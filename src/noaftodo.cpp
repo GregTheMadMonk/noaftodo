@@ -35,6 +35,11 @@ int main(int argc, char* argv[])
 			da_kill();
 			return 0;
 		}
+		if (strcmp(argv[i], "-n") * strcmp(argv[i], "--renotify") == 0)
+		{
+			da_send("N");
+			return 0;
+		}
 	}
 
 	if (mode == PM_HELP) 
@@ -67,4 +72,5 @@ void print_help()
 	cout << "\t-h, --help - print this message" << endl;
 	cout << "\t-d, --daemon - start " << TITLE << " daemon" << endl;
 	cout << "\t-k, --kill-daemon - kill " << TITLE << " daemon" << endl;
+	cout << "\t-n, --renotify - if daemon is running, re-send startup notifications" << endl;
 }

@@ -144,6 +144,18 @@ void da_run()
 				case 'K':
 					running = false;
 					break;
+				case 'N':
+					for (int i = 0; i < t_list.size(); i++)
+					{
+						const noaftodo_entry e1 = t_list.at(i);
+						if (e1.completed)
+							notify(DA_M_TCOMPLETE, e1.title + ": " + e1.description, NP_LOW);
+						else if (e1.due <= ti_to_long("a0d"))
+							notify(DA_M_TFAILED, e1.title + ": " + e1.description, NP_HIGH);
+						else if (e1.due <= ti_to_long("a1d"))
+							notify(DA_M_TCOMING, e1.title + ": " + e1.description, NP_MID);
+					}
+					break;
 			}
 
 			status = mq_timedreceive(mq, msg, DA_MSGSIZE, NULL, &tout);

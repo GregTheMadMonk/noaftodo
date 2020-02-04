@@ -217,16 +217,22 @@ void cui_exec(const string& command)
 				cui_set_mode(CUI_MODE_HELP);
 			else if (words.at(i) == "down")
 			{
-				if (cui_s_line < t_list.size() - 1) cui_s_line++;
-				else cui_s_line = 0;
+				if (t_list.size() != 0)
+				{
+					if (cui_s_line < t_list.size() - 1) cui_s_line++;
+					else cui_s_line = 0;
 
-				if (!cui_is_visible(cui_s_line)) cui_exec("down");
+					if (!cui_is_visible(cui_s_line)) cui_exec("down");
+				}
 			} else if (words.at(i) == "up")
 			{
-				if (cui_s_line > 0) cui_s_line--;
-				else cui_s_line = t_list.size() - 1;
+				if (t_list.size() != 0)
+				{
+					if (cui_s_line > 0) cui_s_line--;
+					else cui_s_line = t_list.size() - 1;
 
-				if (!cui_is_visible(cui_s_line)) cui_exec("up");
+					if (!cui_is_visible(cui_s_line)) cui_exec("up");
+				}
 			} else if (words.at(i) == "c")
 			{
 				li_comp(cui_s_line);
@@ -361,7 +367,7 @@ void cui_normal_paint()
 			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
 			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") +
 			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
-			" | " + to_string(cui_s_line) + "/" + to_string(t_list.size() - 1) +
+			((t_list.size() == 0) ? "" : " | " + to_string(cui_s_line) + "/" + to_string(t_list.size() - 1)) +
 			string((cui_status != "") ? (" | " + cui_status) : "");
 
 	move(cui_h - 1, cui_w - 1 - cui_status.length());
