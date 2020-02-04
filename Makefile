@@ -4,10 +4,10 @@ SRC_DIR := src/
 OBJ_DIR := obj/
 
 CC := gcc
-CCX := g++
+CXX := g++
 
 CXX_FLAGS := -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/libmount -I/usr/include/blkid
-CXX_LINKER_FLAGS := -pthread -lnotify -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0  -lncursesw -lrt
+CXX_LINKER_FLAGS := -lnotify -lncursesw -lrt
 
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
 H_FILES := $(wildcard $(SRC_DIR)/*.h)
