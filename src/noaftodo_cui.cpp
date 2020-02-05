@@ -9,7 +9,7 @@
 
 using namespace std;
 
-int cui_filter = 0x1111;
+int cui_filter = 0b1111;
 
 int cui_mode;
 
@@ -78,7 +78,7 @@ void cui_run()
 	{
 		bool bind_fired = false;
 		for (const auto& bind : binds)
-			if (((bind.mode == CUI_MODE_ALL) || (bind.mode == cui_mode)) && (bind.key == c))
+			if ((bind.mode & cui_mode) && (bind.key == c))
 			{
 				if (bind.autoexec) cui_exec(bind.command);
 				else 
@@ -180,12 +180,15 @@ void cui_exec(const string& command)
 			case ';':
 				if (inquotes) word += c;
 				else
+				{
 					if (word != "")
 					{
 						words.push_back(word);
-						words.push_back(";");
 						word = "";
 					}
+					words.push_back(";");
+				}
+				break;
 			case '"':
 				inquotes = !inquotes;
 				break;
@@ -193,7 +196,7 @@ void cui_exec(const string& command)
 				word += c;
 		}
 	}
-	words.push_back(word);
+	if (word != "") words.push_back(word);
 
 	// trim words
 	for (string& t_word : words)
@@ -235,16 +238,25 @@ void cui_exec(const string& command)
 				}
 			} else if (words.at(i) == "c")
 			{
-				li_comp(cui_s_line);
+				if (t_list.size() == 0)
+					cui_status = "There's nothing in the list!";
+				else
+					li_comp(cui_s_line);
 			} else if (words.at(i) == "d")
 			{
-				li_rem(cui_s_line);
-				if (t_list.size() != 0) if (cui_s_line >= t_list.size()) cui_exec("up");
+				if (t_list.size() == 0)
+					cui_status = "There's nothing to delete!";
+				else
+				{
+					li_rem(cui_s_line);
+					if (t_list.size() != 0) if (cui_s_line >= t_list.size()) cui_exec("up");
+				}
 			} else if (words.at(i) == "a")
 			{
 				if (words.size() >= i + 4)
 				{
 					noaftodo_entry new_entry;
+					new_entry.completed = false;
 					if (words.at(i + 1) != "")
 					{
 						new_entry.due = ti_to_long(words.at(i + 1));
@@ -259,6 +271,8 @@ void cui_exec(const string& command)
 							}
 						}
 					}
+				} else { 
+					cui_status = "Not enough arguments for \":a\""; 
 				}
 			} else if (words.at(i) == "vtoggle")
 			{
@@ -272,6 +286,8 @@ void cui_exec(const string& command)
 						cui_filter ^= CUI_FILTER_COMING;
 					if (words.at(i + 1) == "failed")
 						cui_filter ^= CUI_FILTER_FAILED;
+				} else { 
+					cui_status = "Not enough arguments for \":vtoggle\""; 
 				}
 			} else if (words.at(i) == "g")
 			{
@@ -281,6 +297,8 @@ void cui_exec(const string& command)
 
 					if ((target >= 0) && (target < t_list.size()))
 						cui_s_line = target;
+				} else {
+					cui_status = "Not enough arguments for \":g\"";
 				}
 			}
 		}
@@ -347,7 +365,7 @@ void cui_normal_paint()
 				for (int i = 0; i < cui_w; i++) addch(' ');
 				move(l - cui_delta + 1, x);
 				addnstr(to_string(l).c_str(), id_chars);
-				x += id_chars + 1;
+				x += id_chars;
 				move(l - cui_delta + 1, x);
 				addnstr(("[" + ti_f_str(t_list.at(l).due) + "]").c_str(), date_chars);
 				x += date_chars + 1;

@@ -19,17 +19,17 @@ constexpr int CUI_CP_YELLOW_ENTRY = 3;
 constexpr int CUI_CP_RED_ENTRY = 4;
 
 // modes
-constexpr int CUI_MODE_EXIT = -2;
-constexpr int CUI_MODE_ALL = -1;
-constexpr int CUI_MODE_NORMAL = 0;
-constexpr int CUI_MODE_COMMAND = 1;
-constexpr int CUI_MODE_HELP = 2;
+constexpr int CUI_MODE_EXIT = 0;
+constexpr int CUI_MODE_ALL = 0b1111;
+constexpr int CUI_MODE_NORMAL = 0b1;
+constexpr int CUI_MODE_COMMAND = 0b10;
+constexpr int CUI_MODE_HELP = 0b100;
 
 // filters
-constexpr int CUI_FILTER_UNCAT = 0x1; // uncategorized
-constexpr int CUI_FILTER_COMPLETE = 0x10; // complete
-constexpr int CUI_FILTER_COMING = 0x100; // upcoming
-constexpr int CUI_FILTER_FAILED = 0x1000; // failed
+constexpr int CUI_FILTER_UNCAT = 0b1; // uncategorized
+constexpr int CUI_FILTER_COMPLETE = 0b10; // complete
+constexpr int CUI_FILTER_COMING = 0b100; // upcoming
+constexpr int CUI_FILTER_FAILED = 0b1000; // failed
 
 extern int cui_filter;
 

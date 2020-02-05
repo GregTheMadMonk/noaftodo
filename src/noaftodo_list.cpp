@@ -123,6 +123,12 @@ void li_add(const noaftodo_entry& li_entry)
 
 void li_comp(const int& entryID)
 {
+	if ((entryID < 0) || (entryID >= t_list.size()))
+	{
+		log("li_comp: entry ID out of list bounds. Operation aborted", LP_ERROR);
+		return;
+	}
+
 	t_list.at(entryID).completed = !t_list.at(entryID).completed;
 
 	if (li_autosave) li_save();
