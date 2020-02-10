@@ -52,6 +52,7 @@ extern int cui_numbuffer;
 
 // command mode data
 extern std::string cui_command;
+extern int cui_command_cursor;
 
 void cui_init();
 void cui_destroy();

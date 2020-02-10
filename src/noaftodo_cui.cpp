@@ -24,6 +24,7 @@ int cui_delta;
 int cui_numbuffer = -1;
 
 string cui_command;
+int cui_command_cursor = 0;
 
 void cui_init()
 {
@@ -139,6 +140,7 @@ void cui_set_mode(const int& mode)
 			break;
 		case CUI_MODE_COMMAND:
 			curs_set(1);
+			cui_command_cursor = cui_command.length();
 			break;
 		case CUI_MODE_HELP:
 			curs_set(0);
@@ -431,6 +433,7 @@ void cui_command_paint()
 	clrtoeol();
 	move(cui_h - 1, 0);
 	addstr((":" + cui_command).c_str());
+	move(cui_h - 1, 1 + cui_command_cursor);
 }
 
 void cui_command_input(const char& key)
@@ -444,11 +447,25 @@ void cui_command_input(const char& key)
 			if (cui_mode == CUI_MODE_COMMAND) cui_set_mode(CUI_MODE_NORMAL);
 			break;
 		case 127:
-			if (cui_command != "")
-				cui_command = cui_command.substr(0, cui_command.length() - 1);
+			if (cui_command_cursor > 0)
+			{
+				cui_command = cui_command.substr(0, cui_command_cursor - 1) + cui_command.substr(cui_command_cursor, cui_command.length() - cui_command_cursor);
+				cui_command_cursor--;
+			}
+			break;
+		case 74:
+			if (cui_command_cursor < cui_command.length())
+				cui_command = cui_command.substr(0, cui_command_cursor) + cui_command.substr(cui_command_cursor + 1, cui_command.length() - cui_command_cursor - 1);
+			break;
+		case 4:
+			if (cui_command_cursor > 0) cui_command_cursor--;
+			break;
+		case 5:
+			if (cui_command_cursor < cui_command.length()) cui_command_cursor++;
 			break;
 		default:
-			cui_command += key;
+			cui_command = cui_command.substr(0, cui_command_cursor) + key + cui_command.substr(cui_command_cursor, cui_command.length() - cui_command_cursor);
+			cui_command_cursor++;
 	}
 }
 
