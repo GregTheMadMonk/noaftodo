@@ -1,6 +1,8 @@
 #include "noaftodo_cui.h"
 
+#include <codecvt>
 #include <curses.h>
+#include <locale>
 
 #include "noaftodo.h"
 #include "noaftodo_list.h"
@@ -23,8 +25,10 @@ int cui_s_line;
 int cui_delta;
 int cui_numbuffer = -1;
 
-string cui_command;
+wstring cui_command;
 int cui_command_cursor = 0;
+
+wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
 
 void cui_init()
 {
@@ -47,13 +51,13 @@ void cui_init()
 	cui_bind('q', "q", CUI_MODE_NORMAL, true);
 	cui_bind(27, "q", CUI_MODE_NORMAL, true);
 	cui_bind(':', ":", CUI_MODE_NORMAL, true);
-	cui_bind(3, "up", CUI_MODE_NORMAL, true);
+	cui_bind(KEY_UP, "up", CUI_MODE_NORMAL, true);
 	cui_bind('k', "up", CUI_MODE_NORMAL, true);
-	cui_bind(2, "down", CUI_MODE_NORMAL, true);
+	cui_bind(KEY_DOWN, "down", CUI_MODE_NORMAL, true);
 	cui_bind('j', "down", CUI_MODE_NORMAL, true);
 	cui_bind('a', "a a", CUI_MODE_NORMAL, false);
 	cui_bind('A', "a", CUI_MODE_NORMAL, false);
-	cui_bind(32, "c", CUI_MODE_NORMAL, true);
+	cui_bind(' ', "c", CUI_MODE_NORMAL, true);
 	cui_bind('d', "d", CUI_MODE_NORMAL, false);
 	cui_bind('?', "?", CUI_MODE_NORMAL, true);
 	cui_bind('F', "vtoggle failed", CUI_MODE_NORMAL, true);
@@ -75,7 +79,7 @@ void cui_run()
 	cui_init();
 	cui_set_mode(CUI_MODE_NORMAL);
 
-	for (char c = 0; ; c = getch())
+	for (wint_t c = 0; ; get_wch(&c))
 	{
 		bool bind_fired = false;
 		for (const auto& bind : binds)
@@ -84,7 +88,7 @@ void cui_run()
 				if (bind.autoexec) cui_exec(bind.command);
 				else 
 				{
-					cui_command = bind.command;
+					cui_command = w_converter.from_bytes(bind.command);
 					cui_set_mode(CUI_MODE_COMMAND);
 				}
 
@@ -153,7 +157,7 @@ void cui_bind(const cui_bind_s& bind)
 	binds.push_back(bind);
 }
 
-void cui_bind(const char& key, const string& command, const int& mode, const bool& autoexec)
+void cui_bind(const wchar_t& key, const string& command, const int& mode, const bool& autoexec)
 {
 	cui_bind({ key, command, mode, autoexec });
 }
@@ -395,7 +399,7 @@ void cui_normal_paint()
 	cui_status = "";
 }
 
-void cui_normal_input(const char& key)
+void cui_normal_input(const wchar_t& key)
 {
 	switch (key)
 	{
@@ -432,18 +436,21 @@ void cui_command_paint()
 	move(cui_h - 1, 0);
 	clrtoeol();
 	move(cui_h - 1, 0);
-	addstr((":" + cui_command).c_str());
+	addstr(w_converter.to_bytes(L":" + cui_command).c_str());
 	move(cui_h - 1, 1 + cui_command_cursor);
 }
 
-void cui_command_input(const char& key)
+void cui_command_input(const wchar_t& key)
 {
+	// for some reason, some keys work as if they were get through getch
+	// and others - with their KEY_* values
+	// Guess, I won't touch it then and let it work as it works.
 	switch (key)
 	{
 		case 10:
-			cui_exec(cui_command);
+			cui_exec(w_converter.to_bytes(cui_command));
 		case 27:
-			cui_command = "";
+			cui_command = L"";
 			if (cui_mode == CUI_MODE_COMMAND) cui_set_mode(CUI_MODE_NORMAL);
 			break;
 		case 127:
@@ -453,14 +460,14 @@ void cui_command_input(const char& key)
 				cui_command_cursor--;
 			}
 			break;
-		case 74:
+		case KEY_DC:
 			if (cui_command_cursor < cui_command.length())
 				cui_command = cui_command.substr(0, cui_command_cursor) + cui_command.substr(cui_command_cursor + 1, cui_command.length() - cui_command_cursor - 1);
 			break;
-		case 4:
+		case KEY_LEFT:
 			if (cui_command_cursor > 0) cui_command_cursor--;
 			break;
-		case 5:
+		case KEY_RIGHT:
 			if (cui_command_cursor < cui_command.length()) cui_command_cursor++;
 			break;
 		default:
@@ -488,7 +495,7 @@ void cui_help_paint()
 	addstr("Press 'q' or <esc> to quit.");
 }
 
-void cui_help_input(const char& key)
+void cui_help_input(const wchar_t& key)
 {
 	switch (key)
 	{

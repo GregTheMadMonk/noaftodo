@@ -6,7 +6,7 @@
 
 struct cui_bind_s
 {
-	char key;
+	wchar_t key;
 	std::string command;
 	int mode;
 	bool autoexec;
@@ -51,7 +51,7 @@ extern int cui_delta;
 extern int cui_numbuffer;
 
 // command mode data
-extern std::string cui_command;
+extern std::wstring cui_command;
 extern int cui_command_cursor;
 
 void cui_init();
@@ -62,7 +62,7 @@ void cui_run();
 void cui_set_mode(const int& mode);
 
 void cui_bind(const cui_bind_s& bind);
-void cui_bind(const char& key, const std::string& command, const int& mode, const bool& autoexec);
+void cui_bind(const wchar_t& key, const std::string& command, const int& mode, const bool& autoexec);
 
 void cui_exec(const std::string& command);
 
@@ -70,11 +70,11 @@ bool cui_is_visible(const int& entryID);
 
 // mode-specific painters and input handlers
 void cui_normal_paint();
-void cui_normal_input(const char& key);
+void cui_normal_input(const wchar_t& key);
 
 void cui_command_paint();
-void cui_command_input(const char& key);
+void cui_command_input(const wchar_t& key);
 
 void cui_help_paint();
-void cui_help_input(const char& key);
+void cui_help_input(const wchar_t& key);
 #endif
