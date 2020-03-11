@@ -12,6 +12,7 @@
 using namespace std;
 
 int cui_filter = 0b1111;
+int cui_tag_filter = CUI_TAG_ALL;
 
 cui_charset_s cui_charset;
 
@@ -209,7 +210,19 @@ void cui_exec(const string& command)
 				cui_set_mode(CUI_MODE_COMMAND);
 			else if (words.at(i) == "?")
 				cui_set_mode(CUI_MODE_HELP);
-			else if (words.at(i) == "down")
+			else if (words.at(i) == "list")
+			{
+				if (words.size() > 1)
+				{
+					if (words.at(1) == "all") cui_tag_filter = CUI_TAG_ALL;
+					else
+					{
+						const int new_filter = stoi(words.at(1));
+						if (new_filter == cui_tag_filter) cui_tag_filter = CUI_TAG_ALL;
+						else cui_tag_filter = new_filter;
+					}
+				} else cui_status = "Not enough arguments for \":list\"";
+			} else if (words.at(i) == "down")
 			{
 				if (t_list.size() != 0)
 				{
@@ -257,6 +270,7 @@ void cui_exec(const string& command)
 							if (words.at(i + 3) != "")
 							{
 								new_entry.description = words.at(i + 3);
+								new_entry.tag = (cui_tag_filter == CUI_TAG_ALL) ? 0 : cui_tag_filter;
 
 								li_add(new_entry);
 							}
@@ -301,11 +315,13 @@ bool cui_is_visible(const int& entryID)
 	if (t_list.size() == 0) return false;
 	const auto& entry = t_list.at(entryID);
 
-	if (entry.completed) return (cui_filter & CUI_FILTER_COMPLETE);
-	if (entry.due <= ti_to_long("a0d")) return (cui_filter & CUI_FILTER_FAILED);
-	if (entry.due <= ti_to_long("a1d")) return (cui_filter & CUI_FILTER_COMING);
+	const bool tag_check = ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == entry.tag));
 
-	return (cui_filter & CUI_FILTER_UNCAT);
+	if (entry.completed) return tag_check && (cui_filter & CUI_FILTER_COMPLETE);
+	if (entry.due <= ti_to_long("a0d")) return tag_check && (cui_filter & CUI_FILTER_FAILED);
+	if (entry.due <= ti_to_long("a1d")) return tag_check && (cui_filter & CUI_FILTER_COMING);
+
+	return tag_check && (cui_filter & CUI_FILTER_UNCAT);
 }
 
 void cui_normal_paint()
@@ -383,7 +399,11 @@ void cui_normal_paint()
 	}
 
 
-	cui_status = 	string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
+	cui_status = 	((cui_tag_filter == CUI_TAG_ALL) ?
+				"All lists" :
+				("List " + to_string(cui_tag_filter) + ((cui_tag_filter < t_tags.size()) ? (": " + t_tags.at(cui_tag_filter)) : ""))) +
+			" " + cui_charset.status_separator + " " +
+			string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
 			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
 			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") +
 			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
@@ -412,6 +432,17 @@ void cui_normal_input(const wchar_t& key)
 				cui_status = 'g';
 			} else {
 				cui_exec("g " + to_string(cui_numbuffer));
+				cui_numbuffer = -1;
+			}
+			break;
+		case 'l':
+			if (cui_numbuffer == -1)
+			{
+				cui_numbuffer = -2;
+				cui_status = 'l';
+			} else {
+				if (cui_numbuffer == -2) cui_exec("list all");
+				else cui_exec("list " + to_string(cui_numbuffer));
 				cui_numbuffer = -1;
 			}
 			break;

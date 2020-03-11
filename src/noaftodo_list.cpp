@@ -9,6 +9,7 @@
 using namespace std;
 
 vector<noaftodo_entry> t_list;
+vector<string> t_tags;
 string li_filename = ".noaftodo-list";
 bool li_autosave = true;
 
@@ -22,6 +23,7 @@ void li_load()
 	log("Loading list file " + li_filename);
 
 	t_list.clear();
+	t_tags.clear();
 
 	// check if file exists
 	ifstream ifile(li_filename);
@@ -38,6 +40,9 @@ void li_load()
 	} else {
 		// load the list
 		string entry;
+		int mode = 0; 	// -1 - nothing
+				// 0 - list tags read
+				// 1 - lists read
 
 		while (getline(ifile, entry))
 		{
@@ -57,32 +62,51 @@ void li_load()
 				if (entry != "") if (entry.at(0) != '#')
 				{
 					log(entry);
-					for (int i = 0; i < entry.length(); i++)
+
+					if (entry.at(0) == '[')
 					{
-						if (entry.at(i) == '\\')
+						if (entry == "[tags]") mode = 0;
+						if (entry == "[list]") mode = 1;
+					} else {
+						if (mode == 0)
 						{
-							switch (token)
+							log("Added tag \"" + entry + "\" with index " + to_string(t_list.size()));
+							t_tags.push_back(entry);
+						}
+
+						if (mode == 1)
+						{
+							for (int i = 0; i < entry.length(); i++)
 							{
-								case 0:
-									li_entry.completed = (temp == "v");
-									break;
-								case 1:
-									li_entry.due = stol(temp);
-									break;
-								case 2:
-									li_entry.title = temp;
-									break;
-								case 3:
-									li_entry.description = temp;
-									break;
+								if (entry.at(i) == '\\')
+								{
+									switch (token)
+									{
+										case 0:
+											li_entry.completed = (temp == "v");
+											break;
+										case 1:
+											li_entry.due = stol(temp);
+											break;
+										case 2:
+											li_entry.title = temp;
+											break;
+										case 3:
+											li_entry.description = temp;
+											break;
+										case 4:
+											li_entry.tag = stoi(temp);
+											break;
+									}
+
+									temp = "";
+									token++;
+								} else temp += entry.at(i);
 							}
 
-							temp = "";
-							token++;
-						} else temp += entry.at(i);
+							t_list.push_back(li_entry);
+						}
 					}
-
-					t_list.push_back(li_entry);
 				}
 			}
 		}
@@ -104,8 +128,13 @@ void li_save()
 
 	ofile << "# naftodo list file" << endl;
 
+	ofile << "[tags]" << endl << "# tags start at index 0 and go on" << endl;
+	for (const auto& tag : t_tags)
+		ofile << tag << endl;
+
+	ofile << endl << "[list]" << endl;
 	for (const auto& entry : t_list)
-		ofile << (entry.completed ? 'v' : '-') << '\\' << entry.due << '\\' << entry.title << '\\' << entry.description << '\\' << endl;
+		ofile << (entry.completed ? 'v' : '-') << '\\' << entry.due << '\\' << entry.title << '\\' << entry.description << '\\' << entry.tag << '\\' << endl;
 
 	log("Changes written to file " + li_filename);
 }

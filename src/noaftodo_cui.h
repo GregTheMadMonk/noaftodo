@@ -32,7 +32,10 @@ constexpr int CUI_FILTER_COMPLETE = 0b10; // complete
 constexpr int CUI_FILTER_COMING = 0b100; // upcoming
 constexpr int CUI_FILTER_FAILED = 0b1000; // failed
 
+constexpr int CUI_TAG_ALL = -1;
+
 extern int cui_filter;
+extern int cui_tag_filter;
 
 // draw charset
 struct cui_charset_s

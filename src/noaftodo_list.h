@@ -10,6 +10,7 @@ struct noaftodo_entry
 	long due;
 	std::string title;
 	std::string description;
+	int tag;
 
 	bool sim(const noaftodo_entry& e2);
 };
@@ -23,6 +24,7 @@ struct less_than_noaftodo_entry
 };
 
 extern std::vector<noaftodo_entry> t_list;	// the list itself
+extern std::vector<std::string> t_tags;		// list tags
 extern std::string li_filename;		// the list filename
 extern bool li_autosave;
 
