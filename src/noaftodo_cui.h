@@ -13,7 +13,8 @@ struct cui_bind_s
 };
 
 // color pair indexes
-constexpr int CUI_CP_TITLE = 1;
+constexpr int CUI_CP_TITLE_1 = 1;
+constexpr int CUI_CP_TITLE_2 = 2;
 constexpr int CUI_CP_GREEN_ENTRY = 2;
 constexpr int CUI_CP_YELLOW_ENTRY = 3;
 constexpr int CUI_CP_RED_ENTRY = 4;
@@ -32,6 +33,14 @@ constexpr int CUI_FILTER_COMING = 0b100; // upcoming
 constexpr int CUI_FILTER_FAILED = 0b1000; // failed
 
 extern int cui_filter;
+
+// draw charset
+struct cui_charset_s
+{
+	std::string row_separator = "│";
+	std::string status_separator = "|";
+};
+extern cui_charset_s cui_charset;
 
 // current mode
 extern int cui_mode;

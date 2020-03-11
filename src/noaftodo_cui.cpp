@@ -13,6 +13,8 @@ using namespace std;
 
 int cui_filter = 0b1111;
 
+cui_charset_s cui_charset;
+
 int cui_mode;
 
 vector<cui_bind_s> binds;
@@ -36,7 +38,8 @@ void cui_init()
 	initscr();
 	start_color();
 	use_default_colors();
-	init_pair(CUI_CP_TITLE, COLOR_BLUE, -1);
+	init_pair(CUI_CP_TITLE_1, COLOR_BLUE, -1);
+	init_pair(CUI_CP_TITLE_2, COLOR_GREEN, -1);
 	init_pair(CUI_CP_GREEN_ENTRY, COLOR_GREEN, -1);
 	init_pair(CUI_CP_YELLOW_ENTRY, COLOR_YELLOW, -1);
 	init_pair(CUI_CP_RED_ENTRY, COLOR_RED, -1);
@@ -46,24 +49,6 @@ void cui_init()
 	curs_set(0);
 	noecho();
 	keypad(stdscr, true);
-
-	// TODO: load this from settings file
-	cui_bind('q', "q", CUI_MODE_NORMAL, true);
-	cui_bind(27, "q", CUI_MODE_NORMAL, true);
-	cui_bind(':', ":", CUI_MODE_NORMAL, true);
-	cui_bind(KEY_UP, "up", CUI_MODE_NORMAL, true);
-	cui_bind('k', "up", CUI_MODE_NORMAL, true);
-	cui_bind(KEY_DOWN, "down", CUI_MODE_NORMAL, true);
-	cui_bind('j', "down", CUI_MODE_NORMAL, true);
-	cui_bind('a', "a a", CUI_MODE_NORMAL, false);
-	cui_bind('A', "a", CUI_MODE_NORMAL, false);
-	cui_bind(' ', "c", CUI_MODE_NORMAL, true);
-	cui_bind('d', "d", CUI_MODE_NORMAL, false);
-	cui_bind('?', "?", CUI_MODE_NORMAL, true);
-	cui_bind('F', "vtoggle failed", CUI_MODE_NORMAL, true);
-	cui_bind('U', "vtoggle uncat", CUI_MODE_NORMAL, true);
-	cui_bind('C', "vtoggle coming", CUI_MODE_NORMAL, true);
-	cui_bind('V', "vtoggle complete", CUI_MODE_NORMAL, true);
 
 	cui_w = getmaxx(stdscr);
 	cui_h = getmaxy(stdscr);
@@ -332,16 +317,27 @@ void cui_normal_paint()
 
 	// draw table title
 	move(0, 0);
-	attron(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-	for (int i = 0; i < cui_w; i++) addch(' ');
+	for (int i = 0; i < cui_w; i++) 
+	{
+		if (i < id_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
+		else if (i < id_chars + 1 + date_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
+		else if (i < id_chars + 1 + date_chars + 1 + title_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
+		else attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
+		addch(' ');
+	}
+
 	move(0, 0);
-	addnstr("ID", id_chars);
-	move(0, id_chars);
-	addnstr("Task due", date_chars);
-	move(0, id_chars + 1 + date_chars);
-	addnstr("Task title", title_chars);
-	move(0, id_chars + 1 + date_chars + 1 + title_chars);
-	addnstr("Task description", desc_chars);
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
+	addnstr("ID", id_chars - 1);
+	move(0, id_chars - 1);
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
+	addnstr((cui_charset.row_separator + " Task due").c_str(), date_chars);
+	move(0, id_chars + date_chars);
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
+	addnstr((cui_charset.row_separator + " Task title").c_str(), title_chars);
+	move(0, id_chars + date_chars + 1 + title_chars);
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
+	addnstr((cui_charset.row_separator + " Task description").c_str(), desc_chars);
 	attrset(A_NORMAL);
 
 	cui_delta = 0;
@@ -359,7 +355,7 @@ void cui_normal_paint()
 			if (l == cui_s_line) if (l != t_list.size() - 1) cui_exec("down");
 		} else {
 			if (l - cui_delta >= cui_h - 2) break;
-			if (l >= cui_delta)
+			if (l >= cui_delta)    
 			{
 				if (l == cui_s_line) attron(A_STANDOUT);
 				if (t_list.at(l).completed) attron(COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD);	// a completed entry
@@ -370,16 +366,16 @@ void cui_normal_paint()
 				move(l - cui_delta + 1, x);
 				for (int i = 0; i < cui_w; i++) addch(' ');
 				move(l - cui_delta + 1, x);
-				addnstr(to_string(l).c_str(), id_chars);
-				x += id_chars;
+				addstr(to_string(l).c_str());
+				x += id_chars - 1;
 				move(l - cui_delta + 1, x);
-				addnstr(("[" + ti_f_str(t_list.at(l).due) + "]").c_str(), date_chars);
+				addstr((cui_charset.row_separator + " " + ti_f_str(t_list.at(l).due)).c_str());
 				x += date_chars + 1;
 				move(l - cui_delta + 1, x);
-				addnstr(t_list.at(l).title.c_str(), title_chars);
+				addstr((cui_charset.row_separator + " " + t_list.at(l).title).c_str());
 				x += title_chars + 1;
 				move(l - cui_delta + 1, x);
-				addnstr(t_list.at(l).description.c_str(), desc_chars);
+				addstr((cui_charset.row_separator + " " + t_list.at(l).description).c_str());
 
 				attrset(A_NORMAL);
 			}
@@ -391,8 +387,8 @@ void cui_normal_paint()
 			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
 			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") +
 			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
-			((t_list.size() == 0) ? "" : " | " + to_string(cui_s_line) + "/" + to_string(t_list.size() - 1)) +
-			string((cui_status != "") ? (" | " + cui_status) : "");
+			((t_list.size() == 0) ? "" : " " + cui_charset.status_separator + " " + to_string(cui_s_line) + "/" + to_string(t_list.size() - 1)) +
+			string((cui_status != "") ? (" " + cui_charset.status_separator + " " + cui_status) : "");
 
 	move(cui_h - 1, cui_w - 1 - cui_status.length());
 	addstr(cui_status.c_str());

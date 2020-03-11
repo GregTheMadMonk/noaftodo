@@ -48,7 +48,12 @@ void li_load()
 			if (entry != "") // only non-empty lines
 			{
 				// trim string
-				while (entry.at(0) == ' ') entry = entry.substr(1);
+				while (entry.at(0) == ' ') 
+				{
+					entry = entry.substr(1);
+					if (entry == "") break;
+				}
+
 				if (entry != "") if (entry.at(0) != '#')
 				{
 					log(entry);

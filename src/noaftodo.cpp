@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "noaftodo_config.h"
 #include "noaftodo_cui.h"
 #include "noaftodo_daemon.h"
 #include "noaftodo_list.h"
@@ -24,6 +25,7 @@ int main(int argc, char* argv[])
 	int mode = PM_DEFAULT;
 
 	li_filename = string(getpwuid(getuid())->pw_dir) + "/.noaftodo-list";
+	conf_filename = string(getpwuid(getuid())->pw_dir) + "/.config/noaftodo.conf";
 
 	// parse arguments
 	for (int i = 1; i < argc; i++)
@@ -47,6 +49,9 @@ int main(int argc, char* argv[])
 		print_help();
 		return 0;
 	}
+
+	// load the config
+	conf_load();
 
 	// load the list
 	li_load();
