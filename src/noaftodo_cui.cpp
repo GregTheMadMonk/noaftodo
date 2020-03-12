@@ -212,9 +212,9 @@ void cui_exec(const string& command)
 				cui_set_mode(CUI_MODE_HELP);
 			else if (words.at(i) == "list")
 			{
-				if (words.size() > 1)
+				if (words.size() >= i + 2)
 				{
-					if (words.at(1) == "all") cui_tag_filter = CUI_TAG_ALL;
+					if (words.at(i + 1) == "all") cui_tag_filter = CUI_TAG_ALL;
 					else
 					{
 						const int new_filter = stoi(words.at(1));
@@ -304,6 +304,27 @@ void cui_exec(const string& command)
 						cui_s_line = target;
 				} else {
 					cui_status = "Not enough arguments for \":g\"";
+				}
+			} else if (words.at(i) == "lrename")
+			{
+				if (words.size() >= i + 2)
+				{
+					if (cui_tag_filter == CUI_TAG_ALL) cui_status = "No specific list selected";
+					else 
+					{
+						while (cui_tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
+
+						t_tags[cui_tag_filter] = words.at(i + 1);
+						li_save();
+					}
+				}
+			}
+		       	else if (words.at(i) == "lmv")
+			{
+				if (words.size() >= i + 2)
+				{
+					t_list[cui_s_line].tag = stoi(words.at(i + 1));
+					li_save();
 				}
 			}
 		}
@@ -401,7 +422,7 @@ void cui_normal_paint()
 
 	cui_status = 	((cui_tag_filter == CUI_TAG_ALL) ?
 				"All lists" :
-				("List " + to_string(cui_tag_filter) + ((cui_tag_filter < t_tags.size()) ? (": " + t_tags.at(cui_tag_filter)) : ""))) +
+				("List " + to_string(cui_tag_filter) + (((cui_tag_filter < t_tags.size()) && (t_tags.at(cui_tag_filter) != to_string(cui_tag_filter))) ? (": " + t_tags.at(cui_tag_filter)) : ""))) +
 			" " + cui_charset.status_separator + " " +
 			string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
 			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
