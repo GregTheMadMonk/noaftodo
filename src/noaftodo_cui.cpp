@@ -28,14 +28,17 @@ int cui_s_line;
 int cui_delta;
 int cui_numbuffer = -1;
 
-wstring cui_command;
+vector<wstring> cui_commands;
 int cui_command_cursor = 0;
+int cui_command_index = 0;
 
 wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
 
 void cui_init()
 {
 	log("Initializing console UI...");
+	cui_commands.push_back(w_converter.from_bytes(""));
+
 	initscr();
 	start_color();
 	use_default_colors();
@@ -74,7 +77,7 @@ void cui_run()
 				if (bind.autoexec) cui_exec(bind.command);
 				else 
 				{
-					cui_command = w_converter.from_bytes(bind.command);
+					cui_commands[cui_commands.size() - 1] = w_converter.from_bytes(bind.command);
 					cui_set_mode(CUI_MODE_COMMAND);
 				}
 
@@ -130,7 +133,8 @@ void cui_set_mode(const int& mode)
 			break;
 		case CUI_MODE_COMMAND:
 			curs_set(1);
-			cui_command_cursor = cui_command.length();
+			cui_command_index = cui_commands.size() - 1;
+			cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
 			break;
 		case CUI_MODE_HELP:
 			curs_set(0);
@@ -347,7 +351,7 @@ bool cui_is_visible(const int& entryID)
 
 void cui_normal_paint()
 {
-	const int id_chars = 4;
+	const int id_chars = (cui_tag_filter == CUI_TAG_ALL) ? 20 : 4;
 	const int date_chars = 18;
 	const int title_chars = cui_w / 5;
 	const int desc_chars = cui_w - title_chars - date_chars - id_chars - 3;
@@ -365,7 +369,7 @@ void cui_normal_paint()
 
 	move(0, 0);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
-	addnstr("ID", id_chars - 1);
+	addnstr((cui_tag_filter == CUI_TAG_ALL) ? "ID: List" : "ID", id_chars - 1);
 	move(0, id_chars - 1);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
 	addnstr((cui_charset.row_separator + " Task due").c_str(), date_chars);
@@ -384,6 +388,7 @@ void cui_normal_paint()
 	bool is_there_visible = false;
 	for (int l = 0; l < t_list.size(); l++) is_there_visible |= cui_is_visible(l);
 
+	int last_string = 0;
 	if (is_there_visible) for (int l = 0; l < t_list.size(); l++)
 	{
 		if (!cui_is_visible(l))
@@ -403,22 +408,32 @@ void cui_normal_paint()
 				move(l - cui_delta + 1, x);
 				for (int i = 0; i < cui_w; i++) addch(' ');
 				move(l - cui_delta + 1, x);
-				addstr(to_string(l).c_str());
+				string id_string = to_string(l);
+				if (cui_tag_filter == CUI_TAG_ALL)
+				{
+					id_string += ": " + to_string(t_list.at(l).tag);
+					if (t_list.at(l).tag < t_tags.size())
+						if (t_tags.at(t_list.at(l).tag) != to_string(t_list.at(l).tag))
+							id_string += "(" + t_tags.at(t_list.at(l).tag) + ")";
+				}
+				addnstr(id_string.c_str(), id_chars - 2);
 				x += id_chars - 1;
 				move(l - cui_delta + 1, x);
-				addstr((cui_charset.row_separator + " " + ti_f_str(t_list.at(l).due)).c_str());
+				addnstr((cui_charset.row_separator + " " + ti_f_str(t_list.at(l).due)).c_str(), date_chars + 2);
 				x += date_chars + 1;
 				move(l - cui_delta + 1, x);
-				addstr((cui_charset.row_separator + " " + t_list.at(l).title).c_str());
+				addnstr((cui_charset.row_separator + " " + t_list.at(l).title).c_str(), title_chars + 2);
 				x += title_chars + 1;
 				move(l - cui_delta + 1, x);
 				addstr((cui_charset.row_separator + " " + t_list.at(l).description).c_str());
 
 				attrset(A_NORMAL);
+				last_string = l - cui_delta + 2;
 			}
 		}
 	}
 
+	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
 
 	cui_status = 	((cui_tag_filter == CUI_TAG_ALL) ?
 				"All lists" :
@@ -484,7 +499,7 @@ void cui_command_paint()
 	move(cui_h - 1, 0);
 	clrtoeol();
 	move(cui_h - 1, 0);
-	addstr(w_converter.to_bytes(L":" + cui_command).c_str());
+	addstr(w_converter.to_bytes(L":" + cui_commands[cui_commands.size() - 1]).c_str());
 	move(cui_h - 1, 1 + cui_command_cursor);
 }
 
@@ -496,30 +511,98 @@ void cui_command_input(const wchar_t& key)
 	switch (key)
 	{
 		case 10:
-			cui_exec(w_converter.to_bytes(cui_command));
+			if (cui_commands[cui_commands.size() - 1] != w_converter.from_bytes(""))
+			{
+				cui_exec(w_converter.to_bytes(cui_commands[cui_commands.size() - 1]));
+				if (cui_command_index != cui_commands.size() - 1)
+				{
+					wstring temp = cui_commands[cui_commands.size() - 1];
+					cui_commands[cui_command_index] = cui_commands[cui_commands.size() - 1];
+					cui_commands[cui_commands.size() - 1] = temp;
+				}
+
+				cui_commands.push_back(w_converter.from_bytes(""));
+				cui_command_index = cui_commands.size() - 1;
+			}
 		case 27:
-			cui_command = L"";
+			cui_commands[cui_commands.size() - 1] = L"";
 			if (cui_mode == CUI_MODE_COMMAND) cui_set_mode(CUI_MODE_NORMAL);
+			cui_filter_history();
 			break;
 		case 127:
+			if (cui_command_index != cui_commands.size() - 1)
+			{
+				wstring temp = cui_commands[cui_commands.size() - 1];
+				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index];
+				cui_commands[cui_command_index] = temp;
+				cui_commands.push_back(temp);
+				cui_command_index = cui_commands.size() - 1;
+			}
+
 			if (cui_command_cursor > 0)
 			{
-				cui_command = cui_command.substr(0, cui_command_cursor - 1) + cui_command.substr(cui_command_cursor, cui_command.length() - cui_command_cursor);
+				cui_commands[cui_commands.size() - 1] = cui_commands[cui_commands.size() - 1].substr(0, cui_command_cursor - 1) + cui_commands[cui_commands.size() - 1].substr(cui_command_cursor, cui_commands[cui_commands.size() - 1].length() - cui_command_cursor);
 				cui_command_cursor--;
 			}
 			break;
 		case KEY_DC:
-			if (cui_command_cursor < cui_command.length())
-				cui_command = cui_command.substr(0, cui_command_cursor) + cui_command.substr(cui_command_cursor + 1, cui_command.length() - cui_command_cursor - 1);
+			if (cui_command_index != cui_commands.size() - 1)
+			{
+				wstring temp = cui_commands[cui_commands.size() - 1];
+				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index];
+				cui_commands[cui_command_index] = temp;
+				cui_commands.push_back(temp);
+				cui_command_index = cui_commands.size() - 1;
+			}
+
+			if (cui_command_cursor < cui_commands[cui_commands.size() - 1].length())
+				cui_commands[cui_commands.size() - 1] = cui_commands[cui_commands.size() - 1].substr(0, cui_command_cursor) + cui_commands[cui_commands.size() - 1].substr(cui_command_cursor + 1, cui_commands[cui_commands.size() - 1].length() - cui_command_cursor - 1);
 			break;
 		case KEY_LEFT:
 			if (cui_command_cursor > 0) cui_command_cursor--;
 			break;
 		case KEY_RIGHT:
-			if (cui_command_cursor < cui_command.length()) cui_command_cursor++;
+			if (cui_command_cursor < cui_commands[cui_commands.size() - 1].length()) cui_command_cursor++;
+			break;
+		case KEY_UP:
+			// go up the history
+			if (cui_command_index > 0)
+			{
+				wstring temp = cui_commands[cui_command_index];
+				cui_commands[cui_command_index] = cui_commands[cui_commands.size() - 1];
+				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index - 1];
+				cui_commands[cui_command_index - 1] = temp;
+				cui_command_index--;
+				if (cui_command_cursor > cui_commands[cui_commands.size() - 1].length())
+					cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
+			}
+			break;
+		case KEY_DOWN:
+			// go down the history
+			if (cui_command_index < cui_commands.size() - 1)
+			{
+				wstring temp = cui_commands[cui_command_index];
+				cui_commands[cui_command_index] = cui_commands[cui_commands.size() - 1];
+				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index + 1];
+				cui_commands[cui_command_index + 1] = temp;
+				cui_command_index++;
+				if (cui_command_cursor > cui_commands[cui_commands.size() - 1].length())
+					cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
+			}	
 			break;
 		default:
-			cui_command = cui_command.substr(0, cui_command_cursor) + key + cui_command.substr(cui_command_cursor, cui_command.length() - cui_command_cursor);
+			if (cui_command_index != cui_commands.size() - 1)
+			{
+				wstring temp = cui_commands[cui_commands.size() - 1];
+				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index];
+				cui_commands[cui_command_index] = temp;
+				cui_commands.push_back(temp);
+				cui_command_index = cui_commands.size() - 1;
+			}
+
+			cui_filter_history();
+
+			cui_commands[cui_commands.size() - 1] = cui_commands[cui_commands.size() - 1].substr(0, cui_command_cursor) + key + cui_commands[cui_commands.size() - 1].substr(cui_command_cursor, cui_commands[cui_commands.size() - 1].length() - cui_command_cursor);
 			cui_command_cursor++;
 	}
 }
@@ -551,4 +634,14 @@ void cui_help_input(const wchar_t& key)
 			cui_set_mode(CUI_MODE_NORMAL);
 			break;
 	}
+}
+
+void cui_filter_history()
+{
+	for (int i = 0; i < cui_commands.size() - 1; i++)
+		if (cui_commands[i] == w_converter.from_bytes("")) 
+		{
+			cui_commands.erase(cui_commands.begin() + i);
+			i--;
+		}
 }

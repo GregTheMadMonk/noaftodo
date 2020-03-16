@@ -63,8 +63,9 @@ extern int cui_delta;
 extern int cui_numbuffer;
 
 // command mode data
-extern std::wstring cui_command;
+extern std::vector<std::wstring> cui_commands;
 extern int cui_command_cursor;
+extern int cui_command_index;
 
 void cui_init();
 void cui_destroy();
@@ -89,4 +90,6 @@ void cui_command_input(const wchar_t& key);
 
 void cui_help_paint();
 void cui_help_input(const wchar_t& key);
+
+void cui_filter_history();
 #endif
