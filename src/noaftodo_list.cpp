@@ -70,7 +70,7 @@ void li_load()
 					} else {
 						if (mode == 0)
 						{
-							log("Added tag \"" + entry + "\" with index " + to_string(t_list.size()));
+							log("Added tag \"" + entry + "\" with index " + to_string(t_tags.size()));
 							t_tags.push_back(entry);
 						}
 

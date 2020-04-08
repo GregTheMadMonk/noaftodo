@@ -425,7 +425,27 @@ void cui_normal_paint()
 				addnstr((cui_charset.row_separator + " " + t_list.at(l).title).c_str(), title_chars + 2);
 				x += title_chars + 1;
 				move(l - cui_delta + 1, x);
-				addstr((cui_charset.row_separator + " " + t_list.at(l).description).c_str());
+				wstring next = w_converter.from_bytes(cui_charset.row_separator + " " + t_list.at(l).description);
+				for (int i = 0; i < next.length(); i++)
+				{
+					addstr(w_converter.to_bytes(next.at(i)).c_str());
+					if (i != 0) if (i % (cui_w - x - 2) == 0) if (i != next.length() - 1)
+					{
+						cui_delta--;
+						x = 0;
+						move(l - cui_delta + 1, x);
+						for (int i = 0; i < cui_w; i++) addch(' ');
+						x += id_chars - 1;
+						move(l - cui_delta + 1, x);
+						addnstr((cui_charset.row_separator + " ").c_str(), date_chars + 2);
+						x += date_chars + 1;
+						move(l - cui_delta + 1, x);
+						addnstr((cui_charset.row_separator + " ").c_str(), title_chars + 2);
+						x += title_chars + 1;
+						move(l - cui_delta + 1, x);
+						addstr((cui_charset.row_separator + " ").c_str());
+					}
+				}
 
 				attrset(A_NORMAL);
 				last_string = l - cui_delta + 2;
@@ -499,8 +519,10 @@ void cui_command_paint()
 	move(cui_h - 1, 0);
 	clrtoeol();
 	move(cui_h - 1, 0);
-	addstr(w_converter.to_bytes(L":" + cui_commands[cui_commands.size() - 1]).c_str());
-	move(cui_h - 1, 1 + cui_command_cursor);
+	int offset = cui_command_cursor - cui_w + 3;
+	if (offset < 0) offset = 0;
+	addstr(w_converter.to_bytes(L":" + cui_commands[cui_commands.size() - 1].substr(offset)).c_str());
+	move(cui_h - 1, 1 + cui_command_cursor - offset);
 }
 
 void cui_command_input(const wchar_t& key)
