@@ -590,6 +590,12 @@ void cui_command_input(const wchar_t& key)
 					cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
 			}	
 			break;
+		case KEY_HOME:
+			cui_command_cursor = 0;
+			break;
+		case KEY_END:
+			cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
+			break;
 		default:
 			if (cui_command_index != cui_commands.size() - 1)
 			{
