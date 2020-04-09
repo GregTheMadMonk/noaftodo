@@ -77,8 +77,6 @@ void cui_set_mode(const int& mode);
 void cui_bind(const cui_bind_s& bind);
 void cui_bind(const wchar_t& key, const std::string& command, const int& mode, const bool& autoexec);
 
-void cui_exec(const std::string& command);
-
 bool cui_is_visible(const int& entryID);
 
 // mode-specific painters and input handlers

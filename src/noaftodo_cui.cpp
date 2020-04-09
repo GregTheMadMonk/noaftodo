@@ -5,6 +5,7 @@
 #include <locale>
 
 #include "noaftodo.h"
+#include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
 #include "noaftodo_list.h"
 #include "noaftodo_output.h"
@@ -75,7 +76,7 @@ void cui_run()
 		for (const auto& bind : binds)
 			if ((bind.mode & cui_mode) && (bind.key == c))
 			{
-				if (bind.autoexec) cui_exec(bind.command);
+				if (bind.autoexec) cmd_exec(bind.command);
 				else 
 				{
 					cui_commands[cui_commands.size() - 1] = w_converter.from_bytes(bind.command);
@@ -153,196 +154,6 @@ void cui_bind(const wchar_t& key, const string& command, const int& mode, const 
 	cui_bind({ key, command, mode, autoexec });
 }
 
-void cui_exec(const string& command)
-{
-	vector<string> words;
-	string word = "";
-	bool inquotes = false;
-
-	for (int i = 0; i < command.length(); i++)
-	{
-		const char c = command.at(i);
-
-		switch (c)
-		{
-			case ' ':
-				if (inquotes) word += c;
-				else 
-					if (word != "")
-					{
-						words.push_back(word);
-						word = "";
-					}
-				break;
-			case ';':
-				if (inquotes) word += c;
-				else
-				{
-					if (word != "")
-					{
-						words.push_back(word);
-						word = "";
-					}
-					words.push_back(";");
-				}
-				break;
-			case '"':
-				inquotes = !inquotes;
-				break;
-			default:
-				word += c;
-		}
-	}
-	if (word != "") words.push_back(word);
-
-	// trim words
-	for (string& t_word : words)
-	{
-		while (t_word.at(0) == ' ') t_word = t_word.substr(1);
-		while (t_word.at(t_word.length() - 1) == ' ') t_word = t_word.substr(0, t_word.length() - 1);
-	}
-	
-	int offset = 0;
-	for (int i = 0; i < words.size(); i++)
-	{
-		if (words.at(i) == ";") // command separator
-			offset = i + 1;
-		else if (i == offset)
-		{
-			if (words.at(i) == "q")
-				cui_mode = CUI_MODE_EXIT;
-			else if (words.at(i) == ":")
-				cui_set_mode(CUI_MODE_COMMAND);
-			else if (words.at(i) == "?")
-				cui_set_mode(CUI_MODE_HELP);
-			else if (words.at(i) == "list")
-			{
-				if (words.size() >= i + 2)
-				{
-					if (words.at(i + 1) == "all") cui_tag_filter = CUI_TAG_ALL;
-					else
-					{
-						const int new_filter = stoi(words.at(1));
-						if (new_filter == cui_tag_filter) cui_tag_filter = CUI_TAG_ALL;
-						else cui_tag_filter = new_filter;
-					}
-				} else cui_status = "Not enough arguments for \":list\"";
-			} else if (words.at(i) == "down")
-			{
-				if (t_list.size() != 0)
-				{
-					if (cui_s_line < t_list.size() - 1) cui_s_line++;
-					else cui_s_line = 0;
-
-					if (!cui_is_visible(cui_s_line)) cui_exec("down");
-				}
-			} else if (words.at(i) == "up")
-			{
-				if (t_list.size() != 0)
-				{
-					if (cui_s_line > 0) cui_s_line--;
-					else cui_s_line = t_list.size() - 1;
-
-					if (!cui_is_visible(cui_s_line)) cui_exec("up");
-				}
-			} else if (words.at(i) == "c")
-			{
-				if (t_list.size() == 0)
-					cui_status = "There's nothing in the list!";
-				else
-					li_comp(cui_s_line);
-			} else if (words.at(i) == "d")
-			{
-				if (t_list.size() == 0)
-					cui_status = "There's nothing to delete!";
-				else
-				{
-					li_rem(cui_s_line);
-					if (t_list.size() != 0) if (cui_s_line >= t_list.size()) cui_exec("up");
-				}
-			} else if (words.at(i) == "a")
-			{
-				if (words.size() >= i + 4)
-				{
-					noaftodo_entry new_entry;
-					new_entry.completed = false;
-					if (words.at(i + 1) != "")
-					{
-						new_entry.due = ti_to_long(words.at(i + 1));
-						if (words.at(i + 2) != "")
-						{
-							new_entry.title = words.at(i + 2);
-							if (words.at(i + 3) != "")
-							{
-								new_entry.description = words.at(i + 3);
-								new_entry.tag = (cui_tag_filter == CUI_TAG_ALL) ? 0 : cui_tag_filter;
-
-								li_add(new_entry);
-							}
-						}
-					}
-				} else { 
-					cui_status = "Not enough arguments for \":a\""; 
-				}
-			} else if (words.at(i) == "vtoggle")
-			{
-				if (words.size() >= i + 2)
-				{
-					if (words.at(i + 1) == "uncat")
-						cui_filter ^= CUI_FILTER_UNCAT;
-					if (words.at(i + 1) == "complete")
-						cui_filter ^= CUI_FILTER_COMPLETE;
-					if (words.at(i + 1) == "coming")
-						cui_filter ^= CUI_FILTER_COMING;
-					if (words.at(i + 1) == "failed")
-						cui_filter ^= CUI_FILTER_FAILED;
-				} else { 
-					cui_status = "Not enough arguments for \":vtoggle\""; 
-				}
-			} else if (words.at(i) == "g")
-			{
-				if (words.size() >= i + 2)
-				{
-					const int target = stoi(words.at(i + 1));
-
-					if ((target >= 0) && (target < t_list.size()))
-						cui_s_line = target;
-				} else {
-					cui_status = "Not enough arguments for \":g\"";
-				}
-			} else if (words.at(i) == "lrename")
-			{
-				if (words.size() >= i + 2)
-				{
-					if (cui_tag_filter == CUI_TAG_ALL) cui_status = "No specific list selected";
-					else 
-					{
-						while (cui_tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
-
-						t_tags[cui_tag_filter] = words.at(i + 1);
-						li_save();
-					}
-				}
-			}
-		       	else if (words.at(i) == "lmv")
-			{
-				if (words.size() >= i + 2)
-				{
-					t_list[cui_s_line].tag = stoi(words.at(i + 1));
-					li_save();
-				}
-			}
-			else if (words.at(i) == "get")
-			{
-				if (words.size() >= i + 2)
-				{
-					cui_status = conf_get_cvar(words.at(i + 1));
-				}
-			}
-		}
-	}
-}
-
 bool cui_is_visible(const int& entryID)
 {
 	if (t_list.size() == 0) return false;
@@ -402,7 +213,7 @@ void cui_normal_paint()
 		if (!cui_is_visible(l))
 		{
 			cui_delta++;
-			if (l == cui_s_line) if (l != t_list.size() - 1) cui_exec("down");
+			if (l == cui_s_line) if (l != t_list.size() - 1) cmd_exec("down");
 		} else {
 			if (l - cui_delta >= cui_h - 2) break;
 			if (l >= cui_delta)    
@@ -495,7 +306,7 @@ void cui_normal_input(const wchar_t& key)
 				cui_numbuffer = 0;
 				cui_status = 'g';
 			} else {
-				cui_exec("g " + to_string(cui_numbuffer));
+				cmd_exec("g " + to_string(cui_numbuffer));
 				cui_numbuffer = -1;
 			}
 			break;
@@ -505,8 +316,8 @@ void cui_normal_input(const wchar_t& key)
 				cui_numbuffer = -2;
 				cui_status = 'l';
 			} else {
-				if (cui_numbuffer == -2) cui_exec("list all");
-				else cui_exec("list " + to_string(cui_numbuffer));
+				if (cui_numbuffer == -2) cmd_exec("list all");
+				else cmd_exec("list " + to_string(cui_numbuffer));
 				cui_numbuffer = -1;
 			}
 			break;
@@ -543,7 +354,7 @@ void cui_command_input(const wchar_t& key)
 		case 10:
 			if (cui_commands[cui_commands.size() - 1] != w_converter.from_bytes(""))
 			{
-				cui_exec(w_converter.to_bytes(cui_commands[cui_commands.size() - 1]));
+				cmd_exec(w_converter.to_bytes(cui_commands[cui_commands.size() - 1]));
 				if (cui_command_index != cui_commands.size() - 1)
 				{
 					wstring temp = cui_commands[cui_commands.size() - 1];

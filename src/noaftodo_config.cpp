@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "noaftodo.h"
-#include "noaftodo_cui.h"
+#include "noaftodo_cmd.h"
 #include "noaftodo_output.h"
 
 using namespace std;
@@ -70,97 +70,7 @@ void conf_load(const string& conf_file)
 			}
 
 			if (entry != "") if (entry.at(0) != '#')
-			{
-				log(entry);
-
-				vector<string> tokens;
-				string temp = "";
-				bool inquotes = false;
-				bool skip_special = false;
-				for (int i = 0; i < entry.length(); i++)
-				{
-					const char c = entry.at(i);
-					if (skip_special) 
-					{
-						temp += c;
-						skip_special = false;
-					} else switch (c) {
-						case '\\':
-							skip_special = true;
-							break;
-						case '"':
-							inquotes = !inquotes;
-							break;
-						case ' ':
-							if (!inquotes)
-							{
-								if (temp != "")
-								{
-									tokens.push_back(temp);
-									temp = "";
-								}
-							} else temp += c;
-							break;
-						default:
-							temp += c;
-							break;
-					}
-				}
-
-				tokens.push_back(temp);
-
-				if (tokens.size() != 0) // do we really need these precautions?
-				{
-					if (tokens.at(0) == "bind")
-					{
-						if (tokens.size() == 5)
-						{
-							const string skey = tokens.at(1);
-							const string scomm = tokens.at(2);
-							const int smode = stoi(tokens.at(3));
-							const bool sauto = (tokens.at(4) == "true");
-
-							log("Binding " + skey + " to '" + scomm + "'");
-							if (skey.length() == 1)
-								cui_bind(skey.at(0), scomm, smode, sauto);
-							else
-							{
-								if (skey == "up")
-									cui_bind(KEY_UP, scomm, smode, sauto);
-								if (skey == "down")
-									cui_bind(KEY_DOWN, scomm, smode, sauto);
-								if (skey == "left")
-									cui_bind(KEY_LEFT, scomm, smode, sauto);
-								if (skey == "right")
-									cui_bind(KEY_RIGHT, scomm, smode, sauto);
-								if (skey == "esc")
-									cui_bind(27, scomm, smode, sauto);
-							}
-						} else log("Incorrect number of arguments for config entry 'bind'", LP_ERROR);
-					}
-					if (tokens.at(0) == "charset")
-					{
-						if (tokens.size() == 3)
-						{
-							if (tokens.at(1) == "status_separator")
-							{
-								cui_charset.status_separator = tokens.at(2).at(0);
-							}
-							if (tokens.at(1) == "row_separator")
-							{
-								cui_charset.row_separator = tokens.at(2).at(0);
-							}
-						}
-					}
-					if (tokens.at(0) == "set")
-					{
-						if (tokens.size() == 3)
-						{
-							conf_set_cvar(tokens.at(1), tokens.at(2));
-						}
-					}
-				}
-			}
+				cmd_exec(entry);
 		}
 	}
 }
