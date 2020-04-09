@@ -12,6 +12,8 @@ using namespace std;
 
 string conf_filename = "noaftodo.conf";
 
+map <string, string> conf_cvars;
+
 void conf_load()
 {
 	conf_load(conf_filename);
@@ -74,11 +76,18 @@ void conf_load(const string& conf_file)
 				vector<string> tokens;
 				string temp = "";
 				bool inquotes = false;
+				bool skip_special = false;
 				for (int i = 0; i < entry.length(); i++)
 				{
 					const char c = entry.at(i);
-					switch (c)
+					if (skip_special) 
 					{
+						temp += c;
+						skip_special = false;
+					} else switch (c) {
+						case '\\':
+							skip_special = true;
+							break;
 						case '"':
 							inquotes = !inquotes;
 							break;
@@ -143,8 +152,32 @@ void conf_load(const string& conf_file)
 							}
 						}
 					}
+					if (tokens.at(0) == "set")
+					{
+						if (tokens.size() == 3)
+						{
+							conf_set_cvar(tokens.at(1), tokens.at(2));
+						}
+					}
 				}
 			}
 		}
+	}
+}
+
+void conf_set_cvar(const string& name, const string& value)
+{
+	log("Set " + name + "=" + value);
+	conf_cvars[name] = value;
+}
+
+string conf_get_cvar(const string& name)
+{
+	try
+	{
+		return conf_cvars.at(name);
+	} catch (const out_of_range& err) {
+		log("No cvar with name " + name + " defined. Returning \"\".", LP_ERROR);
+		return "";
 	}
 }

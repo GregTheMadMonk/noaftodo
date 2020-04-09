@@ -2,7 +2,6 @@
 
 #include <cstring>
 #include <iostream>
-#include <libnotify/notify.h>
 #include <pwd.h>
 #include <string>
 #include <sys/types.h>
@@ -37,7 +36,7 @@ int main(int argc, char* argv[])
 			da_kill();
 			return 0;
 		}
-		if (strcmp(argv[i], "-n") * strcmp(argv[i], "--renotify") == 0)
+		if (strcmp(argv[i], "-r") * strcmp(argv[i], "--refire") == 0)
 		{
 			da_send("N");
 			return 0;
@@ -61,11 +60,7 @@ int main(int argc, char* argv[])
 		cui_run();
 	}
 
-	if (mode == PM_DAEMON)
-	{
-		notify_init(TITLE);
-		da_run();
-	}
+	if (mode == PM_DAEMON) da_run();
 
 	return 0;
 }
@@ -77,5 +72,5 @@ void print_help()
 	cout << "\t-h, --help - print this message" << endl;
 	cout << "\t-d, --daemon - start " << TITLE << " daemon" << endl;
 	cout << "\t-k, --kill-daemon - kill " << TITLE << " daemon" << endl;
-	cout << "\t-n, --renotify - if daemon is running, re-send startup notifications" << endl;
+	cout << "\t-r, --refire - if daemon is running, re-fire startup events" << endl;
 }

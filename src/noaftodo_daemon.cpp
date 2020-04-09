@@ -1,5 +1,6 @@
 #include "noaftodo_daemon.h"
 
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
 #include <string>
@@ -7,6 +8,8 @@
 #include <unistd.h>
 
 #include "noaftodo.h"
+#include "noaftodo_config.h"
+#include "noaftodo_list.h"
 #include "noaftodo_output.h"
 #include "noaftodo_time.h"
 
@@ -45,7 +48,7 @@ void da_run()
 	}
 	log("OK");
 
-	notify(string(TITLE) + " v." + VERSION, "Daemon is up and running");
+	system(format_str(conf_get_cvar("on_daemon_launch_action"), {}).c_str());
 
 	bool running = true;
 	timespec tout;
@@ -72,36 +75,36 @@ void da_run()
 				da_cache.push_back(t_list.at(i));
 
 				if (e1.completed)
-					notify(DA_M_TCOMPLETE, e1.title + ": " + e1.description, NP_LOW);
+					system(format_str(conf_get_cvar("on_task_completed_action"), e1).c_str());
 				else if (e1.due <= ti_to_long("a0d"))
-					notify(DA_M_TFAILED, e1.title + ": " + e1.description, NP_HIGH);
+					system(format_str(conf_get_cvar("on_task_failed_action"), e1).c_str());
 				else if (e1.due <= ti_to_long("a1d"))
-					notify(DA_M_TCOMING, e1.title + ": " + e1.description, NP_MID);
+					system(format_str(conf_get_cvar("on_task_coming_action"), e1).c_str());
 				else if (!first)
-					notify(DA_M_TNEW, e1.title + ": " + e1.description);
+					system(format_str(conf_get_cvar("on_task_new_action"), e1).c_str());
 			} else {
 				const noaftodo_entry e2 = da_cache.at(cached_id);
 
 				if (e1.completed != e2.completed)
 				{
 					if (e1.completed)
-						notify(DA_M_TCOMPLETE, e1.title + ": " + e1.description, NP_LOW);
+						system(format_str(conf_get_cvar("on_task_completed_action"), e1).c_str());
 					else if (e1.due <= ti_to_long("a0d"))
-						notify(DA_M_TFAILED, e1.title + ": " + e1.description, NP_HIGH);
+						system(format_str(conf_get_cvar("on_task_failed_action"), e1).c_str());
 					else if (e1.due <= ti_to_long("a1d"))\
-						notify(DA_M_TCOMING, e1.title + ": " + e1.description, NP_MID);
+						system(format_str(conf_get_cvar("on_task_coming_action"), e1).c_str());
 					else
-						notify(DA_M_TUNCOMPLETE, e1.title + ": " + e1.description, NP_MID);
+						system(format_str(conf_get_cvar("on_task_uncompleted_action"), e1).c_str());
 				} else if (!e1.completed)
 				{
 					if (e1.due <= ti_to_long("a0d"))
 					{
 						if (e1.due > da_cached_time)
-							notify(DA_M_TFAILED, e1.title + ": " + e1.description, NP_HIGH);
+							system(format_str(conf_get_cvar("on_task_failed_action"), e1).c_str());
 					} else if (e1.due <= ti_to_long("a1d"))
 					{
 						if (e1.due > ti_to_long(ti_to_tm(da_cached_time + ti_to_long("1d"))))
-							notify(DA_M_TCOMING, e1.title + ": " + e1.description, NP_MID);
+							system(format_str(conf_get_cvar("on_task_coming_action"), e1).c_str());
 					}
 				}
 
@@ -118,7 +121,7 @@ void da_run()
 
 			if (deleted) 
 			{
-				notify(DA_M_TREM, da_cache.at(i).title + ": " + da_cache.at(i).description, NP_MID);
+				system(format_str(conf_get_cvar("on_task_removed_action"), da_cache.at(i)).c_str());
 				da_cache.erase(da_cache.begin() + i);
 				i--;
 			}
@@ -149,11 +152,11 @@ void da_run()
 					{
 						const noaftodo_entry e1 = t_list.at(i);
 						if (e1.completed)
-							notify(DA_M_TCOMPLETE, e1.title + ": " + e1.description, NP_LOW);
+							system(format_str(conf_get_cvar("on_task_completed_action"), e1).c_str());
 						else if (e1.due <= ti_to_long("a0d"))
-							notify(DA_M_TFAILED, e1.title + ": " + e1.description, NP_HIGH);
+							system(format_str(conf_get_cvar("on_task_failed_action"), e1).c_str());
 						else if (e1.due <= ti_to_long("a1d"))
-							notify(DA_M_TCOMING, e1.title + ": " + e1.description, NP_MID);
+							system(format_str(conf_get_cvar("on_task_coming_action"), e1).c_str());
 					}
 					break;
 			}

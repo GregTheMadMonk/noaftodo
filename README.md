@@ -1,12 +1,12 @@
 # NOAFtodo
-A TODO-manager No One Asked For. Written in C++, with ncurses, notification support, love and absolutely no clue why.
+A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolutely no clue why.
 
 ![A screenshot](screenshot.png)
 
 ### Features
 * minimalisic interface written with ncurses
-* primitive TODO list management: add and remove tasks with dues, marking tasks as completed, filtering failed, completed, upcomig and uncategorized tasks.
-* a daemon that works and background, tracks tasks dues and completion and sends notifications via libnotify
+* primitive TODO list management: add and remove tasks with dues, marking tasks as completed, filtering failed, completed, upcomig and uncategorized tasks
+* a daemon that works and background, tracks tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
 
 ### Default shortcuts:
 * ? - :? - shows help (sometimes outdated :) )

@@ -5,6 +5,7 @@
 #include <locale>
 
 #include "noaftodo.h"
+#include "noaftodo_config.h"
 #include "noaftodo_list.h"
 #include "noaftodo_output.h"
 #include "noaftodo_time.h"
@@ -329,6 +330,13 @@ void cui_exec(const string& command)
 				{
 					t_list[cui_s_line].tag = stoi(words.at(i + 1));
 					li_save();
+				}
+			}
+			else if (words.at(i) == "get")
+			{
+				if (words.size() >= i + 2)
+				{
+					cui_status = conf_get_cvar(words.at(i + 1));
 				}
 			}
 		}

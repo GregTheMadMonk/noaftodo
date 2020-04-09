@@ -7,7 +7,7 @@ CC := gcc
 CXX := g++
 
 CXX_FLAGS := -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/libmount -I/usr/include/blkid
-CXX_LINKER_FLAGS := -lnotify -lncursesw -lrt
+CXX_LINKER_FLAGS := -lncursesw -lrt
 
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
 H_FILES := $(wildcard $(SRC_DIR)/*.h)

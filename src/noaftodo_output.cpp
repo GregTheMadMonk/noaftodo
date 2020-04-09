@@ -1,7 +1,8 @@
 #include "noaftodo_output.h"
 
 #include <iostream>
-#include <libnotify/notify.h>
+
+#include "noaftodo.h"
 
 using namespace std;
 
@@ -10,16 +11,12 @@ void log(const string& message, const char& prefix)
 	cout << "[" << prefix << "] " << message << endl;
 }
 
-void notify(const string& title, const string& description, const int& priority)
+string format_str(const string& str, const noaftodo_entry& li_entry)
 {
-	NotifyNotification* n = notify_notification_new(title.c_str(), description.c_str(), 0);
-	notify_notification_set_timeout(n, 5000);
-
-	NotifyUrgency u = NOTIFY_URGENCY_LOW;
-	if (priority == NP_MID) u = NOTIFY_URGENCY_NORMAL;
-	if (priority == NP_HIGH) u = NOTIFY_URGENCY_CRITICAL;
-
-	notify_notification_set_urgency(n, u);
-
-	notify_notification_show(n, 0);
+	string ret = str;
+	int index = -1;
+	while ((index = ret.find("%T%")) != string::npos) ret.replace(index, 3, li_entry.title);
+	while ((index = ret.find("%D%")) != string::npos) ret.replace(index, 3, li_entry.description);
+	while ((index = ret.find("%VER%")) != string::npos) ret.replace(index, 5, VERSION);
+	return ret;
 }
