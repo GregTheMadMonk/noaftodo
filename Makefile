@@ -21,7 +21,7 @@ all: obj_dir $(OBJ_FILES) noaftodo.conf.template
 	@echo g++ flags: $(CXX_FLAGS)
 	@echo Linker flags: $(CXX_LINKER_FLAGS)
 	@echo Creting embed config...
-	objcopy --input binary --output $(shell objdump -f $(OBJ_DIR)/noaftodo_config.o | grep file\ format | sed 's/.*file\ format.//g') noaftodo.conf.template $(OBJ_DIR)/noaftodo_config_template.o
+	objcopy --input binary --output $(shell objdump -f $(OBJ_DIR)/noaftodo_config.o | grep file\ format | sed 's/.*file\ format.//g') --binary-architecture $(shell objdump -f $(OBJ_DIR)/noaftodo_config.o | grep architecture | sed 's/architecture:\ //g' | sed 's/,.*//g') noaftodo.conf.template $(OBJ_DIR)/noaftodo_config_template.o
 	@echo Linking binary $(BINARY)...
 	$(CXX) $(CXX_FLAGS) -o $(BINARY) $(OBJ_FILES) $(OBJ_DIR)/noaftodo_config_template.o $(CXX_LINKER_FLAGS)
 
