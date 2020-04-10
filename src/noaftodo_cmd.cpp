@@ -214,19 +214,6 @@ int cmd_exec(const string& command)
 							cui_bind(27, scomm, smode, sauto);
 					}
 				} else return 1;
-			} else if (words.at(i) == "charset")
-			{
-				if (words.size() == i + 3)
-				{
-					if (words.at(i + 1) == "status_separator")
-					{
-						cui_charset.status_separator = words.at(2).at(0);
-					}
-					if (words.at(i + 1) == "row_separator")
-					{
-						cui_charset.row_separator = words.at(2).at(0);
-					}
-				} else return 1;
 			} else if (words.at(i) == "set")
 			{
 				if (words.size() == i + 3)

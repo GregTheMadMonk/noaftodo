@@ -37,14 +37,6 @@ constexpr int CUI_TAG_ALL = -1;
 extern int cui_filter;
 extern int cui_tag_filter;
 
-// draw charset
-struct cui_charset_s
-{
-	std::string row_separator = "│";
-	std::string status_separator = "|";
-};
-extern cui_charset_s cui_charset;
-
 // current mode
 extern int cui_mode;
 

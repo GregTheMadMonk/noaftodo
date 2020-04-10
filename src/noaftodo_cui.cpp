@@ -16,8 +16,6 @@ using namespace std;
 int cui_filter = 0b1111;
 int cui_tag_filter = CUI_TAG_ALL;
 
-cui_charset_s cui_charset;
-
 int cui_mode;
 
 vector<cui_bind_s> binds;
@@ -191,13 +189,13 @@ void cui_normal_paint()
 	addnstr((cui_tag_filter == CUI_TAG_ALL) ? "ID: List" : "ID", id_chars - 1);
 	move(0, id_chars - 1);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
-	addnstr((cui_charset.row_separator + " Task due").c_str(), date_chars);
+	addnstr((conf_get_cvar("charset.row_separator") + " Task due").c_str(), date_chars);
 	move(0, id_chars + date_chars);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
-	addnstr((cui_charset.row_separator + " Task title").c_str(), title_chars);
+	addnstr((conf_get_cvar("charset.row_separator") + " Task title").c_str(), title_chars);
 	move(0, id_chars + date_chars + 1 + title_chars);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
-	addnstr((cui_charset.row_separator + " Task description").c_str(), desc_chars);
+	addnstr((conf_get_cvar("charset.row_separator") + " Task description").c_str(), desc_chars);
 	attrset(A_NORMAL);
 
 	cui_delta = 0;
@@ -238,13 +236,13 @@ void cui_normal_paint()
 				addnstr(id_string.c_str(), id_chars - 2);
 				x += id_chars - 1;
 				move(l - cui_delta + 1, x);
-				addnstr((cui_charset.row_separator + " " + ti_f_str(t_list.at(l).due)).c_str(), date_chars + 2);
+				addnstr((conf_get_cvar("charset.row_separator") + " " + ti_f_str(t_list.at(l).due)).c_str(), date_chars + 2);
 				x += date_chars + 1;
 				move(l - cui_delta + 1, x);
-				addnstr((cui_charset.row_separator + " " + t_list.at(l).title).c_str(), title_chars + 2);
+				addnstr((conf_get_cvar("charset.row_separator") + " " + t_list.at(l).title).c_str(), title_chars + 2);
 				x += title_chars + 1;
 				move(l - cui_delta + 1, x);
-				wstring next = w_converter.from_bytes(cui_charset.row_separator + " " + t_list.at(l).description);
+				wstring next = w_converter.from_bytes(conf_get_cvar("charset.row_separator") + " " + t_list.at(l).description);
 				for (int i = 0; i < next.length(); i++)
 				{
 					addstr(w_converter.to_bytes(next.at(i)).c_str());
@@ -256,13 +254,13 @@ void cui_normal_paint()
 						for (int i = 0; i < cui_w; i++) addch(' ');
 						x += id_chars - 1;
 						move(l - cui_delta + 1, x);
-						addnstr((cui_charset.row_separator + " ").c_str(), date_chars + 2);
+						addnstr((conf_get_cvar("charset.row_separator") + " ").c_str(), date_chars + 2);
 						x += date_chars + 1;
 						move(l - cui_delta + 1, x);
-						addnstr((cui_charset.row_separator + " ").c_str(), title_chars + 2);
+						addnstr((conf_get_cvar("charset.row_separator") + " ").c_str(), title_chars + 2);
 						x += title_chars + 1;
 						move(l - cui_delta + 1, x);
-						addstr((cui_charset.row_separator + " ").c_str());
+						addstr((conf_get_cvar("charset.row_separator") + " ").c_str());
 					}
 				}
 
@@ -277,13 +275,13 @@ void cui_normal_paint()
 	cui_status = 	((cui_tag_filter == CUI_TAG_ALL) ?
 				"All lists" :
 				("List " + to_string(cui_tag_filter) + (((cui_tag_filter < t_tags.size()) && (t_tags.at(cui_tag_filter) != to_string(cui_tag_filter))) ? (": " + t_tags.at(cui_tag_filter)) : ""))) +
-			" " + cui_charset.status_separator + " " +
+			" " + conf_get_cvar("charset.status_separator") + " " +
 			string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
 			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
 			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") +
 			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
-			((t_list.size() == 0) ? "" : " " + cui_charset.status_separator + " " + to_string(cui_s_line) + "/" + to_string(t_list.size() - 1)) +
-			string((cui_status != "") ? (" " + cui_charset.status_separator + " " + cui_status) : "");
+			((t_list.size() == 0) ? "" : " " + conf_get_cvar("charset.status_separator") + " " + to_string(cui_s_line) + "/" + to_string(t_list.size() - 1)) +
+			string((cui_status != "") ? (" " + conf_get_cvar("charset.status_separator") + " " + cui_status) : "");
 
 	move(cui_h - 1, cui_w - 1 - cui_status.length());
 	addstr(cui_status.c_str());
