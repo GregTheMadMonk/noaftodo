@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <fstream>
 
+#include "noaftodo_cmd.h"
+#include "noaftodo_config.h"
 #include "noaftodo_daemon.h"
 #include "noaftodo_output.h"
 
@@ -43,6 +45,7 @@ void li_load()
 		int mode = 0; 	// -1 - nothing
 				// 0 - list tags read
 				// 1 - lists read
+				// 2 - workspace read
 
 		while (getline(ifile, entry))
 		{
@@ -67,6 +70,7 @@ void li_load()
 					{
 						if (entry == "[tags]") mode = 0;
 						if (entry == "[list]") mode = 1;
+						if (entry == "[workspace]") mode = 2;
 					} else {
 						if (mode == 0)
 						{
@@ -106,6 +110,18 @@ void li_load()
 
 							t_list.push_back(li_entry);
 						}
+						
+						if (mode == 2)
+						{
+							while (entry.at(0) == ' ')
+							{
+								entry = entry.substr(1);
+								if (entry == "") break;
+							}
+
+							if (entry != "") if (entry.at(0) != '#')
+								cmd_exec(entry);
+						}
 					}
 				}
 			}
@@ -135,6 +151,14 @@ void li_save()
 	ofile << endl << "[list]" << endl;
 	for (const auto& entry : t_list)
 		ofile << (entry.completed ? 'v' : '-') << '\\' << entry.due << '\\' << entry.title << '\\' << entry.description << '\\' << entry.tag << '\\' << endl;
+
+	ofile << endl << "[workspace]" << endl;
+	for (map<string, string>::iterator cvar_i = conf_cvars.begin(); cvar_i != conf_cvars.end(); cvar_i++)
+	{
+		const string key = cvar_i->first;
+		if (conf_get_predefined_cvar(key) != conf_get_cvar(key))
+			ofile << "set \"" << key << "\" \"" << conf_cvars.at(key) << "\"" << endl;
+	}
 
 	log("Changes written to file " + li_filename);
 }

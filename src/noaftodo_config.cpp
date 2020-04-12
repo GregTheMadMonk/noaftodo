@@ -12,7 +12,8 @@ using namespace std;
 
 string conf_filename = "noaftodo.conf";
 
-map <string, string> conf_cvars;
+map<string, string> conf_cvars;
+map<string, string> conf_predefined_cvars;
 
 extern char _binary_noaftodo_conf_template_start;
 
@@ -59,6 +60,8 @@ void conf_load(const string& conf_file)
 				cmd_exec(entry);
 		}
 	}
+
+	conf_predefined_cvars = conf_cvars;
 }
 
 void conf_set_cvar(const string& name, const string& value)
@@ -74,6 +77,17 @@ string conf_get_cvar(const string& name)
 		return conf_cvars.at(name);
 	} catch (const out_of_range& err) {
 		log("No cvar with name " + name + " defined. Returning \"\".", LP_ERROR);
+		return "";
+	}
+}
+
+string conf_get_predefined_cvar(const string& name)
+{
+	try
+	{
+		return conf_predefined_cvars.at(name);
+	} catch (const out_of_range& err) {
+		log("No cvar with name " + name + " predefined. Returning \"\".", LP_ERROR);
 		return "";
 	}
 }

@@ -220,6 +220,15 @@ int cmd_exec(const string& command)
 				{
 					conf_set_cvar(words.at(i + 1), words.at(i + 2));
 				} else return 1;
+			} else if (words.at(i) == "reset")
+			{
+				if (words.size() == i + 2)
+				{
+					if (conf_get_predefined_cvar(words.at(i + 1)) != "")
+						conf_set_cvar(words.at(i + 1), conf_get_predefined_cvar(words.at(i + 1)));
+					else
+						conf_cvars.erase(words.at(i + 1));
+				}
 			}
 		}
 	}
