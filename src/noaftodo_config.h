@@ -16,4 +16,8 @@ void conf_set_cvar(const std::string& name, const std::string& value);
 std::string conf_get_cvar(const std::string& name);
 std::string conf_get_predefined_cvar(const std::string& name);
 
+void conf_set_cvar_int(const std::string& name, const int& value);
+int conf_get_cvar_int(const std::string& name);
+int conf_get_predefined_cvar_int(const std::string& name);
+
 #endif

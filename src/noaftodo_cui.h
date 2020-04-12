@@ -34,9 +34,6 @@ constexpr int CUI_FILTER_FAILED = 0b1000; // failed
 
 constexpr int CUI_TAG_ALL = -1;
 
-extern int cui_filter;
-extern int cui_tag_filter;
-
 // current mode
 extern int cui_mode;
 

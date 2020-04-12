@@ -91,3 +91,37 @@ string conf_get_predefined_cvar(const string& name)
 		return "";
 	}
 }
+
+void conf_set_cvar_int(const string& name, const int& value)
+{
+	log("Set " + name + "=" + to_string(value));
+	conf_cvars[name] = to_string(value);
+}
+
+int conf_get_cvar_int(const string& name)
+{
+	try
+	{
+		return stoi(conf_cvars.at(name));
+	} catch (const out_of_range& err) {
+		log("No cvar with name " + name + " defined. Returning \"\".", LP_ERROR);
+		return 0;
+	} catch (const invalid_argument& err) {
+		log("Cannot convert variable value to integer (" + name + "=" + conf_cvars.at(name) + ")", LP_ERROR);
+		return 0;
+	}
+}
+
+int conf_get_predefined_cvar_int(const string& name)
+{
+	try
+	{
+		return stoi(conf_predefined_cvars.at(name));
+	} catch (const out_of_range& err) {
+		log("No cvar with name " + name + " predefined. Returning \"\".", LP_ERROR);
+		return 0;
+	} catch (const invalid_argument& err) {
+		log("Cannot convert variable value to integer (" + name + "=" + conf_predefined_cvars.at(name) + ")", LP_ERROR);
+		return 0;
+	}
+}

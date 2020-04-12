@@ -75,12 +75,13 @@ int cmd_exec(const string& command)
 			{
 				if (words.size() >= i + 2)
 				{
-					if (words.at(i + 1) == "all") cui_tag_filter = CUI_TAG_ALL;
+					if (words.at(i + 1) == "all") conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
 					else
 					{
 						const int new_filter = stoi(words.at(1));
-						if (new_filter == cui_tag_filter) cui_tag_filter = CUI_TAG_ALL;
-						else cui_tag_filter = new_filter;
+						const int tag_filter = conf_get_cvar_int("tag_filter");
+						if (new_filter == tag_filter) conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
+						else conf_set_cvar_int("tag_filter", new_filter);
 					}
 				} else return 1;
 			} else if (words.at(i) == "down")
@@ -131,7 +132,8 @@ int cmd_exec(const string& command)
 							if (words.at(i + 3) != "")
 							{
 								new_entry.description = words.at(i + 3);
-								new_entry.tag = (cui_tag_filter == CUI_TAG_ALL) ? 0 : cui_tag_filter;
+								int tag_filter = conf_get_cvar_int("tag_filter");
+								new_entry.tag = (tag_filter == CUI_TAG_ALL) ? 0 : tag_filter;
 
 								li_add(new_entry);
 							}
@@ -142,14 +144,16 @@ int cmd_exec(const string& command)
 			{
 				if (words.size() >= i + 2)
 				{
+					int filter = conf_get_cvar_int("filter");
 					if (words.at(i + 1) == "uncat")
-						cui_filter ^= CUI_FILTER_UNCAT;
+						filter ^= CUI_FILTER_UNCAT;
 					if (words.at(i + 1) == "complete")
-						cui_filter ^= CUI_FILTER_COMPLETE;
+						filter ^= CUI_FILTER_COMPLETE;
 					if (words.at(i + 1) == "coming")
-						cui_filter ^= CUI_FILTER_COMING;
+						filter ^= CUI_FILTER_COMING;
 					if (words.at(i + 1) == "failed")
-						cui_filter ^= CUI_FILTER_FAILED;
+						filter ^= CUI_FILTER_FAILED;
+					conf_set_cvar_int("filter", filter);
 				} else return 1;
 			} else if (words.at(i) == "g")
 			{
@@ -164,12 +168,13 @@ int cmd_exec(const string& command)
 			{
 				if (words.size() >= i + 2)
 				{
-					if (cui_tag_filter == CUI_TAG_ALL) cui_status = "No specific list selected";
+					const int tag_filter = conf_get_cvar_int("tag_filter");
+					if (tag_filter == CUI_TAG_ALL) cui_status = "No specific list selected";
 					else 
 					{
-						while (cui_tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
+						while (tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
 
-						t_tags[cui_tag_filter] = words.at(i + 1);
+						t_tags[tag_filter] = words.at(i + 1);
 						li_save();
 					}
 				} else return 1;

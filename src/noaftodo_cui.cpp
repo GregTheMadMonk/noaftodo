@@ -13,9 +13,6 @@
 
 using namespace std;
 
-int cui_filter = 0b1111;
-int cui_tag_filter = CUI_TAG_ALL;
-
 int cui_mode;
 
 vector<cui_bind_s> binds;
@@ -159,18 +156,22 @@ bool cui_is_visible(const int& entryID)
 	if (t_list.size() == 0) return false;
 	const auto& entry = t_list.at(entryID);
 
-	const bool tag_check = ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == entry.tag));
+	const int tag_filter = conf_get_cvar_int("tag_filter");
+	const int filter = conf_get_cvar_int("filter");
+	const bool tag_check = ((tag_filter == CUI_TAG_ALL) || (tag_filter == entry.tag));
 
-	if (entry.completed) return tag_check && (cui_filter & CUI_FILTER_COMPLETE);
-	if (entry.due <= ti_to_long("a0d")) return tag_check && (cui_filter & CUI_FILTER_FAILED);
-	if (entry.due <= ti_to_long("a1d")) return tag_check && (cui_filter & CUI_FILTER_COMING);
+	if (entry.completed) return tag_check && (filter & CUI_FILTER_COMPLETE);
+	if (entry.due <= ti_to_long("a0d")) return tag_check && (filter & CUI_FILTER_FAILED);
+	if (entry.due <= ti_to_long("a1d")) return tag_check && (filter & CUI_FILTER_COMING);
 
-	return tag_check && (cui_filter & CUI_FILTER_UNCAT);
+	return tag_check && (filter & CUI_FILTER_UNCAT);
 }
 
 void cui_normal_paint()
 {
-	const int id_chars = (cui_tag_filter == CUI_TAG_ALL) ? 20 : 4;
+	const int tag_filter = conf_get_cvar_int("tag_filter");
+	const int filter = conf_get_cvar_int("filter");
+	const int id_chars = (tag_filter == CUI_TAG_ALL) ? 20 : 4;
 	const int date_chars = 18;
 	const int title_chars = cui_w / 5;
 	const int desc_chars = cui_w - title_chars - date_chars - id_chars - 3;
@@ -188,7 +189,7 @@ void cui_normal_paint()
 
 	move(0, 0);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
-	addnstr((cui_tag_filter == CUI_TAG_ALL) ? "ID: List" : "ID", id_chars - 1);
+	addnstr((tag_filter == CUI_TAG_ALL) ? "ID: List" : "ID", id_chars - 1);
 	move(0, id_chars - 1);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
 	addnstr((conf_get_cvar("charset.row_separator") + " Task due").c_str(), date_chars);
@@ -228,7 +229,7 @@ void cui_normal_paint()
 				for (int i = 0; i < cui_w; i++) addch(' ');
 				move(l - cui_delta + 1, x);
 				string id_string = to_string(l);
-				if (cui_tag_filter == CUI_TAG_ALL)
+				if (tag_filter == CUI_TAG_ALL)
 				{
 					id_string += ": " + to_string(t_list.at(l).tag);
 					if (t_list.at(l).tag < t_tags.size())
@@ -274,14 +275,14 @@ void cui_normal_paint()
 
 	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
 
-	cui_status = 	((cui_tag_filter == CUI_TAG_ALL) ?
+	cui_status = 	((tag_filter == CUI_TAG_ALL) ?
 				"All lists" :
-				("List " + to_string(cui_tag_filter) + (((cui_tag_filter < t_tags.size()) && (t_tags.at(cui_tag_filter) != to_string(cui_tag_filter))) ? (": " + t_tags.at(cui_tag_filter)) : ""))) +
+				("List " + to_string(tag_filter) + (((tag_filter < t_tags.size()) && (t_tags.at(tag_filter) != to_string(tag_filter))) ? (": " + t_tags.at(tag_filter)) : ""))) +
 			" " + conf_get_cvar("charset.status_separator") + " " +
-			string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
-			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
-			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") +
-			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
+			string((filter & CUI_FILTER_UNCAT) ? "U" : "_") +
+			string((filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
+			string((filter & CUI_FILTER_COMING) ? "C" : "_") +
+			string((filter & CUI_FILTER_FAILED) ? "F" : "_") +
 			((t_list.size() == 0) ? "" : " " + conf_get_cvar("charset.status_separator") + " " + to_string(cui_s_line) + "/" + to_string(t_list.size() - 1)) +
 			string((cui_status != "") ? (" " + conf_get_cvar("charset.status_separator") + " " + cui_status) : "");
 
