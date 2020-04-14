@@ -39,11 +39,10 @@ void cui_init()
 	initscr();
 	start_color();
 	use_default_colors();
-	init_pair(CUI_CP_TITLE_1, COLOR_BLUE, -1);
-	init_pair(CUI_CP_TITLE_2, COLOR_GREEN, -1);
-	init_pair(CUI_CP_GREEN_ENTRY, COLOR_GREEN, -1);
-	init_pair(CUI_CP_YELLOW_ENTRY, COLOR_YELLOW, -1);
-	init_pair(CUI_CP_RED_ENTRY, COLOR_RED, -1);
+	init_pair(CUI_CP_TITLE, conf_get_cvar_int("colors.title"), conf_get_cvar_int("colors.background"));
+	init_pair(CUI_CP_GREEN_ENTRY, conf_get_cvar_int("colors.entry_completed"), conf_get_cvar_int("colors.background"));
+	init_pair(CUI_CP_YELLOW_ENTRY, conf_get_cvar_int("colors.entry_coming"), conf_get_cvar_int("colors.background"));
+	init_pair(CUI_CP_RED_ENTRY, conf_get_cvar_int("colors.entry_failed"), conf_get_cvar_int("colors.background"));
 
 	cbreak();
 	set_escdelay(0);
@@ -180,24 +179,24 @@ void cui_normal_paint()
 	move(0, 0);
 	for (int i = 0; i < cui_w; i++) 
 	{
-		if (i < id_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
-		else if (i < id_chars + 1 + date_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
-		else if (i < id_chars + 1 + date_chars + 1 + title_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
-		else attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
+		if (i < id_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
+		else if (i < id_chars + 1 + date_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
+		else if (i < id_chars + 1 + date_chars + 1 + title_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
+		else attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
 		addch(' ');
 	}
 
 	move(0, 0);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
 	addnstr((tag_filter == CUI_TAG_ALL) ? "ID: List" : "ID", id_chars - 1);
 	move(0, id_chars - 1);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
 	addnstr((conf_get_cvar("charset.row_separator") + " Task due").c_str(), date_chars);
 	move(0, id_chars + date_chars);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_1));
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
 	addnstr((conf_get_cvar("charset.row_separator") + " Task title").c_str(), title_chars);
 	move(0, id_chars + date_chars + 1 + title_chars);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE_2));
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
 	addnstr((conf_get_cvar("charset.row_separator") + " Task description").c_str(), desc_chars);
 	attrset(A_NORMAL);
 

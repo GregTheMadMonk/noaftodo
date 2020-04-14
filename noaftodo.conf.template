@@ -30,3 +30,9 @@ set "on_task_removed_action" "notify-send \"You have removed a task!\" \"%T%: %D
 # filter=0b1111
 set "filter" "15"
 set "tag_filter" "-1"
+
+set "colors.background" "-1"
+set "colors.title" "12"
+set "colors.entry_completed" "2"
+set "colors.entry_coming" "3"
+set "colors.entry_failed" "1"

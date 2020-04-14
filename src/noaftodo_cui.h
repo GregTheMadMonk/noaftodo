@@ -13,8 +13,7 @@ struct cui_bind_s
 };
 
 // color pair indexes
-constexpr int CUI_CP_TITLE_1 = 1;
-constexpr int CUI_CP_TITLE_2 = 2;
+constexpr int CUI_CP_TITLE = 1;
 constexpr int CUI_CP_GREEN_ENTRY = 2;
 constexpr int CUI_CP_YELLOW_ENTRY = 3;
 constexpr int CUI_CP_RED_ENTRY = 4;
