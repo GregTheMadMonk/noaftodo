@@ -16,6 +16,10 @@ long ti_to_long(const string& t_str)
 tm ti_to_tm(const string& t_str)
 {
 	tm ti = {0};
+	const time_t t = system_clock::to_time_t(system_clock::now());
+	tm l_ti = *localtime(&t);
+	l_ti.tm_mon += 1;
+	l_ti.tm_year += 1900;
 
 	int year = 0;
 	int month = 0;
@@ -26,10 +30,7 @@ tm ti_to_tm(const string& t_str)
 	int start = 0;
 	if (t_str.at(0) == 'a')
 	{
-		const time_t t = system_clock::to_time_t(system_clock::now());
-		ti = *localtime(&t);
-		ti.tm_mon += 1;
-		ti.tm_year += 1900;
+		ti = l_ti;
 
 		start = 1;
 	}
@@ -80,6 +81,15 @@ tm ti_to_tm(const string& t_str)
 	}
 
 	if (ti.tm_mon > 12) { ti.tm_year += ti.tm_mon / 12; ti.tm_mon = ti.tm_mon % 12; }
+
+	if (start == 0)
+	{
+		if (ti.tm_year == 0) ti.tm_year = l_ti.tm_year;
+		if (ti.tm_mon == 0) ti.tm_mon = l_ti.tm_mon;
+		if (ti.tm_mday == 0) ti.tm_mday = l_ti.tm_mday;
+		if (ti.tm_hour == 0) ti.tm_hour = l_ti.tm_hour;
+		if (ti.tm_min == 0) ti.tm_min = l_ti.tm_min;
+	}
 
 	return ti;
 }

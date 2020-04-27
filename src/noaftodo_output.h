@@ -1,5 +1,5 @@
 #ifndef NOAFTODO_OUTPUT_H
-#define NOAFTOFO_OUTPUT_H
+#define NOAFTODO_OUTPUT_H
 
 #include <string>
 
