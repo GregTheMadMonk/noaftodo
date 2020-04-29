@@ -208,71 +208,74 @@ void cui_normal_paint()
 	for (int l = 0; l < t_list.size(); l++) is_there_visible |= cui_is_visible(l);
 
 	int last_string = 0;
-	if (is_there_visible) for (int l = 0; l < t_list.size(); l++)
+	if (is_there_visible) 
 	{
-		if (!cui_is_visible(l))
+		for (int l = 0; l < t_list.size(); l++)
 		{
-			cui_delta++;
-			if (l == cui_s_line) if (l != t_list.size() - 1) cmd_exec("down");
-		} else {
-			if (l - cui_delta >= cui_h - 2) break;
-			if (l >= cui_delta)    
+			if (!cui_is_visible(l))
 			{
-				if (l == cui_s_line) attron(A_STANDOUT);
-				if (t_list.at(l).completed) attron(COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD);	// a completed entry
-				else if (t_list.at(l).due <= ti_to_long("a0d")) attron(COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD);	// a failed entry
-				else if (t_list.at(l).due <= ti_to_long("a1d")) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// an upcoming entry
+				cui_delta++;
+				if (l == cui_s_line) if (l != t_list.size() - 1) cmd_exec("down");
+			} else {
+				if (l - cui_delta >= cui_h - 2) break;
+				if (l >= cui_delta)    
+				{
+					if (l == cui_s_line) attron(A_STANDOUT);
+					if (t_list.at(l).completed) attron(COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD);	// a completed entry
+					else if (t_list.at(l).due <= ti_to_long("a0d")) attron(COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD);	// a failed entry
+					else if (t_list.at(l).due <= ti_to_long("a1d")) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// an upcoming entry
 
-				int x = 0;
-				move(l - cui_delta + 1, x);
-				for (int i = 0; i < cui_w; i++) addch(' ');
-				move(l - cui_delta + 1, x);
-				string id_string = to_string(l);
-				if (tag_filter == CUI_TAG_ALL)
-				{
-					id_string += ": " + to_string(t_list.at(l).tag);
-					if (t_list.at(l).tag < t_tags.size())
-						if (t_tags.at(t_list.at(l).tag) != to_string(t_list.at(l).tag))
-							id_string += "(" + t_tags.at(t_list.at(l).tag) + ")";
-				}
-				addnstr(id_string.c_str(), id_chars - 2);
-				x += id_chars - 1;
-				move(l - cui_delta + 1, x);
-				addnstr((conf_get_cvar("charset.row_separator") + " " + ti_f_str(t_list.at(l).due)).c_str(), date_chars + 2);
-				x += date_chars + 1;
-				move(l - cui_delta + 1, x);
-				addnstr((conf_get_cvar("charset.row_separator") + " " + t_list.at(l).title).c_str(), title_chars + 2);
-				x += title_chars + 1;
-				move(l - cui_delta + 1, x);
-				wstring next = w_converter.from_bytes(conf_get_cvar("charset.row_separator") + " " + t_list.at(l).description);
-				for (int i = 0; i < next.length(); i++)
-				{
-					addstr(w_converter.to_bytes(next.at(i)).c_str());
-					if (i != 0) if (i % (cui_w - x - 2) == 0) if (i != next.length() - 1)
+					int x = 0;
+					move(l - cui_delta + 1, x);
+					for (int i = 0; i < cui_w; i++) addch(' ');
+					move(l - cui_delta + 1, x);
+					string id_string = to_string(l);
+					if (tag_filter == CUI_TAG_ALL)
 					{
-						cui_delta--;
-						x = 0;
-						move(l - cui_delta + 1, x);
-						for (int i = 0; i < cui_w; i++) addch(' ');
-						x += id_chars - 1;
-						move(l - cui_delta + 1, x);
-						addnstr((conf_get_cvar("charset.row_separator") + " ").c_str(), date_chars + 2);
-						x += date_chars + 1;
-						move(l - cui_delta + 1, x);
-						addnstr((conf_get_cvar("charset.row_separator") + " ").c_str(), title_chars + 2);
-						x += title_chars + 1;
-						move(l - cui_delta + 1, x);
-						addstr((conf_get_cvar("charset.row_separator") + " ").c_str());
+						id_string += ": " + to_string(t_list.at(l).tag);
+						if (t_list.at(l).tag < t_tags.size())
+							if (t_tags.at(t_list.at(l).tag) != to_string(t_list.at(l).tag))
+								id_string += "(" + t_tags.at(t_list.at(l).tag) + ")";
 					}
-				}
+					addnstr(id_string.c_str(), id_chars - 2);
+					x += id_chars - 1;
+					move(l - cui_delta + 1, x);
+					addnstr((conf_get_cvar("charset.row_separator") + " " + ti_f_str(t_list.at(l).due)).c_str(), date_chars + 2);
+					x += date_chars + 1;
+					move(l - cui_delta + 1, x);
+					addnstr((conf_get_cvar("charset.row_separator") + " " + t_list.at(l).title).c_str(), title_chars + 2);
+					x += title_chars + 1;
+					move(l - cui_delta + 1, x);
+					wstring next = w_converter.from_bytes(conf_get_cvar("charset.row_separator") + " " + t_list.at(l).description);
+					for (int i = 0; i < next.length(); i++)
+					{
+						addstr(w_converter.to_bytes(next.at(i)).c_str());
+						if (i != 0) if (i % (cui_w - x - 2) == 0) if (i != next.length() - 1)
+						{
+							cui_delta--;
+							x = 0;
+							move(l - cui_delta + 1, x);
+							for (int i = 0; i < cui_w; i++) addch(' ');
+							x += id_chars - 1;
+							move(l - cui_delta + 1, x);
+							addnstr((conf_get_cvar("charset.row_separator") + " ").c_str(), date_chars + 2);
+							x += date_chars + 1;
+							move(l - cui_delta + 1, x);
+							addnstr((conf_get_cvar("charset.row_separator") + " ").c_str(), title_chars + 2);
+							x += title_chars + 1;
+							move(l - cui_delta + 1, x);
+							addstr((conf_get_cvar("charset.row_separator") + " ").c_str());
+						}
+					}
 
-				attrset(A_NORMAL);
-				last_string = l - cui_delta + 2;
+					attrset(A_NORMAL);
+					last_string = l - cui_delta + 2;
+				}
 			}
 		}
-	}
 
-	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
+		for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
+	}
 
 	cui_status = 	((tag_filter == CUI_TAG_ALL) ?
 				"All lists" :
