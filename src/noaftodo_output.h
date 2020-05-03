@@ -11,6 +11,6 @@ constexpr char LP_ERROR = '!';
 
 void log(const std::string& message, const char& prefix = LP_DEFAULT);
 
-std::string format_str(const std::string& str, const noaftodo_entry& li_entry);
+std::string format_str(const std::string& str, const noaftodo_entry& li_entry, const bool& renotify = false);
 
 #endif

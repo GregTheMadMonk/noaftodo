@@ -3,7 +3,7 @@
 
 // progrm title and version
 constexpr char TITLE[] = "NOAFtodo";
-constexpr char VERSION[] = "1.0.4";
+constexpr char VERSION[] = "1.0.5";
 
 // program modes
 constexpr int PM_DEFAULT = 0;

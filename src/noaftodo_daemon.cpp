@@ -74,11 +74,11 @@ void da_run()
 				da_cache.push_back(t_list.at(i));
 
 				if (e1.completed)
-					system(format_str(conf_get_cvar("on_task_completed_action"), e1).c_str());
+					system(format_str(conf_get_cvar("on_task_completed_action"), e1, first).c_str());
 				else if (e1.due <= ti_to_long("a0d"))
-					system(format_str(conf_get_cvar("on_task_failed_action"), e1).c_str());
+					system(format_str(conf_get_cvar("on_task_failed_action"), e1, first).c_str());
 				else if (e1.due <= ti_to_long("a1d"))
-					system(format_str(conf_get_cvar("on_task_coming_action"), e1).c_str());
+					system(format_str(conf_get_cvar("on_task_coming_action"), e1, first).c_str());
 				else if (!first)
 					system(format_str(conf_get_cvar("on_task_new_action"), e1).c_str());
 			} else {
@@ -151,11 +151,11 @@ void da_run()
 					{
 						const noaftodo_entry e1 = t_list.at(i);
 						if (e1.completed)
-							system(format_str(conf_get_cvar("on_task_completed_action"), e1).c_str());
+							system(format_str(conf_get_cvar("on_task_completed_action"), e1, true).c_str());
 						else if (e1.due <= ti_to_long("a0d"))
-							system(format_str(conf_get_cvar("on_task_failed_action"), e1).c_str());
+							system(format_str(conf_get_cvar("on_task_failed_action"), e1, true).c_str());
 						else if (e1.due <= ti_to_long("a1d"))
-							system(format_str(conf_get_cvar("on_task_coming_action"), e1).c_str());
+							system(format_str(conf_get_cvar("on_task_coming_action"), e1, true).c_str());
 					}
 					break;
 			}

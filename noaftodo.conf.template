@@ -20,7 +20,7 @@ set "charset.row_separator" "│"
 
 set "on_daemon_launch_action" "notify-send \"NOAFtodo v.%VER%\" \"Daemon is up and running\""
 
-set "on_task_completed_action" "notify-send \"You have completed a task!\" \"%T%: %D%\" -u low"
+set "on_task_completed_action" "%N% && notify-send \"You have completed a task!\" \"%T%: %D%\" -u low"
 set "on_task_uncompleted_action" "notify-send \"Task is marked \\\"Not Completed\\\" again!\" \"%T%: %D%\""
 set "on_task_failed_action" "notify-send \"You have a failed task! Come on, it\'s never too late!\" \"%T%: %D%\" -u critical"
 set "on_task_coming_action" "notify-send \"You have an upcoming task!\" \"%T%: %D%\""
