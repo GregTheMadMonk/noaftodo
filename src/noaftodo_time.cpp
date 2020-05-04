@@ -27,6 +27,12 @@ tm ti_to_tm(const string& t_str)
 	int hour = 0;
 	int minute = 0;
 
+	bool c_year = false;
+	bool c_mon = false;
+	bool c_day = false;
+	bool c_hour = false;
+	bool c_min = false;
+
 	int start = 0;
 	if (t_str.at(0) == 'a')
 	{
@@ -39,22 +45,30 @@ tm ti_to_tm(const string& t_str)
 	{
 		const char c = t_str.at(i);
 
-		if (isdigit(c)) minute = minute * 10 + (c - '0');
+		if (isdigit(c)) { minute = minute * 10 + (c - '0'); c_min = true; }
 		else 
 		{
 			switch (c)
 			{
 				case 'h':
 					hour = minute;
+					c_hour = true;
+					c_min = false;
 					break;
 				case 'd':
 					day = minute;
+					c_day = true;
+					c_min = false;
 					break;
 				case 'm':
 					month = minute;
+					c_mon = true;
+					c_min = false;
 					break;
 				case 'y':
 					year = minute;
+					c_year = true;
+					c_min = false;
 					break;
 			}
 
@@ -84,11 +98,11 @@ tm ti_to_tm(const string& t_str)
 
 	if (start == 0)
 	{
-		if (ti.tm_year == 0) ti.tm_year = l_ti.tm_year;
-		if (ti.tm_mon == 0) ti.tm_mon = l_ti.tm_mon;
-		if (ti.tm_mday == 0) ti.tm_mday = l_ti.tm_mday;
-		if (ti.tm_hour == 0) ti.tm_hour = l_ti.tm_hour;
-		if (ti.tm_min == 0) ti.tm_min = l_ti.tm_min;
+		if (!c_year) ti.tm_year = l_ti.tm_year;
+		if (!c_mon) ti.tm_mon = l_ti.tm_mon;
+		if (!c_day) ti.tm_mday = l_ti.tm_mday;
+		if (!c_hour) ti.tm_hour = l_ti.tm_hour;
+		if (!c_min) ti.tm_min = l_ti.tm_min;
 	}
 
 	return ti;
