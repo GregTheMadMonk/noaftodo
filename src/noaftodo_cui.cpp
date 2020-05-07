@@ -245,12 +245,14 @@ void cui_normal_paint()
 				x += id_chars - 1;
 				move(l - cui_delta + 1, x);
 				addnstr((conf_get_cvar("charset.row_separator") + " " + ti_f_str(entry.due)).c_str(), date_chars + 2);
-				x += date_chars + 1;
+				x += date_chars;
 				move(l - cui_delta + 1, x);
-				addnstr((conf_get_cvar("charset.row_separator") + " " + entry.title).c_str(), title_chars + 2);
+				addstr((" " + conf_get_cvar("charset.row_separator") + " " + entry.title).c_str());
 				x += title_chars + 1;
 				move(l - cui_delta + 1, x);
-				addnstr((conf_get_cvar("charset.row_separator") + " " + entry.description).c_str(), desc_chars + 2);
+				addstr((" " + conf_get_cvar("charset.row_separator") + " " + entry.description).c_str());
+				move(l - cui_delta + 1, cui_w - 1);
+				addstr(" ");
 
 				attrset(A_NORMAL);
 				last_string = l - cui_delta + 2;
