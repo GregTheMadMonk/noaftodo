@@ -31,6 +31,8 @@ int cui_command_index = 0;
 
 wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
 
+extern char _binary_doc_doc_gen_start;
+
 void cui_init()
 {
 	log("Initializing console UI...");
@@ -87,6 +89,9 @@ void cui_run()
 			case CUI_MODE_NORMAL:
 				cui_normal_input(c);
 				break;
+			case CUI_MODE_DETAILS:
+				cui_details_input(c);
+				break;
 			case CUI_MODE_COMMAND:
 				cui_command_input(c);
 				break;
@@ -103,6 +108,9 @@ void cui_run()
 		{
 			case CUI_MODE_NORMAL:
 				cui_normal_paint();
+				break;
+			case CUI_MODE_DETAILS:
+				cui_details_paint();
 				break;
 			case CUI_MODE_COMMAND:
 				cui_command_paint();
@@ -129,12 +137,17 @@ void cui_set_mode(const int& mode)
 		case CUI_MODE_NORMAL:
 			curs_set(0);
 			break;
+		case CUI_MODE_DETAILS:
+			cui_delta = 0;
+			curs_set(0);
+			break;
 		case CUI_MODE_COMMAND:
 			curs_set(1);
 			cui_command_index = cui_commands.size() - 1;
 			cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
 			break;
 		case CUI_MODE_HELP:
+			cui_delta = 0;
 			curs_set(0);
 			break;
 	}
@@ -319,6 +332,117 @@ void cui_normal_input(const wchar_t& key)
 	}
 }
 
+void cui_details_paint()
+{
+	const int tdelta = cui_delta;
+	cui_normal_paint();
+
+	// draw details box
+	move(2, 3);
+	addstr(conf_get_cvar("charset.box_corner_1").c_str());
+	move(cui_h - 3, 3);
+	addstr(conf_get_cvar("charset.box_corner_3").c_str());
+	move(2, cui_w - 4);
+	addstr(conf_get_cvar("charset.box_corner_2").c_str());
+	move(cui_h - 3, cui_w - 4);
+	addstr(conf_get_cvar("charset.box_corner_4").c_str());
+
+	for (int i = 3; i <= cui_h - 4; i++) 
+	{ 
+		move(i, 3); 
+		addstr(conf_get_cvar("charset.box_border_v").c_str()); 
+
+		move(i, cui_w - 4);
+		addstr(conf_get_cvar("charset.box_border_v").c_str()); 
+	}
+
+	for (int j = 4; j < cui_w - 4; j++)
+	{
+		move(2, j);
+		addstr(conf_get_cvar("charset.box_border_h").c_str());
+
+		for (int i = 3; i < cui_h - 3; i++)
+		{
+			move(i, j);
+			addch(' ');
+		}
+
+		move(cui_h - 3, j);
+		addstr(conf_get_cvar("charset.box_border_h").c_str());
+	}
+
+	// fill the box with details
+	// Title
+	const noaftodo_entry& entry = t_list.at(cui_s_line);
+	move(4, 5);
+	addstr(entry.title.c_str());
+
+	for (int i = 4; i < cui_w - 4; i++)
+	{
+		move(6, i);
+		addstr(conf_get_cvar("charset.box_ui_line_h").c_str());
+	}
+
+	move(7, 5);
+	addstr(ti_f_str(entry.due).c_str());
+
+	for (int i = 4; i < cui_w - 4; i++)
+	{
+		move(8, i);
+		addstr(conf_get_cvar("charset.box_ui_line_h").c_str());
+	}
+
+	// draw description
+	// we want text wrapping here
+	wstring desc = w_converter.from_bytes(entry.description);
+	int x = 5;
+	int y = 10 + tdelta;
+	for (int i = 0; i < desc.length(); i++)
+	{
+		if (x == cui_w - 5)
+		{
+			x = 5;
+			y++;
+		}
+
+		if (y == cui_h - 4) 
+		{
+			move(cui_h - 4, 5);
+			addstr("<- ... ->");
+			break; // could've implemented scrolling
+				// but come on, who writes descriptions
+				// that long in a TODO-list :)
+		}
+
+		move(y, x);
+		if (y >= 10) addstr(w_converter.to_bytes(desc.at(i)).c_str());
+
+		x++;
+
+		cui_delta = tdelta;
+	}
+}
+
+void cui_details_input(const wchar_t& key)
+{
+	switch (key)
+	{
+		case 'q': case 27:
+			cui_set_mode(CUI_MODE_NORMAL);
+		case KEY_RIGHT:
+			cui_delta--;
+			break;
+		case KEY_LEFT:
+			cui_delta++;
+			break;
+		case '=':
+			cui_delta = 0;
+			break;
+		default:
+			break;
+	}
+}
+
 void cui_command_paint()
 {
 	cui_normal_paint();
@@ -334,9 +458,6 @@ void cui_command_paint()
 
 void cui_command_input(const wchar_t& key)
 {
-	// for some reason, some keys work as if they were get through getch
-	// and others - with their KEY_* values
-	// Guess, I won't touch it then and let it work as it works.
 	switch (key)
 	{
 		case 10:
@@ -358,7 +479,8 @@ void cui_command_input(const wchar_t& key)
 			if (cui_mode == CUI_MODE_COMMAND) cui_set_mode(CUI_MODE_NORMAL);
 			cui_filter_history();
 			break;
-		case 127:
+		case 127: case KEY_BACKSPACE: // 127 is for, e.g., xfce4-terminal
+						// KEY_BACKSPACE - e.g., alacritty
 			if (cui_command_index != cui_commands.size() - 1)
 			{
 				wstring temp = cui_commands[cui_commands.size() - 1];
@@ -444,21 +566,94 @@ void cui_command_input(const wchar_t& key)
 
 void cui_help_paint()
 {
-	move(1, 1);
-	addstr((string(TITLE) + " v." + VERSION + " help.").c_str());
-	move(3, 1);
-	addstr("Command mode (activates with \':\' key) commands:\n");
-	addstr("\t:q - exit program\n");
-	addstr("\t:? - show this message\n");
-	addstr("\t:g <number> - got to entry with ID <number>\n");
-	addstr("\t:up, :down - navigate up and down in the list\n");
-	addstr("\t:a <due> <title> <description> - add entry to list. Due format: \"<year>y<month>m<day>d<hour>h<minute>\". If \"a\" is added before the due string, time is counted from current moment.\n");
-	addstr("\t:c - toggle selected entry completion\n");
-	addstr("\t:d - remove selected entry\n");
-	addstr("\t:vtoggle uncat|completed|coming|failed - toggle visibility for entry category (\"uncat\" = uncategorized)\n");
+	const int tdelta = cui_delta;
+	cui_normal_paint();
 
-	move(cui_h - 1, 1);
-	addstr("Press 'q' or <esc> to quit.");
+	// draw help box
+	move(2, 3);
+	addstr(conf_get_cvar("charset.box_corner_1").c_str());
+	move(cui_h - 3, 3);
+	addstr(conf_get_cvar("charset.box_corner_3").c_str());
+	move(2, cui_w - 4);
+	addstr(conf_get_cvar("charset.box_corner_2").c_str());
+	move(cui_h - 3, cui_w - 4);
+	addstr(conf_get_cvar("charset.box_corner_4").c_str());
+
+	for (int i = 3; i <= cui_h - 4; i++) 
+	{ 
+		move(i, 3); 
+		addstr(conf_get_cvar("charset.box_border_v").c_str()); 
+
+		move(i, cui_w - 4);
+		addstr(conf_get_cvar("charset.box_border_v").c_str()); 
+	}
+
+	for (int j = 4; j < cui_w - 4; j++)
+	{
+		move(2, j);
+		addstr(conf_get_cvar("charset.box_border_h").c_str());
+
+		for (int i = 3; i < cui_h - 3; i++)
+		{
+			move(i, j);
+			addch(' ');
+		}
+
+		move(cui_h - 3, j);
+		addstr(conf_get_cvar("charset.box_border_h").c_str());
+	}
+
+	// fill the box
+	move(4, 5);
+	addstr((string(TITLE) + " v." + VERSION).c_str());
+
+	for (int i = 4; i < cui_w - 4; i++)
+	{
+		move(6, i);
+		addstr(conf_get_cvar("charset.box_ui_line_h").c_str());
+	}
+
+	// draw description
+	// we want text wrapping here
+	int x = 5;
+	int y = 8 + tdelta;
+	const string cui_help = string(&_binary_doc_doc_gen_start);
+	for (int i = 0; i < cui_help.length(); i++)
+	{
+		if (x == cui_w - 5)
+		{
+			x = 5;
+			y++;
+		}
+		
+		if (y >= cui_h - 4) 
+		{
+			move(cui_h - 4, 5);
+			addstr("<- ... ->");
+			break;
+		}
+
+		const char c = cui_help.at(i);
+
+		move(y, x);
+
+		constexpr int TAB_W = 20;
+		switch (c)
+		{
+			case '\n':
+				y++;
+				x = 5;
+				break;
+			case '\t':
+				x = TAB_W;
+				break;
+			default:
+				if (y >= 8) addch(c);
+				x++;
+		}
+	}
+
+	cui_delta = tdelta;
 }
 
 void cui_help_input(const wchar_t& key)
@@ -467,6 +662,15 @@ void cui_help_input(const wchar_t& key)
 	{
 		case 'q': case 27:
 			cui_set_mode(CUI_MODE_NORMAL);
+			break;
+		case KEY_RIGHT:
+			cui_delta--;
+			break;
+		case KEY_LEFT:
+			cui_delta++;
+			break;
+		case '=':
+			cui_delta = 0;
 			break;
 	}
 }

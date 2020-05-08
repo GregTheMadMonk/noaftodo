@@ -65,13 +65,15 @@ int cmd_exec(const string& command)
 			offset = i + 1;
 		else if (i == offset)
 		{
-			if (words.at(i) == "q")
+			if (words.at(i) == "q") // exit the program
 				cui_mode = CUI_MODE_EXIT;
-			else if (words.at(i) == ":")
+			else if (words.at(i) == ":") // enter command mode
 				cui_set_mode(CUI_MODE_COMMAND);
-			else if (words.at(i) == "?")
+			else if (words.at(i) == "details") // show selected task details
+				cui_set_mode(CUI_MODE_DETAILS);
+			else if (words.at(i) == "?") // show help message
 				cui_set_mode(CUI_MODE_HELP);
-			else if (words.at(i) == "list")
+			else if (words.at(i) == "list") // navigate to list (":list all" to view tasks from all lists)
 			{
 				if (words.size() >= i + 2)
 				{
@@ -84,7 +86,7 @@ int cmd_exec(const string& command)
 						else conf_set_cvar_int("tag_filter", new_filter);
 					}
 				} else return 1;
-			} else if (words.at(i) == "down")
+			} else if (words.at(i) == "down") // navigate down the list
 			{
 				if (t_list.size() != 0)
 				{
@@ -92,8 +94,10 @@ int cmd_exec(const string& command)
 					else cui_s_line = 0;
 
 					if (!cui_is_visible(cui_s_line)) cmd_exec("down");
+
+					cui_delta = 0;
 				} else return 2;
-			} else if (words.at(i) == "up")
+			} else if (words.at(i) == "up") // navigate up the list
 			{
 				if (t_list.size() != 0)
 				{
@@ -101,14 +105,16 @@ int cmd_exec(const string& command)
 					else cui_s_line = t_list.size() - 1;
 
 					if (!cui_is_visible(cui_s_line)) cmd_exec("up");
+
+					cui_delta = 0;
 				} else return 2;
-			} else if (words.at(i) == "c")
+			} else if (words.at(i) == "c") // toggle selected task's "completed" property
 			{
 				if (t_list.size() == 0)
 					return 2;
 				else
 					li_comp(cui_s_line);
-			} else if (words.at(i) == "d")
+			} else if (words.at(i) == "d") // remove selected task
 			{
 				if (t_list.size() == 0)
 					return 2;
@@ -117,7 +123,7 @@ int cmd_exec(const string& command)
 					li_rem(cui_s_line);
 					if (t_list.size() != 0) if (cui_s_line >= t_list.size()) cmd_exec("up");
 				}
-			} else if (words.at(i) == "a")
+			} else if (words.at(i) == "a") // add a task
 			{
 				if (words.size() >= i + 4)
 				{
@@ -140,7 +146,7 @@ int cmd_exec(const string& command)
 						}
 					}
 				} else return 1;
-			} else if (words.at(i) == "vtoggle")
+			} else if (words.at(i) == "vtoggle") // toggle filters. Supported filters: uncat, complete, coming, failed
 			{
 				if (words.size() >= i + 2)
 				{
@@ -155,7 +161,7 @@ int cmd_exec(const string& command)
 						filter ^= CUI_FILTER_FAILED;
 					conf_set_cvar_int("filter", filter);
 				} else return 1;
-			} else if (words.at(i) == "g")
+			} else if (words.at(i) == "g") // go to task
 			{
 				if (words.size() >= i + 2)
 				{
@@ -164,7 +170,7 @@ int cmd_exec(const string& command)
 					if ((target >= 0) && (target < t_list.size()))
 						cui_s_line = target;
 				} else return 1;
-			} else if (words.at(i) == "lrename")
+			} else if (words.at(i) == "lrename") // rename list
 			{
 				if (words.size() >= i + 2)
 				{
@@ -179,7 +185,7 @@ int cmd_exec(const string& command)
 					}
 				} else return 1;
 			}
-		       	else if (words.at(i) == "lmv")
+		       	else if (words.at(i) == "lmv") // move selected task to a list
 			{
 				if (words.size() >= i + 2)
 				{
@@ -187,13 +193,13 @@ int cmd_exec(const string& command)
 					li_save();
 				} else return 1;
 			}
-			else if (words.at(i) == "get")
+			else if (words.at(i) == "get") // get cvar value
 			{
 				if (words.size() >= i + 2)
 				{
 					cui_status = conf_get_cvar(words.at(i + 1));
 				} else return 1;
-			} else if (words.at(i) == "bind")
+			} else if (words.at(i) == "bind") // bind a key
 			{
 				if (words.size() == i + 5)
 				{
@@ -217,15 +223,17 @@ int cmd_exec(const string& command)
 							cui_bind(KEY_RIGHT, scomm, smode, sauto);
 						if (skey == "esc")
 							cui_bind(27, scomm, smode, sauto);
+						if (skey == "enter")
+							cui_bind(10, scomm, smode, sauto);
 					}
 				} else return 1;
-			} else if (words.at(i) == "set")
+			} else if (words.at(i) == "set") // set cvar value
 			{
 				if (words.size() == i + 3)
 				{
 					conf_set_cvar(words.at(i + 1), words.at(i + 2));
 				} else return 1;
-			} else if (words.at(i) == "reset")
+			} else if (words.at(i) == "reset") // reset cvar value to default
 			{
 				if (words.size() == i + 2)
 				{

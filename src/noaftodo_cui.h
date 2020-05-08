@@ -22,6 +22,7 @@ constexpr int CUI_CP_RED_ENTRY = 4;
 constexpr int CUI_MODE_EXIT = 0;
 constexpr int CUI_MODE_ALL = 0b1111;
 constexpr int CUI_MODE_NORMAL = 0b1;
+constexpr int CUI_MODE_DETAILS = 0b1000;
 constexpr int CUI_MODE_COMMAND = 0b10;
 constexpr int CUI_MODE_HELP = 0b100;
 
@@ -70,6 +71,9 @@ bool cui_is_visible(const int& entryID);
 // mode-specific painters and input handlers
 void cui_normal_paint();
 void cui_normal_input(const wchar_t& key);
+
+void cui_details_paint();
+void cui_details_input(const wchar_t& key);
 
 void cui_command_paint();
 void cui_command_input(const wchar_t& key);
