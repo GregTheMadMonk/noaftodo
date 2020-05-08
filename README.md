@@ -1,20 +1,22 @@
 # NOAFtodo
 A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolutely no clue why.
 
-![A screenshot](screenshot.png)
+![NOAFtodo workflow](workflow.gif)
 
 ### Features
 * minimalisic interface written with ncurses
+* multiple lists between which tasks can be moved
 * primitive TODO list management: add and remove tasks with dues, marking tasks as completed, filtering failed, completed, upcomig and uncategorized tasks
-* a daemon that works and background, tracks tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
+* a daemon that can work in background, track tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
 
-### Default shortcuts:
-* ? - :? - shows help (sometimes outdated :) )
+### Some of default shortcuts (can be modified in config):
+* ? - :? - shows help
 * q or \<esc\> - :q - exit program
 * up arrow or k - :up - navigate up the list
 * down arrow or j - :down - navigate down the list
 * a - :a a (no autoexec) - adds entry (relative time)
 * A - :a (no autoexec) - adds entry
+* \<enter\> - :details - show full information about entry
 * \<space\> - :c - toggles entry completion
 * d - :d (no autoexec) - deletes entry
 * gg - :g 0

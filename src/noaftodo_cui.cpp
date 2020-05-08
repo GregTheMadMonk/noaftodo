@@ -223,8 +223,6 @@ void cui_normal_paint()
 	addnstr((conf_get_cvar("charset.row_separator") + " Task description").c_str(), desc_chars);
 	attrset(A_NORMAL);
 
-	while (!cui_is_visible(cui_s_line)) cmd_exec("down");
-
 	vector<int> v_list;
 	int cui_v_line = -1;
 	for (int l = 0; l < t_list.size(); l++)
@@ -233,6 +231,12 @@ void cui_normal_paint()
 			v_list.push_back(l);
 			if (l == cui_s_line) cui_v_line = v_list.size() - 1;
 		}
+
+	if (v_list.size() != 0) 
+	{
+		while (!cui_is_visible(cui_s_line)) cmd_exec("down");
+		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == cui_s_line) cui_v_line = i;
+	}
 
 	cui_delta = 0;
 	if (cui_v_line - cui_delta >= cui_h - 2) cui_delta = cui_v_line - cui_h + 3;
