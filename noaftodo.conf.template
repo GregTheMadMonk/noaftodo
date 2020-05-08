@@ -1,7 +1,7 @@
 bind "q" "q" 1 true
 bind "esc" "q" 1 true
 bind "enter" "details" 1 true
-bind ":" ":" 9 true
+bind ":" ":" 13 true
 bind "up" "up" 9 true
 bind "k" "up" 9 true
 bind "down" "down" 9 true
@@ -10,7 +10,7 @@ bind "a" "a a" 1 false
 bind "A" "a" 1 false
 bind " " "c" 1 true
 bind "d" "d" 1 false
-bind "?" "?" 1 true
+bind "?" "?" 9 true
 bind "F" "vtoggle failed" 1 true
 bind "U" "vtoggle uncat" 1 true
 bind "C" "vtoggle coming" 1 true

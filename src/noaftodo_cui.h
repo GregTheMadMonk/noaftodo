@@ -1,6 +1,7 @@
 #ifndef NOAFTODO_CUI_H
 #define NOAFTODO_CUI_H
 
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -36,6 +37,7 @@ constexpr int CUI_TAG_ALL = -1;
 
 // current mode
 extern int cui_mode;
+extern std::stack<int> cui_prev_modes;
 
 // binds
 extern std::vector<cui_bind_s> binds;

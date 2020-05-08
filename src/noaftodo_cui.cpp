@@ -14,6 +14,7 @@
 using namespace std;
 
 int cui_mode;
+stack<int> cui_prev_modes;
 
 vector<cui_bind_s> binds;
 
@@ -130,7 +131,16 @@ void cui_run()
 
 void cui_set_mode(const int& mode)
 {
-	cui_mode = mode;
+	if (mode == -1)
+	{
+		cui_mode = cui_prev_modes.top();
+		cui_prev_modes.pop();
+	} else {
+		if ((cui_mode != CUI_MODE_COMMAND) && (cui_mode != mode)) cui_prev_modes.push(cui_mode);
+		cui_mode = mode;
+	}
+
+	cui_delta = 0;
 
 	switch (mode)
 	{
@@ -428,7 +438,8 @@ void cui_details_input(const wchar_t& key)
 	switch (key)
 	{
 		case 'q': case 27:
-			cui_set_mode(CUI_MODE_NORMAL);
+			cui_set_mode(-1);
+			break;
 		case KEY_RIGHT:
 			cui_delta--;
 			break;
@@ -445,7 +456,18 @@ void cui_details_input(const wchar_t& key)
 
 void cui_command_paint()
 {
-	cui_normal_paint();
+	switch (cui_prev_modes.top())
+	{
+		case CUI_MODE_NORMAL:
+			cui_normal_paint();
+			break;
+		case CUI_MODE_DETAILS:
+			cui_details_paint();
+			break;
+		case CUI_MODE_HELP:
+			cui_help_paint();
+			break;
+	}
 
 	move(cui_h - 1, 0);
 	clrtoeol();
@@ -661,7 +683,7 @@ void cui_help_input(const wchar_t& key)
 	switch (key)
 	{
 		case 'q': case 27:
-			cui_set_mode(CUI_MODE_NORMAL);
+			cui_set_mode(-1);
 			break;
 		case KEY_RIGHT:
 			cui_delta--;
