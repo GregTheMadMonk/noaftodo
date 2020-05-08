@@ -33,6 +33,7 @@ int cui_command_index = 0;
 wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
 
 extern char _binary_doc_doc_gen_start;
+extern char _binary_doc_doc_gen_end;
 
 void cui_init()
 {
@@ -398,7 +399,15 @@ void cui_details_paint()
 	}
 
 	move(7, 5);
-	addstr(ti_f_str(entry.due).c_str());
+	
+	string tag = "";
+	if (entry.tag < t_tags.size()) if (t_tags.at(entry.tag) != to_string(entry.tag))
+		tag = ": " + t_tags.at(entry.tag);
+
+	addstr((ti_f_str(entry.due) +
+		" " + conf_get_cvar("charset.status_separator") + " " + 
+		"List " + to_string(entry.tag) + 
+		tag).c_str()); 
 
 	for (int i = 4; i < cui_w - 4; i++)
 	{
@@ -643,7 +652,10 @@ void cui_help_paint()
 	// we want text wrapping here
 	int x = 5;
 	int y = 8 + tdelta;
-	const string cui_help = string(&_binary_doc_doc_gen_start);
+	string cui_help;
+	for (char* c = &_binary_doc_doc_gen_start; c < &_binary_doc_doc_gen_end; c++)
+		cui_help += string(1, *c);
+
 	for (int i = 0; i < cui_help.length(); i++)
 	{
 		if (x == cui_w - 5)

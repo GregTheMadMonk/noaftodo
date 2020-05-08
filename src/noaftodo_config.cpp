@@ -16,6 +16,7 @@ map<string, string> conf_cvars;
 map<string, string> conf_predefined_cvars;
 
 extern char _binary_noaftodo_conf_template_start;
+extern char _binary_noaftodo_conf_template_end;
 
 void conf_load()
 {
@@ -34,7 +35,10 @@ void conf_load(const string& conf_file)
 
 		ofstream oconf(conf_file);
 		// there must be a smarter way to do this
-		oconf << "# " << TITLE << " v." << VERSION << " auto-generated config file" << endl <<&_binary_noaftodo_conf_template_start;
+		oconf << "# " << TITLE << " v." << VERSION << " auto-generated config file" << endl;
+
+		for (char* c = &_binary_noaftodo_conf_template_start; c < &_binary_noaftodo_conf_template_end; c++)
+			oconf << *c;
 	}
 
 	iconf = ifstream(conf_file);
