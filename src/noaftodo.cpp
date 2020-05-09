@@ -30,17 +30,17 @@ int main(int argc, char* argv[])
 	for (int i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i], "-h") * strcmp(argv[i], "--help") == 0) mode = PM_HELP;
-		if (strcmp(argv[i], "-d") * strcmp(argv[i], "--daemon") == 0) mode = PM_DAEMON;
-		if (strcmp(argv[i], "-k") * strcmp(argv[i], "--kill-daemon") == 0)
+		else if (strcmp(argv[i], "-d") * strcmp(argv[i], "--daemon") == 0) mode = PM_DAEMON;
+		else if (strcmp(argv[i], "-k") * strcmp(argv[i], "--kill-daemon") == 0)
 		{
 			da_kill();
 			return 0;
 		}
-		if (strcmp(argv[i], "-r") * strcmp(argv[i], "--refire") == 0)
+		else if (strcmp(argv[i], "-r") * strcmp(argv[i], "--refire") == 0)
 		{
 			da_send("N");
 			return 0;
-		}
+		} else log("Unrecognized parameter \"" + string(argv[i]));
 	}
 
 	if (mode == PM_HELP) 
