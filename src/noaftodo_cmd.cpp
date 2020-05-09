@@ -1,9 +1,11 @@
 #include "noaftodo_cmd.h"
 
+#include <cstdlib>
 #include <curses.h>
 
 #include "noaftodo_config.h"
 #include "noaftodo_cui.h"
+#include "noaftodo_list.h"
 #include "noaftodo_output.h"
 #include "noaftodo_time.h"
 
@@ -15,6 +17,10 @@ int cmd_exec(const string& command)
 	string word = "";
 	bool inquotes = false;
 	bool skip_special = false;
+
+	if (command != "") if (command.at(0) == '!')
+		if (cui_s_line >= 0) system(format_str(command.substr(1), t_list.at(cui_s_line)).c_str());
+		else system(command.substr(1).c_str());
 
 	for (int i = 0; i < command.length(); i++)
 	{
