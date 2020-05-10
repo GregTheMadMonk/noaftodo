@@ -40,7 +40,29 @@ int main(int argc, char* argv[])
 		{
 			da_send("N");
 			return 0;
-		} else log("Unrecognized parameter \"" + string(argv[i]));
+		} 
+		else if (strcmp(argv[i], "-c") * strcmp(argv[i], "--config") == 0)
+		{
+			if (i < argc - 1)
+			{
+				conf_filename = string(argv[i + 1]);
+				i++;
+			} else {
+				log("Config not specified after " + string(argv[i]), LP_ERROR);
+				return 1;
+			}
+		}
+		else if (strcmp(argv[i], "-l") * strcmp(argv[i], "--list") == 0)
+		{
+			if (i < argc - 1)
+			{
+				li_filename = string(argv[i + 1]);
+				i++;
+			} else {
+				log("List file not specified after " + string(argv[i]), LP_ERROR);
+				return 1;
+			}
+		} else log("Unrecognized parameter \"" + string(argv[i]), LP_ERROR);
 	}
 
 	if (mode == PM_HELP) 
@@ -70,6 +92,8 @@ void print_help()
 	cout << "Usage: noaftodo [OPTIONS]" << endl;
 	cout << "Command-line options:" << endl;
 	cout << "\t-h, --help - print this message" << endl;
+	cout << "\t-c, --config - specify config file after this parameter" << endl;
+	cout << "\t-l, --list - specify list file after this parameter" << endl;
 	cout << "\t-d, --daemon - start " << TITLE << " daemon" << endl;
 	cout << "\t-k, --kill-daemon - kill " << TITLE << " daemon" << endl;
 	cout << "\t-r, --refire - if daemon is running, re-fire startup events" << endl;
