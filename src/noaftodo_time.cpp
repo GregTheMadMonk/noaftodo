@@ -33,6 +33,8 @@ tm ti_to_tm(const string& t_str)
 	bool c_hour = false;
 	bool c_min = false;
 
+	bool absolute = true;
+
 	for (int i = 0; i <= t_str.length(); i++)
 	{
 		const char c = (i == t_str.length()) ? 'a' : t_str.at(i);
@@ -47,7 +49,9 @@ tm ti_to_tm(const string& t_str)
 					if (!c_mon) ti.tm_mon = l_ti.tm_mon;
 					if (!c_day) ti.tm_mday = l_ti.tm_mday;
 					if (!c_hour) ti.tm_hour = l_ti.tm_hour;
-					if (!c_min) ti.tm_min = l_ti.tm_min;
+					if (absolute) if (!c_min) ti.tm_min = l_ti.tm_min;
+
+					absolute = false;
 					break;
 				case 'h':
 					hour = minute;
