@@ -16,9 +16,8 @@ H_FILES := $(wildcard $(SRC_DIR)/*.h)
 OBJ_FILES := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(patsubst %.cpp,%.o,$(CPP_FILES)))
 
 UNAME_S := $(shell uname -s)
-UNAME_R := $(shell uname -s)
 
-ifeq ($(UNAME_S),SunOS))
+ifeq ($(UNAME_S),SunOS)
 	OBJCOPY := "/usr/gnu/bin/objcopy"
 	OBJDUMP := "/usr/gnu/bin/objdump"
 else
