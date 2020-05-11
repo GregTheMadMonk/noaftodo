@@ -271,16 +271,17 @@ void cui_normal_paint()
 
 	int x = 0;
 	const string cols = (tag_filter == CUI_TAG_ALL) ? conf_get_cvar("all_cols") : conf_get_cvar("cols");
-	for (const char& col : cols)
+	for (int coln = 0; coln < cols.length(); coln++)
 	{
 		try
 		{
+			const char& col = cols.at(coln);
 			if (x >= cui_w) break;
 			move(0, x);
 			const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
 			addstr(cui_columns.at(col).title.c_str());
 
-			if (x + w < cui_w)
+			if (coln < cols.length() - 1) if (x + w < cui_w)
 			{
 				move(0, x + w);
 				addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
@@ -328,16 +329,17 @@ void cui_normal_paint()
 				move(l - cui_delta + 1, x);
 				for (int i = 0; i < cui_w; i++) addch(' ');
 
-				for (const char& col : cols)
+				for (int coln = 0; coln < cols.length(); coln++)
 				{
 					try
 					{
+						const char& col = cols.at(coln);
 						if (x >= cui_w) break;
 						move(l - cui_delta + 1, x);
 						const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
 						addstr((cui_columns.at(col).contents(entry, v_list.at(l))).c_str());
 
-						if (x + w < cui_w)
+						if (coln < cols.length() - 1) if (x + w < cui_w)
 						{
 							move(l - cui_delta + 1, x + w);
 							addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
