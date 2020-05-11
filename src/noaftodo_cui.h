@@ -1,9 +1,13 @@
 #ifndef NOAFTODO_CUI_H
 #define NOAFTODO_CUI_H
 
+#include <functional>
+#include <map>
 #include <stack>
 #include <string>
 #include <vector>
+
+#include "noaftodo_list.h"
 
 struct cui_bind_s
 {
@@ -12,6 +16,17 @@ struct cui_bind_s
 	int mode;
 	bool autoexec;
 };
+
+struct cui_col_s
+{
+	std::string title;
+
+	std::function<int(const int& w, const int& free, const int& col_n)> width;
+	std::function<std::string(const noaftodo_entry& entry, const int& id)> contents;
+};
+
+// columns
+extern std::map<char, cui_col_s> columns;
 
 // color pair indexes
 constexpr int CUI_CP_TITLE = 1;

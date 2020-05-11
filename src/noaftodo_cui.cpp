@@ -7,11 +7,12 @@
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
-#include "noaftodo_list.h"
 #include "noaftodo_output.h"
 #include "noaftodo_time.h"
 
 using namespace std;
+
+map<char, cui_col_s> cui_columns;
 
 int cui_mode;
 stack<int> cui_prev_modes;
@@ -38,6 +39,74 @@ extern char _binary_doc_doc_gen_end;
 void cui_init()
 {
 	log("Initializing console UI...");
+
+	// initialize columns
+	cui_columns['t'] = 
+	{ 
+		"Task Title", 
+		[](const int& w, const int& free, const int& cols)
+		{
+			return free / 4;
+		},
+		[](const noaftodo_entry& e, const int& id) 
+		{ 
+			return e.title; 
+		} 
+	};
+	cui_columns['l'] = 
+	{ 
+		"List", 
+		[](const int& w, const int& free, const int& cols)
+		{
+			return free / 10;
+		},
+		[](const noaftodo_entry& e, const int& id) 
+		{ 
+			if (e.tag < t_tags.size())
+			       if (t_tags.at(e.tag) != to_string(e.tag))
+				       return to_string(e.tag) + ": " + t_tags.at(e.tag);
+
+			return "List " + t_tags.at(e.tag);
+		} 
+	};
+	cui_columns['d'] = 
+	{ 
+		"Due", 
+		[](const int& w, const int& free, const int& cols)
+		{
+			return 16;
+		},
+		[](const noaftodo_entry& e, const int& id) 
+		{ 
+			return ti_f_str(e.due); 
+		} 
+	};
+	cui_columns['D'] = 
+	{ 
+		"Task description", 
+		[](const int& w, const int& free, const int& cols)
+		{
+			return free;
+		},
+		[](const noaftodo_entry& e, const int& id) 
+		{ 
+			return e.description; 
+		} 
+	};
+	cui_columns['i'] = 
+	{ 
+		"ID", 
+		[](const int& w, const int& free, const int& cols)
+		{
+			return 3;
+		},
+		[](const noaftodo_entry& e, const int& id) 
+		{ 
+			return to_string(id); 
+		} 
+	};
+	
+	// construct UI
 	cui_commands.push_back(w_converter.from_bytes(""));
 
 	initscr();
@@ -194,34 +263,28 @@ void cui_normal_paint()
 {
 	const int tag_filter = conf_get_cvar_int("tag_filter");
 	const int filter = conf_get_cvar_int("filter");
-	const int id_chars = (tag_filter == CUI_TAG_ALL) ? 20 : 4;
-	const int date_chars = 18;
-	const int title_chars = cui_w / 5;
-	const int desc_chars = cui_w - title_chars - date_chars - id_chars - 3;
 
 	// draw table title
 	move(0, 0);
-	for (int i = 0; i < cui_w; i++) 
-	{
-		if (i < id_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-		else if (i < id_chars + 1 + date_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-		else if (i < id_chars + 1 + date_chars + 1 + title_chars) attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-		else attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-		addch(' ');
-	}
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
+	for (int i = 0; i < cui_w; i++) addch(' ');
 
-	move(0, 0);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-	addnstr((tag_filter == CUI_TAG_ALL) ? "ID: List" : "ID", id_chars - 1);
-	move(0, id_chars - 1);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-	addnstr((conf_get_cvar("charset.row_separator") + " Task due").c_str(), date_chars);
-	move(0, id_chars + date_chars);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-	addnstr((conf_get_cvar("charset.row_separator") + " Task title").c_str(), title_chars);
-	move(0, id_chars + date_chars + 1 + title_chars);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-	addnstr((conf_get_cvar("charset.row_separator") + " Task description").c_str(), desc_chars);
+	int x = 0;
+	const string cols = (tag_filter == CUI_TAG_ALL) ? conf_get_cvar("all_cols") : conf_get_cvar("cols");
+	for (const char& col : cols)
+	{
+		if (x >= cui_w) break;
+		move(0, x);
+		const int w = cui_columns[col].width(cui_w, cui_w - x, cols.length());
+		addstr(cui_columns[col].title.c_str());
+
+		if (x + w < cui_w)
+		{
+			move(0, x + w);
+			addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+		}
+		x += w + 3;
+	}
 	attrset(A_NORMAL);
 
 	vector<int> v_list;
@@ -252,33 +315,31 @@ void cui_normal_paint()
 			if (l >= cui_delta)    
 			{
 				const noaftodo_entry& entry = t_list.at(v_list.at(l));
+				
 				if (l == cui_v_line) attron(A_STANDOUT);
 				if (entry.completed) attron(COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD);	// a completed entry
 				else if (entry.due <= ti_to_long("a0d")) attron(COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD);	// a failed entry
 				else if (entry.due <= ti_to_long("a1d")) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// an upcoming entry
 
-				int x = 0;
+				x = 0;
 				move(l - cui_delta + 1, x);
 				for (int i = 0; i < cui_w; i++) addch(' ');
-				move(l - cui_delta + 1, x);
-				string id_string = to_string(v_list.at(l));
-				if (tag_filter == CUI_TAG_ALL)
+
+				for (const char& col : cols)
 				{
-					id_string += ": " + to_string(entry.tag);
-					if (entry.tag < t_tags.size())
-						if (t_tags.at(entry.tag) != to_string(entry.tag))
-							id_string += "(" + t_tags.at(entry.tag) + ")";
+					if (x >= cui_w) break;
+					move(l - cui_delta + 1, x);
+					const int w = cui_columns[col].width(cui_w, cui_w - x, cols.length());
+					addstr((cui_columns[col].contents(entry, v_list.at(l))).c_str());
+
+					if (x + w < cui_w)
+					{
+						move(l - cui_delta + 1, x + w);
+						addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+					}
+					x += w + 3;
 				}
-				addnstr(id_string.c_str(), id_chars - 2);
-				x += id_chars - 1;
-				move(l - cui_delta + 1, x);
-				addnstr((conf_get_cvar("charset.row_separator") + " " + ti_f_str(entry.due)).c_str(), date_chars + 2);
-				x += date_chars;
-				move(l - cui_delta + 1, x);
-				addstr((" " + conf_get_cvar("charset.row_separator") + " " + entry.title).c_str());
-				x += title_chars + 1;
-				move(l - cui_delta + 1, x);
-				addstr((" " + conf_get_cvar("charset.row_separator") + " " + entry.description).c_str());
+
 				move(l - cui_delta + 1, cui_w - 1);
 				addstr(" ");
 
