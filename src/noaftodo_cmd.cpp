@@ -1,7 +1,11 @@
 #include "noaftodo_cmd.h"
 
 #include <cstdlib>
+#ifdef __sun
+#include <ncurses/curses.h>
+# else
 #include <curses.h>
+#endif
 
 #include "noaftodo_config.h"
 #include "noaftodo_cui.h"

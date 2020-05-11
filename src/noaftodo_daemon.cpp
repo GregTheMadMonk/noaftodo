@@ -5,6 +5,7 @@
 #include <string>
 #include <mqueue.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"

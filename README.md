@@ -14,6 +14,8 @@ Default list is created as **~/.noaftodo-list** and delault config is copied to 
 ### Building
 Run `make`.
 
+On Solaris 11, run `gmake`.
+
 ### How to add a task?
 You can easily add a task with
 `:a <due> <title> <description>`.

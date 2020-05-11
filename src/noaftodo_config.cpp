@@ -1,6 +1,10 @@
 #include "noaftodo_config.h"
 
+#ifdef __sun
+#include <ncurses/curses.h>
+# else
 #include <curses.h>
+#endif
 #include <fstream>
 #include <vector>
 
