@@ -273,17 +273,20 @@ void cui_normal_paint()
 	const string cols = (tag_filter == CUI_TAG_ALL) ? conf_get_cvar("all_cols") : conf_get_cvar("cols");
 	for (const char& col : cols)
 	{
-		if (x >= cui_w) break;
-		move(0, x);
-		const int w = cui_columns[col].width(cui_w, cui_w - x, cols.length());
-		addstr(cui_columns[col].title.c_str());
-
-		if (x + w < cui_w)
+		try
 		{
-			move(0, x + w);
-			addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
-		}
-		x += w + 3;
+			if (x >= cui_w) break;
+			move(0, x);
+			const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
+			addstr(cui_columns.at(col).title.c_str());
+
+			if (x + w < cui_w)
+			{
+				move(0, x + w);
+				addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+			}
+			x += w + 3;
+		} catch (out_of_range e) {}
 	}
 	attrset(A_NORMAL);
 
@@ -327,17 +330,20 @@ void cui_normal_paint()
 
 				for (const char& col : cols)
 				{
-					if (x >= cui_w) break;
-					move(l - cui_delta + 1, x);
-					const int w = cui_columns[col].width(cui_w, cui_w - x, cols.length());
-					addstr((cui_columns[col].contents(entry, v_list.at(l))).c_str());
-
-					if (x + w < cui_w)
+					try
 					{
-						move(l - cui_delta + 1, x + w);
-						addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
-					}
-					x += w + 3;
+						if (x >= cui_w) break;
+						move(l - cui_delta + 1, x);
+						const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
+						addstr((cui_columns.at(col).contents(entry, v_list.at(l))).c_str());
+
+						if (x + w < cui_w)
+						{
+							move(l - cui_delta + 1, x + w);
+							addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+						}
+						x += w + 3;
+					} catch (out_of_range e) {}
 				}
 
 				move(l - cui_delta + 1, cui_w - 1);
