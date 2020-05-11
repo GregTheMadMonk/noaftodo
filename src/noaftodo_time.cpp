@@ -52,26 +52,30 @@ tm ti_to_tm(const string& t_str)
 				case 'h':
 					hour = minute;
 					c_hour = true;
-					c_min = false;
+
+					minute = 0;
 					break;
 				case 'd':
 					day = minute;
 					c_day = true;
-					c_min = false;
+
+					minute = 0;
 					break;
 				case 'm':
 					month = minute;
 					c_mon = true;
-					c_min = false;
+
+					minute = 0;
 					break;
 				case 'y':
 					year = minute;
 					c_year = true;
-					c_min = false;
+
+					minute = 0;
 					break;
 			}
 
-			minute = 0;
+			c_min = false;
 		}
 	}
 
