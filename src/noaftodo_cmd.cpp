@@ -23,7 +23,8 @@ int cmd_exec(const string& command)
 	bool skip_special = false;
 
 	if (command != "") if (command.at(0) == '!')
-		if (cui_s_line >= 0) system(format_str(command.substr(1), t_list.at(cui_s_line)).c_str());
+		if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) 
+				system(format_str(command.substr(1), t_list.at(cui_s_line)).c_str());
 		else system(command.substr(1).c_str());
 
 	for (int i = 0; i < command.length(); i++)
