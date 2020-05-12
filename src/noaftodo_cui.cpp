@@ -70,7 +70,7 @@ void cui_init()
 			       if (t_tags.at(e.tag) != to_string(e.tag))
 				       return to_string(e.tag) + ": " + t_tags.at(e.tag);
 
-			return "List " + t_tags.at(e.tag);
+			return to_string(e.tag);
 		} 
 	};
 	cui_columns['d'] = 
