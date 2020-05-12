@@ -16,8 +16,8 @@ bind "U" "vtoggle uncat" 1 true
 bind "C" "vtoggle coming" 1 true
 bind "V" "vtoggle complete" 1 true
 
-set "all_cols" "ildtD"
-set "cols" "idtD"
+set "all_cols" "ifldtD"
+set "cols" "ifdtD"
 
 set "charset.status_separator" "|"
 set "charset.row_separator" "│"

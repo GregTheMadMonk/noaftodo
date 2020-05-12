@@ -47,7 +47,7 @@ void cui_init()
 	// initialize columns
 	cui_columns['t'] = 
 	{ 
-		"Task Title", 
+		"Title", 
 		[](const int& w, const int& free, const int& cols)
 		{
 			return free / 4;
@@ -55,6 +55,22 @@ void cui_init()
 		[](const noaftodo_entry& e, const int& id) 
 		{ 
 			return e.title; 
+		} 
+	};
+	cui_columns['f'] = 
+	{ 
+		"Flags", 
+		[](const int& w, const int& free, const int& cols)
+		{
+			return 5;
+		},
+		[](const noaftodo_entry& e, const int& id) 
+		{ 
+			string ret = "";
+			if (e.completed) ret += "V";				// a completed entry
+			else if (e.due <= ti_to_long("a0d")) ret += "F";	// a failed entry
+			else if (e.due <= ti_to_long("a1d")) ret += "C";	// an upcoming entry
+			return ret; 
 		} 
 	};
 	cui_columns['l'] = 
@@ -87,7 +103,7 @@ void cui_init()
 	};
 	cui_columns['D'] = 
 	{ 
-		"Task description", 
+		"Description", 
 		[](const int& w, const int& free, const int& cols)
 		{
 			return free;
