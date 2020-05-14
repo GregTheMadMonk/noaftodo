@@ -427,7 +427,7 @@ void cui_normal_input(const wchar_t& key)
 			}
 			break;
 		case 'G':
-			cui_numbuffer = t_list.size() - 1;
+			for (int i = 0; i < t_list.size(); i++) if (cui_is_visible(i)) cui_numbuffer = i;
 			cui_status = 'G';
 			break;
 		default:
