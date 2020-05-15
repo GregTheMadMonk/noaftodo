@@ -307,6 +307,7 @@ void cui_normal_paint()
 				addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
 			}
 			x += w + 3;
+			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
 		} catch (out_of_range e) {}
 	}
 	attrset(A_NORMAL);
@@ -365,6 +366,8 @@ void cui_normal_paint()
 							addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
 						}
 						x += w + 3;
+
+						for (int x1 = x; x1 < cui_w; x1++) addch(' ');
 					} catch (out_of_range e) {}
 				}
 
