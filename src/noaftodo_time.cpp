@@ -45,49 +45,69 @@ tm ti_to_tm(const string& t_str)
 			switch (c)
 			{
 				case 'a':
-					if (!c_year) ti.tm_year = l_ti.tm_year;
-					if (!c_mon) ti.tm_mon = l_ti.tm_mon;
-					if (!c_day) ti.tm_mday = l_ti.tm_mday;
-					if (!c_hour) ti.tm_hour = l_ti.tm_hour;
-					if (absolute) if (!c_min) ti.tm_min = l_ti.tm_min;
+					if (absolute) 
+					{
+						if (!c_year) ti.tm_year = l_ti.tm_year;
+						else ti.tm_year = year;
 
-					absolute = false;
+						if (!c_mon) ti.tm_mon = l_ti.tm_mon;
+						else ti.tm_mon = month;
+
+						if (!c_day) ti.tm_mday = l_ti.tm_mday;
+						else ti.tm_mday = day;
+
+						if (!c_hour) ti.tm_hour = l_ti.tm_hour;
+						else ti.tm_hour = hour;
+
+						if (!c_min) ti.tm_min = l_ti.tm_min;
+						else ti.tm_min = minute;
+					} else {
+						ti.tm_year += year;
+						ti.tm_mon += month;
+						ti.tm_mday += day;
+						ti.tm_hour += hour;
+						ti.tm_min += minute;
+					}
+
+					hour = 0;
+					day = 0;
+					month = 0;
+					year = 0;
+					
+					c_hour = false;
+					c_day = false;
+					c_mon = false;
+					c_year = false;
+
+					absolute = !absolute;
 					break;
 				case 'h':
 					hour = minute;
 					c_hour = true;
 
-					minute = 0;
 					break;
 				case 'd':
 					day = minute;
 					c_day = true;
 
-					minute = 0;
 					break;
 				case 'm':
 					month = minute;
 					c_mon = true;
 
-					minute = 0;
 					break;
 				case 'y':
 					year = minute;
 					c_year = true;
 
-					minute = 0;
 					break;
 			}
 
 			c_min = false;
+			minute = 0;
 		}
 	}
 
-	ti.tm_year += year;
-	ti.tm_mon += month;
-	ti.tm_mday += day;
-	ti.tm_hour += hour;
-	ti.tm_min += minute;
 	ti.tm_sec = 0;
 
 	if (ti.tm_min >= 60) { ti.tm_hour += ti.tm_min / 60; ti.tm_min = ti.tm_min % 60; }
