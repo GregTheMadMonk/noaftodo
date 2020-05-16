@@ -1,3 +1,12 @@
+# This is a default config for NOAFtodo. It is included in the program and here
+# only serves as an example if you don't want all these lines you make NOAFtodo 
+# load default config by deleting everything in here and replacing it with
+#
+# exec "default"
+#
+# or by running NOAFtodo with "-c default" (won't create default config in ~/.config
+# even if there's none)
+
 bind "q" "q" 1 true
 bind "esc" "q" 1 true
 bind "enter" "details" 1 true

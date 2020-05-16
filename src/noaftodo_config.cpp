@@ -29,6 +29,35 @@ void conf_load()
 
 void conf_load(const string& conf_file)
 {
+	if (conf_file == "default")
+	{
+		log("Loading default config...");
+
+		string entry = "";
+		for (char* c = &_binary_noaftodo_conf_template_start; c < &_binary_noaftodo_conf_template_end; c++)
+		{
+			if (*c == '\n')
+			{
+				// new line
+				if (entry != "")
+				{
+					while (entry.at(0) == ' ') 
+					{ 
+						entry = entry.substr(1);
+						if (entry == "") break;
+					}
+
+					if (entry != "") if (entry.at(0) != '#')
+						cmd_exec(entry);
+				}
+
+				entry = "";
+			} else entry += *c;
+		}
+
+		return;
+	}
+
 	log("Loading config from " + conf_file + "...");
 
 	ifstream iconf(conf_file);

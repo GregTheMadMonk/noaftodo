@@ -253,6 +253,12 @@ int cmd_exec(const string& command)
 					else
 						conf_cvars.erase(words.at(i + 1));
 				}
+			} else if (words.at(i) == "exec") // execute another config
+			{
+				if (words.size() == i + 2)
+				{
+					conf_load(words.at(i + 1));
+				}
 			}
 		}
 	}
