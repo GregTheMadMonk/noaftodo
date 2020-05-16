@@ -308,7 +308,7 @@ void cui_normal_paint()
 			}
 			x += w + 3;
 			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
-		} catch (out_of_range e) {}
+		} catch (const out_of_range& e) {}
 	}
 	attrset(A_NORMAL);
 
@@ -368,7 +368,7 @@ void cui_normal_paint()
 						x += w + 3;
 
 						for (int x1 = x; x1 < cui_w; x1++) addch(' ');
-					} catch (out_of_range e) {}
+					} catch (const out_of_range& e) {}
 				}
 
 				move(l - cui_delta + 1, cui_w - 1);

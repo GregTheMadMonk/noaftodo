@@ -8,13 +8,22 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 * multiple lists between which tasks can be moved
 * primitive TODO list management: add and remove tasks with dues, marking tasks as completed, filtering failed, completed, upcomig and uncategorized tasks
 * a daemon that can work in background, track tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
+* bugs
 
 Default list is created as **~/.noaftodo-list** and delault config is copied to **~/.config/noaftodo.conf**.
 
-### Building
-Run `make`.
+Also running without creating a config is supported with `noaftodo -c default`, as default config is included in the program during compilation.
 
-On Solaris 11, run `gmake`.
+### Building
+Run `make` (`gmake` on Solaris 11).
+#### Dependencies
+**ncurses**. You need it.
+
+On an Arch-based system: `sudo pacman -S ncurses`
+
+On a Debian-based system: `sudo apt install libncurses5-dev`
+
+Also, default config makes daemon use **notify-send** on task events (provided by `libnotify` and `libnotify-bin` on Arch and Debian based distributions respectively, also requires notification deamon of your choise).
 
 ### How to add a task?
 You can easily add a task with
@@ -43,15 +52,17 @@ All tasks belong in one of the following categories and can be filtered by them 
 * (up)Coming (due is in less than 24 hours)
 * Uncategorized - all other
 
+## Configuring
+See **noaftodo.conf.template** if you want an example configuration.
 ### Binding keys
 Command responsible for binding keys is `:bind <key> <command> <mode> <autoexec>`.
 Exampes of it being used can be found in template config.
 
-`mode` specifies modes that allow this bind. See **src/noaftodo_cui.h** for integer values for modes. For bind to be executable in multiple modes, `mode` should be set to logical OR of their values: 9 = 0b1001 = 0b1000 | 0b0001 = CUI_MODE_DETAILS | CUI_MODE_NORMAl - bind will be available in normal and description modes.
+`mode` specifies modes that allow this bind. See **src/noaftodo_cui.h** for integer values for modes. For bind to be executable in multiple modes, `mode` should be set to logical OR of their values: `9 = 0b1001 = 0b1000 | 0b0001 = CUI_MODE_DETAILS | CUI_MODE_NORMAL` - bind will be available in normal and description modes.
 
 If `autoexec` is set, command executes immediately, otherwise the bind will take you to command mode with `command` pre-typed
 
-### Some of default shortcuts (can be modified in config):
+### Some of the default shortcuts:
 * ? - :? - shows help
 * q or \<esc\> - :q - exit program
 * up arrow or k - :up - navigate up the list
@@ -70,5 +81,3 @@ If `autoexec` is set, command executes immediately, otherwise the bind will take
 * F - :vtoggle failed - toggles failed entries visibility
 * C - :vtoggle coming - and so on
 * V - :vtoggle complete - and so forth
-
-Not really much more to say. _Yet?_

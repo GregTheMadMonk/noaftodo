@@ -1,10 +1,11 @@
 # This is a default config for NOAFtodo. It is included in the program and here
-# only serves as an example if you don't want all these lines you make NOAFtodo 
-# load default config by deleting everything in here and replacing it with
+# only serves as an example. If you don't want all these lines, you can make 
+# NOAFtodo load default config by deleting everything in here and replacing 
+# it with:
 #
 # exec "default"
 #
-# or by running NOAFtodo with "-c default" (won't create default config in ~/.config
+# , or by running NOAFtodo with "-c default" (won't create config file in ~/.config
 # even if there's none)
 
 bind "q" "q" 1 true
