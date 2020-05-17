@@ -3,7 +3,11 @@
 
 // progrm title and version
 constexpr char TITLE[] = "NOAFtodo";
-constexpr char VERSION[] = "1.1.2";
+
+constexpr int LIST_V = 1;
+constexpr int CONF_V = 1;
+constexpr int MINOR_V = 3;
+#define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(MINOR_V)
 
 // program modes
 constexpr int PM_DEFAULT = 0;

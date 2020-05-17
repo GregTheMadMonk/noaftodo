@@ -7,6 +7,7 @@
 #include <curses.h>
 #endif
 
+#include "noaftodo.h"
 #include "noaftodo_config.h"
 #include "noaftodo_cui.h"
 #include "noaftodo_list.h"
@@ -258,6 +259,16 @@ int cmd_exec(const string& command)
 				if (words.size() == i + 2)
 				{
 					conf_load(words.at(i + 1));
+				}
+			} else if (words.at(i) == "ver")
+			{
+				if (words.size() == i + 2)
+				{
+					if (words.at(i + 1) != to_string(CONF_V))
+					{
+						log("File you are trying to load is declared to be for another version of NOAFtodo (CONF_V " + words.at(i + 1) + " != " + to_string(CONF_V) + ") and might not work as expected. Program will continue executing in 5 seconds", LP_ERROR);
+						system("sleep 5");
+					}
 				}
 			}
 		}

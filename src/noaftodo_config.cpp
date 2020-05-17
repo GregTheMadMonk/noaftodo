@@ -70,6 +70,8 @@ void conf_load(const string& conf_file)
 		// there must be a smarter way to do this
 		oconf << "# " << TITLE << " v." << VERSION << " auto-generated config file" << endl;
 
+		oconf << "ver " << CONF_V << endl;
+
 		for (char* c = &_binary_noaftodo_conf_template_start; c < &_binary_noaftodo_conf_template_end; c++)
 			oconf << *c;
 	}

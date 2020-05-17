@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fstream>
 
+#include "noaftodo.h"
 #include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
 #include "noaftodo_daemon.h"
@@ -153,6 +154,7 @@ void li_save()
 		ofile << (entry.completed ? 'v' : '-') << '\\' << entry.due << '\\' << entry.title << '\\' << entry.description << '\\' << entry.tag << '\\' << endl;
 
 	ofile << endl << "[workspace]" << endl;
+	ofile << "ver " << CONF_V << endl;
 	for (map<string, string>::iterator cvar_i = conf_cvars.begin(); cvar_i != conf_cvars.end(); cvar_i++)
 	{
 		const string key = cvar_i->first;
