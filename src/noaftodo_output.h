@@ -5,6 +5,8 @@
 
 #include "noaftodo_list.h"
 
+extern bool verbose;
+
 // log prefixes
 constexpr char LP_DEFAULT = 'i';
 constexpr char LP_ERROR = '!';

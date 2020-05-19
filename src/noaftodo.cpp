@@ -62,6 +62,10 @@ int main(int argc, char* argv[])
 				log("List file not specified after " + string(argv[i]), LP_ERROR);
 				return 1;
 			}
+		}
+		else if (strcmp(argv[i], "-v") * strcmp(argv[i], "--verbose") == 0)
+		{
+			verbose = true;
 		} else log("Unrecognized parameter \"" + string(argv[i]), LP_ERROR);
 	}
 
@@ -97,4 +101,5 @@ void print_help()
 	cout << "\t-d, --daemon - start " << TITLE << " daemon" << endl;
 	cout << "\t-k, --kill-daemon - kill " << TITLE << " daemon" << endl;
 	cout << "\t-r, --refire - if daemon is running, re-fire startup events" << endl;
+	cout << "\t-v, --verbose - print all messages" << endl;
 }
