@@ -3,12 +3,15 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 
 ![NOAFtodo workflow](workflow.gif)
 
-### Features
-* minimalisic interface written with ncurses
-* multiple lists between which tasks can be moved
-* primitive TODO list management: add and remove tasks with dues, marking tasks as completed, filtering failed, completed, upcomig and uncategorized tasks
-* a daemon that can work in background, track tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
-* bugs
+### Current and future features
+- [x] minimalisic interface written with ncurses
+- [x] multiple lists between which tasks can be moved
+- [x] primitive TODO list management: add and remove tasks with dues, marking tasks as completed, filtering failed, completed, upcomig and uncategorized tasks
+- [x] a daemon that can work in background, track tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
+- [x] bugs
+- [ ] task-specific events
+- [ ] option to configure program with source-code only
+- [ ] \(not a feature really\) documentation
 
 Default list is created as **~/.noaftodo-list** and delault config is copied to **~/.config/noaftodo.conf**.
 
@@ -42,6 +45,7 @@ You can set only one property or several of them. Unset properties will be reset
 Examples:
 * `a15h` - task due is in 15 hours from now
 * `15h00` - task due is today at 3:00 pm. Note that is `00` is not specified in the end the minutes for due will be set to teir current value and might not be 00
+* `15h00a1d` - task due is tomorrow at 3:00 pm: absolute and relative dues can be combined
 
 Hope it makes sense.
 

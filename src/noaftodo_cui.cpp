@@ -31,7 +31,9 @@ int cui_s_line;
 int cui_delta;
 int cui_numbuffer = -1;
 
-vector<wstring> cui_commands;
+vector<wstring> cui_command_history;
+wstring cui_command;
+wstring cui_command_t;
 int cui_command_cursor = 0;
 int cui_command_index = 0;
 
@@ -127,7 +129,7 @@ void cui_init()
 	};
 	
 	// construct UI
-	cui_commands.push_back(w_converter.from_bytes(""));
+	cui_command_history.push_back(w_converter.from_bytes(""));
 
 	initscr();
 	start_color();
@@ -166,7 +168,7 @@ void cui_run()
 				if (bind.autoexec) cmd_exec(bind.command);
 				else 
 				{
-					cui_commands[cui_commands.size() - 1] = w_converter.from_bytes(bind.command);
+					cui_command = w_converter.from_bytes(bind.command);
 					cui_set_mode(CUI_MODE_COMMAND);
 				}
 
@@ -243,8 +245,8 @@ void cui_set_mode(const int& mode)
 			break;
 		case CUI_MODE_COMMAND:
 			curs_set(1);
-			cui_command_index = cui_commands.size() - 1;
-			cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
+			cui_command_index = cui_command_history.size();
+			cui_command_cursor = cui_command.length();
 			break;
 		case CUI_MODE_HELP:
 			cui_delta = 0;
@@ -579,7 +581,7 @@ void cui_command_paint()
 	move(cui_h - 1, 0);
 	int offset = cui_command_cursor - cui_w + 3;
 	if (offset < 0) offset = 0;
-	addstr(w_converter.to_bytes(L":" + cui_commands[cui_commands.size() - 1].substr(offset)).c_str());
+	addstr(w_converter.to_bytes(L":" + cui_command.substr(offset)).c_str());
 	move(cui_h - 1, 1 + cui_command_cursor - offset);
 }
 
@@ -588,105 +590,73 @@ void cui_command_input(const wchar_t& key)
 	switch (key)
 	{
 		case 10:
-			if (cui_commands[cui_commands.size() - 1] != w_converter.from_bytes(""))
+			if (cui_command != L"")
 			{
-				cmd_exec(w_converter.to_bytes(cui_commands[cui_commands.size() - 1]));
-				if (cui_command_index != cui_commands.size() - 1)
-				{
-					wstring temp = cui_commands[cui_commands.size() - 1];
-					cui_commands[cui_command_index] = cui_commands[cui_commands.size() - 1];
-					cui_commands[cui_commands.size() - 1] = temp;
-				}
-
-				cui_commands.push_back(w_converter.from_bytes(""));
-				cui_command_index = cui_commands.size() - 1;
+				cmd_exec(w_converter.to_bytes(cui_command));
+				cui_command_history.push_back(cui_command);
+				cui_command_index = cui_command_history.size();
 			}
 		case 27:
-			cui_commands[cui_commands.size() - 1] = L"";
+			cui_command = L"";
 			if (cui_mode == CUI_MODE_COMMAND) cui_set_mode(CUI_MODE_NORMAL);
 			cui_filter_history();
 			break;
 		case 127: case KEY_BACKSPACE: // 127 is for, e.g., xfce4-terminal
 						// KEY_BACKSPACE - e.g., alacritty
-			if (cui_command_index != cui_commands.size() - 1)
-			{
-				wstring temp = cui_commands[cui_commands.size() - 1];
-				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index];
-				cui_commands[cui_command_index] = temp;
-				cui_commands.push_back(temp);
-				cui_command_index = cui_commands.size() - 1;
-			}
+			cui_command_index = cui_command_history.size();
 
 			if (cui_command_cursor > 0)
 			{
-				cui_commands[cui_commands.size() - 1] = cui_commands[cui_commands.size() - 1].substr(0, cui_command_cursor - 1) + cui_commands[cui_commands.size() - 1].substr(cui_command_cursor, cui_commands[cui_commands.size() - 1].length() - cui_command_cursor);
+				cui_command = cui_command.substr(0, cui_command_cursor - 1) + cui_command.substr(cui_command_cursor, cui_command.length() - cui_command_cursor);
 				cui_command_cursor--;
 			}
 			break;
 		case KEY_DC:
-			if (cui_command_index != cui_commands.size() - 1)
-			{
-				wstring temp = cui_commands[cui_commands.size() - 1];
-				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index];
-				cui_commands[cui_command_index] = temp;
-				cui_commands.push_back(temp);
-				cui_command_index = cui_commands.size() - 1;
-			}
+			cui_command_index = cui_command_history.size();
 
-			if (cui_command_cursor < cui_commands[cui_commands.size() - 1].length())
-				cui_commands[cui_commands.size() - 1] = cui_commands[cui_commands.size() - 1].substr(0, cui_command_cursor) + cui_commands[cui_commands.size() - 1].substr(cui_command_cursor + 1, cui_commands[cui_commands.size() - 1].length() - cui_command_cursor - 1);
+			if (cui_command_cursor < cui_command.length())
+				cui_command = cui_command.substr(0, cui_command_cursor) + cui_command.substr(cui_command_cursor + 1, cui_command.length() - cui_command_cursor - 1);
 			break;
 		case KEY_LEFT:
 			if (cui_command_cursor > 0) cui_command_cursor--;
 			break;
 		case KEY_RIGHT:
-			if (cui_command_cursor < cui_commands[cui_commands.size() - 1].length()) cui_command_cursor++;
+			if (cui_command_cursor < cui_command.length()) cui_command_cursor++;
 			break;
 		case KEY_UP:
 			// go up the history
 			if (cui_command_index > 0)
 			{
-				wstring temp = cui_commands[cui_command_index];
-				cui_commands[cui_command_index] = cui_commands[cui_commands.size() - 1];
-				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index - 1];
-				cui_commands[cui_command_index - 1] = temp;
+				if (cui_command_index == cui_command_history.size()) cui_command_t = cui_command;
 				cui_command_index--;
-				if (cui_command_cursor > cui_commands[cui_commands.size() - 1].length())
-					cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
+				cui_command = cui_command_history[cui_command_index];
 			}
+
+			if (cui_command_cursor > cui_command.length()) cui_command_cursor = cui_command.length();
 			break;
 		case KEY_DOWN:
 			// go down the history
-			if (cui_command_index < cui_commands.size() - 1)
+			if (cui_command_index < cui_command_history.size() - 1)
 			{
-				wstring temp = cui_commands[cui_command_index];
-				cui_commands[cui_command_index] = cui_commands[cui_commands.size() - 1];
-				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index + 1];
-				cui_commands[cui_command_index + 1] = temp;
 				cui_command_index++;
-				if (cui_command_cursor > cui_commands[cui_commands.size() - 1].length())
-					cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
-			}	
+				cui_command = cui_command_history[cui_command_index];
+			} else if (cui_command_index == cui_command_history.size() - 1) {
+				cui_command_index++;
+				cui_command = cui_command_t;
+			}
+
+			if (cui_command_cursor > cui_command.length()) cui_command_cursor = cui_command.length();
 			break;
 		case KEY_HOME:
 			cui_command_cursor = 0;
 			break;
 		case KEY_END:
-			cui_command_cursor = cui_commands[cui_commands.size() - 1].length();
+			cui_command_cursor = cui_command.length();
 			break;
 		default:
-			if (cui_command_index != cui_commands.size() - 1)
-			{
-				wstring temp = cui_commands[cui_commands.size() - 1];
-				cui_commands[cui_commands.size() - 1] = cui_commands[cui_command_index];
-				cui_commands[cui_command_index] = temp;
-				cui_commands.push_back(temp);
-				cui_command_index = cui_commands.size() - 1;
-			}
+			cui_command_index = cui_command_history.size();
 
-			cui_filter_history();
-
-			cui_commands[cui_commands.size() - 1] = cui_commands[cui_commands.size() - 1].substr(0, cui_command_cursor) + key + cui_commands[cui_commands.size() - 1].substr(cui_command_cursor, cui_commands[cui_commands.size() - 1].length() - cui_command_cursor);
+			cui_command = cui_command.substr(0, cui_command_cursor) + key + cui_command.substr(cui_command_cursor, cui_command.length() - cui_command_cursor);
 			cui_command_cursor++;
 	}
 }
@@ -807,10 +777,10 @@ void cui_help_input(const wchar_t& key)
 
 void cui_filter_history()
 {
-	for (int i = 0; i < cui_commands.size() - 1; i++)
-		if (cui_commands[i] == w_converter.from_bytes("")) 
+	for (int i = 0; i < cui_command_history.size() - 1; i++)
+		if (cui_command_history[i] == w_converter.from_bytes("")) 
 		{
-			cui_commands.erase(cui_commands.begin() + i);
+			cui_command_history.erase(cui_command_history.begin() + i);
 			i--;
 		}
 }
