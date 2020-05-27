@@ -1,6 +1,7 @@
 #include "noaftodo_cmd.h"
 
 #include <cstdlib>
+
 #ifdef __sun
 #include <ncurses/curses.h>
 # else
@@ -260,7 +261,7 @@ int cmd_exec(const string& command)
 				{
 					conf_load(words.at(i + 1));
 				}
-			} else if (words.at(i) == "ver")
+			} else if (words.at(i) == "ver") // is used to specify config version to notify about possible outdated config files
 			{
 				if (words.size() == i + 2)
 				{

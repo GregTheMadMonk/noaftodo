@@ -1,3 +1,4 @@
 noaftodo
+*.html
 obj/*
 doc/*
