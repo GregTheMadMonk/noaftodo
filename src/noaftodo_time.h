@@ -12,4 +12,7 @@ tm ti_to_tm(const long& t_long);
 std::string ti_f_str(const tm& t_tm);
 std::string ti_f_str(const long& t_long);
 
+std::string ti_cmd_str(const tm& t_tm);
+std::string ti_cmd_str(const long& t_long);
+
 #endif

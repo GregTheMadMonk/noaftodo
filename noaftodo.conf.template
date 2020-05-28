@@ -26,6 +26,9 @@ bind "U" "vtoggle uncat" 1 true
 bind "C" "vtoggle coming" 1 true
 bind "V" "vtoggle complete" 1 true
 
+alias duplicate a \%due\% \%T\% \%D\%
+alias postpone1d a \%due\%a1d \%T\% \%D\%
+
 set "all_cols" "ifldtD"
 set "cols" "ifdtD"
 

@@ -154,3 +154,13 @@ string ti_f_str(const long& t_long)
 {
 	return ti_f_str(ti_to_tm(t_long));
 }
+
+string ti_cmd_str(const tm& t_tm)
+{
+	return to_string(t_tm.tm_year) + "y" + to_string(t_tm.tm_mon) + "m" + to_string(t_tm.tm_mday) + "d" + to_string(t_tm.tm_hour) + "h" + to_string(t_tm.tm_min);
+}
+
+string ti_cmd_str(const long& t_long)
+{
+	return ti_cmd_str(ti_to_tm(t_long));
+}

@@ -331,6 +331,9 @@ int cmd_exec(const string& command)
 	bool skip_special = false;
 	bool shell_cmd = false;
 
+	if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
+		command = format_str(command, t_list.at(cui_s_line));
+
 	for (int i = 0; i < command.length(); i++)
 	{
 		const char c = command.at(i);
@@ -404,15 +407,14 @@ int cmd_exec(const string& command)
 
 				log("Executing shell command: \`" + shell_command + "\`...", LP_IMPORTANT);
 
-				if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) 
-						system(format_str(shell_command, t_list.at(cui_s_line)).c_str());
-				else system(shell_command.c_str());
+				system(shell_command.c_str());
 			} else {
 				// search command in cmds
 
 				vector<string> cmdarg;
 
-				for (int j = 1; i + j < words.size(); j++)
+				int j;
+				for (j = 1; i + j < words.size(); j++)
 				{
 					if (words.at(i + j) == ";") break;
 					cmdarg.push_back(words.at(i + j));
@@ -421,9 +423,16 @@ int cmd_exec(const string& command)
 				try {	// search for alias, prioritize
 					vector<string> oargs = aliases.at(words.at(i));
 
-					for (int j = 1; j < oargs.size(); j++) cmdarg.insert(cmdarg.begin(), oargs.at(j));
+					vector<string> newargs;
 
-					const int ret = (cmds.at(oargs.at(0)))(cmdarg);
+					for (int j = 1; j < oargs.size(); j++) 
+					{
+						if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) newargs.push_back(format_str(oargs.at(j), t_list.at(cui_s_line)));
+						else newargs.push_back(oargs.at(j));
+					}
+					for (int j = 0; j < cmdarg.size(); j++) newargs.push_back(cmdarg.at(j));
+
+					const int ret = (cmds.at(oargs.at(0)))(newargs);
 
 					if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Not enough arguments";
 					if (ret == CMD_ERR_ARG_TYPE)	cui_status = "Wrong argument type";
@@ -440,6 +449,8 @@ int cmd_exec(const string& command)
 						log("Command not found!", LP_ERROR);
 					}
 				}
+
+				offset += j;
 			}
 		}
 	}

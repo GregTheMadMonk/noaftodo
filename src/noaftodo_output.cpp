@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "noaftodo.h"
+#include "noaftodo_time.h"
 
 using namespace std;
 
@@ -20,6 +21,7 @@ string format_str(const string& str, const noaftodo_entry& li_entry, const bool&
 	int index = -1;
 	while ((index = ret.find("%T%")) != string::npos) ret.replace(index, 3, li_entry.title);
 	while ((index = ret.find("%D%")) != string::npos) ret.replace(index, 3, li_entry.description);
+	while ((index = ret.find("%due%")) != string::npos) ret.replace(index, 5, ti_cmd_str(li_entry.due));
 	while ((index = ret.find("%VER%")) != string::npos) ret.replace(index, 5, VERSION);
 	while ((index = ret.find("%N%")) != string::npos) ret.replace(index, 3, renotify ? "false" : "true");
 	return ret;
