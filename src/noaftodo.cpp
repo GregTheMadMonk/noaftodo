@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
 #include "noaftodo_cui.h"
 #include "noaftodo_daemon.h"
@@ -74,6 +75,9 @@ int main(int argc, char* argv[])
 		print_help();
 		return 0;
 	}
+
+	// init the command-line interpreter
+	cmd_init();
 
 	// load the config
 	conf_load();

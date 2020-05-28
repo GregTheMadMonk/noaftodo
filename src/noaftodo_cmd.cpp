@@ -1,6 +1,7 @@
 #include "noaftodo_cmd.h"
 
 #include <cstdlib>
+#include <stdexcept>
 
 #ifdef __sun
 #include <ncurses/curses.h>
@@ -16,6 +17,297 @@
 #include "noaftodo_time.h"
 
 using namespace std;
+
+map<string, function<int(const vector<string>& args)>> cmds;
+
+void cmd_init()
+{
+	// command "q" - exit the program
+	cmds["q"] = [] (const vector<string>& args)
+	{
+		cui_mode = CUI_MODE_EXIT;
+		return 0;
+	};
+
+	// command ":" - enter the command mode
+	cmds[":"] = [] (const vector<string>& args)
+	{
+		cui_set_mode(CUI_MODE_COMMAND);
+		return 0;
+	};
+
+	// command "?" - show the help message
+	cmds["?"] = [] (const vector<string>& args)
+	{
+		cui_set_mode(CUI_MODE_HELP);
+		return 0;
+	};
+
+	// command "details" - view task details
+	cmds["details"] = [] (const vector<string>& args)
+	{
+		cui_set_mode(CUI_MODE_DETAILS);
+		return 0;
+	};
+
+	// command "list" - navigate to list (":list all" to view tasks from all lists)
+	cmds["list"] = [] (const vector<string>& args)
+	{
+		if (args.size() != 1) return CMD_ERR_ARG_COUNT;
+		
+		if (args.at(0) == "all") conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
+		else try {
+			const int new_filter = stoi(args.at(0));
+			const int tag_filter = conf_get_cvar_int("tag_filter");
+
+			if (new_filter == tag_filter) conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
+			else conf_set_cvar_int("tag_filter", new_filter);
+		} catch (const invalid_argument& e) {
+			return CMD_ERR_ARG_TYPE;
+		}
+
+		return 0;
+	};
+
+	// command "down" - navigate down the list
+	cmds["down"] = [] (const vector<string>& args)
+	{
+		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
+
+		if (cui_s_line < t_list.size() - 1) cui_s_line++;
+		else cui_s_line = 0;
+
+		if (!cui_is_visible(cui_s_line)) cmd_exec("down");
+
+		cui_delta = 0;
+
+		return 0;
+	};
+
+	// command "up" - navigate up the list
+	cmds["up"] = [] (const vector<string>& args)
+	{
+		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
+
+		if (cui_s_line > 0) cui_s_line--;
+		else cui_s_line = t_list.size() - 1;
+
+		if (!cui_is_visible(cui_s_line)) cmd_exec("up");
+
+		cui_delta = 0;
+
+		return 0;
+	};
+
+	// command "c" - toggle selected task's "completed" property
+	cmds["c"] = [] (const vector<string>& args)
+	{
+		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
+
+		li_comp(cui_s_line);
+		return 0;
+	};
+
+	// command "d" - remove selected task
+	cmds["d"] = [] (const vector<string>& args)
+	{
+		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
+
+		li_rem(cui_s_line);
+		if (t_list.size() != 0) if (cui_s_line >= t_list.size()) cmd_exec("up");
+
+		return 0;
+	};
+
+	// command "a" - add a task
+	cmds["a"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
+
+		try {
+			noaftodo_entry new_entry;
+			new_entry.completed = false;
+
+			new_entry.due = ti_to_long(args.at(0));
+			new_entry.title = args.at(1);
+			new_entry.description = args.at(2);
+
+			const int tag_filter = conf_get_cvar_int("tag_filter");
+			new_entry.tag = (tag_filter == CUI_TAG_ALL) ? 0 : tag_filter;
+			
+			li_add(new_entry);
+
+			return 0;
+		} catch (const invalid_argument& e) {
+			return CMD_ERR_ARG_TYPE;
+		}
+	};
+
+	// command "vtoggle" - toggle filters. Supported titles: uncat, complete, coming, failed
+	cmds["vtoggle"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		int filter = conf_get_cvar_int("filter");
+		if (args.at(0) == "uncat") filter ^= CUI_FILTER_UNCAT;
+		if (args.at(0) == "complete") filter ^= CUI_FILTER_COMPLETE;
+		if (args.at(0) == "coming") filter ^= CUI_FILTER_COMING;
+		if (args.at(0) == "failed") filter ^= CUI_FILTER_FAILED;
+
+		conf_set_cvar_int("filter", filter);
+
+		return 0;
+	};
+
+	// command "g" - go to task
+	cmds["g"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		try {
+			const int target = stoi(args.at(0));
+
+			if ((target >= 0) && (target < t_list.size()))
+				cui_s_line = target;
+			else return CMD_ERR_EXTERNAL;
+
+			return 0;
+		} catch (const invalid_argument& e) {
+			return CMD_ERR_ARG_TYPE;
+		}
+	};
+
+
+	// command "lrename" - rename list
+	cmds["lrename"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		const int tag_filter = conf_get_cvar_int("tag_filter");
+		if (tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
+
+		while (tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
+
+		t_tags[tag_filter] = args.at(0);
+		li_save();
+
+		return 0;
+	};
+
+	// command "lmv" - move selected task to a list
+	cmds["lmv"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		try {
+			t_list[cui_s_line].tag = stoi(args.at(0));
+			li_save();
+
+			return 0;
+		} catch (const invalid_argument& e) {
+			return CMD_ERR_ARG_TYPE;
+		}
+	};
+
+	// command "get" - print cvar value to status
+	cmds["get"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		cui_status = conf_get_cvar(args.at(0));
+
+		return 0;
+	};
+
+	// command "bind" - bind a key
+	cmds["bind"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 4) return CMD_ERR_ARG_COUNT;
+
+		try {
+			const string skey = args.at(0);
+			const string scomm = args.at(1);
+			const int smode = stoi(args.at(2));
+			const bool sauto = (args.at(3) == "true");
+
+			log("Binding " + skey + " to \"" + scomm + "\"");
+
+			wchar_t key;
+			if (skey.length() == 1)
+				key = skey.at(0);
+			else
+			{
+				if (skey == "up") 	key = KEY_UP;
+				if (skey == "down") 	key = KEY_DOWN;
+				if (skey == "left")	key = KEY_LEFT;
+				if (skey == "right")	key = KEY_RIGHT;
+				if (skey == "esc")	key = 27;
+				if (skey == "enter")	key = 10;
+			}
+
+			cui_bind(key, scomm, smode, sauto);
+
+			return 0;
+		} catch (const invalid_argument& e) {
+			return CMD_ERR_ARG_TYPE;
+		}
+	};
+
+	// command "set" - set cvar value
+	cmds["set"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 2) return CMD_ERR_ARG_COUNT;
+
+		conf_set_cvar(args.at(0), args.at(1));
+		return 0;
+	};
+
+	// command "reset" - reset cvar value to default
+	cmds["reset"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		if (conf_get_predefined_cvar(args.at(0)) != "")
+			conf_set_cvar(args.at(0), conf_get_predefined_cvar(args.at(0)));
+		else
+			conf_cvars.erase(args.at(0));
+
+		return 0;
+	};
+
+	// command "exec" - execute a config file
+	cmds["exec"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		conf_load(args.at(0));
+
+		return 0;
+	};
+
+	// command "ver" - is used to specify config version to notify about possible outdated config files
+	cmds["ver"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		if (args.at(0) != to_string(CONF_V))
+		{
+			log("File you are trying to load is declared to be for an outdated version of NOAFtodo (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + ") and might not work as expected. Program will continue execution in 5 seconds...", LP_ERROR);
+			system("sleep 5");
+		}
+
+		return 0;
+	};
+
+	// command "echo" - print the following in status
+	cmds["echo"] = [] (const vector<string>& args)
+	{
+		string message = "";
+		for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
+		cui_status = message;
+		return 0;
+	};
+}
 
 int cmd_exec(const string& command)
 {
@@ -92,200 +384,7 @@ int cmd_exec(const string& command)
 			offset = i + 1;
 		else if (i == offset)
 		{
-			if (words.at(i) == "q") // exit the program
-				cui_mode = CUI_MODE_EXIT;
-			else if (words.at(i) == ":") // enter command mode
-				cui_set_mode(CUI_MODE_COMMAND);
-			else if (words.at(i) == "details") // show selected task details
-				cui_set_mode(CUI_MODE_DETAILS);
-			else if (words.at(i) == "?") // show help message
-				cui_set_mode(CUI_MODE_HELP);
-			else if (words.at(i) == "list") // navigate to list (":list all" to view tasks from all lists)
-			{
-				if (words.size() >= i + 2)
-				{
-					if (words.at(i + 1) == "all") conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
-					else
-					{
-						const int new_filter = stoi(words.at(1));
-						const int tag_filter = conf_get_cvar_int("tag_filter");
-						if (new_filter == tag_filter) conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
-						else conf_set_cvar_int("tag_filter", new_filter);
-					}
-				} else return 1;
-			} else if (words.at(i) == "down") // navigate down the list
-			{
-				if (t_list.size() != 0)
-				{
-					if (cui_s_line < t_list.size() - 1) cui_s_line++;
-					else cui_s_line = 0;
-
-					if (!cui_is_visible(cui_s_line)) cmd_exec("down");
-
-					cui_delta = 0;
-				} else return 2;
-			} else if (words.at(i) == "up") // navigate up the list
-			{
-				if (t_list.size() != 0)
-				{
-					if (cui_s_line > 0) cui_s_line--;
-					else cui_s_line = t_list.size() - 1;
-
-					if (!cui_is_visible(cui_s_line)) cmd_exec("up");
-
-					cui_delta = 0;
-				} else return 2;
-			} else if (words.at(i) == "c") // toggle selected task's "completed" property
-			{
-				if (t_list.size() == 0)
-					return 2;
-				else
-					li_comp(cui_s_line);
-			} else if (words.at(i) == "d") // remove selected task
-			{
-				if (t_list.size() == 0)
-					return 2;
-				else
-				{
-					li_rem(cui_s_line);
-					if (t_list.size() != 0) if (cui_s_line >= t_list.size()) cmd_exec("up");
-				}
-			} else if (words.at(i) == "a") // add a task
-			{
-				if (words.size() >= i + 4)
-				{
-					noaftodo_entry new_entry;
-					new_entry.completed = false;
-					if (words.at(i + 1) != "")
-					{
-						new_entry.due = ti_to_long(words.at(i + 1));
-						if (words.at(i + 2) != "")
-						{
-							new_entry.title = words.at(i + 2);
-							if (words.at(i + 3) != "")
-							{
-								new_entry.description = words.at(i + 3);
-								int tag_filter = conf_get_cvar_int("tag_filter");
-								new_entry.tag = (tag_filter == CUI_TAG_ALL) ? 0 : tag_filter;
-
-								li_add(new_entry);
-							}
-						}
-					}
-				} else return 1;
-			} else if (words.at(i) == "vtoggle") // toggle filters. Supported filters: uncat, complete, coming, failed
-			{
-				if (words.size() >= i + 2)
-				{
-					int filter = conf_get_cvar_int("filter");
-					if (words.at(i + 1) == "uncat")
-						filter ^= CUI_FILTER_UNCAT;
-					if (words.at(i + 1) == "complete")
-						filter ^= CUI_FILTER_COMPLETE;
-					if (words.at(i + 1) == "coming")
-						filter ^= CUI_FILTER_COMING;
-					if (words.at(i + 1) == "failed")
-						filter ^= CUI_FILTER_FAILED;
-					conf_set_cvar_int("filter", filter);
-				} else return 1;
-			} else if (words.at(i) == "g") // go to task
-			{
-				if (words.size() >= i + 2)
-				{
-					const int target = stoi(words.at(i + 1));
-
-					if ((target >= 0) && (target < t_list.size()))
-						cui_s_line = target;
-				} else return 1;
-			} else if (words.at(i) == "lrename") // rename list
-			{
-				if (words.size() >= i + 2)
-				{
-					const int tag_filter = conf_get_cvar_int("tag_filter");
-					if (tag_filter == CUI_TAG_ALL) cui_status = "No specific list selected";
-					else 
-					{
-						while (tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
-
-						t_tags[tag_filter] = words.at(i + 1);
-						li_save();
-					}
-				} else return 1;
-			}
-		       	else if (words.at(i) == "lmv") // move selected task to a list
-			{
-				if (words.size() >= i + 2)
-				{
-					t_list[cui_s_line].tag = stoi(words.at(i + 1));
-					li_save();
-				} else return 1;
-			}
-			else if (words.at(i) == "get") // get cvar value
-			{
-				if (words.size() >= i + 2)
-				{
-					cui_status = conf_get_cvar(words.at(i + 1));
-				} else return 1;
-			} else if (words.at(i) == "bind") // bind a key
-			{
-				if (words.size() == i + 5)
-				{
-					const string skey = words.at(i + 1);
-					const string scomm = words.at(i + 2);
-					const int smode = stoi(words.at(i + 3));
-					const bool sauto = (words.at(i + 4) == "true");
-
-					log("Binding " + skey + " to '" + scomm + "'");
-					if (skey.length() == 1)
-						cui_bind(skey.at(0), scomm, smode, sauto);
-					else
-					{
-						if (skey == "up")
-							cui_bind(KEY_UP, scomm, smode, sauto);
-						if (skey == "down")
-							cui_bind(KEY_DOWN, scomm, smode, sauto);
-						if (skey == "left")
-							cui_bind(KEY_LEFT, scomm, smode, sauto);
-						if (skey == "right")
-							cui_bind(KEY_RIGHT, scomm, smode, sauto);
-						if (skey == "esc")
-							cui_bind(27, scomm, smode, sauto);
-						if (skey == "enter")
-							cui_bind(10, scomm, smode, sauto);
-					}
-				} else return 1;
-			} else if (words.at(i) == "set") // set cvar value
-			{
-				if (words.size() == i + 3)
-				{
-					conf_set_cvar(words.at(i + 1), words.at(i + 2));
-				} else return 1;
-			} else if (words.at(i) == "reset") // reset cvar value to default
-			{
-				if (words.size() == i + 2)
-				{
-					if (conf_get_predefined_cvar(words.at(i + 1)) != "")
-						conf_set_cvar(words.at(i + 1), conf_get_predefined_cvar(words.at(i + 1)));
-					else
-						conf_cvars.erase(words.at(i + 1));
-				}
-			} else if (words.at(i) == "exec") // execute another config
-			{
-				if (words.size() == i + 2)
-				{
-					conf_load(words.at(i + 1));
-				}
-			} else if (words.at(i) == "ver") // is used to specify config version to notify about possible outdated config files
-			{
-				if (words.size() == i + 2)
-				{
-					if (words.at(i + 1) != to_string(CONF_V))
-					{
-						log("File you are trying to load is declared to be for another version of NOAFtodo (CONF_V " + words.at(i + 1) + " != " + to_string(CONF_V) + ") and might not work as expected. Program will continue executing in 5 seconds", LP_ERROR);
-						system("sleep 5");
-					}
-				}
-			} else if (words.at(i).at(0) == '!')
+			if (words.at(i).at(0) == '!')
 			{
 				string shell_command = words.at(i).substr(1);
 
@@ -294,6 +393,24 @@ int cmd_exec(const string& command)
 				if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) 
 						system(format_str(shell_command, t_list.at(cui_s_line)).c_str());
 				else system(shell_command.c_str());
+			} else {
+				// search command in cmds
+
+				vector<string> cmdarg;
+
+				for (int j = 1; i + j < words.size(); j++)
+				{
+					if (words.at(i + j) == ";") break;
+					cmdarg.push_back(words.at(i + j));
+				}
+
+				try {
+					(cmds.at(words.at(i)))(cmdarg);
+				} catch (const out_of_range& e)
+				{
+					log("Command not found!", LP_ERROR);
+				}
+
 			}
 		}
 	}
