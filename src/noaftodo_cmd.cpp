@@ -19,6 +19,7 @@
 using namespace std;
 
 map<string, function<int(const vector<string>& args)>> cmds;
+map<string, vector<string>> aliases;
 
 void cmd_init()
 {
@@ -47,6 +48,19 @@ void cmd_init()
 	cmds["details"] = [] (const vector<string>& args)
 	{
 		cui_set_mode(CUI_MODE_DETAILS);
+		return 0;
+	};
+
+	// command "alias" - create an alias for command
+	cmds["alias"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		vector<string> alargs;
+		for (int i = 1; i < args.size(); i++) alargs.push_back(args.at(i));
+
+		aliases[args.at(0)] = alargs;
+
 		return 0;
 	};
 
@@ -404,17 +418,28 @@ int cmd_exec(const string& command)
 					cmdarg.push_back(words.at(i + j));
 				}
 
-				try {
-					const int ret = (cmds.at(words.at(i)))(cmdarg);
+				try {	// search for alias, prioritize
+					vector<string> oargs = aliases.at(words.at(i));
+
+					for (int j = 1; j < oargs.size(); j++) cmdarg.insert(cmdarg.begin(), oargs.at(j));
+
+					const int ret = (cmds.at(oargs.at(0)))(cmdarg);
 
 					if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Not enough arguments";
 					if (ret == CMD_ERR_ARG_TYPE)	cui_status = "Wrong argument type";
 					if (ret == CMD_ERR_EXTERNAL)	cui_status = "Cannot execute command";
-				} catch (const out_of_range& e)
-				{
-					log("Command not found!", LP_ERROR);
-				}
+				} catch (const out_of_range& e) { // alias not found, try to execute a command
+					try {
+						const int ret = (cmds.at(words.at(i)))(cmdarg);
 
+						if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Not enough arguments";
+						if (ret == CMD_ERR_ARG_TYPE)	cui_status = "Wrong argument type";
+						if (ret == CMD_ERR_EXTERNAL)	cui_status = "Cannot execute command";
+					} catch (const out_of_range& e)
+					{
+						log("Command not found!", LP_ERROR);
+					}
+				}
 			}
 		}
 	}
