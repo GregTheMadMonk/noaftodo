@@ -9,6 +9,7 @@ extern bool verbose;
 
 // log prefixes
 constexpr char LP_DEFAULT = 'i';
+constexpr char LP_IMPORTANT = 'I';
 constexpr char LP_ERROR = '!';
 
 void log(const std::string& message, const char& prefix = LP_DEFAULT);

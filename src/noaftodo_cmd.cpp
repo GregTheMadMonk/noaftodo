@@ -23,17 +23,27 @@ int cmd_exec(const string& command)
 	string word = "";
 	bool inquotes = false;
 	bool skip_special = false;
-
-	if (command != "") if (command.at(0) == '!')
-		if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) 
-				system(format_str(command.substr(1), t_list.at(cui_s_line)).c_str());
-		else system(command.substr(1).c_str());
+	bool shell_cmd = false;
 
 	for (int i = 0; i < command.length(); i++)
 	{
 		const char c = command.at(i);
 
-		if (skip_special) 
+		if (shell_cmd)
+		{
+			if (!skip_special && (c == ';')) 
+			{
+				words.push_back(word);
+				word = "";
+				words.push_back(";");
+				shell_cmd = false;
+			} else {
+				if (skip_special) word += '\\';
+				
+				if (c == '\\') skip_special = true;
+				else { word += c; skip_special = false; }
+			}
+		} else if (skip_special) 
 		{
 			word += c;
 			skip_special = false;
@@ -64,6 +74,10 @@ int cmd_exec(const string& command)
 				break;
 			case '"':
 				inquotes = !inquotes;
+				break;
+			case '!':
+				if (!inquotes) shell_cmd = true;
+				word += c;
 				break;
 			default:
 				word += c;
@@ -271,6 +285,15 @@ int cmd_exec(const string& command)
 						system("sleep 5");
 					}
 				}
+			} else if (words.at(i).at(0) == '!')
+			{
+				string shell_command = words.at(i).substr(1);
+
+				log("Executing shell command: \`" + shell_command + "\`...", LP_IMPORTANT);
+
+				if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) 
+						system(format_str(shell_command, t_list.at(cui_s_line)).c_str());
+				else system(shell_command.c_str());
 			}
 		}
 	}
