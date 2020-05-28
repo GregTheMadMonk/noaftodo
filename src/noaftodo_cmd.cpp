@@ -405,7 +405,11 @@ int cmd_exec(const string& command)
 				}
 
 				try {
-					(cmds.at(words.at(i)))(cmdarg);
+					const int ret = (cmds.at(words.at(i)))(cmdarg);
+
+					if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Not enough arguments";
+					if (ret == CMD_ERR_ARG_TYPE)	cui_status = "Wrong argument type";
+					if (ret == CMD_ERR_EXTERNAL)	cui_status = "Cannot execute command";
 				} catch (const out_of_range& e)
 				{
 					log("Command not found!", LP_ERROR);
