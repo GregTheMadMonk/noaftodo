@@ -138,6 +138,7 @@ void cui_init()
 	init_pair(CUI_CP_GREEN_ENTRY, conf_get_cvar_int("colors.entry_completed"), conf_get_cvar_int("colors.background"));
 	init_pair(CUI_CP_YELLOW_ENTRY, conf_get_cvar_int("colors.entry_coming"), conf_get_cvar_int("colors.background"));
 	init_pair(CUI_CP_RED_ENTRY, conf_get_cvar_int("colors.entry_failed"), conf_get_cvar_int("colors.background"));
+	init_pair(CUI_CP_STATUS, conf_get_cvar_int("colors.status"), conf_get_cvar_int("colors.background"));
 
 	cbreak();
 	set_escdelay(0);
@@ -194,8 +195,6 @@ void cui_run()
 
 		cui_w = getmaxx(stdscr);
 		cui_h = getmaxy(stdscr);
-
-		clear();
 
 		switch (cui_mode)
 		{
@@ -395,8 +394,13 @@ void cui_normal_paint()
 			((t_list.size() == 0) ? "" : " " + conf_get_cvar("charset.status_separator") + " " + to_string(cui_s_line) + "/" + to_string(t_list.size() - 1)) +
 			string((cui_status != "") ? (" " + conf_get_cvar("charset.status_separator") + " " + cui_status) : "");
 
+	if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+	attron(COLOR_PAIR(CUI_CP_STATUS));
+	move(cui_h - 1, 0);
+	for (int x = 0; x < cui_w; x++) addch(' ');
 	move(cui_h - 1, cui_w - 1 - cui_status.length());
 	addstr(cui_status.c_str());
+	attrset(A_NORMAL);
 	cui_status = "";
 }
 
@@ -577,7 +581,9 @@ void cui_command_paint()
 	}
 
 	move(cui_h - 1, 0);
-	clrtoeol();
+	if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+	attron(COLOR_PAIR(CUI_CP_STATUS));
+	for (int x = 0; x < cui_w; x++) addch(' ');
 	move(cui_h - 1, 0);
 	int offset = cui_command_cursor - cui_w + 3;
 	if (offset < 0) offset = 0;

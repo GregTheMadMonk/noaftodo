@@ -33,6 +33,7 @@ constexpr int CUI_CP_TITLE = 1;
 constexpr int CUI_CP_GREEN_ENTRY = 2;
 constexpr int CUI_CP_YELLOW_ENTRY = 3;
 constexpr int CUI_CP_RED_ENTRY = 4;
+constexpr int CUI_CP_STATUS = 5;
 
 // modes
 constexpr int CUI_MODE_EXIT = 0;

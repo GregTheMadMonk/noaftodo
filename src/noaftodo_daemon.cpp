@@ -148,7 +148,6 @@ void da_run()
 					running = false;
 					break;
 				case 'N':
-					bool notified = false;
 					for (int i = 0; i < t_list.size(); i++)
 					{
 						const noaftodo_entry e1 = t_list.at(i);
@@ -160,11 +159,7 @@ void da_run()
 						else if (e1.due <= ti_to_long("a1d"))
 							cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), e1, true));
 						else continue;
-
-						notified = true;
 					}
-
-					if (notified) cmd_exec(conf_get_cvar("on_renotify_empty_action"));
 					break;
 			}
 
