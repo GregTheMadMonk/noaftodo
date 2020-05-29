@@ -398,7 +398,7 @@ void cui_normal_paint()
 	attron(COLOR_PAIR(CUI_CP_STATUS));
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
-	move(cui_h - 1, cui_w - 1 - cui_status.length());
+	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status).length());
 	addstr(cui_status.c_str());
 	attrset(A_NORMAL);
 	cui_status = "";
