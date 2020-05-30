@@ -86,7 +86,10 @@ void cmd_init()
 	// command "down" - navigate down the list
 	cmds["down"] = [] (const vector<string>& args)
 	{
-		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
+		bool has_visible = false;
+		for (int i = 0; i < t_list.size(); i++) has_visible |= cui_is_visible(i);
+
+		if (!has_visible) return CMD_ERR_EXTERNAL;
 
 		if (cui_s_line < t_list.size() - 1) cui_s_line++;
 		else cui_s_line = 0;
@@ -101,7 +104,10 @@ void cmd_init()
 	// command "up" - navigate up the list
 	cmds["up"] = [] (const vector<string>& args)
 	{
-		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
+		bool has_visible = false;
+		for (int i = 0; i < t_list.size(); i++) has_visible |= cui_is_visible(i);
+
+		if (!has_visible) return CMD_ERR_EXTERNAL;
 
 		if (cui_s_line > 0) cui_s_line--;
 		else cui_s_line = t_list.size() - 1;

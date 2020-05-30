@@ -332,7 +332,7 @@ void cui_normal_paint()
 	if (cui_v_line - cui_delta >= cui_h - 2) cui_delta = cui_v_line - cui_h + 3;
 	if (cui_v_line - cui_delta < 0) cui_delta = cui_v_line;
 
-	int last_string = 0;
+	int last_string = 1;
 	if (v_list.size() > 0) 
 	{
 		for (int l = 0; l < v_list.size(); l++)
@@ -379,9 +379,9 @@ void cui_normal_paint()
 				last_string = l - cui_delta + 2;
 			}
 		}
-
-		for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
 	}
+
+	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
 
 	cui_status = 	((tag_filter == CUI_TAG_ALL) ?
 				"All lists" :
