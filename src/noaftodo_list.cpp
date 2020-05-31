@@ -7,7 +7,7 @@
 #include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
 #include "noaftodo_daemon.h"
-#include "noaftodo_output.h"
+#include "noaftodo_io.h"
 
 using namespace std;
 

@@ -12,7 +12,7 @@
 #include "noaftodo_cui.h"
 #include "noaftodo_daemon.h"
 #include "noaftodo_list.h"
-#include "noaftodo_output.h"
+#include "noaftodo_io.h"
 
 using namespace std;
 
@@ -85,12 +85,9 @@ int main(int argc, char* argv[])
 	// load the list
 	li_load();
 
-	if (mode == PM_DEFAULT)
-	{
-		cui_run();
-	}
+	if (mode == PM_DEFAULT)	cui_run();
 
-	if (mode == PM_DAEMON) da_run();
+	if (mode == PM_DAEMON)	da_run();
 
 	return 0;
 }

@@ -76,7 +76,11 @@ extern std::wstring cui_command_t;
 extern int cui_command_cursor;
 extern int cui_command_index;
 
+// is cui started
+extern bool cui_active;
+
 void cui_init();
+void cui_construct();
 void cui_destroy();
 
 void cui_run();

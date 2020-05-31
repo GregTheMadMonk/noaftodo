@@ -1,8 +1,9 @@
-#include "noaftodo_output.h"
+#include "noaftodo_io.h"
 
 #include <iostream>
 
 #include "noaftodo.h"
+#include "noaftodo_cui.h"
 #include "noaftodo_time.h"
 
 using namespace std;
@@ -10,9 +11,14 @@ using namespace std;
 bool verbose = false;
 
 void log(const string& message, const char& prefix)
-{
+{	const bool wcui = cui_active;
+
+	if (wcui) cui_destroy();
+
 	if ((prefix != LP_DEFAULT) || verbose)
 		cout << "[" << prefix << "] " << message << endl;
+
+	if (wcui) cui_construct();
 }
 
 string format_str(const string& str, const noaftodo_entry& li_entry, const bool& renotify)

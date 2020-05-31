@@ -11,7 +11,7 @@
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
-#include "noaftodo_output.h"
+#include "noaftodo_io.h"
 #include "noaftodo_time.h"
 
 using namespace std;
@@ -38,6 +38,8 @@ int cui_command_cursor = 0;
 int cui_command_index = 0;
 
 wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
+
+bool cui_active = false;
 
 extern char _binary_doc_doc_gen_start;
 extern char _binary_doc_doc_gen_end;
@@ -131,9 +133,15 @@ void cui_init()
 	// construct UI
 	cui_command_history.push_back(w_converter.from_bytes(""));
 
+	cui_construct();
+}
+
+void cui_construct()
+{
 	initscr();
 	start_color();
 	use_default_colors();
+
 	init_pair(CUI_CP_TITLE, conf_get_cvar_int("colors.title"), conf_get_cvar_int("colors.background"));
 	init_pair(CUI_CP_GREEN_ENTRY, conf_get_cvar_int("colors.entry_completed"), conf_get_cvar_int("colors.background"));
 	init_pair(CUI_CP_YELLOW_ENTRY, conf_get_cvar_int("colors.entry_coming"), conf_get_cvar_int("colors.background"));
@@ -148,11 +156,14 @@ void cui_init()
 
 	cui_w = getmaxx(stdscr);
 	cui_h = getmaxy(stdscr);
+
+	cui_active = true;
 }
 
 void cui_destroy()
 {
 	endwin();
+	cui_active = false;
 }
 
 void cui_run()
