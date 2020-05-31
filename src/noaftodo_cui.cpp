@@ -513,10 +513,20 @@ void cui_details_paint()
 	if (entry.tag < t_tags.size()) if (t_tags.at(entry.tag) != to_string(entry.tag))
 		tag = ": " + t_tags.at(entry.tag);
 
-	addstr((ti_f_str(entry.due) +
-		" " + conf_get_cvar("charset.status_separator") + " " + 
-		"List " + to_string(entry.tag) + 
-		tag).c_str()); 
+	const string cols = conf_get_cvar("details_cols");
+	string info_str = "";
+	for (int coln = 0; coln < cols.length(); coln++)
+	{
+		try
+		{
+			const char& col = cols.at(coln);
+
+			info_str += cui_columns.at(col).contents(entry, cui_s_line);
+			if (coln < cols.length() - 1) info_str += " " + conf_get_cvar("charset.details_separator") + " ";
+		} catch (const out_of_range& e) {}
+	}
+
+	addstr(info_str.c_str()); 
 
 	for (int i = 4; i < cui_w - 4; i++)
 	{
