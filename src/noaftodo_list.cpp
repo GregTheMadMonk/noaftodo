@@ -53,6 +53,7 @@ void li_load()
 			int token = 0;
 			noaftodo_entry li_entry;
 			string temp = "";
+			string metaname = "";
 
 			if (entry != "") // only non-empty lines
 			{
@@ -95,12 +96,23 @@ void li_load()
 											break;
 										case 2:
 											li_entry.title = temp;
+											log("Entry: " + li_entry.title);
 											break;
 										case 3:
 											li_entry.description = temp;
 											break;
 										case 4:
 											li_entry.tag = stoi(temp);
+											break;
+										default:
+											// metadata
+											if (metaname == "") metaname = temp;
+											else 
+											{ 
+												li_entry.meta[metaname] = temp; 
+												log("Meta prop: " + metaname + " <=> " + temp);
+												metaname = "";
+											}
 											break;
 									}
 
@@ -151,7 +163,16 @@ void li_save()
 
 	ofile << endl << "[list]" << endl;
 	for (const auto& entry : t_list)
-		ofile << (entry.completed ? 'v' : '-') << '\\' << entry.due << '\\' << entry.title << '\\' << entry.description << '\\' << entry.tag << '\\' << endl;
+	{
+		ofile << (entry.completed ? 'v' : '-') << '\\' << entry.due << '\\' << entry.title << '\\' << entry.description << '\\' << entry.tag;
+
+		for (const auto& it = entry.meta.begin(); it != entry.meta.end(); it++)
+		{
+			ofile << '\\' << it->first << '\\' << it->second;
+		}
+
+		ofile << '\\' << endl;
+	}
 
 	ofile << endl << "[workspace]" << endl;
 	ofile << "ver " << CONF_V << endl;

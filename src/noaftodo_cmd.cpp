@@ -170,6 +170,23 @@ void cmd_init()
 		}
 	};
 
+	// command "setmeta" - set task property
+	cmds["setmeta"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return CMD_ERR_EXTERNAL;
+
+		if (args.size() < 2)
+			t_list[cui_s_line].meta.erase(args.at(0));
+		else
+			t_list[cui_s_line].meta[args.at(0)] = args.at(1);
+
+		li_save();
+
+		return 0;
+	};
+
 	// command "vtoggle" - toggle filters. Supported titles: uncat, complete, coming, failed
 	cmds["vtoggle"] = [] (const vector<string>& args)
 	{
@@ -460,6 +477,7 @@ int cmd_exec(const string& command)
 					} catch (const out_of_range& e)
 					{
 						log("Command not found!", LP_ERROR);
+						cui_status = "Command not found!";
 					}
 				}
 
