@@ -187,6 +187,17 @@ void cmd_init()
 		return 0;
 	};
 
+	// command "clrmeta" - erase task metadata
+	cmds["clrmeta"] = [] (const vector<string>& args)
+	{
+		if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return CMD_ERR_EXTERNAL;
+
+		for (auto it = t_list[cui_s_line].meta.begin(); it != t_list[cui_s_line].meta.end(); it = t_list[cui_s_line].meta.begin())
+			t_list[cui_s_line].meta.erase(it->first);
+
+		return 0;
+	};
+
 	// command "vtoggle" - toggle filters. Supported titles: uncat, complete, coming, failed
 	cmds["vtoggle"] = [] (const vector<string>& args)
 	{

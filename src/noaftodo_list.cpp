@@ -166,7 +166,7 @@ void li_save()
 	{
 		ofile << (entry.completed ? 'v' : '-') << '\\' << entry.due << '\\' << entry.title << '\\' << entry.description << '\\' << entry.tag;
 
-		for (const auto& it = entry.meta.begin(); it != entry.meta.end(); it++)
+		for (auto it = entry.meta.begin(); it != entry.meta.end(); it++)
 		{
 			ofile << '\\' << it->first << '\\' << it->second;
 		}
@@ -211,6 +211,12 @@ void li_comp(const int& entryID)
 	}
 
 	t_list.at(entryID).completed = !t_list.at(entryID).completed;
+
+	try
+	{
+		if (t_list.at(entryID).completed) cmd_exec(t_list.at(entryID).meta.at("on_completed"));
+		else cmd_exec(t_list.at(entryID).meta.at("on_uncompleted"));
+	} catch (const out_of_range& e) {}
 
 	if (li_autosave) li_save();
 
