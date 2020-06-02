@@ -155,7 +155,14 @@ void cmd_init()
 			const int tag_filter = conf_get_cvar_int("tag_filter");
 			new_entry.tag = (tag_filter == CUI_TAG_ALL) ? 0 : tag_filter;
 			
-			li_add(new_entry);
+			if (args.size() < 4) li_add(new_entry);
+			else
+			{
+				const int id = stoi(args.at(3));
+
+				if ((id >= 0) && (id < t_list.size())) t_list[id] = new_entry;
+				else return CMD_ERR_EXTERNAL;
+			}	
 
 			return 0;
 		} catch (const invalid_argument& e) {
