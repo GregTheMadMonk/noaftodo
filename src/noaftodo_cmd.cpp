@@ -198,7 +198,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "vtoggle" - toggle filters. Supported titles: uncat, complete, coming, failed
+	// command "vtoggle" - toggle filters. Supported filters: uncat, complete, coming, failed
 	cmds["vtoggle"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
@@ -364,7 +364,7 @@ void cmd_init()
 	};
 }
 
-int cmd_exec(const string& command)
+int cmd_exec(string command)
 {
 	vector<string> words;
 	string word = "";
@@ -446,7 +446,7 @@ int cmd_exec(const string& command)
 			{
 				string shell_command = words.at(i).substr(1);
 
-				log("Executing shell command: \`" + shell_command + "\`...", LP_IMPORTANT);
+				log("Executing shell command: `" + shell_command + "`...", LP_IMPORTANT);
 
 				system(shell_command.c_str());
 			} else {

@@ -14,6 +14,6 @@ extern std::map<std::string, std::function<int(const std::vector<std::string>& a
 extern std::map<std::string, std::vector<std::string>> aliases;
 
 void cmd_init();
-int cmd_exec(const std::string& command);
+int cmd_exec(std::string command);
 
 #endif
