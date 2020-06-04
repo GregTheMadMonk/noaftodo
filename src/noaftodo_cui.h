@@ -105,5 +105,7 @@ void cui_command_input(const wchar_t& key);
 void cui_help_paint();
 void cui_help_input(const wchar_t& key);
 
+std::string cui_prompt(const std::string& message = ">");
+
 void cui_filter_history();
 #endif

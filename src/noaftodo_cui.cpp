@@ -802,6 +802,44 @@ void cui_help_input(const wchar_t& key)
 	}
 }
 
+string cui_prompt(const string& message)
+{
+	cui_command = L"";
+	curs_set(1);
+	cui_command_index = cui_command_history.size();
+	cui_command_cursor = cui_command.length();
+
+	for (wint_t c = 0; ; get_wch(&c))
+	{
+		switch (c)
+		{
+			case 10:
+				return w_converter.to_bytes(cui_command);
+				break;
+			case 27:
+				return "";
+				break;
+			case 0:
+				break;
+			default:
+				cui_command_input(c);
+				break;
+		}
+
+		move(cui_h - 1, 0);
+		if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+		attron(COLOR_PAIR(CUI_CP_STATUS));
+		for (int x = 0; x < cui_w; x++) addch(' ');
+		move(cui_h - 1, 0);
+		int offset = cui_command_cursor - cui_w + 3;
+		if (offset < 0) offset = 0;
+		addstr((message + w_converter.to_bytes(cui_command.substr(offset))).c_str());
+		move(cui_h - 1, 1 + cui_command_cursor - offset);
+	}
+
+	return "";
+}
+
 void cui_filter_history()
 {
 	for (int i = 0; i < cui_command_history.size() - 1; i++)
