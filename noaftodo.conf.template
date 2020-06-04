@@ -27,7 +27,7 @@ bind "C" "vtoggle coming" 1 true
 bind "V" "vtoggle complete" 1 true
 
 alias duplicate a \%due\% \%T\% \%D\%
-alias postpone1d a \%due\%a1d \%T\% \%D\%
+alias postpone a \%due\%a\%prompt\% \%T\% \%D\% \%id\%
 
 set "all_cols" "ifldtD"
 set "cols" "ifdtD"

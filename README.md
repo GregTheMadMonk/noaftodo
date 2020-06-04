@@ -9,7 +9,7 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 - [x] primitive TODO list management: add and remove tasks with dues, marking tasks as completed, filtering failed, completed, upcomig and uncategorized tasks
 - [x] a daemon that can work in background, track tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
 - [x] bugs
-- [ ] task-specific events
+- [x] \(almost\) task-specific events
 - [ ] option to configure program with source-code only
 - [ ] \(not a feature really\) documentation
 

@@ -9,6 +9,7 @@
 
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"
+#include "noaftodo_cui.h"
 #include "noaftodo_config.h"
 #include "noaftodo_io.h"
 #include "noaftodo_time.h"
@@ -70,6 +71,8 @@ void da_run()
 
 			const noaftodo_entry e1 = t_list.at(i);
 
+			cui_s_line = i;
+
 			if (!cached)
 			{	// add to cache
 				da_cache.push_back(t_list.at(i));
@@ -119,6 +122,9 @@ void da_run()
 			for (int j = 0; j < t_list.size(); j++)
 				if (t_list.at(j).sim(da_cache.at(i))) deleted = false;
 
+			cui_s_line = -1; // we don't know and we don't want to know
+					// a deleted task's ID
+
 			if (deleted) 
 			{
 				cmd_exec(format_str(conf_get_cvar("on_task_removed_action"), da_cache.at(i)));
@@ -151,6 +157,8 @@ void da_run()
 					for (int i = 0; i < t_list.size(); i++)
 					{
 						const noaftodo_entry e1 = t_list.at(i);
+
+						cui_s_line = i;
 
 						if (e1.completed)
 							cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), e1, true));
