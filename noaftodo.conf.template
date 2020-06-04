@@ -1,12 +1,25 @@
 # This is a default config for NOAFtodo. It is included in the program and here
-# only serves as an example. If you don't want all these lines, you can make 
-# NOAFtodo load default config by deleting everything in here and replacing 
-# it with:
+# only serves as an example.
+# I highly recommend you delete all the junk blow and replace it with
 #
 # exec "default"
 #
-# , or by running NOAFtodo with "-c default" (won't create config file in ~/.config
-# even if there's none)
+# , which loads default config that is always guaranteed to work, or just run 
+# NOAFtodo with "-c default" (won't create config file in ~/.config even if 
+# there's none)
+# Also, if you config file contains anything aside from "exec default", you
+# really should specify its version with
+#
+# ver VERSION
+#
+# , where VERSION is the second number in program version:
+#
+# $noaftodo -v -h
+# [i] NOAFtodo v.X.Y.Z
+#                 /|\
+#                  |
+#                  |
+#                  you need this number
 
 bind "q" "q" 1 true
 bind "esc" "q" 1 true
@@ -27,7 +40,10 @@ bind "C" "vtoggle coming" 1 true
 bind "V" "vtoggle complete" 1 true
 
 alias duplicate a \%due\% \%T\% \%D\%
-alias postpone a \%due\%a\%prompt\% \%T\% \%D\% \%id\%
+alias postpone a \%due\%a%arg1% \%T\% \%D\% \%id\%
+alias reschedule a %arg1% \%T\% \%D\% \%id\%
+alias makerec setmeta on_completed "postpone %arg1%"
+alias makerec_fixed setmeta on_completed "reschedule a%arg1%"
 
 set "all_cols" "ifldtD"
 set "cols" "ifdtD"

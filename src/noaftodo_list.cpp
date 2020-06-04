@@ -21,6 +21,19 @@ bool noaftodo_entry::sim(const noaftodo_entry& e2)
 	return (this->due == e2.due) && (this->title == e2.title) && (this->description == e2.description);
 }
 
+string noaftodo_entry::meta_str() const
+{
+	string meta = "";
+
+	for (auto it = this->meta.begin(); it != this->meta.end(); it++)
+	{
+		if (meta != "") meta += " ";
+		meta += it->first + " " + it->second;
+	}
+
+	return meta;
+}
+
 void li_load()
 {
 	log("Loading list file " + li_filename);

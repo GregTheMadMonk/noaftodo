@@ -16,13 +16,13 @@
 
 using namespace std;
 
+int run_mode;
+
 int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, "");
 
-	log(string(TITLE) + " v." + string(VERSION));
-
-	int mode = PM_DEFAULT;
+	run_mode = PM_DEFAULT;
 
 	li_filename = string(getpwuid(getuid())->pw_dir) + "/.noaftodo-list";
 	conf_filename = string(getpwuid(getuid())->pw_dir) + "/.config/noaftodo.conf";
@@ -30,8 +30,8 @@ int main(int argc, char* argv[])
 	// parse arguments
 	for (int i = 1; i < argc; i++)
 	{
-		if (strcmp(argv[i], "-h") * strcmp(argv[i], "--help") == 0) mode = PM_HELP;
-		else if (strcmp(argv[i], "-d") * strcmp(argv[i], "--daemon") == 0) mode = PM_DAEMON;
+		if (strcmp(argv[i], "-h") * strcmp(argv[i], "--help") == 0) run_mode = PM_HELP;
+		else if (strcmp(argv[i], "-d") * strcmp(argv[i], "--daemon") == 0) run_mode = PM_DAEMON;
 		else if (strcmp(argv[i], "-k") * strcmp(argv[i], "--kill-daemon") == 0)
 		{
 			da_kill();
@@ -70,7 +70,9 @@ int main(int argc, char* argv[])
 		} else log("Unrecognized parameter \"" + string(argv[i]), LP_ERROR);
 	}
 
-	if (mode == PM_HELP) 
+	log(string(TITLE) + " v." + string(VERSION));
+
+	if (run_mode == PM_HELP) 
 	{
 		print_help();
 		return 0;
@@ -85,9 +87,9 @@ int main(int argc, char* argv[])
 	// load the list
 	li_load();
 
-	if (mode == PM_DEFAULT)	cui_run();
+	if (run_mode == PM_DEFAULT)	cui_run();
 
-	if (mode == PM_DAEMON)	da_run();
+	if (run_mode == PM_DAEMON)	da_run();
 
 	return 0;
 }

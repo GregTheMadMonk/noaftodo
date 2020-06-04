@@ -16,6 +16,8 @@
 
 using namespace std;
 
+bool da_running = false;
+
 int da_interval = 1;
 
 vector<noaftodo_entry> da_cache;
@@ -51,10 +53,10 @@ void da_run()
 
 	cmd_exec(format_str(conf_get_cvar("on_daemon_launch_action"), {}));
 
-	bool running = true;
+	da_running = true;
 	timespec tout;
 	bool first = true;
-	while (running)
+	while (da_running)
 	{
 		// update cache
 		li_load();
@@ -151,7 +153,7 @@ void da_run()
 			switch (msg[0])
 			{
 				case 'K':
-					running = false;
+					da_running = false;
 					break;
 				case 'N':
 					for (int i = 0; i < t_list.size(); i++)

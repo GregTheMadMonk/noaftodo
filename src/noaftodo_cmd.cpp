@@ -1,5 +1,13 @@
 #include "noaftodo_cmd.h"
 
+/*
+ * [Almost] everything responsible for NOAFtodo
+ * built-in command interpreter.
+ *
+ * I am losing control of it.
+ * If hell exists, this is my ticket there.
+ */
+
 #include <cstdlib>
 #include <stdexcept>
 
@@ -12,6 +20,7 @@
 #include "noaftodo.h"
 #include "noaftodo_config.h"
 #include "noaftodo_cui.h"
+#include "noaftodo_daemon.h"
 #include "noaftodo_list.h"
 #include "noaftodo_io.h"
 #include "noaftodo_time.h"
@@ -160,7 +169,11 @@ void cmd_init()
 			{
 				const int id = stoi(args.at(3));
 
-				if ((id >= 0) && (id < t_list.size())) t_list[id] = new_entry;
+				if ((id >= 0) && (id < t_list.size())) 
+				{
+					new_entry.meta = t_list.at(id).meta;
+					t_list[id] = new_entry;
+				}
 				else return CMD_ERR_EXTERNAL;
 			}	
 
@@ -347,8 +360,22 @@ void cmd_init()
 
 		if (args.at(0) != to_string(CONF_V))
 		{
-			log("File you are trying to load is declared to be for an outdated version of NOAFtodo (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + ") and might not work as expected. Program will continue execution in 5 seconds...", LP_ERROR);
-			system("sleep 5");
+			log("File you are trying to load is declared to be for an outdated version of NOAFtodo (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + ") and might not work as expected. Fix it and restart " + TITLE + ". Exiting program now.", LP_ERROR);
+
+			switch (run_mode)
+			{
+				case PM_DEFAULT:
+					if (cui_active) cui_set_mode(CUI_MODE_EXIT);
+					else exit(1);
+					break;
+				case PM_DAEMON:
+					if (da_running) da_kill();
+					else exit(1);
+					break;
+				default:
+					exit(1);
+					break;
+			}
 		}
 
 		return 0;
@@ -471,7 +498,23 @@ int cmd_exec(string command)
 						if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) newargs.push_back(format_str(oargs.at(j), t_list.at(cui_s_line)));
 						else newargs.push_back(oargs.at(j));
 					}
-					for (int j = 0; j < cmdarg.size(); j++) newargs.push_back(cmdarg.at(j));
+					for (int j = 0; j < cmdarg.size(); j++) 
+					{
+						bool replaced = false;
+
+						for (int k = 0; k < oargs.size() - 1; k++)
+						{
+							int index = -1;
+							string varname = "%arg" + to_string(j + 1) + "%";
+							while ((index = newargs.at(k).find(varname)) != string::npos)
+							{
+								newargs[k].replace(index, varname.length(), cmdarg.at(j));
+								replaced = true;
+							}
+						}
+
+						if (!replaced) newargs.push_back(cmdarg.at(j));
+					}
 
 					const int ret = (cmds.at(oargs.at(0)))(newargs);
 
@@ -487,7 +530,7 @@ int cmd_exec(string command)
 						if (ret == CMD_ERR_EXTERNAL)	cui_status = "Cannot execute command";
 					} catch (const out_of_range& e)
 					{
-						log("Command not found!", LP_ERROR);
+						log("Command not found! (" + command + ")", LP_ERROR);
 						cui_status = "Command not found!";
 					}
 				}

@@ -22,6 +22,9 @@ constexpr char DA_LOCK_FILE[] = "/tmp/.noaftodo-dlock";
 // message size
 constexpr int DA_MSGSIZE = 256;
 
+// is daemon running?
+extern bool da_running;
+
 // cache
 extern std::vector<noaftodo_entry> da_cache;
 extern long da_cached_time;

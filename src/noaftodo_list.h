@@ -16,6 +16,7 @@ struct noaftodo_entry
 	std::map<std::string, std::string> meta;
 
 	bool sim(const noaftodo_entry& e2);
+	std::string meta_str() const;
 };
 
 struct less_than_noaftodo_entry
