@@ -41,6 +41,10 @@ bind "C" "vtoggle coming" 1 true
 bind "V" "vtoggle complete" 1 true
 
 alias duplicate a \%due\% \%T\% \%D\%
+# Aaand this is the place where you willl ask me: "Hey, Greg, why do you do this,
+# why do you create an alias to referenc from nother alias instead of writing it 
+# as it is?" The answer is: I've tried, and it didn't work. Command interpreter in
+# its current state doesn't like multiple layers of commands and variables.
 alias postpone a \%due\%a%arg1% \%T\% \%D\% \%id\%
 alias reschedule a %arg1% \%T\% \%D\% \%id\%
 alias makerec setmeta on_completed "postpone %arg1%"
@@ -49,6 +53,8 @@ alias makerec_fixed setmeta on_completed "reschedule a%arg1%"
 set "all_cols" "ifldtD"
 set "cols" "ifdtD"
 set "details_cols" "dl"
+
+set "status_fields" "lfi"
 
 set "charset.status_separator" "|"
 set "charset.details_separator" "|"

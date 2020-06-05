@@ -17,6 +17,7 @@
 using namespace std;
 
 map<char, cui_col_s> cui_columns;
+map<char, function<string()>> cui_status_fields;
 
 int cui_mode;
 stack<int> cui_prev_modes;
@@ -128,6 +129,36 @@ void cui_init()
 		{ 
 			return to_string(id); 
 		} 
+	};
+
+	// initialize status fields
+	cui_status_fields['l'] = [] ()
+	{
+		const int tag_filter = conf_get_cvar_int("tag_filter");
+
+		if (tag_filter == CUI_TAG_ALL) return string("All lists");
+
+		return "List " + to_string(tag_filter) + (((tag_filter < t_tags.size()) && (t_tags.at(tag_filter) != to_string(tag_filter))) ? (": " + t_tags.at(tag_filter)) : "");
+	};
+
+	cui_status_fields['f'] = [] ()
+	{
+		const int filter = conf_get_cvar_int("filter");
+		return string((filter & CUI_FILTER_UNCAT) ? "U" : "_") +
+			string((filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
+			string((filter & CUI_FILTER_COMING) ? "C" : "_") + 
+			string((filter & CUI_FILTER_FAILED) ? "F" : "_");
+	};
+
+	cui_status_fields['i'] = [] ()
+	{
+		bool has_visible = false;
+
+		for (int i = 0; i < t_list.size(); i++) has_visible |= cui_is_visible(i);
+
+		if (!has_visible) return string("");
+
+		return to_string(cui_s_line) + "/" + to_string(t_list.size() - 1);
 	};
 	
 	// construct UI
@@ -394,23 +425,25 @@ void cui_normal_paint()
 
 	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
 
-	cui_status = 	((tag_filter == CUI_TAG_ALL) ?
-				"All lists" :
-				("List " + to_string(tag_filter) + (((tag_filter < t_tags.size()) && (t_tags.at(tag_filter) != to_string(tag_filter))) ? (": " + t_tags.at(tag_filter)) : ""))) +
-			" " + conf_get_cvar("charset.status_separator") + " " +
-			string((filter & CUI_FILTER_UNCAT) ? "U" : "_") +
-			string((filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
-			string((filter & CUI_FILTER_COMING) ? "C" : "_") +
-			string((filter & CUI_FILTER_FAILED) ? "F" : "_") +
-			((t_list.size() == 0) ? "" : " " + conf_get_cvar("charset.status_separator") + " " + to_string(cui_s_line) + "/" + to_string(t_list.size() - 1)) +
-			string((cui_status != "") ? (" " + conf_get_cvar("charset.status_separator") + " " + cui_status) : "");
+	string cui_status_l = "";
+
+	for (const char& c : conf_get_cvar("status_fields"))
+	{
+		try {
+			const string field = (cui_status_fields.at(c))();
+			if (field != "")
+				cui_status_l += " " + conf_get_cvar("charset.status_separator") + " " + field;
+		} catch (const out_of_range& e) {}
+	}
+
+	if (cui_status != "") cui_status_l += " " + conf_get_cvar("charset.status_separator") + " " + cui_status;
 
 	if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
 	attron(COLOR_PAIR(CUI_CP_STATUS));
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
-	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status).length());
-	addstr(cui_status.c_str());
+	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());
+	addstr(cui_status_l.c_str());
 	attrset(A_NORMAL);
 	cui_status = "";
 }

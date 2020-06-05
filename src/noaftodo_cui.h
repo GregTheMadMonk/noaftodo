@@ -26,7 +26,10 @@ struct cui_col_s
 };
 
 // columns
-extern std::map<char, cui_col_s> columns;
+extern std::map<char, cui_col_s> cui_columns;
+
+// status fields
+extern std::map<char, std::function<std::string()>> cui_status_fields;
 
 // color pair indexes
 constexpr int CUI_CP_TITLE = 1;
