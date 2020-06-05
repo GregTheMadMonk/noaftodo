@@ -309,6 +309,7 @@ void cui_bind(const wchar_t& key, const string& command, const int& mode, const 
 bool cui_is_visible(const int& entryID)
 {
 	if (t_list.size() == 0) return false;
+	if ((entryID < 0) && (entryID >= t_list.size())) return false;
 	const auto& entry = t_list.at(entryID);
 
 	const int tag_filter = conf_get_cvar_int("tag_filter");
@@ -375,8 +376,8 @@ void cui_normal_paint()
 	if (cui_v_line - cui_delta < 0) cui_delta = cui_v_line;
 
 	int last_string = 1;
-	if (v_list.size() > 0) 
-	{
+	if (v_list.size() == 0) cui_s_line = -1;
+	else {
 		for (int l = 0; l < v_list.size(); l++)
 		{
 			if (l - cui_delta >= cui_h - 2) break;
@@ -432,7 +433,10 @@ void cui_normal_paint()
 		try {
 			const string field = (cui_status_fields.at(c))();
 			if (field != "")
-				cui_status_l += " " + conf_get_cvar("charset.status_separator") + " " + field;
+			{
+				if (cui_status_l != "") cui_status_l += " " + conf_get_cvar("charset.status_separator") + " ";
+		       		cui_status_l += field;
+			}
 		} catch (const out_of_range& e) {}
 	}
 
@@ -774,6 +778,7 @@ void cui_help_paint()
 	// we want text wrapping here
 	int x = 5;
 	int y = 8 + tdelta;
+	int tabs = 0;
 	string cui_help;
 	for (char* c = &_binary_doc_doc_gen_start; c < &_binary_doc_doc_gen_end; c++)
 		cui_help += string(1, *c);
@@ -797,15 +802,17 @@ void cui_help_paint()
 
 		move(y, x);
 
-		constexpr int TAB_W = 20;
+		constexpr int TAB_W = 10;
 		switch (c)
 		{
 			case '\n':
 				y++;
+				tabs = 0;
 				x = 5;
 				break;
 			case '\t':
-				x = TAB_W;
+				tabs++;
+				x = tabs * TAB_W;
 				break;
 			default:
 				if (y >= 8) addch(c);
@@ -827,7 +834,7 @@ void cui_help_input(const wchar_t& key)
 			cui_delta--;
 			break;
 		case KEY_LEFT:
-			cui_delta++;
+			if (cui_delta < 0) cui_delta++;
 			break;
 		case '=':
 			cui_delta = 0;

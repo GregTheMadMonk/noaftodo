@@ -41,8 +41,8 @@ bind "C" "vtoggle coming" 1 true
 bind "V" "vtoggle complete" 1 true
 
 alias duplicate a \%due\% \%T\% \%D\%
-# Aaand this is the place where you willl ask me: "Hey, Greg, why do you do this,
-# why do you create an alias to referenc from nother alias instead of writing it 
+# Aaand this is the place where you will ask me: "Hey, Greg, why do you do this,
+# why do you create an alias to reference from another alias instead of writing it 
 # as it is?" The answer is: I've tried, and it didn't work. Command interpreter in
 # its current state doesn't like multiple layers of commands and variables.
 alias postpone a \%due\%a%arg1% \%T\% \%D\% \%id\%

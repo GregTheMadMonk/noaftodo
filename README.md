@@ -10,7 +10,7 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 - [x] a daemon that can work in background, track tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
 - [x] bugs
 - [x] \(almost\) task-specific events
-- [ ] option to configure program with source-code only
+- [ ] \(thinking of a way to imlpement it so it's not completely useless\) option to configure program with source-code only
 - [ ] \(not a feature really\) documentation
 
 Default list is created as **~/.noaftodo-list** and delault config is copied to **~/.config/noaftodo.conf**.
