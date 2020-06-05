@@ -81,9 +81,9 @@ void da_run()
 
 				if (e1.completed)
 					cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), e1, first));
-				else if (e1.due <= ti_to_long("a0d"))
+				else if (e1.is_failed())
 					cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), e1, first));
-				else if (e1.due <= ti_to_long("a1d"))
+				else if (e1.is_coming())
 					cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), e1, first));
 				else if (!first)
 					cmd_exec(format_str(conf_get_cvar("on_task_new_action"), e1));
@@ -94,19 +94,19 @@ void da_run()
 				{
 					if (e1.completed)
 						cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), e1));
-					else if (e1.due <= ti_to_long("a0d"))
+					else if (e1.is_failed())
 						cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), e1));
-					else if (e1.due <= ti_to_long("a1d"))
+					else if (e1.is_coming())
 						cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), e1));
 					else
 						cmd_exec(format_str(conf_get_cvar("on_task_uncompleted_action"), e1));
 				} else if (!e1.completed)
 				{
-					if (e1.due <= ti_to_long("a0d"))
+					if (e1.is_failed())
 					{
 						if (e1.due > da_cached_time)
 							cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), e1));
-					} else if (e1.due <= ti_to_long("a1d"))
+					} else if (e1.is_coming())
 					{
 						if (e1.due > ti_to_long(ti_cmd_str(da_cached_time) + "a1d"))
 							cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), e1));
@@ -164,9 +164,9 @@ void da_run()
 
 						if (e1.completed)
 							cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), e1, true));
-						else if (e1.due <= ti_to_long("a0d"))
+						else if (e1.is_failed())
 							cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), e1, true));
-						else if (e1.due <= ti_to_long("a1d"))
+						else if (e1.is_coming())
 							cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), e1, true));
 						else continue;
 					}

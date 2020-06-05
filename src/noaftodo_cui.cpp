@@ -72,9 +72,9 @@ void cui_init()
 		[](const noaftodo_entry& e, const int& id) 
 		{ 
 			string ret = "";
-			if (e.completed) ret += "V";				// a completed entry
-			else if (e.due <= ti_to_long("a0d")) ret += "F";	// a failed entry
-			else if (e.due <= ti_to_long("a1d")) ret += "C";	// an upcoming entry
+			if (e.completed) ret += "V";		// a completed entry
+			else if (e.is_failed()) ret += "F";	// a failed entry
+			else if (e.is_coming()) ret += "C";	// an upcoming entry
 			return ret; 
 		} 
 	};
@@ -103,7 +103,8 @@ void cui_init()
 		},
 		[](const noaftodo_entry& e, const int& id) 
 		{ 
-			return ti_f_str(e.due); 
+			if (e.get_meta("nodue") == "true") return string("-----------------");
+			else return ti_f_str(e.due); 
 		} 
 	};
 	cui_columns['D'] = 
@@ -317,8 +318,8 @@ bool cui_is_visible(const int& entryID)
 	const bool tag_check = ((tag_filter == CUI_TAG_ALL) || (tag_filter == entry.tag));
 
 	if (entry.completed) return tag_check && (filter & CUI_FILTER_COMPLETE);
-	if (entry.due <= ti_to_long("a0d")) return tag_check && (filter & CUI_FILTER_FAILED);
-	if (entry.due <= ti_to_long("a1d")) return tag_check && (filter & CUI_FILTER_COMING);
+	if (entry.is_failed()) return tag_check && (filter & CUI_FILTER_FAILED);
+	if (entry.is_coming()) return tag_check && (filter & CUI_FILTER_COMING);
 
 	return tag_check && (filter & CUI_FILTER_UNCAT);
 }
@@ -387,8 +388,8 @@ void cui_normal_paint()
 				
 				if (l == cui_v_line) attron(A_STANDOUT);
 				if (entry.completed) attron(COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD);	// a completed entry
-				else if (entry.due <= ti_to_long("a0d")) attron(COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD);	// a failed entry
-				else if (entry.due <= ti_to_long("a1d")) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// an upcoming entry
+				else if (entry.is_failed()) attron(COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD);	// a failed entry
+				else if (entry.is_coming()) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// an upcoming entry
 
 				x = 0;
 				move(l - cui_delta + 1, x);

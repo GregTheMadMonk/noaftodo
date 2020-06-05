@@ -100,7 +100,10 @@ void conf_load(const string& conf_file)
 		}
 	}
 
-	conf_predefined_cvars = conf_cvars;
+	for (auto it = conf_cvars.begin(); it != conf_cvars.end(); it++)
+	{
+		conf_predefined_cvars[it->first] = it->second;
+	}
 }
 
 void conf_set_cvar(const string& name, const string& value)

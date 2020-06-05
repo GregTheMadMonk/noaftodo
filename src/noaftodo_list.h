@@ -14,9 +14,18 @@ struct noaftodo_entry
 	int tag;
 
 	std::map<std::string, std::string> meta;
+	std::string get_meta(const std::string& str);
+	std::string get_meta(const std::string& str) const;
 
 	bool sim(const noaftodo_entry& e2);
+	std::string meta_str();
 	std::string meta_str() const;
+
+	bool is_failed();
+	bool is_failed() const;
+
+	bool is_coming();
+	bool is_coming() const;
 };
 
 struct less_than_noaftodo_entry

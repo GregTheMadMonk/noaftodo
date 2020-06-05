@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <stdexcept>
 #include <unistd.h>
 
 #include "noaftodo.h"
@@ -9,6 +10,7 @@
 #include "noaftodo_config.h"
 #include "noaftodo_daemon.h"
 #include "noaftodo_io.h"
+#include "noaftodo_time.h"
 
 using namespace std;
 
@@ -16,6 +18,19 @@ vector<noaftodo_entry> t_list;
 vector<string> t_tags;
 string li_filename = ".noaftodo-list";
 bool li_autosave = true;
+
+string noaftodo_entry::get_meta(const string& str) const
+{
+	try 
+	{
+		return this->meta.at(str);
+	} catch (const out_of_range& e) { return ""; }
+}
+
+string noaftodo_entry::get_meta(const string& str)
+{
+	return const_cast<const noaftodo_entry*>(this)->get_meta(str);
+}
 
 bool noaftodo_entry::sim(const noaftodo_entry& e2)
 {
@@ -33,6 +48,31 @@ string noaftodo_entry::meta_str() const
 	}
 
 	return meta;
+}
+
+string noaftodo_entry::meta_str()
+{
+	return const_cast<const noaftodo_entry*>(this)->meta_str();
+}
+
+bool noaftodo_entry::is_failed() const
+{
+	return ((this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a0d")));
+}
+
+bool noaftodo_entry::is_failed()
+{
+	return const_cast<const noaftodo_entry*>(this)->is_failed();
+}
+
+bool noaftodo_entry::is_coming() const
+{
+	return ((this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a1d")));
+}
+
+bool noaftodo_entry::is_coming()
+{
+	return const_cast<const noaftodo_entry*>(this)->is_coming();
 }
 
 void li_load()
@@ -163,6 +203,7 @@ void li_load()
 					break;
 				
 				case 2: // workspace
+					conf_cvars = conf_predefined_cvars;
 					while (entry.at(0) == ' ')
 					{
 						entry = entry.substr(1);
