@@ -12,9 +12,10 @@
 #
 # ver VERSION
 #
-# , where VERSION is the second number in program version:
+# (if the config was created automatically, it's already placed at the top), 
+# where VERSION is the second number in program version:
 #
-# $noaftodo -v -h
+# $ noaftodo -v -h
 # [i] NOAFtodo v.X.Y.Z
 #                 /|\
 #                  |

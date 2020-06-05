@@ -21,19 +21,29 @@ void log(const string& message, const char& prefix)
 	if (wcui) cui_construct();
 }
 
-string format_str(const string& str, const noaftodo_entry& li_entry, const bool& renotify)
+string format_str(string str, const noaftodo_entry& li_entry, const bool& renotify)
 {
-	string ret = str;
 	int index = -1;
-	while ((index = ret.find("%T%")) 	!= string::npos) ret.replace(index, 3, li_entry.title);
-	while ((index = ret.find("%D%")) 	!= string::npos) ret.replace(index, 3, li_entry.description);
-	while ((index = ret.find("%due%")) 	!= string::npos) ret.replace(index, 5, ti_cmd_str(li_entry.due));
+	while ((index = str.find("%T%")) 	!= string::npos) str.replace(index, 3, replace_special(li_entry.title));
+	while ((index = str.find("%D%")) 	!= string::npos) str.replace(index, 3, replace_special(li_entry.description));
+	while ((index = str.find("%due%")) 	!= string::npos) str.replace(index, 5, ti_cmd_str(li_entry.due));
 	if (cui_active)
-		while ((index = ret.find("%prompt%")) 	!= string::npos) ret.replace(index, 8, cui_prompt());
+		while ((index = str.find("%prompt%")) 	!= string::npos) str.replace(index, 8, cui_prompt());
 
-	while ((index = ret.find("%meta%"))	!= string::npos) ret.replace(index, 6, li_entry.meta_str());
-	while ((index = ret.find("%id%")) 	!= string::npos) ret.replace(index, 4, to_string(cui_s_line));
-	while ((index = ret.find("%VER%")) 	!= string::npos) ret.replace(index, 5, VERSION);
-	while ((index = ret.find("%N%")) 	!= string::npos) ret.replace(index, 3, renotify ? "false" : "true");
-	return ret;
+	while ((index = str.find("%meta%"))	!= string::npos) str.replace(index, 6, li_entry.meta_str());
+	while ((index = str.find("%id%")) 	!= string::npos) str.replace(index, 4, to_string(cui_s_line));
+	while ((index = str.find("%VER%")) 	!= string::npos) str.replace(index, 5, VERSION);
+	while ((index = str.find("%N%")) 	!= string::npos) str.replace(index, 3, renotify ? "false" : "true");
+	return str;
+}
+
+string replace_special(string str)
+{
+	for (auto c : SPECIAL)
+	{
+		int index = 0;
+		while ((index = str.find(c, index)) != string::npos) { str.replace(index, 1, "\\" + c); index += 2; }
+	}
+
+	return str;
 }

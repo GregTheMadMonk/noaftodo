@@ -95,43 +95,63 @@ void li_load()
 
 						if (mode == 1)
 						{
+							bool inquotes = false;
+							bool skip_special = false;
+
 							for (int i = 0; i < entry.length(); i++)
 							{
-								if (entry.at(i) == '\\')
-								{
-									switch (token)
-									{
-										case 0:
-											li_entry.completed = (temp == "v");
-											break;
-										case 1:
-											li_entry.due = stol(temp);
-											break;
-										case 2:
-											li_entry.title = temp;
-											log("Entry: " + li_entry.title);
-											break;
-										case 3:
-											li_entry.description = temp;
-											break;
-										case 4:
-											li_entry.tag = stoi(temp);
-											break;
-										default:
-											// metadata
-											if (metaname == "") metaname = temp;
-											else 
-											{ 
-												li_entry.meta[metaname] = temp; 
-												log("Meta prop: " + metaname + " <=> " + temp);
-												metaname = "";
-											}
-											break;
-									}
+								const char c = entry.at(i);
 
-									temp = "";
-									token++;
-								} else temp += entry.at(i);
+								if (skip_special) { temp += c; skip_special = false; }
+								else switch (c) 
+								{
+									case '\\':
+										if (inquotes)
+										{
+											skip_special = true;
+										} else {
+											switch (token)
+											{
+												case 0:
+													li_entry.completed = (temp == "v");
+													break;
+												case 1:
+													li_entry.due = stol(temp);
+													break;
+												case 2:
+													li_entry.title = temp;
+													log("Entry: " + li_entry.title);
+													break;
+												case 3:
+													li_entry.description = temp;
+													break;
+												case 4:
+													li_entry.tag = stoi(temp);
+													break;
+												default:
+													// metadata
+													if (metaname == "") metaname = temp;
+													else 
+													{ 
+														li_entry.meta[metaname] = temp; 
+														log("Meta prop: " + metaname + " <=> " + temp);
+														metaname = "";
+													}
+													break;
+											}
+
+											temp = "";
+											token++;
+										}
+
+										break;
+									case '\"':
+										inquotes = !inquotes;
+										break;
+									default:
+										temp += c;
+										break;
+								}
 							}
 
 							t_list.push_back(li_entry);
@@ -177,11 +197,16 @@ void li_save()
 	ofile << endl << "[list]" << endl;
 	for (const auto& entry : t_list)
 	{
-		ofile << (entry.completed ? 'v' : '-') << '\\' << entry.due << '\\' << entry.title << '\\' << entry.description << '\\' << entry.tag;
+		ofile << "\"" << (entry.completed ? 'v' : '-') 
+			<< "\"\\\"" << entry.due 
+			<< "\"\\\"" << replace_special(entry.title)
+			<< "\"\\\"" << replace_special(entry.description)
+			<< "\"\\\"" << entry.tag << "\"";
 
 		for (auto it = entry.meta.begin(); it != entry.meta.end(); it++)
 		{
-			ofile << '\\' << it->first << '\\' << it->second;
+			ofile << "\\\"" << replace_special(it->first) 
+				<< "\"\\\"" << replace_special(it->second) << "\"";
 		}
 
 		ofile << '\\' << endl;
