@@ -195,7 +195,7 @@ void cmd_init()
 		else
 			t_list[cui_s_line].meta[args.at(0)] = args.at(1);
 
-		li_save();
+		if (li_autosave) li_save();
 
 		return 0;
 	};
@@ -257,7 +257,7 @@ void cmd_init()
 		while (tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
 
 		t_tags[tag_filter] = args.at(0);
-		li_save();
+		if (li_autosave) li_save();
 
 		return 0;
 	};
@@ -269,7 +269,7 @@ void cmd_init()
 
 		try {
 			t_list[cui_s_line].tag = stoi(args.at(0));
-			li_save();
+			if (li_autosave) li_save();
 
 			return 0;
 		} catch (const invalid_argument& e) {
@@ -378,6 +378,14 @@ void cmd_init()
 			}
 		}
 
+		return 0;
+	};
+
+	// command "save" - force the list save
+	cmds["save"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1)	li_save();
+		else 			li_save(args.at(0));
 		return 0;
 	};
 

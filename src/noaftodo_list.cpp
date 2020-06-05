@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <unistd.h>
 
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"
@@ -37,6 +38,7 @@ string noaftodo_entry::meta_str() const
 void li_load()
 {
 	log("Loading list file " + li_filename);
+	li_autosave = false;
 
 	t_list.clear();
 	t_tags.clear();
@@ -60,6 +62,7 @@ void li_load()
 				// 0 - list tags read
 				// 1 - lists read
 				// 2 - workspace read
+				// 3 - list version read
 
 		while (getline(ifile, entry))
 		{
@@ -68,110 +71,122 @@ void li_load()
 			string temp = "";
 			string metaname = "";
 
-			if (entry != "") // only non-empty lines
+			if (entry == "") continue; // only non-empty lines
+
+			// trim string
+			while (entry.at(0) == ' ') 
 			{
-				// trim string
-				while (entry.at(0) == ' ') 
-				{
-					entry = entry.substr(1);
-					if (entry == "") break;
-				}
+				entry = entry.substr(1);
+				if (entry == "") break;
+			}
 
-				if (entry != "") if (entry.at(0) != '#')
-				{
-					log(entry);
+			if (entry == "") 	continue; // same precautions
+			if (entry.at(0) == '#') continue; // comment?
 
-					if (entry.at(0) == '[')
+			log(entry);
+
+			if (entry.at(0) == '[')
+			{
+				if (entry == "[tags]") 		mode = 0;
+				if (entry == "[list]") 		mode = 1;
+				if (entry == "[workspace]") 	mode = 2;
+				if (entry == "[ver]") 		mode = 3;
+			} else switch (mode) {
+				case 0: // tags
+					log("Added tag \"" + entry + "\" with index " + to_string(t_tags.size()));
+					t_tags.push_back(entry);
+					break;
+
+				case 1: // list
 					{
-						if (entry == "[tags]") mode = 0;
-						if (entry == "[list]") mode = 1;
-						if (entry == "[workspace]") mode = 2;
-					} else {
-						if (mode == 0)
+					bool inquotes = false;
+					bool skip_special = false;
+
+					for (int i = 0; i < entry.length(); i++)
+					{
+						const char c = entry.at(i);
+
+						if (skip_special) { temp += c; skip_special = false; }
+						else switch (c) 
 						{
-							log("Added tag \"" + entry + "\" with index " + to_string(t_tags.size()));
-							t_tags.push_back(entry);
-						}
-
-						if (mode == 1)
-						{
-							bool inquotes = false;
-							bool skip_special = false;
-
-							for (int i = 0; i < entry.length(); i++)
-							{
-								const char c = entry.at(i);
-
-								if (skip_special) { temp += c; skip_special = false; }
-								else switch (c) 
+							case '\\':
+								if (inquotes)
 								{
-									case '\\':
-										if (inquotes)
-										{
-											skip_special = true;
-										} else {
-											switch (token)
-											{
-												case 0:
-													li_entry.completed = (temp == "v");
-													break;
-												case 1:
-													li_entry.due = stol(temp);
-													break;
-												case 2:
-													li_entry.title = temp;
-													log("Entry: " + li_entry.title);
-													break;
-												case 3:
-													li_entry.description = temp;
-													break;
-												case 4:
-													li_entry.tag = stoi(temp);
-													break;
-												default:
-													// metadata
-													if (metaname == "") metaname = temp;
-													else 
-													{ 
-														li_entry.meta[metaname] = temp; 
-														log("Meta prop: " + metaname + " <=> " + temp);
-														metaname = "";
-													}
-													break;
+									skip_special = true;
+								} else {
+									switch (token)
+									{
+										case 0:
+											li_entry.completed = (temp == "v");
+											break;
+										case 1:
+											li_entry.due = stol(temp);
+											break;
+										case 2:
+											li_entry.title = temp;
+											log("Entry: " + li_entry.title);
+											break;
+										case 3:
+											li_entry.description = temp;
+											break;
+										case 4:
+											li_entry.tag = stoi(temp);
+											break;
+										default:
+											// metadata
+											if (metaname == "") metaname = temp;
+											else 
+											{ 
+												li_entry.meta[metaname] = temp; 
+												log("Meta prop: " + metaname + " <=> " + temp);
+												metaname = "";
 											}
+											break;
+									}
 
-											temp = "";
-											token++;
-										}
-
-										break;
-									case '\"':
-										inquotes = !inquotes;
-										break;
-									default:
-										temp += c;
-										break;
+									temp = "";
+									token++;
 								}
-							}
 
-							t_list.push_back(li_entry);
-						}
-						
-						if (mode == 2)
-						{
-							while (entry.at(0) == ' ')
-							{
-								entry = entry.substr(1);
-								if (entry == "") break;
-							}
-
-							if (entry != "") if (entry.at(0) != '#')
-								cmd_exec(entry);
+								break;
+							case '\"':
+								inquotes = !inquotes;
+								break;
+							default:
+								temp += c;
+								break;
 						}
 					}
-				}
+
+					t_list.push_back(li_entry);
+					}
+					break;
+				
+				case 2: // workspace
+					while (entry.at(0) == ' ')
+					{
+						entry = entry.substr(1);
+						if (entry == "") break;
+					}
+
+					if (entry != "") if (entry.at(0) != '#')
+						cmd_exec(entry);
+					break;
+
+				case 3: // list version verification
+					li_autosave |= (entry == to_string(LIST_V));
+					break;
 			}
 		}
+	}
+
+	if (!li_autosave)
+	{
+		log("Errors encountered during list load. Starting in safe mode. "
+				"The possible cause of it may be list version mismatch. "
+				"Solution: back up your list, start NOAFtodo and execute :save. "
+				"Then restart the program and hope for the best.", LP_ERROR);
+		sleep(1);
 	}
 
 	li_sort();
@@ -220,6 +235,8 @@ void li_save()
 		if (conf_get_predefined_cvar(key) != conf_get_cvar(key))
 			ofile << "set \"" << key << "\" \"" << conf_cvars.at(key) << "\"" << endl;
 	}
+
+	ofile << endl << "[ver]" << endl << LIST_V << endl;
 
 	log("Changes written to file " + li_filename);
 }

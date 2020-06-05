@@ -226,7 +226,7 @@ void cui_run()
 		if (cui_mode == CUI_MODE_EXIT) break;
 	}
 
-	li_save();
+	if (li_autosave) li_save();
 
 	cui_destroy();
 }
