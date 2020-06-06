@@ -157,7 +157,12 @@ void cmd_init()
 			noaftodo_entry new_entry;
 			new_entry.completed = false;
 
-			new_entry.due = ti_to_long(args.at(0));
+			if (args.at(0) == "-")
+			{
+				new_entry.due = ti_to_long("a10000y");
+				new_entry.meta["nodue"] = "true";
+			}
+			else new_entry.due = ti_to_long(args.at(0));
 			new_entry.title = args.at(1);
 			new_entry.description = args.at(2);
 
