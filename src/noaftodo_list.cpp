@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <stdexcept>
 #include <unistd.h>
 
 #include "noaftodo.h"

@@ -1,6 +1,7 @@
 #ifndef NOAFTODO_LIST_H
 #define NOAFTODO_LIST_H
 
+#include <stdexcept>
 #include <map>
 #include <string>
 #include <vector>
@@ -32,6 +33,27 @@ struct less_than_noaftodo_entry
 {
 	inline bool operator() (const noaftodo_entry& e1, const noaftodo_entry& e2)
 	{
+		// if only one of entries is "nodue" - it comes after
+		if ((e1.get_meta("nodue") == "true") &&  (e2.get_meta("nodue") != "true")) return false;
+		if ((e2.get_meta("nodue") == "true") &&  (e1.get_meta("nodue") != "true")) return true;
+
+		// if both are "nodue"
+		if ((e1.get_meta("nodue") == "true") &&  (e2.get_meta("nodue") == "true"))
+		{
+			if (e1.tag != e2.tag) return e1.tag < e2.tag; // sort by tag
+			else	// if tags are equal, sort by title
+			{
+				try { // sort by number in title
+					return stod(e1.title) < stod(e2.title);
+				} catch (const std::invalid_argument& e) {
+					// sort by title
+					for (int i = 0; (i < e1.title.length()) && (i < e2.title.length()); i++)
+						if (e1.title.at(i) != e2.title.at(i)) return e1.title.at(i) < e2.title.at(i);
+
+					return false;
+				}
+			}
+		}
 		return e1.due < e2.due;
 	}
 };
