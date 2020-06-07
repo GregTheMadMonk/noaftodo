@@ -177,6 +177,7 @@ void cmd_init()
 				if ((id >= 0) && (id < t_list.size())) 
 				{
 					new_entry.meta = t_list.at(id).meta;
+					new_entry.tag = t_list.at(id).tag;
 					t_list[id] = new_entry;
 				}
 				else return CMD_ERR_EXTERNAL;
