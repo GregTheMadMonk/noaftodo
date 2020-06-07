@@ -54,49 +54,47 @@ void conf_load(const string& conf_file)
 				entry = "";
 			} else entry += *c;
 		}
+	} else {
+		log("Loading config from " + conf_file + "...");
 
-		return;
-	}
+		ifstream iconf(conf_file);
+		if (!iconf.good())
+		{	// create a new config from a template
+			log("Config file does not exist!", LP_ERROR);
+			log("Creating a new one from template...");
 
-	log("Loading config from " + conf_file + "...");
+			ofstream oconf(conf_file);
+			// there must be a smarter way to do this
+			oconf << "# " << TITLE << " v." << VERSION << " auto-generated config file" << endl;
 
-	ifstream iconf(conf_file);
-	if (!iconf.good())
-	{	// create a new config from a template
-		log("Config file does not exist!", LP_ERROR);
-		log("Creating a new one from template...");
+			oconf << "ver " << CONF_V << endl;
 
-		ofstream oconf(conf_file);
-		// there must be a smarter way to do this
-		oconf << "# " << TITLE << " v." << VERSION << " auto-generated config file" << endl;
+			for (char* c = &_binary_noaftodo_conf_template_start; c < &_binary_noaftodo_conf_template_end; c++)
+				oconf << *c;
+		}
 
-		oconf << "ver " << CONF_V << endl;
-
-		for (char* c = &_binary_noaftodo_conf_template_start; c < &_binary_noaftodo_conf_template_end; c++)
-			oconf << *c;
-	}
-
-	iconf = ifstream(conf_file);
-	if (!iconf.good())
-	{
-		log("Something went wrong!", LP_ERROR);
-		return;
-	}
-
-	string entry;
-
-	while (getline(iconf, entry))
-	{
-		if (entry != "")
+		iconf = ifstream(conf_file);
+		if (!iconf.good())
 		{
-			while (entry.at(0) == ' ') 
-			{ 
-				entry = entry.substr(1);
-				if (entry == "") break;
-			}
+			log("Something went wrong!", LP_ERROR);
+			return;
+		}
 
-			if (entry != "") if (entry.at(0) != '#')
-				cmd_exec(entry);
+		string entry;
+
+		while (getline(iconf, entry))
+		{
+			if (entry != "")
+			{
+				while (entry.at(0) == ' ') 
+				{ 
+					entry = entry.substr(1);
+					if (entry == "") break;
+				}
+
+				if (entry != "") if (entry.at(0) != '#')
+					cmd_exec(entry);
+			}
 		}
 	}
 

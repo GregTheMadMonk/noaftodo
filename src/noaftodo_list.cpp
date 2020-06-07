@@ -56,7 +56,7 @@ string noaftodo_entry::meta_str()
 
 bool noaftodo_entry::is_failed() const
 {
-	return ((this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a0d")));
+	return !this->completed && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a0d"));
 }
 
 bool noaftodo_entry::is_failed()
@@ -66,7 +66,7 @@ bool noaftodo_entry::is_failed()
 
 bool noaftodo_entry::is_coming() const
 {
-	return !this->is_failed() && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a1d"));
+	return !this->completed && !this->is_failed() && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a1d"));
 }
 
 bool noaftodo_entry::is_coming()
