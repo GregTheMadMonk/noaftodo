@@ -66,7 +66,7 @@ bool noaftodo_entry::is_failed()
 
 bool noaftodo_entry::is_coming() const
 {
-	return ((this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a1d")));
+	return !this->is_failed() && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a1d"));
 }
 
 bool noaftodo_entry::is_coming()

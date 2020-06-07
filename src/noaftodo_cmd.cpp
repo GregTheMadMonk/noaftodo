@@ -268,6 +268,20 @@ void cmd_init()
 		return 0;
 	};
 
+	// command "lclear" - clear list
+	cmds["lclear"] = [] (const vector<string>& args)
+	{
+		const int tag_filter = conf_get_cvar_int("tag_filter");
+
+		if (tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
+
+		for (int i = 0; i < t_list.size(); )
+			if (t_list.at(i).tag == tag_filter) li_rem(i);
+			else i++;
+
+		return 0;
+	};
+
 	// command "lmv" - move selected task to a list
 	cmds["lmv"] = [] (const vector<string>& args)
 	{

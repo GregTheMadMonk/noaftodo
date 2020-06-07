@@ -72,9 +72,10 @@ void cui_init()
 		[](const noaftodo_entry& e, const int& id) 
 		{ 
 			string ret = "";
-			if (e.completed) ret += "V";		// a completed entry
-			else if (e.is_failed()) ret += "F";	// a failed entry
-			else if (e.is_coming()) ret += "C";	// an upcoming entry
+			if (e.completed) ret += "V";	// a completed entry
+			if (e.is_failed()) ret += "F";	// a failed entry
+			if (e.is_coming()) ret += "C";	// an upcoming entry
+			if (e.get_meta("nodue") == "true") ret += "N";	// a "nodue" entry
 			return ret; 
 		} 
 	};
