@@ -40,6 +40,8 @@ bind "U" "vtoggle uncat" 1 true
 bind "C" "vtoggle coming" 1 true
 bind "V" "vtoggle complete" 1 true
 bind "N" "vtoggle nodue" 1 true
+bind "f" "set regex_filter " 1 false
+bind "e" "a %due% %T% %D% %id% %meta%" 1 false
 
 alias duplicate a \%due\% \%T\% \%D\%
 # Aaand this is the place where you will ask me: "Hey, Greg, why do you do this,

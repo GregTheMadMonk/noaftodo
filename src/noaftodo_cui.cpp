@@ -7,6 +7,7 @@
 #include <curses.h>
 #endif
 #include <locale>
+#include <regex>
 
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"
@@ -150,7 +151,8 @@ void cui_init()
 			string((filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
 			string((filter & CUI_FILTER_COMING) ? "C" : "_") + 
 			string((filter & CUI_FILTER_FAILED) ? "F" : "_") +
-			string((filter & CUI_FILTER_NODUE) ? "N" : "_");
+			string((filter & CUI_FILTER_NODUE) ? "N" : "_") + 
+			((conf_get_cvar("regex_filter") == "") ? "" : (" [" + conf_get_cvar("regex_filter") + "]"));
 	};
 
 	cui_status_fields['i'] = [] ()
@@ -214,7 +216,10 @@ void cui_run()
 				if (bind.autoexec) cmd_exec(bind.command);
 				else 
 				{
-					cui_command = w_converter.from_bytes(bind.command);
+					if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
+						cui_command = w_converter.from_bytes(format_str(bind.command, t_list.at(cui_s_line)));
+					else
+						cui_command = w_converter.from_bytes(bind.command);
 					cui_set_mode(CUI_MODE_COMMAND);
 				}
 
@@ -327,6 +332,14 @@ bool cui_is_visible(const int& entryID)
 	if (entry.get_meta("nodue") == "true") ret = ret && (filter & CUI_FILTER_NODUE);
 
 	if (entry.is_uncat())	ret = ret && (filter & CUI_FILTER_UNCAT);
+
+	// fit regex
+	if (conf_get_cvar("regex_filter") != "")
+	{
+		regex rf_regex(conf_get_cvar("regex_filter"));
+
+		ret = ret && (std::regex_search(entry.title, rf_regex) || std::regex_search(entry.description, rf_regex));
+	}
 
 	return ret;
 }

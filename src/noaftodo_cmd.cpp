@@ -353,7 +353,13 @@ void cmd_init()
 	// command "set" - set cvar value
 	cmds["set"] = [] (const vector<string>& args)
 	{
-		if (args.size() < 2) return CMD_ERR_ARG_COUNT;
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		if (args.size() < 2)
+		{
+			cmd_exec("reset " + args.at(0));
+			return 0;
+		}
 
 		conf_set_cvar(args.at(0), args.at(1));
 		return 0;
