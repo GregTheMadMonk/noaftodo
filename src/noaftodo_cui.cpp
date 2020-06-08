@@ -105,7 +105,7 @@ void cui_init()
 		},
 		[](const noaftodo_entry& e, const int& id) 
 		{ 
-			if (e.get_meta("nodue") == "true") return string("-----------------");
+			if (e.get_meta("nodue") == "true") return string("----------------");
 			else return ti_f_str(e.due); 
 		} 
 	};
@@ -338,7 +338,7 @@ bool cui_is_visible(const int& entryID)
 	{
 		regex rf_regex(conf_get_cvar("regex_filter"));
 
-		ret = ret && (std::regex_search(entry.title, rf_regex) || std::regex_search(entry.description, rf_regex));
+		ret = ret && (regex_search(entry.title, rf_regex) || regex_search(entry.description, rf_regex));
 	}
 
 	return ret;
@@ -686,7 +686,7 @@ void cui_command_input(const wchar_t& key)
 			if (cui_mode == CUI_MODE_COMMAND) cui_set_mode(CUI_MODE_NORMAL);
 			cui_filter_history();
 			break;
-		case 127: case KEY_BACKSPACE: // 127 is for, e.g., xfce4-terminal
+		case 127: case KEY_BACKSPACE: 	// 127 is for, e.g., xfce4-terminal
 						// KEY_BACKSPACE - e.g., alacritty
 			cui_command_index = cui_command_history.size();
 
@@ -695,12 +695,16 @@ void cui_command_input(const wchar_t& key)
 				cui_command = cui_command.substr(0, cui_command_cursor - 1) + cui_command.substr(cui_command_cursor, cui_command.length() - cui_command_cursor);
 				cui_command_cursor--;
 			}
+
+			goto contexec;
 			break;
 		case KEY_DC:
 			cui_command_index = cui_command_history.size();
 
 			if (cui_command_cursor < cui_command.length())
 				cui_command = cui_command.substr(0, cui_command_cursor) + cui_command.substr(cui_command_cursor + 1, cui_command.length() - cui_command_cursor - 1);
+
+			goto contexec;
 			break;
 		case KEY_LEFT:
 			if (cui_command_cursor > 0) cui_command_cursor--;
@@ -743,6 +747,16 @@ void cui_command_input(const wchar_t& key)
 
 			cui_command = cui_command.substr(0, cui_command_cursor) + key + cui_command.substr(cui_command_cursor, cui_command.length() - cui_command_cursor);
 			cui_command_cursor++;
+
+			// continious command execution
+			contexec:
+			if (conf_get_cvar("contexec_cmd_regex") != "")
+			{
+				regex ce_regex(conf_get_cvar("contexec_cmd_regex"));
+
+				if (regex_search(w_converter.to_bytes(cui_command), ce_regex))
+					cmd_exec(w_converter.to_bytes(cui_command));
+			}
 	}
 }
 
