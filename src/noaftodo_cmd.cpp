@@ -306,16 +306,6 @@ void cmd_init()
 		}
 	};
 
-	// command "get" - print cvar value to status
-	cmds["get"] = [] (const vector<string>& args)
-	{
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-		cui_status = conf_get_cvar(args.at(0));
-
-		return 0;
-	};
-
 	// command "bind" - bind a key
 	cmds["bind"] = [] (const vector<string>& args)
 	{
