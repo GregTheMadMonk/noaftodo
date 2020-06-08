@@ -165,6 +165,44 @@ void cui_init()
 
 		return to_string(cui_s_line) + "/" + to_string(t_list.size() - 1);
 	};
+
+	cui_status_fields['p'] = [] ()
+	{
+		const int tag_filter = conf_get_cvar_int("tag_filter");
+
+		int total = 0;
+		int comp = 0;
+
+		for (int i = 0; i < t_list.size(); i++)
+			if ((tag_filter == CUI_TAG_ALL) || (tag_filter == t_list.at(i).tag))
+			{
+				total++;
+				if (t_list.at(i).completed) comp++;
+			}
+
+		if (total == 0) return string("");
+
+		return to_string((int)(100.0 * comp / total)) + "%";
+	};
+
+	cui_status_fields['P'] = [] ()
+	{
+		const int tag_filter = conf_get_cvar_int("tag_filter");
+
+		int total = 0;
+		int comp = 0;
+
+		for (int i = 0; i < t_list.size(); i++)
+			if ((tag_filter == CUI_TAG_ALL) || (tag_filter == t_list.at(i).tag))
+			{
+				total++;
+				if (t_list.at(i).completed) comp++;
+			}
+
+		if (total == 0) return string("");
+
+		return to_string(comp) + "/" + to_string(total) + " COMP";
+	};
 	
 	// construct UI
 	cui_command_history.push_back(w_converter.from_bytes(""));
