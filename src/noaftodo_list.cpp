@@ -31,9 +31,18 @@ string noaftodo_entry::get_meta(const string& str)
 	return const_cast<const noaftodo_entry*>(this)->get_meta(str);
 }
 
+bool noaftodo_entry::operator==(const noaftodo_entry& comp)
+{
+	return this->sim(comp) &&
+		(this->completed == comp.completed);
+}
+
 bool noaftodo_entry::sim(const noaftodo_entry& e2)
 {
-	return (this->due == e2.due) && (this->title == e2.title) && (this->description == e2.description);
+	return (this->due == e2.due) && 
+		(this->title == e2.title) && 
+		(this->description == e2.description) &&
+		(this->tag == e2.tag);
 }
 
 string noaftodo_entry::meta_str() const

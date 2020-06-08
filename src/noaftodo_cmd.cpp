@@ -183,6 +183,10 @@ void cmd_init()
 				else return CMD_ERR_EXTERNAL;
 			}	
 
+			// go to created task
+			for (int i = 0; i < t_list.size(); i++)
+				if (t_list.at(i) == new_entry) cmd_exec("g " + to_string(i));
+
 			return 0;
 		} catch (const invalid_argument& e) {
 			return CMD_ERR_ARG_TYPE;
@@ -198,8 +202,12 @@ void cmd_init()
 
 		if (args.size() < 2)
 			t_list[cui_s_line].meta.erase(args.at(0));
-		else
-			t_list[cui_s_line].meta[args.at(0)] = args.at(1);
+		else 
+		{
+			if (args.size() % 2 == 1) return CMD_ERR_ARG_COUNT;
+			for (int i = 0; i < args.size(); i += 2)
+				t_list[cui_s_line].meta[args.at(i)] = args.at(i + 1);
+		}
 
 		if (li_autosave) li_save();
 
@@ -546,14 +554,14 @@ int cmd_exec(string command)
 
 					const int ret = (cmds.at(oargs.at(0)))(newargs);
 
-					if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Not enough arguments";
+					if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Wrong argument count";
 					if (ret == CMD_ERR_ARG_TYPE)	cui_status = "Wrong argument type";
 					if (ret == CMD_ERR_EXTERNAL)	cui_status = "Cannot execute command";
 				} catch (const out_of_range& e) { // alias not found, try to execute a command
 					try {
 						const int ret = (cmds.at(words.at(i)))(cmdarg);
 
-						if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Not enough arguments";
+						if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Wrong argument count";
 						if (ret == CMD_ERR_ARG_TYPE)	cui_status = "Wrong argument type";
 						if (ret == CMD_ERR_EXTERNAL)	cui_status = "Cannot execute command";
 					} catch (const out_of_range& e)
