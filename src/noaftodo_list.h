@@ -29,6 +29,9 @@ struct noaftodo_entry
 
 	bool is_coming();
 	bool is_coming() const;
+
+	bool is_uncat();
+	bool is_uncat() const;
 };
 
 struct less_than_noaftodo_entry

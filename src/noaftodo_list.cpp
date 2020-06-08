@@ -83,6 +83,19 @@ bool noaftodo_entry::is_coming()
 	return const_cast<const noaftodo_entry*>(this)->is_coming();
 }
 
+bool noaftodo_entry::is_uncat() const
+{
+	return !this->completed &&
+		!this->is_failed() &&
+		!this->is_coming() &&
+		(this->get_meta("nodue") != "true");
+}
+
+bool noaftodo_entry::is_uncat()
+{
+	return const_cast<const noaftodo_entry*>(this)->is_uncat();
+}
+
 void li_load()
 {
 	log("Loading list file " + li_filename);

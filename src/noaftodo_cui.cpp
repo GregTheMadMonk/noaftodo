@@ -149,7 +149,8 @@ void cui_init()
 		return string((filter & CUI_FILTER_UNCAT) ? "U" : "_") +
 			string((filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
 			string((filter & CUI_FILTER_COMING) ? "C" : "_") + 
-			string((filter & CUI_FILTER_FAILED) ? "F" : "_");
+			string((filter & CUI_FILTER_FAILED) ? "F" : "_") +
+			string((filter & CUI_FILTER_NODUE) ? "N" : "_");
 	};
 
 	cui_status_fields['i'] = [] ()
@@ -312,17 +313,22 @@ bool cui_is_visible(const int& entryID)
 {
 	if (t_list.size() == 0) return false;
 	if ((entryID < 0) && (entryID >= t_list.size())) return false;
+
 	const auto& entry = t_list.at(entryID);
 
 	const int tag_filter = conf_get_cvar_int("tag_filter");
 	const int filter = conf_get_cvar_int("filter");
-	const bool tag_check = ((tag_filter == CUI_TAG_ALL) || (tag_filter == entry.tag));
+	bool ret = ((tag_filter == CUI_TAG_ALL) || (tag_filter == entry.tag));
 
-	if (entry.completed) return tag_check && (filter & CUI_FILTER_COMPLETE);
-	if (entry.is_failed()) return tag_check && (filter & CUI_FILTER_FAILED);
-	if (entry.is_coming()) return tag_check && (filter & CUI_FILTER_COMING);
+	if (entry.completed) 	ret = ret && (filter & CUI_FILTER_COMPLETE);
+	if (entry.is_failed()) 	ret = ret && (filter & CUI_FILTER_FAILED);
+	if (entry.is_coming()) 	ret = ret && (filter & CUI_FILTER_COMING);
 
-	return tag_check && (filter & CUI_FILTER_UNCAT);
+	if (entry.get_meta("nodue") == "true") ret = ret && (filter & CUI_FILTER_NODUE);
+
+	if (entry.is_uncat())	ret = ret && (filter & CUI_FILTER_UNCAT);
+
+	return ret;
 }
 
 void cui_normal_paint()

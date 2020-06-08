@@ -39,6 +39,7 @@ bind "F" "vtoggle failed" 1 true
 bind "U" "vtoggle uncat" 1 true
 bind "C" "vtoggle coming" 1 true
 bind "V" "vtoggle complete" 1 true
+bind "N" "vtoggle nodue" 1 true
 
 alias duplicate a \%due\% \%T\% \%D\%
 # Aaand this is the place where you will ask me: "Hey, Greg, why do you do this,

@@ -231,10 +231,11 @@ void cmd_init()
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
 		int filter = conf_get_cvar_int("filter");
-		if (args.at(0) == "uncat") filter ^= CUI_FILTER_UNCAT;
-		if (args.at(0) == "complete") filter ^= CUI_FILTER_COMPLETE;
-		if (args.at(0) == "coming") filter ^= CUI_FILTER_COMING;
-		if (args.at(0) == "failed") filter ^= CUI_FILTER_FAILED;
+		if (args.at(0) == "uncat") 	filter ^= CUI_FILTER_UNCAT;
+		if (args.at(0) == "complete") 	filter ^= CUI_FILTER_COMPLETE;
+		if (args.at(0) == "coming") 	filter ^= CUI_FILTER_COMING;
+		if (args.at(0) == "failed") 	filter ^= CUI_FILTER_FAILED;
+		if (args.at(0) == "nodue")	filter ^= CUI_FILTER_NODUE;
 
 		conf_set_cvar_int("filter", filter);
 

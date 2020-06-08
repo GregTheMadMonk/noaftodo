@@ -47,10 +47,11 @@ constexpr int CUI_MODE_COMMAND = 0b10;
 constexpr int CUI_MODE_HELP = 0b100;
 
 // filters
-constexpr int CUI_FILTER_UNCAT = 0b1; // uncategorized
-constexpr int CUI_FILTER_COMPLETE = 0b10; // complete
-constexpr int CUI_FILTER_COMING = 0b100; // upcoming
-constexpr int CUI_FILTER_FAILED = 0b1000; // failed
+constexpr int CUI_FILTER_UNCAT = 0b1; 		// uncategorized
+constexpr int CUI_FILTER_COMPLETE = 0b10; 	// complete
+constexpr int CUI_FILTER_COMING = 0b100; 	// upcoming
+constexpr int CUI_FILTER_FAILED = 0b1000; 	// failed
+constexpr int CUI_FILTER_NODUE = 0b10000; 	// nodue
 
 constexpr int CUI_TAG_ALL = -1;
 
