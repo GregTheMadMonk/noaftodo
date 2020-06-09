@@ -34,6 +34,9 @@ extern int da_interval;
 
 void da_run();
 
+void da_upd_cache(const bool& is_first_load = false);
+void da_check_dues(const bool& renotify = false);
+
 void da_kill();
 
 void da_send(const char message[]);

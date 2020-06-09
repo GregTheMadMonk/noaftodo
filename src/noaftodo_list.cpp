@@ -34,15 +34,28 @@ string noaftodo_entry::get_meta(const string& str)
 bool noaftodo_entry::operator==(const noaftodo_entry& comp)
 {
 	return this->sim(comp) &&
-		(this->completed == comp.completed);
+		(this->completed == comp.completed) &&
+		(this->meta == comp.meta);
 }
 
-bool noaftodo_entry::sim(const noaftodo_entry& e2)
+bool noaftodo_entry::operator==(const noaftodo_entry& comp) const
+{
+	return this->sim(comp) &&
+		(this->completed == comp.completed) &&
+		(this->meta == comp.meta);
+}
+
+bool noaftodo_entry::sim(const noaftodo_entry& e2) const
 {
 	return (this->due == e2.due) && 
 		(this->title == e2.title) && 
 		(this->description == e2.description) &&
 		(this->tag == e2.tag);
+}
+
+bool noaftodo_entry::sim(const noaftodo_entry& e2)
+{
+	return const_cast<const noaftodo_entry*>(this)->sim(e2); 
 }
 
 string noaftodo_entry::meta_str() const
@@ -99,7 +112,7 @@ bool noaftodo_entry::is_uncat()
 void li_load()
 {
 	log("Loading list file " + li_filename);
-	li_autosave = false;
+	bool safemode = true;
 
 	t_list.clear();
 	t_tags.clear();
@@ -236,13 +249,13 @@ void li_load()
 					break;
 
 				case 3: // list version verification
-					li_autosave |= (entry == to_string(LIST_V));
+					safemode &= (entry != to_string(LIST_V));
 					break;
 			}
 		}
 	}
 
-	if (!li_autosave)
+	if (safemode)
 	{
 		log("Errors encountered during list load. Starting in safe mode. "
 				"The possible cause of it may be list version mismatch. "
@@ -250,6 +263,8 @@ void li_load()
 				"Then restart the program and hope for the best.", LP_ERROR);
 		sleep(1);
 	}
+
+	li_autosave = (!safemode) && (run_mode != PM_DAEMON); // don't allow daemon to save stuff
 
 	li_sort();
 }

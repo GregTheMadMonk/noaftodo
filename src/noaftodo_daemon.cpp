@@ -28,14 +28,13 @@ void da_run()
 	// init cache
 	if (da_check_lockfile())
 	{
-		log("Lockfile " + string(DA_LOCK_FILE) + " exists. If daemon is not running, you can delete it or run noaftodo -k.");
+		log("Lockfile " + string(DA_LOCK_FILE) + " exists. If daemon is not running, you can delete it or run noaftodo -k.", LP_IMPORTANT);
 		return;
 	} else {
 		da_lock();
 	}
 
 	da_cache.clear();
-	li_autosave = false;
 
 	log("Opening a message queue...");
 	mq_attr attr;
@@ -55,87 +54,20 @@ void da_run()
 
 	da_running = true;
 	timespec tout;
-	bool first = true;
-	while (da_running)
+
+	da_upd_cache(true);
+	da_cached_time = ti_to_long("a0d");
+
+	for (int ticks = 0; da_running; ticks++)
 	{
-		// update cache
-		li_load();
-		for (int i = 0; i < t_list.size(); i++)
+		if (ticks == conf_get_cvar_int("daemon.list_upd_ticks")) 
 		{
-			bool cached = false;
-			int cached_id = -1;
-			for (int j = 0; j < da_cache.size(); j++)
-				if (da_cache.at(j).sim(t_list.at(i)))
-				{
-					cached = true;
-					cached_id = j;
-				}
-
-			const noaftodo_entry e1 = t_list.at(i);
-
-			cui_s_line = i;
-
-			if (!cached)
-			{	// add to cache
-				da_cache.push_back(t_list.at(i));
-
-				if (e1.completed)
-					cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), e1, first));
-				else if (e1.is_failed())
-					cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), e1, first));
-				else if (e1.is_coming())
-					cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), e1, first));
-				else if (!first)
-					cmd_exec(format_str(conf_get_cvar("on_task_new_action"), e1));
-			} else {
-				const noaftodo_entry e2 = da_cache.at(cached_id);
-
-				if (e1.completed != e2.completed)
-				{
-					if (e1.completed)
-						cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), e1));
-					else if (e1.is_failed())
-						cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), e1));
-					else if (e1.is_coming())
-						cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), e1));
-					else
-						cmd_exec(format_str(conf_get_cvar("on_task_uncompleted_action"), e1));
-				} else if (!e1.completed)
-				{
-					if (e1.is_failed())
-					{
-						if (e1.due > da_cached_time)
-							cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), e1));
-					} else if (e1.is_coming())
-					{
-						if (e1.due > ti_to_long(ti_cmd_str(da_cached_time) + "a1d"))
-							cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), e1));
-					}
-				}
-
-				da_cache[cached_id] = e1;
-			}
+			ticks = 0;
+			da_upd_cache();
 		}
 
-		// clear cache
-		for (int i = 0; i < da_cache.size(); i++)
-		{
-			bool deleted = true;
-			for (int j = 0; j < t_list.size(); j++)
-				if (t_list.at(j).sim(da_cache.at(i))) deleted = false;
+		da_check_dues();
 
-			cui_s_line = -1; // we don't know and we don't want to know
-					// a deleted task's ID
-
-			if (deleted) 
-			{
-				cmd_exec(format_str(conf_get_cvar("on_task_removed_action"), da_cache.at(i)));
-				da_cache.erase(da_cache.begin() + i);
-				i--;
-			}
-		}
-
-		first = false;
 		da_cached_time = ti_to_long("a0d");
 
 		char msg[DA_MSGSIZE];
@@ -156,20 +88,11 @@ void da_run()
 					da_running = false;
 					break;
 				case 'N':
-					for (int i = 0; i < t_list.size(); i++)
-					{
-						const noaftodo_entry e1 = t_list.at(i);
-
-						cui_s_line = i;
-
-						if (e1.completed)
-							cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), e1, true));
-						else if (e1.is_failed())
-							cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), e1, true));
-						else if (e1.is_coming())
-							cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), e1, true));
-						else continue;
-					}
+					da_check_dues(true);
+					break;
+				case 'C':
+					da_upd_cache();
+					ticks = 0;
 					break;
 			}
 
@@ -182,6 +105,96 @@ void da_run()
 	mq_unlink(DA_MQ_NAME);
 
 	da_unlock();
+}
+
+void da_upd_cache(const bool& is_first_load)
+{
+	li_load();
+
+	for (int i = 0; i < t_list.size(); i++)
+	{
+		int cached_id = -1;
+
+		for (int j = 0; j < da_cache.size(); j++)
+			if (da_cache.at(j).sim(t_list.at(i)))
+			{
+				cached_id  = j;
+				break;
+			}
+
+		const noaftodo_entry li_e = t_list.at(i);
+
+		if (cached_id == -1) 
+		{	// add to cache
+			da_cache.push_back(li_e);
+
+			if (li_e.completed)
+				cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), li_e, is_first_load));
+			else if (li_e.is_failed())
+				cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), li_e, is_first_load));
+			else if (li_e.is_coming())
+				cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), li_e, is_first_load));
+			else if (!is_first_load)
+				cmd_exec(format_str(conf_get_cvar("on_task_new_action"), li_e, is_first_load));
+
+			continue;
+		}
+
+		const noaftodo_entry ca_e = da_cache.at(cached_id);
+		da_cache[cached_id] = li_e;
+
+		if (ca_e == li_e) continue; // skip the unchanged entries
+
+		// entry completion switched
+		if (ca_e.completed != li_e.completed)
+		{
+			if (li_e.completed)
+				cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), li_e, false));
+			else if (li_e.is_failed())
+				cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), li_e, true));
+			else if (li_e.is_coming())
+				cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), li_e, true));
+
+			continue;
+		}
+
+		// something else has changed
+		//
+		// ...
+		//
+		// we don't care yet lol
+	}
+
+	cui_s_line = -1;
+
+	// clear cache from deleted tasks
+	for (int i = 0; i < da_cache.size();)
+	{
+		bool removed = true;
+		for (int j = 0; j < t_list.size(); j++)
+			removed &= !t_list.at(j).sim(da_cache.at(i));
+
+		if (removed)
+		{
+			cmd_exec(format_str(conf_get_cvar("on_task_removed_action"), da_cache.at(i)));
+			da_cache.erase(da_cache.begin() + i);
+		} else i++;
+	}
+}
+
+void da_check_dues(const bool& renotify)
+{
+	// da_check_dues supposes that the cache is up to date with the list
+	// and da_cache and t_list contain the same entries
+	for (cui_s_line = 0; cui_s_line < t_list.size(); cui_s_line++)	
+	{
+		if ((t_list.at(cui_s_line).is_failed()) && (renotify || (t_list.at(cui_s_line).due > da_cached_time)))
+			cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), t_list.at(cui_s_line), renotify));
+		else if ((t_list.at(cui_s_line).is_coming()) && (renotify || (t_list.at(cui_s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a1d"))))
+			cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), t_list.at(cui_s_line), renotify));
+	}
+
+	cui_s_line = -1;
 }
 
 void da_kill()

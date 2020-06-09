@@ -135,6 +135,11 @@ void cui_init()
 	};
 
 	// initialize status fields
+	cui_status_fields['s'] = [] ()
+	{
+		return cui_status;
+	};
+
 	cui_status_fields['l'] = [] ()
 	{
 		const int tag_filter = conf_get_cvar_int("tag_filter");
@@ -498,8 +503,6 @@ void cui_normal_paint()
 			}
 		} catch (const out_of_range& e) {}
 	}
-
-	if (cui_status != "") cui_status_l += " " + conf_get_cvar("charset.status_separator") + " " + cui_status;
 
 	if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
 	attron(COLOR_PAIR(CUI_CP_STATUS));

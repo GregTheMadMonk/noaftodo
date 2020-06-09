@@ -19,7 +19,9 @@ struct noaftodo_entry
 	std::string get_meta(const std::string& str) const;
 
 	bool sim(const noaftodo_entry& e2);
+	bool sim(const noaftodo_entry& e2) const;
 	bool operator==(const noaftodo_entry& comp);
+	bool operator==(const noaftodo_entry& comp) const;
 
 	std::string meta_str();
 	std::string meta_str() const;
