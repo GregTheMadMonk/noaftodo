@@ -235,7 +235,8 @@ void da_send(const char message[])
 	}
 	log("OK");
 
-	int status = mq_send(mq, message, DA_MSGSIZE, 1);
+	const timespec timeout = { .tv_sec = 1 };
+	int status = mq_timedsend(mq, message, DA_MSGSIZE, 1, &timeout);
 
 	if (status == -1)
 		log("Uh oh no success :(", LP_ERROR);

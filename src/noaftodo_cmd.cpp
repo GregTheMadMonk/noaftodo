@@ -183,6 +183,8 @@ void cmd_init()
 					new_entry.meta = t_list.at(id).meta;
 					new_entry.tag = t_list.at(id).tag;
 					t_list[id] = new_entry;
+
+					if (li_autosave) li_save();
 				}
 				else return CMD_ERR_EXTERNAL;
 			}	
