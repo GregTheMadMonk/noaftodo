@@ -152,7 +152,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "a <due> <title> <description>[ <id> <meta>]" - add or override a task. If <id> is not specified or is set to "new", a new task is created. If not, a task with <id> will be overriden.
+	// command "a <due> <title> <description>[ <id>]" - add or override a task. If <id> is not specified, a new task is created. If not, a task with <id> will be overriden.
 	cmds["a"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
