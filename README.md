@@ -1,16 +1,17 @@
 # NOAFtodo
 A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolutely no clue why.
 
-![NOAFtodo workflow](workflow.gif)
+![NOAFtodo workflow](workflow.gif =576x324)
 
 ### Current and future features
 - [x] minimalisic interface written with ncurses
 - [x] multiple lists between which tasks can be moved
-- [x] primitive TODO list management: add and remove tasks with dues, marking tasks as completed, filtering failed, completed, upcomig and uncategorized tasks
+- [x] primitive TODO list management: add and remove tasks with or without dues, mark tasks as completed, basic task editing
+- [x] task filtering: by flag (failed, upcoming, completed, nodue, uncategoorized), by list (tag), regex serach titles and descriptions
 - [x] a daemon that can work in background, track tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
+- [x] per-task events on top of global events, which allow you to do some tricky things (creaing recurring tasks or setting up something like an alarm clock)
 - [x] bugs
-- [x] \(almost\) task-specific events
-- [ ] \(thinking of a way to imlpement it so it's not completely useless\) option to configure program with source-code only
+- [ ] option to configure program with source-code only (being considered, thinking of a way to do this and provide new functionality on top of just using a config file)
 - [ ] \(not a feature really\) documentation
 
 Default list is created as **~/.noaftodo-list** and delault config is copied to **~/.config/noaftodo.conf**.
@@ -20,20 +21,17 @@ Also running without creating a config is supported with `noaftodo -c default`, 
 ### Building
 Run `make` (`gmake` on Solaris 11).
 #### Dependencies
-**ncurses**. You need it.
+**ncurses**. You need it (on an Arch-based system: `sudo pacman -S ncurses`, on a Debian-based system: `sudo apt install libncurses5-dev`).
 
-On an Arch-based system: `sudo pacman -S ncurses`
+Also, default config makes daemon use **notify-send** on task events (provided by `libnotify` and `libnotify-bin` on Arch and Debian based distributions respectively, requires notification deamon of your choise).
 
-On a Debian-based system: `sudo apt install libncurses5-dev`
+### Configuring
+See **noaftodo.conf.template** if you want an example configuration.
 
-Also, default config makes daemon use **notify-send** on task events (provided by `libnotify` and `libnotify-bin` on Arch and Debian based distributions respectively, also requires notification deamon of your choise).
+### Adding a task, and just using NOAFtodo
+Run `noaftodo -h` or press `?` in normal mode (use left and right arrows to scroll). The help message should cover most of the things you need.
 
-### How to add a task?
-You can easily add a task with
-`:a <due> <title> <description>`.
-Some might find due format confusing though, so here it is explained:
-
-You specify due as `[a]YYYYyMMmDDdHHhμμ` it means:
+The only thing you will probably find confusing is time and date fromat used: you specify time as `[a]YYYYyMMmDDdHHhμμ`, where:
 * `YYYYy` - year YYYY
 * `MMm` - MM'th month
 * `DDd` - DD'th day
@@ -49,39 +47,32 @@ Examples:
 
 Hope it makes sense.
 
+You should also know that you can execute system commands with `!<command>`.
+
+The best way to somewhat understand how NOAFtodo command-line works now will be reading **nooaftodo.conf.template**.
+
 ### Task categories
-All tasks belong in one of the following categories and can be filtered by them in normal mode:
+All tasks belong to the following categories and can be filtered by them in normal mode:
 * Completed (marked completed manually)
 * Failed (due has passed)
 * (up)Coming (due is in less than 24 hours)
+* Nodue (doesn't have a due)
 * Uncategorized - all other
 
-## Configuring
-See **noaftodo.conf.template** if you want an example configuration.
-### Binding keys
-Command responsible for binding keys is `:bind <key> <command> <mode> <autoexec>`.
-Exampes of it being used can be found in template config.
-
-`mode` specifies modes that allow this bind. See **src/noaftodo_cui.h** for integer values for modes. For bind to be executable in multiple modes, `mode` should be set to logical OR of their values: `9 = 0b1001 = 0b1000 | 0b0001 = CUI_MODE_DETAILS | CUI_MODE_NORMAL` - bind will be available in normal and description modes.
-
-If `autoexec` is set, command executes immediately, otherwise the bind will take you to command mode with `command` pre-typed
-
-### Some of the default shortcuts:
-* ? - :? - shows help
-* q or \<esc\> - :q - exit program
-* up arrow or k - :up - navigate up the list
-* down arrow or j - :down - navigate down the list
-* a - :a a (no autoexec) - adds entry (relative time)
-* A - :a (no autoexec) - adds entry
-* \<enter\> - :details - show full information about entry
-* \<space\> - :c - toggles entry completion
-* d - :d (no autoexec) - deletes entry
-* gg - :g 0
-* [input number]g - :g [input number] - goes to the entry with index [input number], or closest if hidden
-* Gg - :g [last item index]
-* ll - :list all
-* [input number]l - :list [input number] - switches to view only the list with index [input number]
-* U - :vtoggle uncat - toggles uncategorized entries visibility
-* F - :vtoggle failed - toggles failed entries visibility
-* C - :vtoggle coming - and so on
-* V - :vtoggle complete - and so forth
+### Some of the default normal mode shortcuts:
+* ? - `:?` - shows help
+* q or \<esc> - `:q` - exit program
+* up arrow or k - `:up` - navigate up the list
+* down arrow or j - `:down` - navigate down the list
+* a - `:a a ` (no autoexec) - adds entry (relative time)
+* A - `:a` (no autoexec) - adds entry
+* \<enter> - `:details` - show full information about entry
+* \<space> - `:c` - toggles entry completion
+* d - `:d` (no autoexec) - deletes entry
+* gg - `:g 0`
+* [input number]g - `:g [input number]` - goes to the entry with index [input number], or closest if hidden
+* Gg - `:g [last item index]`
+* ll - `:list all` - show tasks from all lists
+* [input number]l - `:list [input number]` - switches to view only the list with index [input number]
+* U|F|C|V|N - `:vtoggle uncat|failed|coming|completed|nodue` - toggles uncategorized|failed|upcoming|completed|nodue entries visibility
+* / - `set regex_filter ` - filter tasks

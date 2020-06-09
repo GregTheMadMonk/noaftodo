@@ -189,9 +189,17 @@ void da_check_dues(const bool& renotify)
 	for (cui_s_line = 0; cui_s_line < t_list.size(); cui_s_line++)	
 	{
 		if ((t_list.at(cui_s_line).is_failed()) && (renotify || (t_list.at(cui_s_line).due > da_cached_time)))
+		{
 			cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), t_list.at(cui_s_line), renotify));
+			if (!renotify)
+				cmd_exec(format_str(t_list.at(cui_s_line).get_meta("on_failed"), t_list.at(cui_s_line)));
+		}
 		else if ((t_list.at(cui_s_line).is_coming()) && (renotify || (t_list.at(cui_s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a1d"))))
+		{
 			cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), t_list.at(cui_s_line), renotify));
+			if (!renotify)
+				cmd_exec(format_str(t_list.at(cui_s_line).get_meta("on_coming"), t_list.at(cui_s_line)));
+		}
 	}
 
 	cui_s_line = -1;

@@ -32,35 +32,35 @@ map<string, vector<string>> aliases;
 
 void cmd_init()
 {
-	// command "q" - exit the program
+	// command "q" - exit the program.
 	cmds["q"] = [] (const vector<string>& args)
 	{
 		cui_mode = CUI_MODE_EXIT;
 		return 0;
 	};
 
-	// command ":" - enter the command mode
+	// command ":" - enter the command mode.
 	cmds[":"] = [] (const vector<string>& args)
 	{
 		cui_set_mode(CUI_MODE_COMMAND);
 		return 0;
 	};
 
-	// command "?" - show the help message
+	// command "?" - show the help message.
 	cmds["?"] = [] (const vector<string>& args)
 	{
 		cui_set_mode(CUI_MODE_HELP);
 		return 0;
 	};
 
-	// command "details" - view task details
+	// command "details" - view task details.
 	cmds["details"] = [] (const vector<string>& args)
 	{
 		cui_set_mode(CUI_MODE_DETAILS);
 		return 0;
 	};
 
-	// command "alias" - create an alias for command
+	// command "alias <command>" - create an alias for command.
 	cmds["alias"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
@@ -73,10 +73,14 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "list" - navigate to list (":list all" to view tasks from all lists)
+	// command "list[ <list_id>]" - navigate to list. If <list_id> is "all" or unspecified, view tasks from all lists.
 	cmds["list"] = [] (const vector<string>& args)
 	{
-		if (args.size() != 1) return CMD_ERR_ARG_COUNT;
+		if (args.size() == 0) 
+		{ 
+			conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
+			return 0;
+		}
 		
 		if (args.at(0) == "all") conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
 		else try {
@@ -92,7 +96,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "down" - navigate down the list
+	// command "down" - navigate down the list.
 	cmds["down"] = [] (const vector<string>& args)
 	{
 		bool has_visible = false;
@@ -110,7 +114,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "up" - navigate up the list
+	// command "up" - navigate up the list.
 	cmds["up"] = [] (const vector<string>& args)
 	{
 		bool has_visible = false;
@@ -128,7 +132,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "c" - toggle selected task's "completed" property
+	// command "c" - toggle selected task's "completed" property.
 	cmds["c"] = [] (const vector<string>& args)
 	{
 		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
@@ -137,7 +141,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "d" - remove selected task
+	// command "d" - remove selected task.
 	cmds["d"] = [] (const vector<string>& args)
 	{
 		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
@@ -148,7 +152,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "a" - add a task
+	// command "a <due> <title> <description>[ <id> <meta>]" - add or override a task. If <id> is not specified or is set to "new", a new task is created. If not, a task with <id> will be overriden.
 	cmds["a"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
@@ -193,7 +197,7 @@ void cmd_init()
 		}
 	};
 
-	// command "setmeta" - set task property
+	// command "setmeta <name>[ <value>]" - set task meta property. If <value> is not specified, property with name <name> is reset.
 	cmds["setmeta"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
@@ -214,7 +218,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "clrmeta" - erase task metadata
+	// command "clrmeta" - erase task metadata.
 	cmds["clrmeta"] = [] (const vector<string>& args)
 	{
 		if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return CMD_ERR_EXTERNAL;
@@ -225,7 +229,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "vtoggle" - toggle filters. Supported filters: uncat, complete, coming, failed
+	// command "vtoggle uncat|complete|coming|failed|nodue" - toggle filters.
 	cmds["vtoggle"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
@@ -242,7 +246,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "g" - go to task
+	// command "g <id>" - go to task with ID <id>.
 	cmds["g"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
@@ -261,13 +265,17 @@ void cmd_init()
 	};
 
 
-	// command "lrename" - rename list
+	// command "lrename[ <new_name>]" - rename list. If <new_name> is not specified or is the same as list id, list name is reset.
 	cmds["lrename"] = [] (const vector<string>& args)
 	{
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
 		const int tag_filter = conf_get_cvar_int("tag_filter");
 		if (tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
+
+		if ((args.size() < 1) && (tag_filter < t_tags.size())) 
+		{ 
+			t_tags[tag_filter] = to_string(tag_filter);
+			return 0;
+		}
 
 		while (tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
 
@@ -277,7 +285,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "lclear" - clear list
+	// command "lclear" - clear list.
 	cmds["lclear"] = [] (const vector<string>& args)
 	{
 		const int tag_filter = conf_get_cvar_int("tag_filter");
@@ -291,7 +299,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "lmv" - move selected task to a list
+	// command "lmv <list_id>" - move selected task to a list.
 	cmds["lmv"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
@@ -306,7 +314,7 @@ void cmd_init()
 		}
 	};
 
-	// command "bind" - bind a key
+	// command "bind <key> <command> <mode> <autoexec>" - bind <key> to <command>. <mode> speciifes, which modes use this bind (mask, see noaftodo_cui.h for CUI_MODE_* values). If <autoexec> is "true", execute command on key hit, otherwise just go into command mode with it.
 	cmds["bind"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 4) return CMD_ERR_ARG_COUNT;
@@ -340,14 +348,18 @@ void cmd_init()
 		}
 	};
 
-	// command "set" - set cvar value
+	// command "set <name>[ <value>]" - set cvar value. If <value> is not specified, reset cvar to default value.
 	cmds["set"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
 		if (args.size() < 2)
 		{
-			cmd_exec("reset " + args.at(0));
+			if (conf_get_predefined_cvar(args.at(0)) != "")
+				conf_set_cvar(args.at(0), conf_get_predefined_cvar(args.at(0)));
+			else
+				conf_cvars.erase(args.at(0));
+
 			return 0;
 		}
 
@@ -355,20 +367,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "reset" - reset cvar value to default
-	cmds["reset"] = [] (const vector<string>& args)
-	{
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-		if (conf_get_predefined_cvar(args.at(0)) != "")
-			conf_set_cvar(args.at(0), conf_get_predefined_cvar(args.at(0)));
-		else
-			conf_cvars.erase(args.at(0));
-
-		return 0;
-	};
-
-	// command "exec" - execute a config file
+	// command "exec <filename>" - execute a config file. Execute default config with "exec default".
 	cmds["exec"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
@@ -378,14 +377,14 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "ver" - is used to specify config version to notify about possible outdated config files
+	// command "ver <VERSION>" - is used to specify config version to notify about possible outdated config files.
 	cmds["ver"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
 		if (args.at(0) != to_string(CONF_V))
 		{
-			log("File you are trying to load is declared to be for an outdated version of NOAFtodo (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + ") and might not work as expected. Fix it and restart " + TITLE + ". Exiting program now.", LP_ERROR);
+			log("File you are trying to load is declared to be for an outdated version of NOAFtodo (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + ") and might not work as expected. Fix it and restart " + TITLE + ". Config file: " + conf_filename + ", list file: " + li_filename + ". Exiting program now.", LP_ERROR);
 
 			switch (run_mode)
 			{
@@ -406,7 +405,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "save" - force the list save
+	// command "save[ <filename>]" - force the list save. If <filename> is not specified, override opened file.
 	cmds["save"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1)	li_save();
@@ -414,7 +413,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "echo" - print the following in status
+	// command "echo[ args...]" - print the following in status.
 	cmds["echo"] = [] (const vector<string>& args)
 	{
 		string message = "";

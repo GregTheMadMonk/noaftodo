@@ -125,7 +125,8 @@ void li_load()
 		log("File does not exist!", LP_ERROR);
 		log("Creating...");
 		ofstream ofile(li_filename);
-		ofile << "# noaftodo list file" << endl;
+		ofile << "# noaftodo list file" << endl << "[ver]" << endl << LIST_V << endl;
+		safemode = false;
 		if (ofile.good()) log("Created");
 		else log("Uh oh file not created", LP_ERROR);
 		ofile.close();

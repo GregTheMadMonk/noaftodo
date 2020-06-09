@@ -87,7 +87,7 @@ set "on_task_new_action" "!notify-send \"You have a new task!\" \"%T%: %D%\" -u 
 set "on_task_removed_action" "!notify-send \"You have removed a task!\" \"%T%: %D%\" -u critical"
 
 # filter=0b1111
-set "filter" "15"
+set "filter" "31"
 set "tag_filter" "-1"
 
 set "colors.background" "-1"

@@ -878,7 +878,7 @@ void cui_help_paint()
 
 		move(y, x);
 
-		constexpr int TAB_W = 10;
+		constexpr int TAB_W = 30;
 		switch (c)
 		{
 			case '\n':
