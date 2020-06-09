@@ -1,7 +1,7 @@
 # NOAFtodo
 A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolutely no clue why.
 
-![NOAFtodo workflow](workflow.gif =576x324)
+<img src="workflow.gif" width="576" height="324" alt="NOAFtodo workflow"></img>
 
 ### Current and future features
 - [x] minimalisic interface written with ncurses
