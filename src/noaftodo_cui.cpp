@@ -12,6 +12,7 @@
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
+#include "noaftodo_daemon.h"
 #include "noaftodo_io.h"
 #include "noaftodo_time.h"
 
@@ -311,6 +312,8 @@ void cui_run()
 	if (li_autosave) li_save();
 
 	cui_destroy();
+
+	da_send("D");
 }
 
 void cui_set_mode(const int& mode)

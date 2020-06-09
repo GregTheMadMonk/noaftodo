@@ -6,6 +6,7 @@
 
 #include "noaftodo_list.h"
 
+extern bool enable_log;
 extern bool verbose;
 
 // special characters

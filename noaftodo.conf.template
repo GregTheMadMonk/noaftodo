@@ -53,6 +53,8 @@ alias reschedule a %arg1% \%T\% \%D\% \%id\%
 alias makerec setmeta on_completed "postpone %arg1%"
 alias makerec_fixed setmeta on_completed "reschedule a%arg1%"
 
+# set "daemon.fork_autostart" "true"
+
 set "daemon.list_upd_ticks" "1"
 
 set "contexec_cmd_regex" "^set regex_filter "

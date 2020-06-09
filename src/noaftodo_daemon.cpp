@@ -17,6 +17,8 @@
 using namespace std;
 
 bool da_running = false;
+int da_clients = -1; // -1 if we don't care. Other numbers indicate
+			// amount of active noaftodo clients
 
 int da_interval = 1;
 
@@ -94,6 +96,16 @@ void da_run()
 					da_upd_cache();
 					ticks = 0;
 					break;
+				case 'S':
+					if (da_clients != -1) da_clients++;
+					break;
+				case 'D':
+					if (da_clients != -1)
+					{
+						da_clients--;
+						if (da_clients == 0) da_running = false;
+					}
+					break;
 			}
 
 			status = mq_timedreceive(mq, msg, DA_MSGSIZE, NULL, &tout);
@@ -154,6 +166,8 @@ void da_upd_cache(const bool& is_first_load)
 				cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), li_e, true));
 			else if (li_e.is_coming())
 				cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), li_e, true));
+			else
+				cmd_exec(format_str(conf_get_cvar("on_task_uncompleted_action"), li_e, true));
 
 			continue;
 		}

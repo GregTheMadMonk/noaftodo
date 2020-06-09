@@ -10,9 +10,13 @@
 using namespace std;
 
 bool verbose = false;
+bool enable_log = true;
 
 void log(const string& message, const char& prefix)
-{	const bool wcui = cui_active;
+{	
+	if (!enable_log) return;
+
+	const bool wcui = cui_active;
 
 	if ((prefix != LP_DEFAULT) || verbose)
 	{

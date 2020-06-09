@@ -97,7 +97,31 @@ int main(int argc, char* argv[])
 	// load the list
 	li_load();
 
-	if (run_mode == PM_DEFAULT)	cui_run();
+	if (run_mode == PM_DEFAULT)	
+	{
+		// if this option is enabled, start daemon in the forked process
+		if ((conf_get_cvar("daemon.fork_autostart") == "true") &&
+		   !da_check_lockfile())
+			switch (fork())
+			{
+				case -1:
+					log("Error creating fork for daemon", LP_ERROR);
+					break;
+				case 0: // child - daemon
+					enable_log = false;
+					da_clients = 1; // care about clients, shut down when there's none
+					da_run();
+					break;
+				default:
+					cui_run();
+					break;
+			}
+		else 
+		{ 
+			da_send("S");
+			cui_run(); 
+		}
+	}
 
 	if (run_mode == PM_DAEMON)	da_run();
 

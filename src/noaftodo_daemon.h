@@ -25,6 +25,9 @@ constexpr int DA_MSGSIZE = 256;
 // is daemon running?
 extern bool da_running;
 
+// running clients
+extern int da_clients;
+
 // cache
 extern std::vector<noaftodo_entry> da_cache;
 extern long da_cached_time;
