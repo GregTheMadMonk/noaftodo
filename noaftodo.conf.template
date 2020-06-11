@@ -22,6 +22,7 @@
 #                  |
 #                  you need this number
 
+# key bindings
 bind "q" "q" 1 true
 bind "esc" "q" 1 true
 bind "enter" "details" 1 true
@@ -43,6 +44,7 @@ bind "N" "vtoggle nodue" 1 true
 bind "/" "set regex_filter " 1 false
 bind "e" "a %due% \"%T%\" \"%D%\" %id% %meta%" 1 false
 
+# aliases
 alias duplicate a \%due\% \%T\% \%D\%
 # Aaand this is the place where you will ask me: "Hey, Greg, why do you do this,
 # why do you create an alias to reference from another alias instead of writing it 
@@ -53,17 +55,35 @@ alias reschedule a %arg1% \%T\% \%D\% \%id\%
 alias makerec setmeta on_completed "postpone %arg1%"
 alias makerec_fixed setmeta on_completed "reschedule a%arg1%"
 
-# set "daemon.fork_autostart" "true"
-
+# daemon settings
+set "daemon.fork_autostart" "true"
 set "daemon.list_upd_ticks" "1"
 
 set "contexec_cmd_regex" "^set regex_filter "
 
+# global events
+set "on_daemon_launch_action" 		"!notify-send \"NOAFtodo v.%VER%\" \"Daemon is up and running\" &"
+
+set "on_task_completed_action"		"!%N% && notify-send \"You have completed a task!\" \"%T%: %D%\" -u low &"
+set "on_task_uncompleted_action" 	"!notify-send \"Task is marked \\\"Not Completed\\\" again!\" \"%T%: %D%\" &"
+set "on_task_failed_action" 		"!%N% && notify-send \"Task due is now!\" \"%T%: %D%\" -u critical || notify-send \"You have a failed task! Come on, it\'s never too late!\" \"%T%: %D%\" -u critical &"
+set "on_task_coming_action" 		"!notify-send \"You have an upcoming task!\" \"%T%: %D%\" &"
+set "on_task_new_action" 		"!notify-send \"You have a new task!\" \"%T%: %D%\" -u low &"
+set "on_task_removed_action" 		"!notify-send \"You have removed a task!\" \"%T%: %D%\" -u critical &"
+
+# default fitlers
+set "filter" "31" # 0b11111
+set "tag_filter" "-1"
+set "regex_filter" ""
+
+# appearance
 set "all_cols" "ifldtD"
 set "cols" "ifdtD"
 set "details_cols" "dl"
 
 set "status_fields" "slfip"
+
+set "charset.box_ui_line_h" "-"
 
 set "charset.status_separator" "|"
 set "charset.details_separator" "|"
@@ -76,21 +96,6 @@ set "charset.box_corner_1" "┏"
 set "charset.box_corner_2" "┓"
 set "charset.box_corner_3" "┗"
 set "charset.box_corner_4" "┛"
-
-set "charset.box_ui_line_h" "-"
-
-set "on_daemon_launch_action" "!notify-send \"NOAFtodo v.%VER%\" \"Daemon is up and running\""
-
-set "on_task_completed_action" "!%N% && notify-send \"You have completed a task!\" \"%T%: %D%\" -u low"
-set "on_task_uncompleted_action" "!notify-send \"Task is marked \\\"Not Completed\\\" again!\" \"%T%: %D%\""
-set "on_task_failed_action" "!%N% && notify-send \"Task due is now!\" \"%T%: %D%\" -u critical || notify-send \"You have a failed task! Come on, it\'s never too late!\" \"%T%: %D%\" -u critical"
-set "on_task_coming_action" "!notify-send \"You have an upcoming task!\" \"%T%: %D%\""
-set "on_task_new_action" "!notify-send \"You have a new task!\" \"%T%: %D%\" -u low"
-set "on_task_removed_action" "!notify-send \"You have removed a task!\" \"%T%: %D%\" -u critical"
-
-# filter=0b1111
-set "filter" "31"
-set "tag_filter" "-1"
 
 set "colors.background" "-1"
 set "colors.title" "12"

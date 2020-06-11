@@ -130,7 +130,28 @@ int main(int argc, char* argv[])
 
 void print_help()
 {
-	const int TAB_W = 10;
+	vector<string> lines;
+	lines.push_back("");
+
+	const int TAB_W = 25;
+	int tabs = 0;
+
 	for (char *c = &_binary_doc_doc_gen_start; c < &_binary_doc_doc_gen_end; c++)
-		cout << *c;
+		switch(*c)
+		{
+			case '\n':
+				lines.push_back("");
+				tabs = 0;
+				break;
+			case '\t':
+				tabs++;
+
+				while (lines.at(lines.size() - 1).length() < TAB_W * tabs) lines[lines.size() - 1] += " ";
+				break;
+			default:
+				lines[lines.size() - 1] += *c;
+				break;
+		}
+
+	for (auto line : lines) cout << line << endl;
 }

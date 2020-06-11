@@ -462,7 +462,7 @@ int cmd_exec(string command)
 			case '\\':
 				skip_special = true;
 				break;
-			case ' ':
+			case ' ': case '\t':
 				if (inquotes) word += c;
 				else 
 					if (word != "")
