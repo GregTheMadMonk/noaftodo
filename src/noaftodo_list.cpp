@@ -114,6 +114,8 @@ void li_load()
 	log("Loading list file " + li_filename);
 	bool safemode = true;
 
+	conf_cvars = conf_predefined_cvars;
+
 	t_list.clear();
 	t_tags.clear();
 
@@ -238,7 +240,6 @@ void li_load()
 					break;
 				
 				case 2: // workspace
-					conf_cvars = conf_predefined_cvars;
 					while (entry.at(0) == ' ')
 					{
 						entry = entry.substr(1);

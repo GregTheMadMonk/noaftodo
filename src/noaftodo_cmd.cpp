@@ -416,6 +416,19 @@ void cmd_init()
 		return 0;
 	};
 
+	// command "toggle <name>" - toggles variable value between "true" and "false"
+	cmds["toggle"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		if (conf_get_cvar(args.at(0)) == "true") 
+			conf_set_cvar(args.at(0), "false"); // cannot just do conf_cvars.erase(args.at(0)) because
+							// someone might've set it to true in their default config
+		else conf_set_cvar(args.at(0), "true");
+
+		return 0;
+	};
+
 	// command "exec <filename>" - execute a config file. Execute default config with "exec default".
 	cmds["exec"] = [] (const vector<string>& args)
 	{

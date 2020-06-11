@@ -256,7 +256,8 @@ void cui_init()
 
 	cui_status_fields['F'] = [] ()
 	{
-			return ((conf_get_cvar("list_regex_filter") == "") ? "" : (" [" + conf_get_cvar("list_regex_filter") + "]"));
+			return ((conf_get_cvar("lview_show_empty") == "true") ? "0" : "_") +
+				((conf_get_cvar("list_regex_filter") == "") ? "" : (" [" + conf_get_cvar("list_regex_filter") + "]"));
 	};
 
 	cui_status_fields['i'] = [] ()
@@ -510,7 +511,9 @@ bool cui_l_is_visible(const int& list_id)
 
 	bool ret = false;
 
-	for (auto e : t_list) ret |= (e.tag == list_id);
+	if (conf_get_cvar("lview_show_empty") != "true")
+		for (auto e : t_list) ret |= (e.tag == list_id);
+	else ret = true;
 
 	// fit regex
 	if (conf_get_cvar("list_regex_filter") != "")
