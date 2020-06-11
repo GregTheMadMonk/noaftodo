@@ -161,13 +161,17 @@ void da_upd_cache(const bool& is_first_load)
 		if (ca_e.completed != li_e.completed)
 		{
 			if (li_e.completed)
+			{
 				cmd_exec(format_str(conf_get_cvar("on_task_completed_action"), li_e, false));
-			else if (li_e.is_failed())
+				cmd_exec(format_str(li_e.get_meta("on_completed"), li_e, false));
+			} else if (li_e.is_failed()) {
 				cmd_exec(format_str(conf_get_cvar("on_task_failed_action"), li_e, true));
-			else if (li_e.is_coming())
+			} else if (li_e.is_coming()) {
 				cmd_exec(format_str(conf_get_cvar("on_task_coming_action"), li_e, true));
-			else
+			} else {
 				cmd_exec(format_str(conf_get_cvar("on_task_uncompleted_action"), li_e, true));
+				cmd_exec(format_str(li_e.get_meta("on_uncompleted"), li_e, true));
+			}
 
 			continue;
 		}

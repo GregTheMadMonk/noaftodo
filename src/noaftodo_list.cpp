@@ -345,12 +345,6 @@ void li_comp(const int& entryID)
 
 	t_list.at(entryID).completed = !t_list.at(entryID).completed;
 
-	try
-	{
-		if (t_list.at(entryID).completed) cmd_exec(t_list.at(entryID).meta.at("on_completed"));
-		else cmd_exec(t_list.at(entryID).meta.at("on_uncompleted"));
-	} catch (const out_of_range& e) {}
-
 	if (li_autosave) li_save();
 
 	da_send("C");
