@@ -53,10 +53,26 @@ void cmd_init()
 		return 0;
 	};
 
+	// command "back" - go to previous mode.
+	cmds["back"] = [] (const vector<string>& args)
+	{
+		cui_set_mode(-1);
+		return 0;
+	};
+
 	// command "details" - view task details.
 	cmds["details"] = [] (const vector<string>& args)
 	{
+		if ((cui_s_line < 0) || (cui_s_line >= t_list.size()))
+			return CMD_ERR_EXTERNAL;
 		cui_set_mode(CUI_MODE_DETAILS);
+		return 0;
+	};
+
+	// command "listview" - go to the list view
+	cmds["listview"] = [] (const vector<string>& args)
+	{
+		cui_set_mode(CUI_MODE_LISTVIEW);
 		return 0;
 	};
 
@@ -128,6 +144,36 @@ void cmd_init()
 		if (!cui_is_visible(cui_s_line)) cmd_exec("up");
 
 		cui_delta = 0;
+
+		return 0;
+	};
+	
+	// command "next" - go to the next list
+	cmds["next"] = [] (const vector<string>& args)
+	{
+		int tag_filter = conf_get_cvar_int("tag_filter");
+		tag_filter++;
+
+		if (tag_filter >= t_tags.size()) tag_filter = CUI_TAG_ALL;
+
+		conf_set_cvar_int("tag_filter", tag_filter);
+
+		if (!cui_l_is_visible(tag_filter)) cmd_exec("next");
+
+		return 0;
+	};
+
+	// command "prev" - go to the previous list
+	cmds["prev"] = [] (const vector<string>& args)
+	{
+		int tag_filter = conf_get_cvar_int("tag_filter");
+		tag_filter--;
+
+		if (tag_filter < CUI_TAG_ALL) tag_filter = t_tags.size() - 1;
+
+		conf_set_cvar_int("tag_filter", tag_filter);
+
+		if (!cui_l_is_visible(tag_filter)) cmd_exec("prev");
 
 		return 0;
 	};
@@ -340,6 +386,7 @@ void cmd_init()
 				if (skey == "right")	key = KEY_RIGHT;
 				if (skey == "esc")	key = 27;
 				if (skey == "enter")	key = 10;
+				if (skey == "tab")	key = 9;
 			}
 
 			cui_bind(key, scomm, smode, sauto);

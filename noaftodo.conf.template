@@ -25,23 +25,33 @@
 # key bindings
 bind "q" "q" 1 true
 bind "esc" "q" 1 true
+bind "q" "back" 28 true
+bind "esc" "back" 28 true
 bind "enter" "details" 1 true
-bind ":" ":" 13 true
+bind "enter" "set tag_filter_copy; back" 16 true
+bind "L" "listview" 1 true
+bind ":" ":" 19 true
+bind "tab" "next" 1 true
 bind "up" "up" 9 true
 bind "k" "up" 9 true
 bind "down" "down" 9 true
 bind "j" "down" 9 true
+bind "up" "prev" 16 true
+bind "k" "prev" 16 true
+bind "down" "next" 16 true
+bind "j" "next" 16 true
 bind "a" "a a" 1 false
 bind "A" "a " 1 false
 bind " " "c" 1 true
 bind "d" "d" 1 false
-bind "?" "?" 9 true
+bind "?" "?" 57 true
 bind "F" "vtoggle failed" 1 true
 bind "U" "vtoggle uncat" 1 true
 bind "C" "vtoggle coming" 1 true
 bind "V" "vtoggle complete" 1 true
 bind "N" "vtoggle nodue" 1 true
 bind "/" "set regex_filter " 1 false
+bind "/" "set list_regex_filter " 16 false
 bind "e" "a %due% \"%T%\" \"%D%\" %id% %meta%" 1 false
 
 # aliases
@@ -59,7 +69,7 @@ alias makerec_fixed setmeta on_completed "reschedule a%arg1%"
 set "daemon.fork_autostart" "true"
 set "daemon.list_upd_ticks" "1"
 
-set "contexec_cmd_regex" "^set regex_filter "
+set "contexec_cmd_regex" "^set regex_filter\ |^set list_regex_filter "
 
 # global events
 set "on_daemon_launch_action" 		"!notify-send \"NOAFtodo v.%VER%\" \"Daemon is up and running\" &"
@@ -79,9 +89,11 @@ set "regex_filter" ""
 # appearance
 set "all_cols" "ifldtD"
 set "cols" "ifdtD"
+set "listview_cols" "itep"
 set "details_cols" "dl"
 
-set "status_fields" "slfip"
+set "status_fields" "smlfip"
+set "listview_status_fields" "smF"
 
 set "charset.box_ui_line_h" "-"
 

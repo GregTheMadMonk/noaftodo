@@ -25,7 +25,16 @@ struct cui_col_s
 	std::function<std::string(const noaftodo_entry& entry, const int& id)> contents;
 };
 
+struct cui_lview_col_s
+{
+	std::string title;
+
+	std::function<int(const int& w, const int& free, const int& col_n)> width;
+	std::function<std::string(const int& list_id)> contents;
+};
+
 // columns
+extern std::map<char, cui_lview_col_s> cui_lview_columns;
 extern std::map<char, cui_col_s> cui_columns;
 
 // status fields
@@ -40,8 +49,9 @@ constexpr int CUI_CP_STATUS = 5;
 
 // modes
 constexpr int CUI_MODE_EXIT = 0;
-constexpr int CUI_MODE_ALL = 0b1111;
+constexpr int CUI_MODE_ALL = 0b11111111;
 constexpr int CUI_MODE_NORMAL = 0b1;
+constexpr int CUI_MODE_LISTVIEW = 0b10000;
 constexpr int CUI_MODE_DETAILS = 0b1000;
 constexpr int CUI_MODE_COMMAND = 0b10;
 constexpr int CUI_MODE_HELP = 0b100;
@@ -95,10 +105,14 @@ void cui_bind(const cui_bind_s& bind);
 void cui_bind(const wchar_t& key, const std::string& command, const int& mode, const bool& autoexec);
 
 bool cui_is_visible(const int& entryID);
+bool cui_l_is_visible(const int& list_id);
 
 // mode-specific painters and input handlers
 void cui_normal_paint();
 void cui_normal_input(const wchar_t& key);
+
+void cui_listview_paint();
+void cui_listview_input(const wchar_t& key);
 
 void cui_details_paint();
 void cui_details_input(const wchar_t& key);

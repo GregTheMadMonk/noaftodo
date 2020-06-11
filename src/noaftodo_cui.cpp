@@ -18,6 +18,7 @@
 
 using namespace std;
 
+map<char, cui_lview_col_s> cui_lview_columns;
 map<char, cui_col_s> cui_columns;
 map<char, function<string()>> cui_status_fields;
 
@@ -134,6 +135,77 @@ void cui_init()
 			return to_string(id); 
 		} 
 	};
+	
+	// initialize listview columns
+	cui_lview_columns['i'] = 
+	{ 
+		"ID", 
+		[](const int& w, const int& free, const int& cols)
+		{
+			return 3;
+		},
+		[](const int& list_id) 
+		{ 
+			if (list_id == -1) return string(" ");
+			return to_string(list_id);
+		} 
+	};
+	
+	cui_lview_columns['t'] = 
+	{ 
+		"Title", 
+		[](const int& w, const int& free, const int& cols)
+		{
+			return free / 4;
+		},
+		[](const int& list_id) 
+		{ 
+			if (list_id == CUI_TAG_ALL) return string("All lists");
+			return t_tags.at(list_id);
+		} 
+	};
+
+	cui_lview_columns['e'] =
+	{
+		"Entries",
+		[](const int& w, const int& free, const int& cols)
+		{
+			return 7;
+		},
+		[](const int& list_id)
+		{
+			if (list_id == CUI_TAG_ALL) return to_string(t_list.size());
+
+			int ret = 0;
+			for (auto e : t_list) if (e.tag == list_id) ret++;
+
+			return to_string(ret);
+		}
+	};	
+	
+	cui_lview_columns['p'] = 
+	{ 
+		"%", 
+		[](const int& w, const int& free, const int& cols)
+		{
+			return 4;
+		},
+		[](const int& list_id) 
+		{ 
+			int ret = 0;
+			int tot = 0;
+
+			for (auto e : t_list)
+				if ((e.tag == list_id) || (CUI_TAG_ALL == list_id))
+				{
+					if (e.completed) ret++;
+					tot++;
+				}
+
+			if (tot == 0) return string("0%");
+			return to_string(100 * ret / tot) + "%";
+		} 
+	};
 
 	// initialize status fields
 	cui_status_fields['s'] = [] ()
@@ -150,6 +222,27 @@ void cui_init()
 		return "List " + to_string(tag_filter) + (((tag_filter < t_tags.size()) && (t_tags.at(tag_filter) != to_string(tag_filter))) ? (": " + t_tags.at(tag_filter)) : "");
 	};
 
+	cui_status_fields['m'] = [] ()
+	{
+		switch (cui_mode)
+		{
+			case CUI_MODE_NORMAL:
+				return string("NORMAL");
+				break;
+			case CUI_MODE_LISTVIEW:
+				return string("LISTVIEW");
+				break;
+			case CUI_MODE_DETAILS:
+				return string("DETAILS");
+				break;
+			case CUI_MODE_HELP:
+				return string("HELP");
+				break;
+			default:
+				return string("");
+		}
+	};
+
 	cui_status_fields['f'] = [] ()
 	{
 		const int filter = conf_get_cvar_int("filter");
@@ -159,6 +252,11 @@ void cui_init()
 			string((filter & CUI_FILTER_FAILED) ? "F" : "_") +
 			string((filter & CUI_FILTER_NODUE) ? "N" : "_") + 
 			((conf_get_cvar("regex_filter") == "") ? "" : (" [" + conf_get_cvar("regex_filter") + "]"));
+	};
+
+	cui_status_fields['F'] = [] ()
+	{
+			return ((conf_get_cvar("list_regex_filter") == "") ? "" : (" [" + conf_get_cvar("list_regex_filter") + "]"));
 	};
 
 	cui_status_fields['i'] = [] ()
@@ -277,6 +375,9 @@ void cui_run()
 			case CUI_MODE_NORMAL:
 				cui_normal_input(c);
 				break;
+			case CUI_MODE_LISTVIEW:
+				cui_listview_input(c);
+				break;
 			case CUI_MODE_DETAILS:
 				cui_details_input(c);
 				break;
@@ -294,6 +395,9 @@ void cui_run()
 		{
 			case CUI_MODE_NORMAL:
 				cui_normal_paint();
+				break;
+			case CUI_MODE_LISTVIEW:
+				cui_listview_paint();
 				break;
 			case CUI_MODE_DETAILS:
 				cui_details_paint();
@@ -329,10 +433,19 @@ void cui_set_mode(const int& mode)
 
 	cui_delta = 0;
 
-	switch (mode)
+	switch (cui_mode)
 	{
 		case CUI_MODE_NORMAL:
+			if (conf_get_cvar("tag_filter_copy") != "")
+			{
+				conf_set_cvar_int("tag_filter", conf_get_cvar_int("tag_filter_copy"));
+				conf_cvars.erase("tag_filter_copy");
+			}
 			curs_set(0);
+			break;
+		case CUI_MODE_LISTVIEW:
+			curs_set(0);
+			conf_set_cvar_int("tag_filter_copy", conf_get_cvar_int("tag_filter"));
 			break;
 		case CUI_MODE_DETAILS:
 			cui_delta = 0;
@@ -388,6 +501,180 @@ bool cui_is_visible(const int& entryID)
 	}
 
 	return ret;
+}
+
+bool cui_l_is_visible(const int& list_id)
+{
+	if (list_id == CUI_TAG_ALL) return true;
+	if ((list_id < 0) || (list_id >= t_tags.size())) return false;
+
+	bool ret = false;
+
+	for (auto e : t_list) ret |= (e.tag == list_id);
+
+	// fit regex
+	if (conf_get_cvar("list_regex_filter") != "")
+	{
+		regex rf_regex(conf_get_cvar("list_regex_filter"));
+
+		ret = ret && regex_search(t_tags.at(list_id), rf_regex);
+	}
+
+	return ret;
+}
+
+void cui_listview_paint()
+{
+	int tag_filter = conf_get_cvar_int("tag_filter");
+
+	// draw table title
+	move(0, 0);
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
+	for (int i = 0; i < cui_w; i++) addch(' ');
+
+	int x = 0;
+	const string cols = conf_get_cvar("listview_cols");
+	for (int coln = 0; coln < cols.length(); coln++)
+	{
+		try
+		{
+			const char& col = cols.at(coln);
+			if (x >= cui_w) break;
+			move(0, x);
+			const int w = cui_lview_columns.at(col).width(cui_w, cui_w - x, cols.length());
+			addstr(cui_lview_columns.at(col).title.c_str());
+
+			if (coln < cols.length() - 1) if (x + w < cui_w)
+			{
+				move(0, x + w);
+				addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+			}
+			x += w + 3;
+			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
+		} catch (const out_of_range& e) {}
+	}
+	attrset(A_NORMAL);
+
+	vector<int> v_list;
+	v_list.push_back(-1);
+	int cui_v_line = -2;
+	for (int l = 0; l < t_tags.size(); l++)
+		if (cui_l_is_visible(l)) 
+		{
+			v_list.push_back(l);
+			if (l == tag_filter) cui_v_line = v_list.size() - 1;
+		}
+
+	if (v_list.size() != 0) 
+	{
+		while (!cui_l_is_visible(tag_filter)) tag_filter++;
+		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == tag_filter) cui_v_line = i;
+	}
+
+	cui_delta = 0;
+	if (cui_v_line - cui_delta >= cui_h - 2) cui_delta = cui_v_line - cui_h + 3;
+	if (cui_v_line - cui_delta < 0) cui_delta = cui_v_line;
+
+	int last_string = 1;
+	if (v_list.size() == 0) tag_filter = CUI_TAG_ALL;
+	else {
+		for (int l = 0; l < v_list.size(); l++)
+		{
+			if (l - cui_delta >= cui_h - 2) break;
+			if (l >= cui_delta)    
+			{
+				if (l == cui_v_line) attron(A_STANDOUT);
+
+				x = 0;
+				move(l - cui_delta + 1, x);
+				for (int i = 0; i < cui_w; i++) addch(' ');
+
+				for (int coln = 0; coln < cols.length(); coln++)
+				{
+					try
+					{
+						const char& col = cols.at(coln);
+						if (x >= cui_w) break;
+						move(l - cui_delta + 1, x);
+						const int w = cui_lview_columns.at(col).width(cui_w, cui_w - x, cols.length());
+						addstr((cui_lview_columns.at(col).contents(v_list.at(l))).c_str());
+
+						if (coln < cols.length() - 1) if (x + w < cui_w)
+						{
+							move(l - cui_delta + 1, x + w);
+							addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+						}
+						x += w + 3;
+
+						for (int x1 = x; x1 < cui_w; x1++) addch(' ');
+					} catch (const out_of_range& e) {}
+				}
+
+				move(l - cui_delta + 1, cui_w - 1);
+				addstr(" ");
+
+				attrset(A_NORMAL);
+				last_string = l - cui_delta + 2;
+			}
+		}
+	}
+
+	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
+
+	string cui_status_l = "";
+
+	for (const char& c : conf_get_cvar("listview_status_fields"))
+	{
+		try {
+			const string field = (cui_status_fields.at(c))();
+			if (field != "")
+			{
+				if (cui_status_l != "") cui_status_l += " " + conf_get_cvar("charset.status_separator") + " ";
+		       		cui_status_l += field;
+			}
+		} catch (const out_of_range& e) {}
+	}
+
+	if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+	attron(COLOR_PAIR(CUI_CP_STATUS));
+	move(cui_h - 1, 0);
+	for (int x = 0; x < cui_w; x++) addch(' ');
+	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());
+	addstr(cui_status_l.c_str());
+	attrset(A_NORMAL);
+	cui_status = "";
+
+	conf_set_cvar_int("tag_filter", tag_filter);
+}
+
+void cui_listview_input(const wchar_t& key)
+{
+	switch (key)
+	{
+		case '0': case '1': case '2': case '3': case '4':
+		case '5': case '6': case '7': case '8': case '9':
+			if (cui_numbuffer == -1) cui_numbuffer = 0;
+			cui_numbuffer = cui_numbuffer * 10 + (key - '0');
+			cui_status = to_string(cui_numbuffer);
+			break;
+		case 'g':
+			if (cui_numbuffer == -1) 
+			{
+				cui_numbuffer = 0;
+				cui_status = 'g';
+			} else {
+				cmd_exec("list " + to_string(cui_numbuffer));
+				cui_numbuffer = -1;
+			}
+			break;
+		case 'G':
+			for (int i = 0; i < t_list.size(); i++) if (cui_is_visible(i)) cui_numbuffer = i;
+			cui_status = 'G';
+			break;
+		default:
+			cui_numbuffer = -1;
+			break;
+	}
 }
 
 void cui_normal_paint()
@@ -671,9 +958,6 @@ void cui_details_input(const wchar_t& key)
 {
 	switch (key)
 	{
-		case 'q': case 27:
-			cui_set_mode(-1);
-			break;
 		case KEY_RIGHT:
 			cui_delta--;
 			break;
@@ -694,6 +978,9 @@ void cui_command_paint()
 	{
 		case CUI_MODE_NORMAL:
 			cui_normal_paint();
+			break;
+		case CUI_MODE_LISTVIEW:
+			cui_listview_paint();
 			break;
 		case CUI_MODE_DETAILS:
 			cui_details_paint();
@@ -727,7 +1014,7 @@ void cui_command_input(const wchar_t& key)
 			}
 		case 27:
 			cui_command = L"";
-			if (cui_mode == CUI_MODE_COMMAND) cui_set_mode(CUI_MODE_NORMAL);
+			if (cui_mode == CUI_MODE_COMMAND) cui_set_mode(-1);
 			cui_filter_history();
 			break;
 		case 127: case KEY_BACKSPACE: 	// 127 is for, e.g., xfce4-terminal
@@ -906,9 +1193,6 @@ void cui_help_input(const wchar_t& key)
 {
 	switch (key)
 	{
-		case 'q': case 27:
-			cui_set_mode(-1);
-			break;
 		case KEY_RIGHT:
 			cui_delta--;
 			break;

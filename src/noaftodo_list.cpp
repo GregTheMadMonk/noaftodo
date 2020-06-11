@@ -307,7 +307,7 @@ void li_save()
 
 	ofile << endl << "[workspace]" << endl;
 	ofile << "ver " << CONF_V << endl;
-	for (map<string, string>::iterator cvar_i = conf_cvars.begin(); cvar_i != conf_cvars.end(); cvar_i++)
+	for (auto cvar_i = conf_cvars.begin(); cvar_i != conf_cvars.end(); cvar_i++)
 	{
 		const string key = cvar_i->first;
 		if (conf_get_predefined_cvar(key) != conf_get_cvar(key))
