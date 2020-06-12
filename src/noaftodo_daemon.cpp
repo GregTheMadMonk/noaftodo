@@ -3,7 +3,11 @@
 #include <ctime>
 #include <fstream>
 #include <string>
+
+#ifndef NO_MQUEUE
 #include <mqueue.h>
+#endif
+
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -30,7 +34,7 @@ void da_run()
 	// init cache
 	if (da_check_lockfile())
 	{
-		log("Lockfile " + string(DA_LOCK_FILE) + " exists. If daemon is not running, you can delete it or run noaftodo -k.", LP_IMPORTANT);
+		log("Lockfile " + string(DA_LOCK_FILE) + " exists. If daemon is not running, you can delete it or run noaftodo -k.", LP_ERROR);
 		return;
 	} else {
 		da_lock();
@@ -38,6 +42,7 @@ void da_run()
 
 	da_cache.clear();
 
+#ifndef NO_MQUEUE
 	log("Opening a message queue...");
 	mq_attr attr;
 	attr.mq_maxmsg = 10;
@@ -51,6 +56,7 @@ void da_run()
 		return;
 	}
 	log("OK");
+#endif
 
 	cmd_exec(format_str(conf_get_cvar("on_daemon_launch_action"), {}));
 
@@ -72,6 +78,27 @@ void da_run()
 
 		da_cached_time = ti_to_long("a0d");
 
+#ifdef NO_MQUEUE
+		string msg;
+		vector<string> msgs;
+		auto getmsg = [&msgs] ()
+		{
+			ifstream q_in(DA_MQ_NAME);
+
+			if (!q_in.good()) return;
+
+			string mes;
+
+			while (getline(q_in, mes)) msgs.push_back(mes);
+
+			q_in.close();
+			ofstream q_out(DA_MQ_NAME);
+			q_out << endl;
+			q_out.close();
+		};
+
+		getmsg();
+#else
 		char msg[DA_MSGSIZE];
 
 		clock_gettime(CLOCK_REALTIME, &tout);
@@ -80,8 +107,18 @@ void da_run()
 		int status = mq_timedreceive(mq, msg, DA_MSGSIZE, NULL, &tout);
 
 		clock_gettime(CLOCK_REALTIME, &tout);
+#endif
+
+#ifdef NO_MQUEUE
+		while (msgs.size() > 0)
+#else
 		while (status >= 0)
+#endif
 		{
+#ifdef NO_MQUEUE
+			msg = msgs.at(0);
+			msgs.erase(msgs.begin());
+#endif
 			log(msg);
 
 			switch (msg[0])
@@ -108,13 +145,22 @@ void da_run()
 					break;
 			}
 
+#ifdef NO_MQUEUE
+			getmsg();
+#else
 			status = mq_timedreceive(mq, msg, DA_MSGSIZE, NULL, &tout);
+#endif
 		}
 	}
 
+#ifdef NO_MQUEUE
+	log("Removing queue file (NO_MQUEUE)...");
+	remove(DA_MQ_NAME);
+#else
 	log("Closing message queue...");
 	mq_close(mq);
 	mq_unlink(DA_MQ_NAME);
+#endif
 
 	da_unlock();
 }
@@ -228,7 +274,11 @@ void da_kill()
 	log("Killing the daemon...");
 	da_send("K");
 	da_unlock();
+#ifdef NO_MQUEUE
+	remove(DA_MQ_NAME);
+#else
 	mq_unlink(DA_MQ_NAME);
+#endif
 }
 
 void da_send(const char message[])
@@ -239,6 +289,17 @@ void da_send(const char message[])
 		return;
 	}
 
+#ifdef NO_MQUEUE
+	log("Sending a message (NO_MQUEUE)...");
+	ofstream q_file(DA_MQ_NAME);
+
+	q_file << message << endl;
+
+	q_file.close();
+
+	if (q_file.good()) log("OK!");
+	else log("Uh oh error", LP_ERROR);
+#else
 	log("Opening a message queue...");
 	mq_attr attr;
 	attr.mq_maxmsg = 10;
@@ -261,6 +322,7 @@ void da_send(const char message[])
 
 	log("Closing message queue...");
 	mq_close(mq);
+#endif
 }
 
 void da_lock()

@@ -14,7 +14,11 @@ constexpr char DA_M_TNEW[] = "You have a new task!";
 constexpr char DA_M_TREM[] = "Task removed!";
 
 // message queue name
+#ifdef NO_MQUEUE
+constexpr char DA_MQ_NAME[] = "/tmp/.noaftodo-queue";
+#else
 constexpr char DA_MQ_NAME[] = "/noaftodo-msg-queue";
+#endif
 
 // lock file name
 constexpr char DA_LOCK_FILE[] = "/tmp/.noaftodo-dlock";

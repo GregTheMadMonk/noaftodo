@@ -24,6 +24,10 @@ else
 	OBJDUMP := "/bin/objdump"
 endif
 
+ifeq ($(UNAME_S),Haiku)
+	CPP_FLAGS += -DNO_MQUEUE
+endif
+
 all: obj_dir $(OBJ_FILES) noaftodo.conf.template doc
 	@echo Source files: $(CPP_FILES)
 	@echo Header files: $(H_FILES)
