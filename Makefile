@@ -4,11 +4,10 @@ SRC_DIR := src
 OBJ_DIR := obj
 DOC_DIR := doc
 
-CC := gcc
-CXX := g++
+CPP := g++
 
-CXX_FLAGS := -fpermissive
-CXX_LINKER_FLAGS := -lncursesw -lrt
+CPP_FLAGS += -DNCURSES_WIDECHAR -fpermissive
+CPP_LINKER_FLAGS += -lncursesw -lrt
 
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
 H_FILES := $(wildcard $(SRC_DIR)/*.h)
@@ -29,18 +28,18 @@ all: obj_dir $(OBJ_FILES) noaftodo.conf.template doc
 	@echo Source files: $(CPP_FILES)
 	@echo Header files: $(H_FILES)
 	@echo Object files: $(OBJ_FILES)
-	@echo g++ flags: $(CXX_FLAGS)
-	@echo Linker flags: $(CXX_LINKER_FLAGS)
+	@echo g++ flags: $(CPP_FLAGS)
+	@echo Linker flags: $(CPP_LINKER_FLAGS)
 	@echo Creting embed config...
 	$(OBJCOPY) --input-target binary --output-target $(shell $(OBJDUMP) -f $(OBJ_DIR)/noaftodo_config.o | grep file\ format | sed 's/.*file\ format.//g') --binary-architecture $(shell $(OBJDUMP) -f $(OBJ_DIR)/noaftodo_config.o | grep architecture | sed 's/architecture:\ //g' | sed 's/,.*//g') noaftodo.conf.template $(OBJ_DIR)/noaftodo_config_template.o
 	@echo Creating embed help...
 	$(OBJCOPY) --input-target binary --output-target $(shell $(OBJDUMP) -f $(OBJ_DIR)/noaftodo_config.o | grep file\ format | sed 's/.*file\ format.//g') --binary-architecture $(shell $(OBJDUMP) -f $(OBJ_DIR)/noaftodo_config.o | grep architecture | sed 's/architecture:\ //g' | sed 's/,.*//g') $(DOC_DIR)/doc.gen $(OBJ_DIR)/noaftodo_doc.o
 	@echo Linking binary $(BINARY)...
-	$(CXX) $(CXX_FLAGS) -o $(BINARY) $(OBJ_FILES) $(OBJ_DIR)/noaftodo_config_template.o $(OBJ_DIR)/noaftodo_doc.o $(CXX_LINKER_FLAGS)
+	$(CPP) $(CPP_FLAGS) -o $(BINARY) $(OBJ_FILES) $(OBJ_DIR)/noaftodo_config_template.o $(OBJ_DIR)/noaftodo_doc.o $(CPP_LINKER_FLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(H_FILES)
 	@echo Compiling $@...
-	$(CXX) $(CXX_FLAGS) -c -o $@ $<
+	$(CPP) $(CPP_FLAGS) -c -o $@ $<
 
 obj_dir:
 	@-mkdir $(OBJ_DIR)
