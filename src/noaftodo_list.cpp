@@ -116,6 +116,8 @@ void li_load()
 
 	conf_cvars = conf_predefined_cvars;
 
+	auto t_list_copy = t_list;
+	auto t_tags_copy = t_tags;
 	t_list.clear();
 	t_tags.clear();
 
@@ -258,13 +260,17 @@ void li_load()
 	}
 
 	if (safemode)
-	{
-		log("Errors encountered during list load. Starting in safe mode. "
-				"The possible cause of it may be list version mismatch. "
-				"Solution: back up your list, start NOAFtodo and execute :save. "
-				"Then restart the program and hope for the best.", LP_ERROR);
-		sleep(1);
-	}
+		if (run_mode == PM_DAEMON) 
+		{
+			t_list = t_list_copy;
+			t_tags = t_tags_copy;
+		} else {
+			log("Errors encountered during list load. Starting in safe mode. "
+					"The possible cause of it may be list version mismatch. "
+					"Solution: back up your list, start NOAFtodo and execute :save. "
+					"Then restart the program and hope for the best.", LP_ERROR);
+			sleep(1);
+		}
 
 	li_autosave = (!safemode) && (run_mode != PM_DAEMON); // don't allow daemon to save stuff
 

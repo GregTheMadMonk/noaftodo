@@ -7,7 +7,7 @@ DOC_DIR := doc
 CPP := g++
 
 CPP_FLAGS += -DNCURSES_WIDECHAR -fpermissive
-CPP_LINKER_FLAGS += -lncursesw -lrt
+CPP_LINKER_FLAGS += -lncursesw
 
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
 H_FILES := $(wildcard $(SRC_DIR)/*.h)
@@ -24,8 +24,14 @@ else
 	OBJDUMP := "/bin/objdump"
 endif
 
-ifeq ($(UNAME_S),Haiku)
+ifeq ($(UNAME_S),Haiku) 
+	NO_MQUEUE := 1
+endif
+
+ifeq ($(NO_MQUEUE), 1)
 	CPP_FLAGS += -DNO_MQUEUE
+else
+	CPP_LINKER_FLAGS += -lrt
 endif
 
 all: obj_dir $(OBJ_FILES) noaftodo.conf.template doc

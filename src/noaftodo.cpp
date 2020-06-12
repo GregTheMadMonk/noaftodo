@@ -108,6 +108,7 @@ int main(int argc, char* argv[])
 					log("Error creating fork for daemon", LP_ERROR);
 					break;
 				case 0: // child - daemon
+					run_mode = PM_DAEMON;
 					enable_log = false;
 					da_clients = 1; // care about clients, shut down when there's none
 					da_run();
@@ -153,5 +154,8 @@ void print_help()
 				break;
 		}
 
+#ifdef NO_MQUEUE
+	cout << "Built with NO_MQUEUE" << endl;
+#endif
 	for (auto line : lines) cout << line << endl;
 }

@@ -567,7 +567,7 @@ int cmd_exec(string command)
 			{
 				string shell_command = words.at(i).substr(1);
 
-				log("Executing shell command: `" + shell_command + "`...", LP_IMPORTANT);
+				log("Executing shell command: '" + shell_command + "'...");
 
 				system(shell_command.c_str());
 			} else {

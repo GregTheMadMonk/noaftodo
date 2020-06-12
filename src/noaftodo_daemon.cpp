@@ -92,9 +92,8 @@ void da_run()
 			while (getline(q_in, mes)) msgs.push_back(mes);
 
 			q_in.close();
-			ofstream q_out(DA_MQ_NAME);
-			q_out << endl;
-			q_out.close();
+
+			remove(DA_MQ_NAME);
 		};
 
 		getmsg();
@@ -119,7 +118,7 @@ void da_run()
 			msg = msgs.at(0);
 			msgs.erase(msgs.begin());
 #endif
-			log(msg);
+			log(msg, LP_IMPORTANT);
 
 			switch (msg[0])
 			{
@@ -274,9 +273,7 @@ void da_kill()
 	log("Killing the daemon...");
 	da_send("K");
 	da_unlock();
-#ifdef NO_MQUEUE
-	remove(DA_MQ_NAME);
-#else
+#ifndef NO_MQUEUE
 	mq_unlink(DA_MQ_NAME);
 #endif
 }
@@ -291,14 +288,14 @@ void da_send(const char message[])
 
 #ifdef NO_MQUEUE
 	log("Sending a message (NO_MQUEUE)...");
-	ofstream q_file(DA_MQ_NAME);
+	ofstream q_file(DA_MQ_NAME, std::ios_base::app);
 
 	q_file << message << endl;
 
-	q_file.close();
-
 	if (q_file.good()) log("OK!");
 	else log("Uh oh error", LP_ERROR);
+
+	q_file.close();
 #else
 	log("Opening a message queue...");
 	mq_attr attr;
@@ -332,9 +329,10 @@ void da_lock()
 
 	l_file << getpid() << endl;
 
-	l_file.close();
 	if (l_file.good()) log("OK");
 	else log("Uh oh error", LP_ERROR);
+
+	l_file.close();
 }
 
 void da_unlock()
