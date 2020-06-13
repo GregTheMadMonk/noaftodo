@@ -327,7 +327,7 @@ void cui_construct()
 	init_pair(CUI_CP_RED_ENTRY, conf_get_cvar_int("colors.entry_failed"), conf_get_cvar_int("colors.background"));
 	init_pair(CUI_CP_STATUS, conf_get_cvar_int("colors.status"), conf_get_cvar_int("colors.background"));
 
-	cbreak();
+	halfdelay(2);
 	set_escdelay(0);
 	curs_set(0);
 	noecho();
@@ -350,43 +350,47 @@ void cui_run()
 	cui_init();
 	cui_set_mode(CUI_MODE_NORMAL);
 
-	for (wint_t c = 0; ; get_wch(&c))
+	for (wint_t c = 0; ; (get_wch(&c) != ERR) ? : (c = 0))
 	{
-		bool bind_fired = false;
-		for (const auto& bind : binds)
-			if ((bind.mode & cui_mode) && (bind.key == c))
-			{
-				if (bind.autoexec) cmd_exec(bind.command);
-				else 
+		if (c != 0)
+		{
+			cui_status = "";
+			bool bind_fired = false;
+			for (const auto& bind : binds)
+				if ((bind.mode & cui_mode) && (bind.key == c))
 				{
-					if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
-						cui_command = w_converter.from_bytes(format_str(bind.command, t_list.at(cui_s_line)));
-					else
-						cui_command = w_converter.from_bytes(bind.command);
-					cui_set_mode(CUI_MODE_COMMAND);
+					if (bind.autoexec) cmd_exec(bind.command);
+					else 
+					{
+						if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
+							cui_command = w_converter.from_bytes(format_str(bind.command, t_list.at(cui_s_line)));
+						else
+							cui_command = w_converter.from_bytes(bind.command);
+						cui_set_mode(CUI_MODE_COMMAND);
+					}
+
+					bind_fired = true;
 				}
 
-				bind_fired = true;
+			if (bind_fired) cui_numbuffer = -1;
+
+			if (!bind_fired) switch (cui_mode)
+			{
+				case CUI_MODE_NORMAL:
+					cui_normal_input(c);
+					break;
+				case CUI_MODE_LISTVIEW:
+					cui_listview_input(c);
+					break;
+				case CUI_MODE_DETAILS:
+					cui_details_input(c);
+					break;
+				case CUI_MODE_COMMAND:
+					cui_command_input(c);
+					break;
+				case CUI_MODE_HELP:
+					cui_help_input(c);
 			}
-
-		if (bind_fired) cui_numbuffer = -1;
-
-		if (!bind_fired) switch (cui_mode)
-		{
-			case CUI_MODE_NORMAL:
-				cui_normal_input(c);
-				break;
-			case CUI_MODE_LISTVIEW:
-				cui_listview_input(c);
-				break;
-			case CUI_MODE_DETAILS:
-				cui_details_input(c);
-				break;
-			case CUI_MODE_COMMAND:
-				cui_command_input(c);
-				break;
-			case CUI_MODE_HELP:
-				cui_help_input(c);
 		}
 
 		cui_w = getmaxx(stdscr);
@@ -645,7 +649,6 @@ void cui_listview_paint()
 	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());
 	addstr(cui_status_l.c_str());
 	attrset(A_NORMAL);
-	cui_status = "";
 
 	conf_set_cvar_int("tag_filter", tag_filter);
 }
@@ -804,7 +807,6 @@ void cui_normal_paint()
 	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());
 	addstr(cui_status_l.c_str());
 	attrset(A_NORMAL);
-	cui_status = "";
 }
 
 void cui_normal_input(const wchar_t& key)
