@@ -111,7 +111,6 @@ int main(int argc, char* argv[])
 					run_mode = PM_DAEMON;
 					enable_log = false;
 					da_clients = 1; // care about clients, shut down when there's none
-					da_run();
 					break;
 				default:
 					cui_run();
