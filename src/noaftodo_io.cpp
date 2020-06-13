@@ -22,7 +22,7 @@ void log(const string& message, const char& prefix)
 	{
 		if (wcui) cui_destroy();
 
-		cout << "[" << prefix << "] " << message << endl;
+		cout << "[" << ti_log_time() << "][" << prefix << "] " << message << endl;
 
 		if (wcui) cui_construct();
 	}

@@ -3,6 +3,16 @@
 using namespace std;
 using namespace chrono;
 
+string ti_log_time()
+{
+	const time_t t = system_clock::to_time_t(system_clock::now());
+	tm l_ti = *localtime(&t);
+
+	return ((l_ti.tm_hour < 10) ? " " : "") + to_string(l_ti.tm_hour) + 
+		":" + ((l_ti.tm_min < 10) ? " " : "") + to_string(l_ti.tm_min) + 
+		":" + ((l_ti.tm_sec < 10) ? " " : "") + to_string(l_ti.tm_sec);
+}
+
 long ti_to_long(const tm& t_tm)
 {
 	return t_tm.tm_min + t_tm.tm_hour * 1e2 + t_tm.tm_mday * 1e4 + t_tm.tm_mon * 1e6 + t_tm.tm_year * 1e8;

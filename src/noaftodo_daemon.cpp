@@ -66,13 +66,9 @@ void da_run()
 	da_upd_cache(true);
 	da_cached_time = ti_to_long("a0d");
 
-	for (int ticks = 0; da_running; ticks++)
+	while (da_running)
 	{
-		if (ticks == conf_get_cvar_int("daemon.list_upd_ticks")) 
-		{
-			ticks = 0;
-			da_upd_cache();
-		}
+		if (li_has_changed()) da_upd_cache();
 
 		da_check_dues();
 
@@ -130,7 +126,6 @@ void da_run()
 					break;
 				case 'C':
 					da_upd_cache();
-					ticks = 0;
 					break;
 				case 'S':
 					if (da_clients != -1) da_clients++;
@@ -150,6 +145,10 @@ void da_run()
 			status = mq_timedreceive(mq, msg, DA_MSGSIZE, NULL, &tout);
 #endif
 		}
+
+#ifdef NO_MQUEUE
+		sleep(da_interval);
+#endif
 	}
 
 #ifdef NO_MQUEUE
@@ -166,20 +165,24 @@ void da_run()
 
 void da_upd_cache(const bool& is_first_load)
 {
+	log("Updating daemon cache...", LP_IMPORTANT);
 	li_load();
 
-	for (int i = 0; i < t_list.size(); i++)
+	vector<noaftodo_entry> t_list_copy = t_list;
+
+	for (int i = 0; i < t_list_copy.size(); i++)
 	{
+		cui_s_line = i;
 		int cached_id = -1;
 
 		for (int j = 0; j < da_cache.size(); j++)
-			if (da_cache.at(j).sim(t_list.at(i)))
+			if (da_cache.at(j).sim(t_list_copy.at(i)))
 			{
 				cached_id  = j;
 				break;
 			}
 
-		const noaftodo_entry li_e = t_list.at(i);
+		const noaftodo_entry li_e = t_list_copy.at(i);
 
 		if (cached_id == -1) 
 		{	// add to cache
@@ -242,6 +245,12 @@ void da_upd_cache(const bool& is_first_load)
 			cmd_exec(format_str(conf_get_cvar("on_task_removed_action"), da_cache.at(i)));
 			da_cache.erase(da_cache.begin() + i);
 		} else i++;
+	}
+
+	if (t_list != t_list_copy) 
+	{
+		li_save();
+		da_upd_cache(); // I'm sorry
 	}
 }
 

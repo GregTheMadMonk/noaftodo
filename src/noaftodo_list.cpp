@@ -18,6 +18,8 @@ vector<string> t_tags;
 string li_filename = ".noaftodo-list";
 bool li_autosave = true;
 
+struct stat li_file_stat;
+
 string noaftodo_entry::get_meta(const string& str) const
 {
 	try 
@@ -109,12 +111,12 @@ bool noaftodo_entry::is_uncat()
 	return const_cast<const noaftodo_entry*>(this)->is_uncat();
 }
 
-void li_load()
+void li_load(const bool& load_workspace)
 {
 	log("Loading list file " + li_filename);
 	bool safemode = true;
 
-	conf_cvars = conf_predefined_cvars;
+	if (load_workspace) conf_cvars = conf_predefined_cvars;
 
 	auto t_list_copy = t_list;
 	auto t_tags_copy = t_tags;
@@ -242,14 +244,17 @@ void li_load()
 					break;
 				
 				case 2: // workspace
-					while (entry.at(0) == ' ')
+					if (load_workspace)
 					{
-						entry = entry.substr(1);
-						if (entry == "") break;
-					}
+						while (entry.at(0) == ' ')
+						{
+							entry = entry.substr(1);
+							if (entry == "") break;
+						}
 
-					if (entry != "") if (entry.at(0) != '#')
-						cmd_exec(entry);
+						if (entry != "") if (entry.at(0) != '#')
+							cmd_exec(entry);
+					}
 					break;
 
 				case 3: // list version verification
@@ -274,17 +279,27 @@ void li_load()
 
 	li_autosave = (!safemode) && (run_mode != PM_DAEMON); // don't allow daemon to save stuff
 
+	li_upd_stat();
+
 	li_sort();
 }
 
-void li_load(const string& filename)
+void li_load(const string& filename, const bool& load_workspace)
 {
 	li_filename = filename;
-	li_load();
+	li_load(load_workspace);
 }
 
 void li_save()
 {
+	if (li_has_changed())
+	{
+		log("File was modified since its last recorded change. Skipping save!", LP_ERROR);
+		return;
+	}
+
+	log("Saving...");
+
 	ofstream ofile;
 	ofile.open(li_filename, ios::out | ios::trunc);
 
@@ -323,6 +338,10 @@ void li_save()
 
 	ofile << endl << "[ver]" << endl << LIST_V << endl;
 
+	ofile.close();
+
+	li_upd_stat();
+
 	log("Changes written to file " + li_filename);
 }
 
@@ -330,6 +349,25 @@ void li_save(const string& filename)
 {
 	li_filename = filename;
 	li_save();
+}
+
+void li_upd_stat()
+{
+	if (stat(li_filename.c_str(), &li_file_stat) != 0)
+		log("Can't stat(...) file", LP_ERROR);
+}
+
+bool li_has_changed()
+{
+	struct stat new_stat;
+
+	if (stat(li_filename.c_str(), &new_stat) != 0) 
+	{ 
+		log("Can't stat(...) file", LP_ERROR);
+		return false;
+	}
+
+	return (new_stat.st_mtime != li_file_stat.st_mtime) || (new_stat.st_mtim.tv_nsec != li_file_stat.st_mtim.tv_nsec);
 }
 
 void li_add(const noaftodo_entry& li_entry)

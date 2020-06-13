@@ -352,6 +352,8 @@ void cui_run()
 
 	for (wint_t c = 0; ; (get_wch(&c) != ERR) ? : (c = 0))
 	{
+		if (li_has_changed()) li_load(false); // load only list contents, not the workspace
+
 		if (c != 0)
 		{
 			cui_status = "";

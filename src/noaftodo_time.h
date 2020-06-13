@@ -4,6 +4,8 @@
 #include <chrono>
 #include <string>
 
+std::string ti_log_time();
+
 long ti_to_long(const tm& t_tm);
 long ti_to_long(const std::string& t_str);
 tm ti_to_tm(const std::string& t_str);

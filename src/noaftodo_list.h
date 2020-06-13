@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <map>
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <vector>
 
 struct noaftodo_entry
@@ -70,11 +72,16 @@ extern std::vector<std::string> t_tags;		// list tags
 extern std::string li_filename;		// the list filename
 extern bool li_autosave;
 
-void li_load();
-void li_load(const std::string& filename);
+extern struct stat li_file_stat;
+
+void li_load(const bool& load_workspace = true);
+void li_load(const std::string& filename, const bool& load_workspace = true);
 
 void li_save();
 void li_save(const std::string& filename);
+
+void li_upd_stat();
+bool li_has_changed();
 
 void li_add(const noaftodo_entry& li_entry);
 void li_comp(const int& entryID);
