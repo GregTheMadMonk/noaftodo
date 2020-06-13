@@ -22,7 +22,6 @@
 #include "noaftodo_cui.h"
 #include "noaftodo_daemon.h"
 #include "noaftodo_list.h"
-#include "noaftodo_io.h"
 #include "noaftodo_time.h"
 
 using namespace std;
