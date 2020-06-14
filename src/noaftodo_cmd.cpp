@@ -94,17 +94,16 @@ void cmd_init()
 	{
 		if (args.size() == 0) 
 		{ 
-			cvar("tag_filter") = CUI_TAG_ALL;
+			cui_tag_filter = CUI_TAG_ALL;
 			return 0;
 		}
 		
-		if (args.at(0) == "all") cvar("tag_filter") = CUI_TAG_ALL;
+		if (args.at(0) == "all") cui_tag_filter = CUI_TAG_ALL;
 		else try {
 			const int new_filter = stoi(args.at(0));
-			const int tag_filter = cvar("tag_filter");
 
-			if (new_filter == tag_filter) cvar("tag_filter") = CUI_TAG_ALL;
-			else cvar("tag_filter") = new_filter;
+			if (new_filter == cui_tag_filter) cui_tag_filter = CUI_TAG_ALL;
+			else cui_tag_filter = new_filter;
 		} catch (const invalid_argument& e) {
 			return CMD_ERR_ARG_TYPE;
 		}
@@ -151,14 +150,11 @@ void cmd_init()
 	// command "next" - go to the next list
 	cmds["next"] = [] (const vector<string>& args)
 	{
-		int tag_filter = cvar("tag_filter");
-		tag_filter++;
+		cui_tag_filter++;
 
-		if (tag_filter >= t_tags.size()) tag_filter = CUI_TAG_ALL;
+		if (cui_tag_filter >= t_tags.size()) cui_tag_filter = CUI_TAG_ALL;
 
-		cvar("tag_filter") = tag_filter;
-
-		if (!cui_l_is_visible(tag_filter)) cmd_exec("next");
+		if (!cui_l_is_visible(cui_tag_filter)) cmd_exec("next");
 
 		return 0;
 	};
@@ -166,14 +162,11 @@ void cmd_init()
 	// command "prev" - go to the previous list
 	cmds["prev"] = [] (const vector<string>& args)
 	{
-		int tag_filter = cvar("tag_filter");
-		tag_filter--;
+		cui_tag_filter--;
 
-		if (tag_filter < CUI_TAG_ALL) tag_filter = t_tags.size() - 1;
+		if (cui_tag_filter < CUI_TAG_ALL) cui_tag_filter = t_tags.size() - 1;
 
-		cvar("tag_filter") = tag_filter;
-
-		if (!cui_l_is_visible(tag_filter)) cmd_exec("prev");
+		if (!cui_l_is_visible(cui_tag_filter)) cmd_exec("prev");
 
 		return 0;
 	};
@@ -216,8 +209,7 @@ void cmd_init()
 			new_entry.title = args.at(1);
 			new_entry.description = args.at(2);
 
-			const int tag_filter = cvar("tag_filter");
-			new_entry.tag = (tag_filter == CUI_TAG_ALL) ? 0 : tag_filter;
+			new_entry.tag = (cui_tag_filter == CUI_TAG_ALL) ? 0 : cui_tag_filter;
 			
 			if (args.size() < 4) li_add(new_entry);
 			else
@@ -316,18 +308,17 @@ void cmd_init()
 	// command "lrename[ <new_name>]" - rename list. If <new_name> is not specified or is the same as list id, list name is reset.
 	cmds["lrename"] = [] (const vector<string>& args)
 	{
-		const int tag_filter = cvar("tag_filter");
-		if (tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
+		if (cui_tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
 
-		if ((args.size() < 1) && (tag_filter < t_tags.size())) 
+		if ((args.size() < 1) && (cui_tag_filter < t_tags.size())) 
 		{ 
-			t_tags[tag_filter] = to_string(tag_filter);
+			t_tags[cui_tag_filter] = to_string(cui_tag_filter);
 			return 0;
 		}
 
-		while (tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
+		while (cui_tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
 
-		t_tags[tag_filter] = args.at(0);
+		t_tags[cui_tag_filter] = args.at(0);
 		if (li_autosave) li_save();
 
 		return 0;
@@ -336,12 +327,10 @@ void cmd_init()
 	// command "lclear" - clear list.
 	cmds["lclear"] = [] (const vector<string>& args)
 	{
-		const int tag_filter = cvar("tag_filter");
-
-		if (tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
+		if (cui_tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
 
 		for (int i = 0; i < t_list.size(); )
-			if (t_list.at(i).tag == tag_filter) li_rem(i);
+			if (t_list.at(i).tag == cui_tag_filter) li_rem(i);
 			else i++;
 
 		return 0;
@@ -479,6 +468,15 @@ void cmd_init()
 		for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
 		cui_status = message;
 		return 0;
+	};
+
+	// "fake" cvars
+	cvars["tag_filter"] = make_unique<cvar_base_s>();
+	cvars["tag_filter"]->getter = [] () { return to_string(cui_tag_filter); };
+	cvars["tag_filter"]->setter = [] (const string& val) 
+	{ 
+		try { cui_tag_filter = stoi(val); }
+		catch (const invalid_argument& e) {}
 	};
 }
 

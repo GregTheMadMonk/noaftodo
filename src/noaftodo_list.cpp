@@ -117,12 +117,14 @@ void li_load(const bool& load_workspace)
 	bool safemode = true;
 
 	if (load_workspace) // clear cvars
-		for (auto it = cvars.begin(); it != cvars.end(); it++)
+		for (int offset = 0; offset < cvars.size(); offset++)
 		{
+			auto it = cvars.begin();
+			for (int i = 0; i < offset; i++) it++;
 			if (cvar(it->first).predef_val == "")
 			{
 				cvar_erase(it->first);
-				it--;
+				offset--;
 			} else cvar(it->first).reset();
 		}
 

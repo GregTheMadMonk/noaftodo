@@ -69,6 +69,9 @@ constexpr int CUI_TAG_ALL = -1;
 extern int cui_mode;
 extern std::stack<int> cui_prev_modes;
 
+// filter values
+extern int cui_tag_filter;
+
 // binds
 extern std::vector<cui_bind_s> binds;
 

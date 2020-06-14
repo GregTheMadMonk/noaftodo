@@ -22,6 +22,8 @@ map<char, cui_lview_col_s> cui_lview_columns;
 map<char, cui_col_s> cui_columns;
 map<char, function<string()>> cui_status_fields;
 
+int cui_tag_filter;
+
 int cui_mode;
 stack<int> cui_prev_modes;
 
@@ -215,11 +217,9 @@ void cui_init()
 
 	cui_status_fields['l'] = [] ()
 	{
-		const int tag_filter = cvar("tag_filter");
+		if (cui_tag_filter == CUI_TAG_ALL) return string("All lists");
 
-		if (tag_filter == CUI_TAG_ALL) return string("All lists");
-
-		return "List " + to_string(tag_filter) + (((tag_filter < t_tags.size()) && (t_tags.at(tag_filter) != to_string(tag_filter))) ? (": " + t_tags.at(tag_filter)) : "");
+		return "List " + to_string(cui_tag_filter) + (((cui_tag_filter < t_tags.size()) && (t_tags.at(cui_tag_filter) != to_string(cui_tag_filter))) ? (": " + t_tags.at(cui_tag_filter)) : "");
 	};
 
 	cui_status_fields['m'] = [] ()
@@ -273,13 +273,11 @@ void cui_init()
 
 	cui_status_fields['p'] = [] ()
 	{
-		const int tag_filter = cvar("tag_filter");
-
 		int total = 0;
 		int comp = 0;
 
 		for (int i = 0; i < t_list.size(); i++)
-			if ((tag_filter == CUI_TAG_ALL) || (tag_filter == t_list.at(i).tag))
+			if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag))
 			{
 				total++;
 				if (t_list.at(i).completed) comp++;
@@ -292,13 +290,11 @@ void cui_init()
 
 	cui_status_fields['P'] = [] ()
 	{
-		const int tag_filter = cvar("tag_filter");
-
 		int total = 0;
 		int comp = 0;
 
 		for (int i = 0; i < t_list.size(); i++)
-			if ((tag_filter == CUI_TAG_ALL) || (tag_filter == t_list.at(i).tag))
+			if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag))
 			{
 				total++;
 				if (t_list.at(i).completed) comp++;
@@ -445,14 +441,14 @@ void cui_set_mode(const int& mode)
 		case CUI_MODE_NORMAL:
 			if (cvar("tag_filter_copy") != "")
 			{
-				cvar("tag_filter") = cvar("tag_filter_copy");
+				cui_tag_filter = cvar("tag_filter_copy");
 				cvar_erase("tag_filter_copy");
 			}
 			curs_set(0);
 			break;
 		case CUI_MODE_LISTVIEW:
 			curs_set(0);
-			cvar("tag_filter_copy") = cvar("tag_filter");
+			cvar("tag_filter_copy") = cui_tag_filter;
 			break;
 		case CUI_MODE_DETAILS:
 			cui_delta = 0;
@@ -487,9 +483,8 @@ bool cui_is_visible(const int& entryID)
 
 	const auto& entry = t_list.at(entryID);
 
-	const int tag_filter = cvar("tag_filter");
 	const int filter = cvar("filter");
-	bool ret = ((tag_filter == CUI_TAG_ALL) || (tag_filter == entry.tag));
+	bool ret = ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == entry.tag));
 
 	if (entry.completed) 	ret = ret && (filter & CUI_FILTER_COMPLETE);
 	if (entry.is_failed()) 	ret = ret && (filter & CUI_FILTER_FAILED);
@@ -534,8 +529,6 @@ bool cui_l_is_visible(const int& list_id)
 
 void cui_listview_paint()
 {
-	int tag_filter = cvar("tag_filter");
-
 	// draw table title
 	move(0, 0);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
@@ -571,13 +564,13 @@ void cui_listview_paint()
 		if (cui_l_is_visible(l)) 
 		{
 			v_list.push_back(l);
-			if (l == tag_filter) cui_v_line = v_list.size() - 1;
+			if (l == cui_tag_filter) cui_v_line = v_list.size() - 1;
 		}
 
 	if (v_list.size() != 0) 
 	{
-		while (!cui_l_is_visible(tag_filter)) tag_filter++;
-		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == tag_filter) cui_v_line = i;
+		while (!cui_l_is_visible(cui_tag_filter)) cui_tag_filter++;
+		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == cui_tag_filter) cui_v_line = i;
 	}
 
 	cui_delta = 0;
@@ -585,7 +578,7 @@ void cui_listview_paint()
 	if (cui_v_line - cui_delta < 0) cui_delta = cui_v_line;
 
 	int last_string = 1;
-	if (v_list.size() == 0) tag_filter = CUI_TAG_ALL;
+	if (v_list.size() == 0) cui_tag_filter = CUI_TAG_ALL;
 	else {
 		for (int l = 0; l < v_list.size(); l++)
 		{
@@ -651,8 +644,6 @@ void cui_listview_paint()
 	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());
 	addstr(cui_status_l.c_str());
 	attrset(A_NORMAL);
-
-	cvar("tag_filter") = tag_filter;
 }
 
 void cui_listview_input(const wchar_t& key)
@@ -687,7 +678,6 @@ void cui_listview_input(const wchar_t& key)
 
 void cui_normal_paint()
 {
-	const int tag_filter = cvar("tag_filter");
 	const int filter = cvar("filter");
 
 	// draw table title
@@ -696,7 +686,7 @@ void cui_normal_paint()
 	for (int i = 0; i < cui_w; i++) addch(' ');
 
 	int x = 0;
-	const string cols = (tag_filter == CUI_TAG_ALL) ? cvar("all_cols") : cvar("cols");
+	const string cols = (cui_tag_filter == CUI_TAG_ALL) ? cvar("all_cols") : cvar("cols");
 	for (int coln = 0; coln < cols.length(); coln++)
 	{
 		try
