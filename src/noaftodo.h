@@ -5,12 +5,13 @@
 #include <vector>
 
 #include "noaftodo_list.h"
+
 // program title and version
 constexpr char TITLE[] = "NOAFtodo";
 
 constexpr int LIST_V = 1;
 constexpr int CONF_V = 3;
-constexpr int MINOR_V = 2;
+constexpr int MINOR_V = 3;
 #define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(MINOR_V)
 
 // program modes
@@ -31,8 +32,10 @@ const std::vector<std::string> SPECIAL =
 	";"
 };
 
+// program mode
 extern int run_mode;
 
+// output options
 extern bool enable_log;
 extern bool verbose;
 

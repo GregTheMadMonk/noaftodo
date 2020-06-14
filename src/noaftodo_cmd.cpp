@@ -20,6 +20,7 @@
 #include "noaftodo.h"
 #include "noaftodo_config.h"
 #include "noaftodo_cui.h"
+#include "noaftodo_cvar.h"
 #include "noaftodo_daemon.h"
 #include "noaftodo_list.h"
 #include "noaftodo_time.h"
@@ -93,17 +94,17 @@ void cmd_init()
 	{
 		if (args.size() == 0) 
 		{ 
-			conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
+			cvar("tag_filter") = CUI_TAG_ALL;
 			return 0;
 		}
 		
-		if (args.at(0) == "all") conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
+		if (args.at(0) == "all") cvar("tag_filter") = CUI_TAG_ALL;
 		else try {
 			const int new_filter = stoi(args.at(0));
-			const int tag_filter = conf_get_cvar_int("tag_filter");
+			const int tag_filter = cvar("tag_filter");
 
-			if (new_filter == tag_filter) conf_set_cvar_int("tag_filter", CUI_TAG_ALL);
-			else conf_set_cvar_int("tag_filter", new_filter);
+			if (new_filter == tag_filter) cvar("tag_filter") = CUI_TAG_ALL;
+			else cvar("tag_filter") = new_filter;
 		} catch (const invalid_argument& e) {
 			return CMD_ERR_ARG_TYPE;
 		}
@@ -150,12 +151,12 @@ void cmd_init()
 	// command "next" - go to the next list
 	cmds["next"] = [] (const vector<string>& args)
 	{
-		int tag_filter = conf_get_cvar_int("tag_filter");
+		int tag_filter = cvar("tag_filter");
 		tag_filter++;
 
 		if (tag_filter >= t_tags.size()) tag_filter = CUI_TAG_ALL;
 
-		conf_set_cvar_int("tag_filter", tag_filter);
+		cvar("tag_filter") = tag_filter;
 
 		if (!cui_l_is_visible(tag_filter)) cmd_exec("next");
 
@@ -165,12 +166,12 @@ void cmd_init()
 	// command "prev" - go to the previous list
 	cmds["prev"] = [] (const vector<string>& args)
 	{
-		int tag_filter = conf_get_cvar_int("tag_filter");
+		int tag_filter = cvar("tag_filter");
 		tag_filter--;
 
 		if (tag_filter < CUI_TAG_ALL) tag_filter = t_tags.size() - 1;
 
-		conf_set_cvar_int("tag_filter", tag_filter);
+		cvar("tag_filter") = tag_filter;
 
 		if (!cui_l_is_visible(tag_filter)) cmd_exec("prev");
 
@@ -215,7 +216,7 @@ void cmd_init()
 			new_entry.title = args.at(1);
 			new_entry.description = args.at(2);
 
-			const int tag_filter = conf_get_cvar_int("tag_filter");
+			const int tag_filter = cvar("tag_filter");
 			new_entry.tag = (tag_filter == CUI_TAG_ALL) ? 0 : tag_filter;
 			
 			if (args.size() < 4) li_add(new_entry);
@@ -281,14 +282,14 @@ void cmd_init()
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		int filter = conf_get_cvar_int("filter");
+		int filter = cvar("filter");
 		if (args.at(0) == "uncat") 	filter ^= CUI_FILTER_UNCAT;
 		if (args.at(0) == "complete") 	filter ^= CUI_FILTER_COMPLETE;
 		if (args.at(0) == "coming") 	filter ^= CUI_FILTER_COMING;
 		if (args.at(0) == "failed") 	filter ^= CUI_FILTER_FAILED;
 		if (args.at(0) == "nodue")	filter ^= CUI_FILTER_NODUE;
 
-		conf_set_cvar_int("filter", filter);
+		cvar("filter") = filter;
 
 		return 0;
 	};
@@ -315,7 +316,7 @@ void cmd_init()
 	// command "lrename[ <new_name>]" - rename list. If <new_name> is not specified or is the same as list id, list name is reset.
 	cmds["lrename"] = [] (const vector<string>& args)
 	{
-		const int tag_filter = conf_get_cvar_int("tag_filter");
+		const int tag_filter = cvar("tag_filter");
 		if (tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
 
 		if ((args.size() < 1) && (tag_filter < t_tags.size())) 
@@ -335,7 +336,7 @@ void cmd_init()
 	// command "lclear" - clear list.
 	cmds["lclear"] = [] (const vector<string>& args)
 	{
-		const int tag_filter = conf_get_cvar_int("tag_filter");
+		const int tag_filter = cvar("tag_filter");
 
 		if (tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
 
@@ -403,15 +404,15 @@ void cmd_init()
 
 		if (args.size() < 2)
 		{
-			if (conf_get_predefined_cvar(args.at(0)) != "")
-				conf_set_cvar(args.at(0), conf_get_predefined_cvar(args.at(0)));
+			if (cvar_predefined(args.at(0)) != "")
+				cvar(args.at(0)) = cvar_predefined(args.at(0));
 			else
-				conf_cvars.erase(args.at(0));
+				cvar_erase(args.at(0));
 
 			return 0;
 		}
 
-		conf_set_cvar(args.at(0), args.at(1));
+		cvar(args.at(0)) = args.at(1);
 		return 0;
 	};
 
@@ -420,10 +421,10 @@ void cmd_init()
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		if (conf_get_cvar(args.at(0)) == "true") 
-			conf_set_cvar(args.at(0), "false"); // cannot just do conf_cvars.erase(args.at(0)) because
+		if (cvar(args.at(0)) == "true") 
+			cvar(args.at(0)) = "false"; // cannot just do cvars.erase(args.at(0)) because
 							// someone might've set it to true in their default config
-		else conf_set_cvar(args.at(0), "true");
+		else cvar(args.at(0)) = "true";
 
 		return 0;
 	};

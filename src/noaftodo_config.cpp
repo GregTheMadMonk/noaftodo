@@ -10,13 +10,11 @@
 
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"
+#include "noaftodo_cvar.h"
 
 using namespace std;
 
 string conf_filename = "noaftodo.conf";
-
-map<string, string> conf_cvars;
-map<string, string> conf_predefined_cvars;
 
 extern char _binary_noaftodo_conf_template_start;
 extern char _binary_noaftodo_conf_template_end;
@@ -97,70 +95,8 @@ void conf_load(const string& conf_file)
 		}
 	}
 
-	for (auto it = conf_cvars.begin(); it != conf_cvars.end(); it++)
+	for (auto it = cvars.begin(); it != cvars.end(); it++)
 	{
-		conf_predefined_cvars[it->first] = it->second;
-	}
-}
-
-void conf_set_cvar(const string& name, const string& value)
-{
-	log("Set " + name + "=" + value);
-	conf_cvars[name] = value;
-}
-
-string conf_get_cvar(const string& name)
-{
-	try
-	{
-		return conf_cvars.at(name);
-	} catch (const out_of_range& err) {
-		log("No cvar with name " + name + " defined. Returning \"\".");
-		return "";
-	}
-}
-
-string conf_get_predefined_cvar(const string& name)
-{
-	try
-	{
-		return conf_predefined_cvars.at(name);
-	} catch (const out_of_range& err) {
-		log("No cvar with name " + name + " predefined. Returning \"\".");
-		return "";
-	}
-}
-
-void conf_set_cvar_int(const string& name, const int& value)
-{
-	log("Set " + name + "=" + to_string(value));
-	conf_cvars[name] = to_string(value);
-}
-
-int conf_get_cvar_int(const string& name)
-{
-	try
-	{
-		return stoi(conf_cvars.at(name));
-	} catch (const out_of_range& err) {
-		log("No cvar with name " + name + " defined. Returning \"\".");
-		return 0;
-	} catch (const invalid_argument& err) {
-		log("Cannot convert variable value to integer (" + name + "=" + conf_cvars.at(name) + ")");
-		return 0;
-	}
-}
-
-int conf_get_predefined_cvar_int(const string& name)
-{
-	try
-	{
-		return stoi(conf_predefined_cvars.at(name));
-	} catch (const out_of_range& err) {
-		log("No cvar with name " + name + " predefined. Returning \"\".");
-		return 0;
-	} catch (const invalid_argument& err) {
-		log("Cannot convert variable value to integer (" + name + "=" + conf_predefined_cvars.at(name) + ")");
-		return 0;
+		cvar_predefined(it->first) = *(it->second);
 	}
 }

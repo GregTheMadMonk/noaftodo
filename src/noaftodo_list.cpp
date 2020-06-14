@@ -7,6 +7,7 @@
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
+#include "noaftodo_cvar.h"
 #include "noaftodo_daemon.h"
 #include "noaftodo_time.h"
 
@@ -115,7 +116,15 @@ void li_load(const bool& load_workspace)
 	log("Loading list file " + li_filename);
 	bool safemode = true;
 
-	if (load_workspace) conf_cvars = conf_predefined_cvars;
+	if (load_workspace)
+	{
+		// clear cvars
+		for (auto it = cvars.begin(); it != cvars.end(); it = cvars.begin())
+			cvar_erase(it->first);
+
+		for (auto it = cvars_predefined.begin(); it != cvars_predefined.end(); it++)
+			cvar(it->first) = *it->second;
+	}
 
 	auto t_list_copy = t_list;
 	auto t_tags_copy = t_tags;
@@ -328,11 +337,11 @@ void li_save()
 
 	ofile << endl << "[workspace]" << endl;
 	ofile << "ver " << CONF_V << endl;
-	for (auto cvar_i = conf_cvars.begin(); cvar_i != conf_cvars.end(); cvar_i++)
+	for (auto cvar_i = cvars.begin(); cvar_i != cvars.end(); cvar_i++)
 	{
 		const string key = cvar_i->first;
-		if (conf_get_predefined_cvar(key) != conf_get_cvar(key))
-			ofile << "set \"" << key << "\" \"" << conf_cvars.at(key) << "\"" << endl;
+		if (cvar_predefined(key) != cvar(key))
+			ofile << "set \"" << key << "\" \"" << cvar(key).getter() << "\"" << endl;
 	}
 
 	ofile << endl << "[ver]" << endl << LIST_V << endl;

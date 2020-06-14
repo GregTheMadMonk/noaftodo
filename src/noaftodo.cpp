@@ -9,6 +9,7 @@
 #include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
 #include "noaftodo_cui.h"
+#include "noaftodo_cvar.h"
 #include "noaftodo_daemon.h"
 #include "noaftodo_list.h"
 #include "noaftodo_time.h"
@@ -102,7 +103,7 @@ int main(int argc, char* argv[])
 	if (run_mode == PM_DEFAULT)	
 	{
 		// if this option is enabled, start daemon in the forked process
-		if ((conf_get_cvar("daemon.fork_autostart") == "true") &&
+		if ((cvar("daemon.fork_autostart") == "true") &&
 		   !da_check_lockfile())
 			switch (fork())
 			{
@@ -196,9 +197,12 @@ string format_str(string str, const noaftodo_entry& li_entry, const bool& renoti
 	while ((index = str.find("%N%")) 	!= string::npos) str.replace(index, 3, renotify ? "false" : "true");
 
 	// replace %cvars% with their values
-	for (auto it = conf_cvars.begin(); it != conf_cvars.end(); it++)
+	for (auto it = cvars.begin(); it != cvars.end(); it++)
 		while ((index = str.find("%" + it->first + "%")) != string::npos)
-			str.replace(index, 2 + it->first.length(), it->second);
+			str.replace(index, 2 + it->first.length(), *it->second);
+	for (auto it = cvars_predefined.begin(); it != cvars_predefined.end(); it++)
+		while ((index = str.find("%" + it->first + "%")) != string::npos)
+			str.replace(index, 2 + it->first.length(), *it->second);
 
 	return str;
 }

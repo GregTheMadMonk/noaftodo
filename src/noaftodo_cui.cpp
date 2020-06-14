@@ -12,6 +12,7 @@
 #include "noaftodo.h"
 #include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
+#include "noaftodo_cvar.h"
 #include "noaftodo_daemon.h"
 #include "noaftodo_time.h"
 
@@ -214,7 +215,7 @@ void cui_init()
 
 	cui_status_fields['l'] = [] ()
 	{
-		const int tag_filter = conf_get_cvar_int("tag_filter");
+		const int tag_filter = cvar("tag_filter");
 
 		if (tag_filter == CUI_TAG_ALL) return string("All lists");
 
@@ -244,19 +245,19 @@ void cui_init()
 
 	cui_status_fields['f'] = [] ()
 	{
-		const int filter = conf_get_cvar_int("filter");
+		const int filter = cvar("filter");
 		return string((filter & CUI_FILTER_UNCAT) ? "U" : "_") +
 			string((filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
 			string((filter & CUI_FILTER_COMING) ? "C" : "_") + 
 			string((filter & CUI_FILTER_FAILED) ? "F" : "_") +
 			string((filter & CUI_FILTER_NODUE) ? "N" : "_") + 
-			((conf_get_cvar("regex_filter") == "") ? "" : (" [" + conf_get_cvar("regex_filter") + "]"));
+			((cvar("regex_filter") == "") ? "" : (" [" + cvar("regex_filter").getter() + "]"));
 	};
 
 	cui_status_fields['F'] = [] ()
 	{
-			return ((conf_get_cvar("lview_show_empty") == "true") ? "0" : "_") +
-				((conf_get_cvar("list_regex_filter") == "") ? "" : (" [" + conf_get_cvar("list_regex_filter") + "]"));
+			return ((cvar("lview_show_empty") == "true") ? "0" : "_") +
+				((cvar("list_regex_filter") == "") ? "" : (" [" + cvar("list_regex_filter").getter() + "]"));
 	};
 
 	cui_status_fields['i'] = [] ()
@@ -272,7 +273,7 @@ void cui_init()
 
 	cui_status_fields['p'] = [] ()
 	{
-		const int tag_filter = conf_get_cvar_int("tag_filter");
+		const int tag_filter = cvar("tag_filter");
 
 		int total = 0;
 		int comp = 0;
@@ -291,7 +292,7 @@ void cui_init()
 
 	cui_status_fields['P'] = [] ()
 	{
-		const int tag_filter = conf_get_cvar_int("tag_filter");
+		const int tag_filter = cvar("tag_filter");
 
 		int total = 0;
 		int comp = 0;
@@ -320,11 +321,11 @@ void cui_construct()
 	start_color();
 	use_default_colors();
 
-	init_pair(CUI_CP_TITLE, conf_get_cvar_int("colors.title"), conf_get_cvar_int("colors.background"));
-	init_pair(CUI_CP_GREEN_ENTRY, conf_get_cvar_int("colors.entry_completed"), conf_get_cvar_int("colors.background"));
-	init_pair(CUI_CP_YELLOW_ENTRY, conf_get_cvar_int("colors.entry_coming"), conf_get_cvar_int("colors.background"));
-	init_pair(CUI_CP_RED_ENTRY, conf_get_cvar_int("colors.entry_failed"), conf_get_cvar_int("colors.background"));
-	init_pair(CUI_CP_STATUS, conf_get_cvar_int("colors.status"), conf_get_cvar_int("colors.background"));
+	init_pair(CUI_CP_TITLE, cvar("colors.title"), cvar("colors.background"));
+	init_pair(CUI_CP_GREEN_ENTRY, cvar("colors.entry_completed"), cvar("colors.background"));
+	init_pair(CUI_CP_YELLOW_ENTRY, cvar("colors.entry_coming"), cvar("colors.background"));
+	init_pair(CUI_CP_RED_ENTRY, cvar("colors.entry_failed"), cvar("colors.background"));
+	init_pair(CUI_CP_STATUS, cvar("colors.status"), cvar("colors.background"));
 
 	halfdelay(2);
 	set_escdelay(0);
@@ -442,16 +443,16 @@ void cui_set_mode(const int& mode)
 	switch (cui_mode)
 	{
 		case CUI_MODE_NORMAL:
-			if (conf_get_cvar("tag_filter_copy") != "")
+			if (cvar("tag_filter_copy") != "")
 			{
-				conf_set_cvar_int("tag_filter", conf_get_cvar_int("tag_filter_copy"));
-				conf_cvars.erase("tag_filter_copy");
+				cvar("tag_filter") = cvar("tag_filter_copy");
+				cvar_erase("tag_filter_copy");
 			}
 			curs_set(0);
 			break;
 		case CUI_MODE_LISTVIEW:
 			curs_set(0);
-			conf_set_cvar_int("tag_filter_copy", conf_get_cvar_int("tag_filter"));
+			cvar("tag_filter_copy") = cvar("tag_filter");
 			break;
 		case CUI_MODE_DETAILS:
 			cui_delta = 0;
@@ -486,8 +487,8 @@ bool cui_is_visible(const int& entryID)
 
 	const auto& entry = t_list.at(entryID);
 
-	const int tag_filter = conf_get_cvar_int("tag_filter");
-	const int filter = conf_get_cvar_int("filter");
+	const int tag_filter = cvar("tag_filter");
+	const int filter = cvar("filter");
 	bool ret = ((tag_filter == CUI_TAG_ALL) || (tag_filter == entry.tag));
 
 	if (entry.completed) 	ret = ret && (filter & CUI_FILTER_COMPLETE);
@@ -499,9 +500,9 @@ bool cui_is_visible(const int& entryID)
 	if (entry.is_uncat())	ret = ret && (filter & CUI_FILTER_UNCAT);
 
 	// fit regex
-	if (conf_get_cvar("regex_filter") != "")
+	if (cvar("regex_filter") != "")
 	{
-		regex rf_regex(conf_get_cvar("regex_filter"));
+		regex rf_regex(cvar("regex_filter").getter());
 
 		ret = ret && (regex_search(entry.title, rf_regex) || regex_search(entry.description, rf_regex));
 	}
@@ -516,14 +517,14 @@ bool cui_l_is_visible(const int& list_id)
 
 	bool ret = false;
 
-	if (conf_get_cvar("lview_show_empty") != "true")
+	if (cvar("lview_show_empty") != "true")
 		for (auto e : t_list) ret |= (e.tag == list_id);
 	else ret = true;
 
 	// fit regex
-	if (conf_get_cvar("list_regex_filter") != "")
+	if (cvar("list_regex_filter") != "")
 	{
-		regex rf_regex(conf_get_cvar("list_regex_filter"));
+		regex rf_regex(cvar("list_regex_filter").getter());
 
 		ret = ret && regex_search(t_tags.at(list_id), rf_regex);
 	}
@@ -533,7 +534,7 @@ bool cui_l_is_visible(const int& list_id)
 
 void cui_listview_paint()
 {
-	int tag_filter = conf_get_cvar_int("tag_filter");
+	int tag_filter = cvar("tag_filter");
 
 	// draw table title
 	move(0, 0);
@@ -541,7 +542,7 @@ void cui_listview_paint()
 	for (int i = 0; i < cui_w; i++) addch(' ');
 
 	int x = 0;
-	const string cols = conf_get_cvar("listview_cols");
+	const string cols = cvar("listview_cols");
 	for (int coln = 0; coln < cols.length(); coln++)
 	{
 		try
@@ -555,7 +556,7 @@ void cui_listview_paint()
 			if (coln < cols.length() - 1) if (x + w < cui_w)
 			{
 				move(0, x + w);
-				addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+				addstr((" " + cvar("charset.row_separator").getter() + " ").c_str());
 			}
 			x += w + 3;
 			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
@@ -610,7 +611,7 @@ void cui_listview_paint()
 						if (coln < cols.length() - 1) if (x + w < cui_w)
 						{
 							move(l - cui_delta + 1, x + w);
-							addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+							addstr((" " + cvar("charset.row_separator").getter() + " ").c_str());
 						}
 						x += w + 3;
 
@@ -631,19 +632,19 @@ void cui_listview_paint()
 
 	string cui_status_l = "";
 
-	for (const char& c : conf_get_cvar("listview_status_fields"))
+	for (const char& c : cvar("listview_status_fields").getter())
 	{
 		try {
 			const string field = (cui_status_fields.at(c))();
 			if (field != "")
 			{
-				if (cui_status_l != "") cui_status_l += " " + conf_get_cvar("charset.status_separator") + " ";
+				if (cui_status_l != "") cui_status_l += " " + cvar("charset.status_separator").getter() + " ";
 		       		cui_status_l += field;
 			}
 		} catch (const out_of_range& e) {}
 	}
 
-	if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+	if (cvar("colors.status_standout") == "true") attron(A_STANDOUT);
 	attron(COLOR_PAIR(CUI_CP_STATUS));
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
@@ -651,7 +652,7 @@ void cui_listview_paint()
 	addstr(cui_status_l.c_str());
 	attrset(A_NORMAL);
 
-	conf_set_cvar_int("tag_filter", tag_filter);
+	cvar("tag_filter") = tag_filter;
 }
 
 void cui_listview_input(const wchar_t& key)
@@ -686,8 +687,8 @@ void cui_listview_input(const wchar_t& key)
 
 void cui_normal_paint()
 {
-	const int tag_filter = conf_get_cvar_int("tag_filter");
-	const int filter = conf_get_cvar_int("filter");
+	const int tag_filter = cvar("tag_filter");
+	const int filter = cvar("filter");
 
 	// draw table title
 	move(0, 0);
@@ -695,7 +696,7 @@ void cui_normal_paint()
 	for (int i = 0; i < cui_w; i++) addch(' ');
 
 	int x = 0;
-	const string cols = (tag_filter == CUI_TAG_ALL) ? conf_get_cvar("all_cols") : conf_get_cvar("cols");
+	const string cols = (tag_filter == CUI_TAG_ALL) ? cvar("all_cols") : cvar("cols");
 	for (int coln = 0; coln < cols.length(); coln++)
 	{
 		try
@@ -709,7 +710,7 @@ void cui_normal_paint()
 			if (coln < cols.length() - 1) if (x + w < cui_w)
 			{
 				move(0, x + w);
-				addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+				addstr((" " + cvar("charset.row_separator").getter() + " ").c_str());
 			}
 			x += w + 3;
 			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
@@ -768,7 +769,7 @@ void cui_normal_paint()
 						if (coln < cols.length() - 1) if (x + w < cui_w)
 						{
 							move(l - cui_delta + 1, x + w);
-							addstr((" " + conf_get_cvar("charset.row_separator") + " ").c_str());
+							addstr((" " + cvar("charset.row_separator").getter() + " ").c_str());
 						}
 						x += w + 3;
 
@@ -789,19 +790,19 @@ void cui_normal_paint()
 
 	string cui_status_l = "";
 
-	for (const char& c : conf_get_cvar("status_fields"))
+	for (const char& c : cvar("status_fields").getter())
 	{
 		try {
 			const string field = (cui_status_fields.at(c))();
 			if (field != "")
 			{
-				if (cui_status_l != "") cui_status_l += " " + conf_get_cvar("charset.status_separator") + " ";
+				if (cui_status_l != "") cui_status_l += " " + cvar("charset.status_separator").getter() + " ";
 		       		cui_status_l += field;
 			}
 		} catch (const out_of_range& e) {}
 	}
 
-	if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+	if (cvar("colors.status_standout") == "true") attron(A_STANDOUT);
 	attron(COLOR_PAIR(CUI_CP_STATUS));
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
@@ -858,27 +859,27 @@ void cui_details_paint()
 
 	// draw details box
 	move(2, 3);
-	addstr(conf_get_cvar("charset.box_corner_1").c_str());
+	addstr(cvar("charset.box_corner_1").getter().c_str());
 	move(cui_h - 3, 3);
-	addstr(conf_get_cvar("charset.box_corner_3").c_str());
+	addstr(cvar("charset.box_corner_3").getter().c_str());
 	move(2, cui_w - 4);
-	addstr(conf_get_cvar("charset.box_corner_2").c_str());
+	addstr(cvar("charset.box_corner_2").getter().c_str());
 	move(cui_h - 3, cui_w - 4);
-	addstr(conf_get_cvar("charset.box_corner_4").c_str());
+	addstr(cvar("charset.box_corner_4").getter().c_str());
 
 	for (int i = 3; i <= cui_h - 4; i++) 
 	{ 
 		move(i, 3); 
-		addstr(conf_get_cvar("charset.box_border_v").c_str()); 
+		addstr(cvar("charset.box_border_v").getter().c_str()); 
 
 		move(i, cui_w - 4);
-		addstr(conf_get_cvar("charset.box_border_v").c_str()); 
+		addstr(cvar("charset.box_border_v").getter().c_str()); 
 	}
 
 	for (int j = 4; j < cui_w - 4; j++)
 	{
 		move(2, j);
-		addstr(conf_get_cvar("charset.box_border_h").c_str());
+		addstr(cvar("charset.box_border_h").getter().c_str());
 
 		for (int i = 3; i < cui_h - 3; i++)
 		{
@@ -887,7 +888,7 @@ void cui_details_paint()
 		}
 
 		move(cui_h - 3, j);
-		addstr(conf_get_cvar("charset.box_border_h").c_str());
+		addstr(cvar("charset.box_border_h").getter().c_str());
 	}
 
 	// fill the box with details
@@ -899,7 +900,7 @@ void cui_details_paint()
 	for (int i = 4; i < cui_w - 4; i++)
 	{
 		move(6, i);
-		addstr(conf_get_cvar("charset.box_ui_line_h").c_str());
+		addstr(cvar("charset.box_ui_line_h").getter().c_str());
 	}
 
 	move(7, 5);
@@ -908,7 +909,7 @@ void cui_details_paint()
 	if (entry.tag < t_tags.size()) if (t_tags.at(entry.tag) != to_string(entry.tag))
 		tag = ": " + t_tags.at(entry.tag);
 
-	const string cols = conf_get_cvar("details_cols");
+	const string cols = cvar("details_cols");
 	string info_str = "";
 	for (int coln = 0; coln < cols.length(); coln++)
 	{
@@ -917,7 +918,7 @@ void cui_details_paint()
 			const char& col = cols.at(coln);
 
 			info_str += cui_columns.at(col).contents(entry, cui_s_line);
-			if (coln < cols.length() - 1) info_str += " " + conf_get_cvar("charset.details_separator") + " ";
+			if (coln < cols.length() - 1) info_str += " " + cvar("charset.details_separator").getter() + " ";
 		} catch (const out_of_range& e) {}
 	}
 
@@ -926,7 +927,7 @@ void cui_details_paint()
 	for (int i = 4; i < cui_w - 4; i++)
 	{
 		move(8, i);
-		addstr(conf_get_cvar("charset.box_ui_line_h").c_str());
+		addstr(cvar("charset.box_ui_line_h").getter().c_str());
 	}
 
 	// draw description
@@ -997,7 +998,7 @@ void cui_command_paint()
 	}
 
 	move(cui_h - 1, 0);
-	if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+	if (cvar("colors.status_standout") == "true") attron(A_STANDOUT);
 	attron(COLOR_PAIR(CUI_CP_STATUS));
 	for (int x = 0; x < cui_w; x++) addch(' ');
 	move(cui_h - 1, 0);
@@ -1087,9 +1088,9 @@ void cui_command_input(const wchar_t& key)
 
 			// continious command execution
 			contexec:
-			if (conf_get_cvar("contexec_cmd_regex") != "")
+			if (cvar("contexec_cmd_regex") != "")
 			{
-				regex ce_regex(conf_get_cvar("contexec_cmd_regex"));
+				regex ce_regex(cvar("contexec_cmd_regex").getter());
 
 				if (regex_search(w_converter.to_bytes(cui_command), ce_regex))
 					cmd_exec(w_converter.to_bytes(cui_command));
@@ -1104,27 +1105,27 @@ void cui_help_paint()
 
 	// draw help box
 	move(2, 3);
-	addstr(conf_get_cvar("charset.box_corner_1").c_str());
+	addstr(cvar("charset.box_corner_1").getter().c_str());
 	move(cui_h - 3, 3);
-	addstr(conf_get_cvar("charset.box_corner_3").c_str());
+	addstr(cvar("charset.box_corner_3").getter().c_str());
 	move(2, cui_w - 4);
-	addstr(conf_get_cvar("charset.box_corner_2").c_str());
+	addstr(cvar("charset.box_corner_2").getter().c_str());
 	move(cui_h - 3, cui_w - 4);
-	addstr(conf_get_cvar("charset.box_corner_4").c_str());
+	addstr(cvar("charset.box_corner_4").getter().c_str());
 
 	for (int i = 3; i <= cui_h - 4; i++) 
 	{ 
 		move(i, 3); 
-		addstr(conf_get_cvar("charset.box_border_v").c_str()); 
+		addstr(cvar("charset.box_border_v").getter().c_str()); 
 
 		move(i, cui_w - 4);
-		addstr(conf_get_cvar("charset.box_border_v").c_str()); 
+		addstr(cvar("charset.box_border_v").getter().c_str()); 
 	}
 
 	for (int j = 4; j < cui_w - 4; j++)
 	{
 		move(2, j);
-		addstr(conf_get_cvar("charset.box_border_h").c_str());
+		addstr(cvar("charset.box_border_h").getter().c_str());
 
 		for (int i = 3; i < cui_h - 3; i++)
 		{
@@ -1133,7 +1134,7 @@ void cui_help_paint()
 		}
 
 		move(cui_h - 3, j);
-		addstr(conf_get_cvar("charset.box_border_h").c_str());
+		addstr(cvar("charset.box_border_h").getter().c_str());
 	}
 
 	// fill the box
@@ -1143,7 +1144,7 @@ void cui_help_paint()
 	for (int i = 4; i < cui_w - 4; i++)
 	{
 		move(6, i);
-		addstr(conf_get_cvar("charset.box_ui_line_h").c_str());
+		addstr(cvar("charset.box_ui_line_h").getter().c_str());
 	}
 
 	// draw description
@@ -1236,7 +1237,7 @@ string cui_prompt(const string& message)
 		}
 
 		move(cui_h - 1, 0);
-		if (conf_get_cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+		if (cvar("colors.status_standout") == "true") attron(A_STANDOUT);
 		attron(COLOR_PAIR(CUI_CP_STATUS));
 		for (int x = 0; x < cui_w; x++) addch(' ');
 		move(cui_h - 1, 0);
