@@ -70,6 +70,7 @@ extern int cui_mode;
 extern std::stack<int> cui_prev_modes;
 
 // filter values
+extern int cui_filter;
 extern int cui_tag_filter;
 
 // binds

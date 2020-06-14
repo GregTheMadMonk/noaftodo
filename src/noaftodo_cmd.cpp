@@ -274,14 +274,11 @@ void cmd_init()
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		int filter = cvar("filter");
-		if (args.at(0) == "uncat") 	filter ^= CUI_FILTER_UNCAT;
-		if (args.at(0) == "complete") 	filter ^= CUI_FILTER_COMPLETE;
-		if (args.at(0) == "coming") 	filter ^= CUI_FILTER_COMING;
-		if (args.at(0) == "failed") 	filter ^= CUI_FILTER_FAILED;
-		if (args.at(0) == "nodue")	filter ^= CUI_FILTER_NODUE;
-
-		cvar("filter") = filter;
+		if (args.at(0) == "uncat") 	cui_filter ^= CUI_FILTER_UNCAT;
+		if (args.at(0) == "complete") 	cui_filter ^= CUI_FILTER_COMPLETE;
+		if (args.at(0) == "coming") 	cui_filter ^= CUI_FILTER_COMING;
+		if (args.at(0) == "failed") 	cui_filter ^= CUI_FILTER_FAILED;
+		if (args.at(0) == "nodue")	cui_filter ^= CUI_FILTER_NODUE;
 
 		return 0;
 	};
@@ -476,6 +473,14 @@ void cmd_init()
 	cvars["tag_filter"]->setter = [] (const string& val) 
 	{ 
 		try { cui_tag_filter = stoi(val); }
+		catch (const invalid_argument& e) {}
+	};
+
+	cvars["filter"] = make_unique<cvar_base_s>();
+	cvars["filter"]->getter = [] () { return to_string(cui_filter); };
+	cvars["filter"]->setter = [] (const string& val) 
+	{ 
+		try { cui_filter = stoi(val); }
 		catch (const invalid_argument& e) {}
 	};
 }

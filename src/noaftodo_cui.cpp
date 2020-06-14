@@ -22,6 +22,7 @@ map<char, cui_lview_col_s> cui_lview_columns;
 map<char, cui_col_s> cui_columns;
 map<char, function<string()>> cui_status_fields;
 
+int cui_filter;
 int cui_tag_filter;
 
 int cui_mode;
@@ -245,12 +246,11 @@ void cui_init()
 
 	cui_status_fields['f'] = [] ()
 	{
-		const int filter = cvar("filter");
-		return string((filter & CUI_FILTER_UNCAT) ? "U" : "_") +
-			string((filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
-			string((filter & CUI_FILTER_COMING) ? "C" : "_") + 
-			string((filter & CUI_FILTER_FAILED) ? "F" : "_") +
-			string((filter & CUI_FILTER_NODUE) ? "N" : "_") + 
+		return string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
+			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
+			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") + 
+			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
+			string((cui_filter & CUI_FILTER_NODUE) ? "N" : "_") + 
 			((cvar("regex_filter") == "") ? "" : (" [" + cvar("regex_filter").getter() + "]"));
 	};
 
@@ -483,16 +483,15 @@ bool cui_is_visible(const int& entryID)
 
 	const auto& entry = t_list.at(entryID);
 
-	const int filter = cvar("filter");
 	bool ret = ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == entry.tag));
 
-	if (entry.completed) 	ret = ret && (filter & CUI_FILTER_COMPLETE);
-	if (entry.is_failed()) 	ret = ret && (filter & CUI_FILTER_FAILED);
-	if (entry.is_coming()) 	ret = ret && (filter & CUI_FILTER_COMING);
+	if (entry.completed) 	ret = ret && (cui_filter & CUI_FILTER_COMPLETE);
+	if (entry.is_failed()) 	ret = ret && (cui_filter & CUI_FILTER_FAILED);
+	if (entry.is_coming()) 	ret = ret && (cui_filter & CUI_FILTER_COMING);
 
-	if (entry.get_meta("nodue") == "true") ret = ret && (filter & CUI_FILTER_NODUE);
+	if (entry.get_meta("nodue") == "true") ret = ret && (cui_filter & CUI_FILTER_NODUE);
 
-	if (entry.is_uncat())	ret = ret && (filter & CUI_FILTER_UNCAT);
+	if (entry.is_uncat())	ret = ret && (cui_filter & CUI_FILTER_UNCAT);
 
 	// fit regex
 	if (cvar("regex_filter") != "")
@@ -667,7 +666,7 @@ void cui_listview_input(const wchar_t& key)
 			}
 			break;
 		case 'G':
-			for (int i = 0; i < t_list.size(); i++) if (cui_is_visible(i)) cui_numbuffer = i;
+			for (int i = 0; i < t_tags.size(); i++) if (cui_l_is_visible(i)) cui_numbuffer = i;
 			cui_status = 'G';
 			break;
 		default:
@@ -678,8 +677,6 @@ void cui_listview_input(const wchar_t& key)
 
 void cui_normal_paint()
 {
-	const int filter = cvar("filter");
-
 	// draw table title
 	move(0, 0);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
