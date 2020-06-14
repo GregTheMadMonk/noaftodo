@@ -56,6 +56,21 @@ bool cvar_base_s::operator!=(const cvar_base_s& rval)
 	return (this->getter() != rval.getter());
 }
 
+void cvar_base_s::reset()
+{
+	this->setter(this->predef_val);
+}
+
+void cvar_base_s::predefine()
+{
+	this->predef_val = this->getter();
+}
+
+bool cvar_base_s::changed()
+{
+	return (this->getter() != this->predef_val);
+}
+
 cvar_base_s::operator int()
 {
 	try
@@ -90,18 +105,15 @@ cvar_base_s& cvar(const string& name)
 	}
 }
 
+void cvar_reset(const string& name)
+{
+	if (cvar(name).predef_val != "")
+		cvar(name).reset();
+	else
+		cvar_erase(name);
+}
+
 void cvar_erase(const string& name)
 {
 	cvars.erase(name);
-}
-
-cvar_base_s& cvar_predefined(const string& name)
-{
-	try
-	{
-		return *cvars_predefined.at(name);
-	} catch (const out_of_range& e) {
-		return *(cvars_predefined[name] = make_unique<cvar_s>()); // otherwise cvars[name] would automatically create
-							// cvar_base_s, which is basically empty
-	}
 }

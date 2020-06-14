@@ -200,9 +200,6 @@ string format_str(string str, const noaftodo_entry& li_entry, const bool& renoti
 	for (auto it = cvars.begin(); it != cvars.end(); it++)
 		while ((index = str.find("%" + it->first + "%")) != string::npos)
 			str.replace(index, 2 + it->first.length(), *it->second);
-	for (auto it = cvars_predefined.begin(); it != cvars_predefined.end(); it++)
-		while ((index = str.find("%" + it->first + "%")) != string::npos)
-			str.replace(index, 2 + it->first.length(), *it->second);
 
 	return str;
 }

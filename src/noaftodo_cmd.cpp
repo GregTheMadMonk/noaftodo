@@ -404,10 +404,7 @@ void cmd_init()
 
 		if (args.size() < 2)
 		{
-			if (cvar_predefined(args.at(0)) != "")
-				cvar(args.at(0)) = cvar_predefined(args.at(0));
-			else
-				cvar_erase(args.at(0));
+			cvar_reset(args.at(0));
 
 			return 0;
 		}

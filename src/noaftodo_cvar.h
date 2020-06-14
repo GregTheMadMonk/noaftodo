@@ -8,6 +8,8 @@
 
 struct cvar_base_s	// a base structure for cvars
 {
+	std::string predef_val; // predefined value
+
 	std::function<std::string()> getter = [] () { return std::string(""); };
 	std::function<void(const std::string& val)> setter = [] (const std::string& val) { };
 
@@ -23,6 +25,11 @@ struct cvar_base_s	// a base structure for cvars
 	bool operator!=(const int& rval);
 	bool operator!=(const cvar_base_s& rval);
 
+	void reset();		// set value = predefined value
+	void predefine();	// set predefined value = value
+
+	bool changed();
+
 	operator int();
 	operator std::string();
 };
@@ -35,10 +42,9 @@ struct cvar_s : public cvar_base_s // a regular cvar
 };
 
 extern std::map<std::string, std::unique_ptr<cvar_base_s>> cvars;
-extern std::map<std::string, std::unique_ptr<cvar_base_s>> cvars_predefined;
 
 cvar_base_s& cvar(const std::string& name);
+void cvar_reset(const std::string& name);
 void cvar_erase(const std::string& name);
-cvar_base_s& cvar_predefined(const std::string& name);
 
 #endif

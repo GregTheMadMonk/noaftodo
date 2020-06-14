@@ -116,15 +116,15 @@ void li_load(const bool& load_workspace)
 	log("Loading list file " + li_filename);
 	bool safemode = true;
 
-	if (load_workspace)
-	{
-		// clear cvars
-		for (auto it = cvars.begin(); it != cvars.end(); it = cvars.begin())
-			cvar_erase(it->first);
-
-		for (auto it = cvars_predefined.begin(); it != cvars_predefined.end(); it++)
-			cvar(it->first) = *it->second;
-	}
+	if (load_workspace) // clear cvars
+		for (auto it = cvars.begin(); it != cvars.end(); it++)
+		{
+			if (cvar(it->first).predef_val == "")
+			{
+				cvar_erase(it->first);
+				it--;
+			} else cvar(it->first).reset();
+		}
 
 	auto t_list_copy = t_list;
 	auto t_tags_copy = t_tags;
@@ -340,7 +340,7 @@ void li_save()
 	for (auto cvar_i = cvars.begin(); cvar_i != cvars.end(); cvar_i++)
 	{
 		const string key = cvar_i->first;
-		if (cvar_predefined(key) != cvar(key))
+		if (cvar(key).changed())
 			ofile << "set \"" << key << "\" \"" << cvar(key).getter() << "\"" << endl;
 	}
 

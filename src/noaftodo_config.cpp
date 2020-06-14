@@ -96,7 +96,5 @@ void conf_load(const string& conf_file)
 	}
 
 	for (auto it = cvars.begin(); it != cvars.end(); it++)
-	{
-		cvar_predefined(it->first) = *(it->second);
-	}
+		cvar(it->first).predefine();
 }
