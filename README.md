@@ -20,6 +20,8 @@ Also running without creating a config is supported with `noaftodo -c default`, 
 
 ### Building
 Run `make` (`gmake` on Solaris 11).
+
+If you don't have mqueue.h on your system, or don't want program to use it, you can set environment variable `NO_MQUEUE` to `1`, and NOAFtodo will compile with a primitive replacement instead.
 #### Dependencies
 **ncurses**. You need it (on an Arch-based system: `sudo pacman -S ncurses`, on a Debian-based system: `sudo apt install libncurses5-dev`).
 

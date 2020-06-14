@@ -4,8 +4,8 @@
 
 using namespace std;
 
-map<string, cvar_base_s*> cvars;
-map<string, cvar_base_s*> cvars_predefined;
+map<string, unique_ptr<cvar_base_s>> cvars;
+map<string, unique_ptr<cvar_base_s>> cvars_predefined;
 
 cvar_base_s& cvar_base_s::operator=(const string& rval)
 {
@@ -85,18 +85,14 @@ cvar_base_s& cvar(const string& name)
 	{
 		return *cvars.at(name);
 	} catch (const out_of_range& e) {
-		return *(cvars[name] = new cvar_s()); // otherwise cvars[name] would automatically create
+		return *(cvars[name] = make_unique<cvar_s>()); // otherwise cvars[name] would automatically create
 							// cvar_base_s, which is basically empty
 	}
 }
 
 void cvar_erase(const string& name)
 {
-	try
-	{
-		delete cvars.at(name);
-		cvars.erase(name);
-	} catch (const out_of_range& e) {}
+	cvars.erase(name);
 }
 
 cvar_base_s& cvar_predefined(const string& name)
@@ -105,7 +101,7 @@ cvar_base_s& cvar_predefined(const string& name)
 	{
 		return *cvars_predefined.at(name);
 	} catch (const out_of_range& e) {
-		return *(cvars_predefined[name] = new cvar_s()); // otherwise cvars[name] would automatically create
+		return *(cvars_predefined[name] = make_unique<cvar_s>()); // otherwise cvars[name] would automatically create
 							// cvar_base_s, which is basically empty
 	}
 }

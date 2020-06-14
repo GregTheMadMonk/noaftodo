@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include <string>
 
 struct cvar_base_s	// a base structure for cvars
@@ -33,8 +34,8 @@ struct cvar_s : public cvar_base_s // a regular cvar
 	cvar_s(const std::string& def_val = "");
 };
 
-extern std::map<std::string, cvar_base_s*> cvars;
-extern std::map<std::string, cvar_base_s*> cvars_predefined;
+extern std::map<std::string, std::unique_ptr<cvar_base_s>> cvars;
+extern std::map<std::string, std::unique_ptr<cvar_base_s>> cvars_predefined;
 
 cvar_base_s& cvar(const std::string& name);
 void cvar_erase(const std::string& name);
