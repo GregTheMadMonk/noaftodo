@@ -11,12 +11,6 @@
 #include <cstdlib>
 #include <stdexcept>
 
-#ifdef __sun
-#include <ncurses/curses.h>
-# else
-#include <curses.h>
-#endif
-
 #include "noaftodo.h"
 #include "noaftodo_config.h"
 #include "noaftodo_cui.h"
@@ -361,26 +355,30 @@ void cmd_init()
 
 			log("Binding " + skey + " to \"" + scomm + "\"");
 
-			wchar_t key;
-			if (skey.length() == 1)
-				key = skey.at(0);
-			else
-			{
-				if (skey == "up") 	key = KEY_UP;
-				if (skey == "down") 	key = KEY_DOWN;
-				if (skey == "left")	key = KEY_LEFT;
-				if (skey == "right")	key = KEY_RIGHT;
-				if (skey == "esc")	key = 27;
-				if (skey == "enter")	key = 10;
-				if (skey == "tab")	key = 9;
-			}
-
-			cui_bind(key, scomm, smode, sauto);
+			cui_bind(cui_key_from_str(skey), scomm, smode, sauto);
 
 			return 0;
 		} catch (const invalid_argument& e) {
 			return CMD_ERR_ARG_TYPE;
 		}
+	};
+
+	// command "unbind <key>" - remove bind from key
+	cmds["unbind"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		bool removed = false;
+
+		for (int i = 0; i < binds.size(); i++)
+			if (cui_key_from_str(args.at(0)) == binds.at(i).key)
+			{
+				binds.erase(binds.begin() + i);
+				i--;
+				removed = true;
+			}
+
+		return removed ? 0 : CMD_ERR_EXTERNAL;
 	};
 
 	// command "set <name>[ <value>]" - set cvar value. If <value> is not specified, reset cvar to default value.
@@ -483,6 +481,65 @@ void cmd_init()
 		try { cui_filter = stoi(val); }
 		catch (const invalid_argument& e) {}
 	};
+
+	cvars["id"] = make_unique<cvar_base_s>();
+	cvars["id"]->getter = [] () { return to_string(cui_s_line); };
+	cvars["id"]->setter = [] (const string& val)
+	{
+		try
+		{
+			const int target = stoi(val);
+
+			if ((target >= 0) && (target < t_list.size()))
+				cui_s_line = target;
+		} catch (const invalid_argument& e) {}
+	};
+
+	cvars["last_visible_id"] = make_unique<cvar_base_s>();
+	cvars["last_visible_id"]->getter = [] () 
+	{
+		int ret = -1;
+		for (int i = 0; i < t_list.size(); i++)
+			if (cui_is_visible(i)) ret = i;
+
+		return to_string(ret);
+	};
+	cvars["last_visible_id"]->setter = [] (const string& val) {}; // read-only value
+
+	cvars["first_visible_id"] = make_unique<cvar_base_s>();
+	cvars["first_visible_id"]->getter = [] () 
+	{
+		for (int i = 0; i < t_list.size(); i++)
+			if (cui_is_visible(i)) return to_string(i);
+
+		return string("-1");
+	};
+	cvars["first_visible_id"]->setter = [] (const string& val) {}; // read-only value
+
+	cvars["last_visible_list"] = make_unique<cvar_base_s>();
+	cvars["last_visible_list"]->getter = [] () 
+	{
+		int ret = -1;
+		for (int i = 0; i < t_tags.size(); i++)
+			if (cui_l_is_visible(i)) ret = i;
+
+		return to_string(ret);
+	};
+	cvars["last_visible_list"]->setter = [] (const string& val) {}; // read-only value
+
+	cvars["first_visible_list"] = make_unique<cvar_base_s>();
+	cvars["first_visible_list"]->getter = [] () 
+	{
+		for (int i = 0; i < t_tags.size(); i++)
+			if (cui_l_is_visible(i)) return to_string(i);
+
+		return string("-1");
+	};
+	cvars["first_visible_list"]->setter = [] (const string& val) {}; // read-only value
+
+	cvars["VER"] = make_unique<cvar_base_s>();
+	cvars["VER"]->getter = [] () { return VERSION; };
+	cvars["VER"]->setter = [] (const string& val) { }; // read-only value
 }
 
 int cmd_exec(string command)

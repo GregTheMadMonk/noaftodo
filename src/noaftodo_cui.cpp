@@ -658,16 +658,12 @@ void cui_listview_input(const wchar_t& key)
 		case 'g':
 			if (cui_numbuffer == -1) 
 			{
-				cui_numbuffer = 0;
+				cui_numbuffer = cvar("first_visible_list");
 				cui_status = 'g';
 			} else {
 				cmd_exec("list " + to_string(cui_numbuffer));
 				cui_numbuffer = -1;
 			}
-			break;
-		case 'G':
-			for (int i = 0; i < t_tags.size(); i++) if (cui_l_is_visible(i)) cui_numbuffer = i;
-			cui_status = 'G';
 			break;
 		default:
 			cui_numbuffer = -1;
@@ -811,7 +807,7 @@ void cui_normal_input(const wchar_t& key)
 		case 'g':
 			if (cui_numbuffer == -1) 
 			{
-				cui_numbuffer = 0;
+				cui_numbuffer = cvar("first_visible_id");
 				cui_status = 'g';
 			} else {
 				cmd_exec("g " + to_string(cui_numbuffer));
@@ -828,10 +824,6 @@ void cui_normal_input(const wchar_t& key)
 				else cmd_exec("list " + to_string(cui_numbuffer));
 				cui_numbuffer = -1;
 			}
-			break;
-		case 'G':
-			for (int i = 0; i < t_list.size(); i++) if (cui_is_visible(i)) cui_numbuffer = i;
-			cui_status = 'G';
 			break;
 		default:
 			cui_numbuffer = -1;
@@ -1245,4 +1237,20 @@ void cui_filter_history()
 			cui_command_history.erase(cui_command_history.begin() + i);
 			i--;
 		}
+}
+
+wchar_t cui_key_from_str(const string& str)
+{
+	if (str.length() == 1)
+		return str.at(0);
+
+	if (str == "up")	return KEY_UP;
+	if (str == "down")	return KEY_DOWN;
+	if (str == "left")	return KEY_LEFT;
+	if (str == "right")	return KEY_RIGHT;
+	if (str == "esc")	return 27;
+	if (str == "enter")	return 10;
+	if (str == "tab")	return 9;
+
+	return 0;
 }
