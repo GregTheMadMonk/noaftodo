@@ -54,7 +54,7 @@ bind "V" "vtoggle complete" 1 true
 bind "N" "vtoggle nodue" 1 true
 bind "/" "set regex_filter " 1 false
 bind "/" "set list_regex_filter " 16 false
-bind "e" "a %due% \"%T%\" \"%D%\" %id%; setmeta %meta%" 1 false
+bind "e" "a \%due\% \"\%T\%\" \"\%D\%\" \%id\%; setmeta \%meta\%" 1 false
 
 # aliases
 alias duplicate a \%due\% \%T\% \%D\%
