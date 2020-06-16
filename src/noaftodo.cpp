@@ -187,10 +187,13 @@ string format_str(string str, const noaftodo_entry& li_entry, const bool& renoti
 		while ((index = str.find("%prompt%")) 	!= string::npos) str.replace(index, 8, cui_prompt());
 
 	// replace entry data
-	while ((index = str.find("%T%")) 	!= string::npos) str.replace(index, 3, replace_special(li_entry.title));
-	while ((index = str.find("%D%")) 	!= string::npos) str.replace(index, 3, replace_special(li_entry.description));
-	while ((index = str.find("%due%")) 	!= string::npos) str.replace(index, 5, ti_cmd_str(li_entry.due));
-	while ((index = str.find("%meta%"))	!= string::npos) str.replace(index, 6, li_entry.meta_str());
+	if (li_entry != NULL_ENTRY)
+	{
+		while ((index = str.find("%T%")) 	!= string::npos) str.replace(index, 3, replace_special(li_entry.title));
+		while ((index = str.find("%D%")) 	!= string::npos) str.replace(index, 3, replace_special(li_entry.description));
+		while ((index = str.find("%due%")) 	!= string::npos) str.replace(index, 5, ti_cmd_str(li_entry.due));
+		while ((index = str.find("%meta%"))	!= string::npos) str.replace(index, 6, li_entry.meta_str());
+	}
 
 	while ((index = str.find("%N%")) 	!= string::npos) str.replace(index, 3, renotify ? "false" : "true");
 

@@ -14,7 +14,7 @@ struct noaftodo_entry
 	long due;
 	std::string title;
 	std::string description;
-	int tag;
+	int tag; // also tag = -1 indicates a null entry
 
 	std::map<std::string, std::string> meta;
 	std::string get_meta(const std::string& str);
@@ -24,6 +24,8 @@ struct noaftodo_entry
 	bool sim(const noaftodo_entry& e2) const;
 	bool operator==(const noaftodo_entry& comp);
 	bool operator==(const noaftodo_entry& comp) const;
+	bool operator!=(const noaftodo_entry& comp);
+	bool operator!=(const noaftodo_entry& comp) const;
 
 	std::string meta_str();
 	std::string meta_str() const;
@@ -37,6 +39,8 @@ struct noaftodo_entry
 	bool is_uncat();
 	bool is_uncat() const;
 };
+
+const noaftodo_entry NULL_ENTRY = { .tag = -1 };
 
 struct less_than_noaftodo_entry
 {

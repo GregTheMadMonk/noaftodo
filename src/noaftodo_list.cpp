@@ -47,6 +47,16 @@ bool noaftodo_entry::operator==(const noaftodo_entry& comp) const
 		(this->meta == comp.meta);
 }
 
+bool noaftodo_entry::operator!=(const noaftodo_entry& comp)
+{
+	return !(*this == comp);
+}
+
+bool noaftodo_entry::operator!=(const noaftodo_entry& comp) const
+{
+	return !(*this == comp);
+}
+
 bool noaftodo_entry::sim(const noaftodo_entry& e2) const
 {
 	return (this->due == e2.due) && 

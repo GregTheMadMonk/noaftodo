@@ -552,6 +552,8 @@ int cmd_exec(string command)
 
 	if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
 		command = format_str(command, t_list.at(cui_s_line));
+	else
+		command = format_str(command, NULL_ENTRY);
 
 	for (int i = 0; i < command.length(); i++)
 	{
