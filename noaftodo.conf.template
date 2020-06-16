@@ -96,8 +96,8 @@ set "cols" "ifdtD"
 set "listview_cols" "itep"
 set "details_cols" "dl"
 
-set "status_fields" "smlfip"
-set "listview_status_fields" "smF"
+set "status_fields" "piflms"
+set "listview_status_fields" "Fms"
 
 set "charset.box_ui_line_h" "-"
 

@@ -540,6 +540,32 @@ void cmd_init()
 	cvars["VER"] = make_unique<cvar_base_s>();
 	cvars["VER"]->getter = [] () { return VERSION; };
 	cvars["VER"]->setter = [] (const string& val) { }; // read-only value
+
+	cvars["charset.row_separator"] = make_unique<cvar_base_s>();
+	cvars["charset.row_separator"]->getter = [] () { return cui_row_separator.full_str(); };
+	cvars["charset.row_separator"]->setter = [] (const string& val)
+	{
+		wstring ws = w_converter.from_bytes(val);
+
+		vector<string> init_list;
+
+		for (auto wc : ws) init_list.push_back(w_converter.to_bytes(wc));
+
+		cui_row_separator = multistr_c(init_list);
+	};
+
+	cvars["charset.status_separator"] = make_unique<cvar_base_s>();
+	cvars["charset.status_separator"]->getter = [] () { return cui_status_separator.full_str(); };
+	cvars["charset.status_separator"]->setter = [] (const string& val)
+	{
+		wstring ws = w_converter.from_bytes(val);
+
+		vector<string> init_list;
+
+		for (auto wc : ws) init_list.push_back(w_converter.to_bytes(wc));
+
+		cui_status_separator = multistr_c(init_list);
+	};
 }
 
 int cmd_exec(string command)

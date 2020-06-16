@@ -1,6 +1,8 @@
 #ifndef NOAFTODO_H
 #define NOAFTODO_H
 
+#include <codecvt>
+#include <locale>
 #include <string>
 #include <vector>
 
@@ -24,6 +26,20 @@ constexpr char LP_DEFAULT = 'i';
 constexpr char LP_IMPORTANT = 'I';
 constexpr char LP_ERROR = '!';
 
+// "multistr" class
+class multistr_c
+{
+	std::vector<std::string> vals;
+	int offset = 0;
+public:
+	multistr_c(const std::vector<std::string>& init_list);
+
+	std::string get();
+	std::string full_str();
+	void shift();
+	void reset();
+};
+
 // special characters
 const std::vector<std::string> SPECIAL = 
 { 
@@ -31,6 +47,9 @@ const std::vector<std::string> SPECIAL =
 	"\"", 
 	";"
 };
+
+// string <-> wstring converter
+extern std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> w_converter;
 
 // program mode
 extern int run_mode;

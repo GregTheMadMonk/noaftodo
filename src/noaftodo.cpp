@@ -21,6 +21,8 @@ int run_mode;
 bool verbose = false;
 bool enable_log = true;
 
+wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
+
 extern char _binary_doc_doc_gen_start;
 extern char _binary_doc_doc_gen_end;
 
@@ -222,4 +224,39 @@ string replace_special(string str)
 	}
 
 	return str;
+}
+
+// multistr_c functions
+multistr_c::multistr_c(const vector<string>& init_list)
+{
+	this->vals = init_list;
+}
+
+string multistr_c::get()
+{
+	const string retval = this->vals.at(this->offset);
+
+	this->shift();
+
+	return retval;
+}
+
+string multistr_c::full_str()
+{
+	string ret = "";
+
+	for (auto s : this->vals) ret += s;
+
+	return ret;
+}
+
+void multistr_c::shift()
+{
+	this->offset++;
+	if (this->offset >= this->vals.size()) this->reset();
+}
+
+void multistr_c::reset()
+{
+	this->offset = 0;
 }

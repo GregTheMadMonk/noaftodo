@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "noaftodo.h"
 #include "noaftodo_list.h"
 
 struct cui_bind_s
@@ -72,6 +73,10 @@ extern std::stack<int> cui_prev_modes;
 // filter values
 extern int cui_filter;
 extern int cui_tag_filter;
+
+// characters
+extern multistr_c cui_row_separator;
+extern multistr_c cui_status_separator;
 
 // binds
 extern std::vector<cui_bind_s> binds;

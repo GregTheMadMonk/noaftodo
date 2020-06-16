@@ -1,15 +1,12 @@
 #include "noaftodo_cui.h"
 
-#include <codecvt>
 #ifdef __sun
 #include <ncurses/curses.h>
 # else
 #include <curses.h>
 #endif
-#include <locale>
 #include <regex>
 
-#include "noaftodo.h"
 #include "noaftodo_cmd.h"
 #include "noaftodo_config.h"
 #include "noaftodo_cvar.h"
@@ -24,6 +21,9 @@ map<char, function<string()>> cui_status_fields;
 
 int cui_filter;
 int cui_tag_filter;
+
+multistr_c cui_row_separator({ "|" });
+multistr_c cui_status_separator({ "|" });
 
 int cui_mode;
 stack<int> cui_prev_modes;
@@ -43,8 +43,6 @@ wstring cui_command;
 wstring cui_command_t;
 int cui_command_cursor = 0;
 int cui_command_index = 0;
-
-wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
 
 bool cui_active = false;
 
@@ -394,6 +392,9 @@ void cui_run()
 		cui_w = getmaxx(stdscr);
 		cui_h = getmaxy(stdscr);
 
+		cui_row_separator.reset();
+		cui_status_separator.reset();
+
 		switch (cui_mode)
 		{
 			case CUI_MODE_NORMAL:
@@ -548,7 +549,7 @@ void cui_listview_paint()
 			if (coln < cols.length() - 1) if (x + w < cui_w)
 			{
 				move(0, x + w);
-				addstr((" " + cvar("charset.row_separator").getter() + " ").c_str());
+				addstr((" " + cui_row_separator.get() + " ").c_str());
 			}
 			x += w + 3;
 			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
@@ -581,6 +582,7 @@ void cui_listview_paint()
 	else {
 		for (int l = 0; l < v_list.size(); l++)
 		{
+			cui_row_separator.reset();
 			if (l - cui_delta >= cui_h - 2) break;
 			if (l >= cui_delta)    
 			{
@@ -603,7 +605,7 @@ void cui_listview_paint()
 						if (coln < cols.length() - 1) if (x + w < cui_w)
 						{
 							move(l - cui_delta + 1, x + w);
-							addstr((" " + cvar("charset.row_separator").getter() + " ").c_str());
+							addstr((" " + cui_row_separator.get() + " ").c_str());
 						}
 						x += w + 3;
 
@@ -630,8 +632,8 @@ void cui_listview_paint()
 			const string field = (cui_status_fields.at(c))();
 			if (field != "")
 			{
-				if (cui_status_l != "") cui_status_l += " " + cvar("charset.status_separator").getter() + " ";
-		       		cui_status_l += field;
+				if (cui_status_l != "") cui_status_l = " " + cui_status_separator.get() + " " + cui_status_l;
+		       		cui_status_l = field + cui_status_l;
 			}
 		} catch (const out_of_range& e) {}
 	}
@@ -693,7 +695,7 @@ void cui_normal_paint()
 			if (coln < cols.length() - 1) if (x + w < cui_w)
 			{
 				move(0, x + w);
-				addstr((" " + cvar("charset.row_separator").getter() + " ").c_str());
+				addstr((" " + cui_row_separator.get() + " ").c_str());
 			}
 			x += w + 3;
 			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
@@ -725,6 +727,7 @@ void cui_normal_paint()
 	else {
 		for (int l = 0; l < v_list.size(); l++)
 		{
+			cui_row_separator.reset();
 			if (l - cui_delta >= cui_h - 2) break;
 			if (l >= cui_delta)    
 			{
@@ -752,7 +755,7 @@ void cui_normal_paint()
 						if (coln < cols.length() - 1) if (x + w < cui_w)
 						{
 							move(l - cui_delta + 1, x + w);
-							addstr((" " + cvar("charset.row_separator").getter() + " ").c_str());
+							addstr((" " + cui_row_separator.get() + " ").c_str());
 						}
 						x += w + 3;
 
@@ -779,8 +782,8 @@ void cui_normal_paint()
 			const string field = (cui_status_fields.at(c))();
 			if (field != "")
 			{
-				if (cui_status_l != "") cui_status_l += " " + cvar("charset.status_separator").getter() + " ";
-		       		cui_status_l += field;
+				if (cui_status_l != "") cui_status_l = " " + cui_status_separator.get() + " " + cui_status_l;
+		       		cui_status_l = field + cui_status_l;
 			}
 		} catch (const out_of_range& e) {}
 	}
