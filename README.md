@@ -3,7 +3,7 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 
 <img src="workflow.gif" width="576" height="324" alt="NOAFtodo workflow"></img>
 
-### Current and future features
+### Current and future features (visit [NOAFtodo wiki](https://github.com/GregTheMadMonk/noaftodo/wiki) to see project roadmap and prepare for non-backwards-compatible changes in command interpreter)
 - [x] minimalisic interface written with ncurses
 - [x] multiple lists between which tasks can be moved
 - [x] primitive TODO list management: add and remove tasks with or without dues, mark tasks as completed, basic task editing
