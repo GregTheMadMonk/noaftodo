@@ -232,13 +232,16 @@ multistr_c::multistr_c(const vector<string>& init_list)
 	this->vals = init_list;
 }
 
-string multistr_c::get()
+string multistr_c::get(const int& position)
 {
-	const string retval = this->vals.at(this->offset);
+	if (position == -1)
+	{
+		const string retval = this->vals.at(this->offset);
 
-	this->shift();
+		this->shift();
 
-	return retval;
+		return retval;
+	} else return this->vals.at(position % this->vals.size());
 }
 
 string multistr_c::full_str()
@@ -250,9 +253,9 @@ string multistr_c::full_str()
 	return ret;
 }
 
-void multistr_c::shift()
+void multistr_c::shift(const int& steps)
 {
-	this->offset++;
+	this->offset += steps;
 	if (this->offset >= this->vals.size()) this->reset();
 }
 

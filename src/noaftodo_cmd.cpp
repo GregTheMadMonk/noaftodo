@@ -541,6 +541,14 @@ void cmd_init()
 	cvars["VER"]->getter = [] () { return VERSION; };
 	cvars["VER"]->setter = [] (const string& val) { }; // read-only value
 
+	cvars["status_fields"] = make_unique<cvar_base_s>();
+	cvars["status_fields"]->getter = [] () { return cui_normal_status_fields; };
+	cvars["status_fields"]->setter = [] (const string& val) { cui_normal_status_fields = val; };
+
+	cvars["listview_status_fields"] = make_unique<cvar_base_s>();
+	cvars["listview_status_fields"]->getter = [] () { return cui_listview_status_fields; };
+	cvars["listview_status_fields"]->setter = [] (const string& val) { cui_listview_status_fields = val; };
+
 	cvars["charset.row_separator"] = make_unique<cvar_base_s>();
 	cvars["charset.row_separator"]->getter = [] () { return cui_row_separator.full_str(); };
 	cvars["charset.row_separator"]->setter = [] (const string& val)

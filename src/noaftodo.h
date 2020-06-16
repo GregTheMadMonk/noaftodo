@@ -34,9 +34,9 @@ class multistr_c
 public:
 	multistr_c(const std::vector<std::string>& init_list);
 
-	std::string get();
+	std::string get(const int& position = -1);
 	std::string full_str();
-	void shift();
+	void shift(const int& steps = 1);
 	void reset();
 };
 

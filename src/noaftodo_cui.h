@@ -74,6 +74,10 @@ extern std::stack<int> cui_prev_modes;
 extern int cui_filter;
 extern int cui_tag_filter;
 
+// status fields
+extern std::string cui_normal_status_fields;
+extern std::string cui_listview_status_fields;
+
 // characters
 extern multistr_c cui_row_separator;
 extern multistr_c cui_status_separator;

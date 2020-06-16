@@ -25,6 +25,9 @@ int cui_tag_filter;
 multistr_c cui_row_separator({ "|" });
 multistr_c cui_status_separator({ "|" });
 
+string cui_normal_status_fields;
+string cui_listview_status_fields;
+
 int cui_mode;
 stack<int> cui_prev_modes;
 
@@ -626,7 +629,7 @@ void cui_listview_paint()
 
 	string cui_status_l = "";
 
-	for (const char& c : cvar("listview_status_fields").getter())
+	for (const char& c : cui_listview_status_fields)
 	{
 		try {
 			const string field = (cui_status_fields.at(c))();
@@ -776,7 +779,7 @@ void cui_normal_paint()
 
 	string cui_status_l = "";
 
-	for (const char& c : cvar("status_fields").getter())
+	for (const char& c : cui_normal_status_fields)
 	{
 		try {
 			const string field = (cui_status_fields.at(c))();
