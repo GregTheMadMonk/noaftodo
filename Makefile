@@ -25,8 +25,10 @@ else
 endif
 
 ifeq ($(UNAME_S),Haiku) 
-	NO_MQUEUE := 1		# couldn't find mqueue.h on Haiku
-	NO_ROOT_CHECK := 1	# Haiku is single-user (isn't it?)
+	# couldn't find mqueue.h on Haiku
+	NO_MQUEUE := 1
+	# Haiku is single-user (isn't it?)
+	NO_ROOT_CHECK := 1
 endif
 
 ifeq ($(NO_MQUEUE), 1)
