@@ -71,6 +71,8 @@ alias makerec_fixed setmeta on_completed "reschedule a%arg1%"
 set "daemon.fork_autostart" "true"
 set "daemon.list_upd_ticks" "1"
 
+set "allow_root" "false"
+
 set "contexec_cmd_regex" "^set regex_filter\ |^set list_regex_filter "
 
 # global events

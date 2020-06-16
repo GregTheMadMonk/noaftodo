@@ -97,6 +97,14 @@ int main(int argc, char* argv[])
 	// load the config
 	conf_load();
 
+#ifndef NO_ROOT_CHECK
+	if ((geteuid() == 0) && (cvar("allow_root") != "true"))
+	{
+		log("Can't run as root! To disable this check, set \"allow_root\" to \"true\" in your config", LP_ERROR);
+		return 0;
+	}
+#endif
+
 	// load the list
 	li_load();
 

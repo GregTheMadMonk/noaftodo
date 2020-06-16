@@ -25,13 +25,18 @@ else
 endif
 
 ifeq ($(UNAME_S),Haiku) 
-	NO_MQUEUE := 1
+	NO_MQUEUE := 1		# couldn't find mqueue.h on Haiku
+	NO_ROOT_CHECK := 1	# Haiku is single-user (isn't it?)
 endif
 
 ifeq ($(NO_MQUEUE), 1)
 	CPP_FLAGS += -DNO_MQUEUE
 else
 	CPP_LINKER_FLAGS += -lrt
+endif
+
+ifeq ($(NO_ROOT_CHECK), 1)
+	CPP_FLAGS += -DNO_ROOT_CHECK
 endif
 
 all: obj_dir $(OBJ_FILES) noaftodo.conf.template doc
