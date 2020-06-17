@@ -268,11 +268,11 @@ void cmd_init()
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		if (args.at(0) == "uncat") 	cui_filter ^= CUI_FILTER_UNCAT;
-		if (args.at(0) == "complete") 	cui_filter ^= CUI_FILTER_COMPLETE;
-		if (args.at(0) == "coming") 	cui_filter ^= CUI_FILTER_COMING;
-		if (args.at(0) == "failed") 	cui_filter ^= CUI_FILTER_FAILED;
-		if (args.at(0) == "nodue")	cui_filter ^= CUI_FILTER_NODUE;
+		if (args.at(0) == "uncat") 	cui_normal_filter ^= CUI_FILTER_UNCAT;
+		if (args.at(0) == "complete") 	cui_normal_filter ^= CUI_FILTER_COMPLETE;
+		if (args.at(0) == "coming") 	cui_normal_filter ^= CUI_FILTER_COMING;
+		if (args.at(0) == "failed") 	cui_normal_filter ^= CUI_FILTER_FAILED;
+		if (args.at(0) == "nodue")	cui_normal_filter ^= CUI_FILTER_NODUE;
 
 		return 0;
 	};
@@ -475,10 +475,10 @@ void cmd_init()
 	};
 
 	cvars["filter"] = make_unique<cvar_base_s>();
-	cvars["filter"]->getter = [] () { return to_string(cui_filter); };
+	cvars["filter"]->getter = [] () { return to_string(cui_normal_filter); };
 	cvars["filter"]->setter = [] (const string& val) 
 	{ 
-		try { cui_filter = stoi(val); }
+		try { cui_normal_filter = stoi(val); }
 		catch (const invalid_argument& e) {}
 	};
 
@@ -593,6 +593,16 @@ void cmd_init()
 		for (auto wc : ws) init_list.push_back(w_converter.to_bytes(wc));
 
 		cui_status_separator = multistr_c(init_list);
+	};
+
+	cvars["lview_show_empty"] = make_unique<cvar_base_s>();
+	cvars["lview_show_empty"]->getter = [] () { return (cui_listview_filter & CUI_FILTER_EMPTY) ? "true" : "false"; };
+	cvars["lview_show_empty"]->setter = [] (const string& val)
+	{
+		if ((val == "true") && (cui_listview_filter ^ CUI_FILTER_EMPTY))
+			cui_listview_filter ^= CUI_FILTER_EMPTY;
+		if ((val == "false") && (cui_listview_filter & CUI_FILTER_EMPTY))
+			cui_listview_filter ^= CUI_FILTER_EMPTY;
 	};
 }
 

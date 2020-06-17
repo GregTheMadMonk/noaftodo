@@ -3,8 +3,6 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#include "noaftodo.h"
-
 using namespace std;
 
 map<string, unique_ptr<cvar_base_s>> cvars;

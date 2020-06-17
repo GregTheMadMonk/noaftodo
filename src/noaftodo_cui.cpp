@@ -19,7 +19,8 @@ map<char, cui_lview_col_s> cui_lview_columns;
 map<char, cui_col_s> cui_columns;
 map<char, function<string()>> cui_status_fields;
 
-int cui_filter;
+int cui_normal_filter;
+int cui_listview_filter;
 int cui_tag_filter;
 string cui_regex_filter;
 
@@ -253,17 +254,17 @@ void cui_init()
 
 	cui_status_fields['f'] = [] ()
 	{
-		return string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
-			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
-			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") + 
-			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
-			string((cui_filter & CUI_FILTER_NODUE) ? "N" : "_") + 
+		return string((cui_normal_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
+			string((cui_normal_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
+			string((cui_normal_filter & CUI_FILTER_COMING) ? "C" : "_") + 
+			string((cui_normal_filter & CUI_FILTER_FAILED) ? "F" : "_") +
+			string((cui_normal_filter & CUI_FILTER_NODUE) ? "N" : "_") + 
 			((cui_regex_filter == "") ? "" : (" [" + cui_regex_filter + "]"));
 	};
 
 	cui_status_fields['F'] = [] ()
 	{
-			return ((cvar("lview_show_empty") == "true") ? "0" : "_") +
+			return ((cui_listview_filter & CUI_FILTER_EMPTY) ? "0" : "_") +
 				((cvar("list_regex_filter") == "") ? "" : (" [" + cvar("list_regex_filter").getter() + "]"));
 	};
 
@@ -495,13 +496,13 @@ bool cui_is_visible(const int& entryID)
 
 	bool ret = ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == entry.tag));
 
-	if (entry.completed) 	ret = ret && (cui_filter & CUI_FILTER_COMPLETE);
-	if (entry.is_failed()) 	ret = ret && (cui_filter & CUI_FILTER_FAILED);
-	if (entry.is_coming()) 	ret = ret && (cui_filter & CUI_FILTER_COMING);
+	if (entry.completed) 	ret = ret && (cui_normal_filter & CUI_FILTER_COMPLETE);
+	if (entry.is_failed()) 	ret = ret && (cui_normal_filter & CUI_FILTER_FAILED);
+	if (entry.is_coming()) 	ret = ret && (cui_normal_filter & CUI_FILTER_COMING);
 
-	if (entry.get_meta("nodue") == "true") ret = ret && (cui_filter & CUI_FILTER_NODUE);
+	if (entry.get_meta("nodue") == "true") ret = ret && (cui_normal_filter & CUI_FILTER_NODUE);
 
-	if (entry.is_uncat())	ret = ret && (cui_filter & CUI_FILTER_UNCAT);
+	if (entry.is_uncat())	ret = ret && (cui_normal_filter & CUI_FILTER_UNCAT);
 
 	// fit regex
 	if (cui_regex_filter != "")
@@ -521,7 +522,7 @@ bool cui_l_is_visible(const int& list_id)
 
 	bool ret = false;
 
-	if (cvar("lview_show_empty") != "true")
+	if (cui_listview_filter ^ CUI_FILTER_EMPTY)
 		for (auto e : t_list) ret |= (e.tag == list_id);
 	else ret = true;
 

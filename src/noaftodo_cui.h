@@ -51,18 +51,21 @@ constexpr int CUI_CP_STATUS = 5;
 // modes
 constexpr int CUI_MODE_EXIT = 0;
 constexpr int CUI_MODE_ALL = 0b11111111;
-constexpr int CUI_MODE_NORMAL = 0b1;
-constexpr int CUI_MODE_LISTVIEW = 0b10000;
-constexpr int CUI_MODE_DETAILS = 0b1000;
-constexpr int CUI_MODE_COMMAND = 0b10;
-constexpr int CUI_MODE_HELP = 0b100;
+constexpr int CUI_MODE_NORMAL = 0b1;		// 1
+constexpr int CUI_MODE_LISTVIEW = 0b10000;	// 16
+constexpr int CUI_MODE_DETAILS = 0b1000;	// 8
+constexpr int CUI_MODE_COMMAND = 0b10;		// 2
+constexpr int CUI_MODE_HELP = 0b100;		// 4
 
 // filters
+// normal mode
 constexpr int CUI_FILTER_UNCAT = 0b1; 		// uncategorized
 constexpr int CUI_FILTER_COMPLETE = 0b10; 	// complete
 constexpr int CUI_FILTER_COMING = 0b100; 	// upcoming
 constexpr int CUI_FILTER_FAILED = 0b1000; 	// failed
 constexpr int CUI_FILTER_NODUE = 0b10000; 	// nodue
+// listview mode
+constexpr int CUI_FILTER_EMPTY = 0b1;		// empty lists
 
 constexpr int CUI_TAG_ALL = -1;
 
@@ -71,7 +74,8 @@ extern int cui_mode;
 extern std::stack<int> cui_prev_modes;
 
 // filter values
-extern int cui_filter;
+extern int cui_normal_filter;
+extern int cui_listview_filter;
 extern int cui_tag_filter;
 extern std::string cui_regex_filter;
 
