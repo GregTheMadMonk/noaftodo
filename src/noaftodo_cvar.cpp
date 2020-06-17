@@ -1,6 +1,9 @@
 #include "noaftodo_cvar.h"
 
 #include <stdexcept>
+#include <typeinfo>
+
+#include "noaftodo.h"
 
 using namespace std;
 
@@ -107,13 +110,23 @@ cvar_base_s& cvar(const string& name)
 
 void cvar_reset(const string& name)
 {
+	try { cvars.at(name); } catch (const out_of_range& e) { return; }
+
 	if (cvar(name).predef_val != "")
 		cvar(name).reset();
-	else
-		cvar_erase(name);
+	else cvar_erase(name);
 }
 
 void cvar_erase(const string& name)
 {
-	cvars.erase(name);
+	if (cvar_is_deletable(name))
+		cvars.erase(name);
+	else
+		cvar(name) = "";
+}
+
+bool cvar_is_deletable(const string& name) // allow deleting only cvar_s cvars
+{
+	try { cvars.at(name); } catch (const out_of_range& e) { return false; }
+	return (dynamic_cast<cvar_s*>(cvars.at(name).get()) != 0);
 }

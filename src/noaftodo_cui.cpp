@@ -21,6 +21,7 @@ map<char, function<string()>> cui_status_fields;
 
 int cui_filter;
 int cui_tag_filter;
+string cui_regex_filter;
 
 multistr_c cui_row_separator({ "|" });
 multistr_c cui_status_separator({ "|" });
@@ -257,7 +258,7 @@ void cui_init()
 			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") + 
 			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
 			string((cui_filter & CUI_FILTER_NODUE) ? "N" : "_") + 
-			((cvar("regex_filter") == "") ? "" : (" [" + cvar("regex_filter").getter() + "]"));
+			((cui_regex_filter == "") ? "" : (" [" + cui_regex_filter + "]"));
 	};
 
 	cui_status_fields['F'] = [] ()
@@ -503,9 +504,9 @@ bool cui_is_visible(const int& entryID)
 	if (entry.is_uncat())	ret = ret && (cui_filter & CUI_FILTER_UNCAT);
 
 	// fit regex
-	if (cvar("regex_filter") != "")
+	if (cui_regex_filter != "")
 	{
-		regex rf_regex(cvar("regex_filter").getter());
+		regex rf_regex(cui_regex_filter);
 
 		ret = ret && (regex_search(entry.title, rf_regex) || regex_search(entry.description, rf_regex));
 	}

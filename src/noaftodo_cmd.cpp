@@ -482,6 +482,10 @@ void cmd_init()
 		catch (const invalid_argument& e) {}
 	};
 
+	cvars["regex_filter"] = make_unique<cvar_base_s>();
+	cvars["regex_filter"]->getter = [] () { return cui_regex_filter; };
+	cvars["regex_filter"]->setter = [] (const string& val) { cui_regex_filter = val; };
+
 	cvars["id"] = make_unique<cvar_base_s>();
 	cvars["id"]->getter = [] () { return to_string(cui_s_line); };
 	cvars["id"]->setter = [] (const string& val)

@@ -134,7 +134,7 @@ void li_load(const bool& load_workspace)
 			if (cvar(it->first).predef_val == "")
 			{
 				cvar_erase(it->first);
-				offset--;
+				if (cvar_is_deletable(it->first)) offset--;
 			} else cvar(it->first).reset();
 		}
 

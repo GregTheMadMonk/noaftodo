@@ -8,6 +8,8 @@
 
 struct cvar_base_s	// a base structure for cvars
 {
+	virtual ~cvar_base_s() = default;
+
 	std::string predef_val; // predefined value
 
 	std::function<std::string()> getter = [] () { return std::string(""); };
@@ -46,5 +48,7 @@ extern std::map<std::string, std::unique_ptr<cvar_base_s>> cvars;
 cvar_base_s& cvar(const std::string& name);
 void cvar_reset(const std::string& name);
 void cvar_erase(const std::string& name);
+
+bool cvar_is_deletable(const std::string& name);
 
 #endif
