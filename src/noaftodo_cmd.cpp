@@ -483,8 +483,12 @@ void cmd_init()
 	};
 
 	cvars["regex_filter"] = make_unique<cvar_base_s>();
-	cvars["regex_filter"]->getter = [] () { return cui_regex_filter; };
-	cvars["regex_filter"]->setter = [] (const string& val) { cui_regex_filter = val; };
+	cvars["regex_filter"]->getter = [] () { return cui_normal_regex_filter; };
+	cvars["regex_filter"]->setter = [] (const string& val) { cui_normal_regex_filter = val; };
+
+	cvars["list_regex_filter"] = make_unique<cvar_base_s>();
+	cvars["list_regex_filter"]->getter = [] () { return cui_listview_regex_filter; };
+	cvars["list_regex_filter"]->setter = [] (const string& val) { cui_listview_regex_filter = val; };
 
 	cvars["id"] = make_unique<cvar_base_s>();
 	cvars["id"]->getter = [] () { return to_string(cui_s_line); };

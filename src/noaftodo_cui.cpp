@@ -22,7 +22,8 @@ map<char, function<string()>> cui_status_fields;
 int cui_normal_filter;
 int cui_listview_filter;
 int cui_tag_filter;
-string cui_regex_filter;
+string cui_normal_regex_filter;
+string cui_listview_regex_filter;
 
 multistr_c cui_row_separator({ "|" });
 multistr_c cui_status_separator({ "|" });
@@ -259,13 +260,13 @@ void cui_init()
 			string((cui_normal_filter & CUI_FILTER_COMING) ? "C" : "_") + 
 			string((cui_normal_filter & CUI_FILTER_FAILED) ? "F" : "_") +
 			string((cui_normal_filter & CUI_FILTER_NODUE) ? "N" : "_") + 
-			((cui_regex_filter == "") ? "" : (" [" + cui_regex_filter + "]"));
+			((cui_normal_regex_filter == "") ? "" : (" [" + cui_normal_regex_filter + "]"));
 	};
 
 	cui_status_fields['F'] = [] ()
 	{
 			return ((cui_listview_filter & CUI_FILTER_EMPTY) ? "0" : "_") +
-				((cvar("list_regex_filter") == "") ? "" : (" [" + cvar("list_regex_filter").getter() + "]"));
+				((cui_listview_regex_filter == "") ? "" : (" [" + cui_listview_regex_filter + "]"));
 	};
 
 	cui_status_fields['i'] = [] ()
@@ -505,9 +506,9 @@ bool cui_is_visible(const int& entryID)
 	if (entry.is_uncat())	ret = ret && (cui_normal_filter & CUI_FILTER_UNCAT);
 
 	// fit regex
-	if (cui_regex_filter != "")
+	if (cui_normal_regex_filter != "")
 	{
-		regex rf_regex(cui_regex_filter);
+		regex rf_regex(cui_normal_regex_filter);
 
 		ret = ret && (regex_search(entry.title, rf_regex) || regex_search(entry.description, rf_regex));
 	}
@@ -527,9 +528,9 @@ bool cui_l_is_visible(const int& list_id)
 	else ret = true;
 
 	// fit regex
-	if (cvar("list_regex_filter") != "")
+	if (cui_listview_regex_filter != "")
 	{
-		regex rf_regex(cvar("list_regex_filter").getter());
+		regex rf_regex(cui_listview_regex_filter);
 
 		ret = ret && regex_search(t_tags.at(list_id), rf_regex);
 	}
