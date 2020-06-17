@@ -82,6 +82,12 @@ extern std::string cui_listview_status_fields;
 extern multistr_c cui_row_separator;
 extern multistr_c cui_status_separator;
 
+// mode columns
+extern std::string cui_normal_all_cols;
+extern std::string cui_normal_cols;
+extern std::string cui_details_cols;
+extern std::string cui_listview_cols;
+
 // binds
 extern std::vector<cui_bind_s> binds;
 

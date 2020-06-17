@@ -541,6 +541,22 @@ void cmd_init()
 	cvars["VER"]->getter = [] () { return VERSION; };
 	cvars["VER"]->setter = [] (const string& val) { }; // read-only value
 
+	cvars["all_cols"] = make_unique<cvar_base_s>();
+	cvars["all_cols"]->getter = [] () { return cui_normal_all_cols; };
+	cvars["all_cols"]->setter = [] (const string& val) { cui_normal_all_cols = val; };
+
+	cvars["cols"] = make_unique<cvar_base_s>();
+	cvars["cols"]->getter = [] () { return cui_normal_cols; };
+	cvars["cols"]->setter = [] (const string& val) { cui_normal_cols = val; };
+
+	cvars["listview_cols"] = make_unique<cvar_base_s>();
+	cvars["listview_cols"]->getter = [] () { return cui_listview_cols; };
+	cvars["listview_cols"]->setter = [] (const string& val) { cui_listview_cols = val; };
+
+	cvars["details_cols"] = make_unique<cvar_base_s>();
+	cvars["details_cols"]->getter = [] () { return cui_details_cols; };
+	cvars["details_cols"]->setter = [] (const string& val) { cui_details_cols = val; };
+
 	cvars["status_fields"] = make_unique<cvar_base_s>();
 	cvars["status_fields"]->getter = [] () { return cui_normal_status_fields; };
 	cvars["status_fields"]->setter = [] (const string& val) { cui_normal_status_fields = val; };
