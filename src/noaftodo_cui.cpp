@@ -25,6 +25,8 @@ int cui_tag_filter;
 string cui_normal_regex_filter;
 string cui_listview_regex_filter;
 
+string cui_contexec_regex_filter;
+
 multistr_c cui_row_separator({ "|" });
 multistr_c cui_status_separator({ "|" });
 
@@ -1079,9 +1081,9 @@ void cui_command_input(const wchar_t& key)
 
 			// continious command execution
 			contexec:
-			if (cvar("contexec_cmd_regex") != "")
+			if (cui_contexec_regex_filter != "")
 			{
-				regex ce_regex(cvar("contexec_cmd_regex").getter());
+				regex ce_regex(cui_contexec_regex_filter);
 
 				if (regex_search(w_converter.to_bytes(cui_command), ce_regex))
 					cmd_exec(w_converter.to_bytes(cui_command));

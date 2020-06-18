@@ -466,32 +466,15 @@ void cmd_init()
 	};
 
 	// "fake" cvars
-	cvars["tag_filter"] = make_unique<cvar_base_s>();
-	cvars["tag_filter"]->getter = [] () { return to_string(cui_tag_filter); };
-	cvars["tag_filter"]->setter = [] (const string& val) 
-	{ 
-		try { cui_tag_filter = stoi(val); }
-		catch (const invalid_argument& e) {}
-	};
+	cvar_wrap_int("tag_filter", cui_tag_filter);
+	cvar_wrap_int("filter", cui_normal_filter);
 
-	cvars["filter"] = make_unique<cvar_base_s>();
-	cvars["filter"]->getter = [] () { return to_string(cui_normal_filter); };
-	cvars["filter"]->setter = [] (const string& val) 
-	{ 
-		try { cui_normal_filter = stoi(val); }
-		catch (const invalid_argument& e) {}
-	};
+	cvar_wrap_string("regex_filter", cui_normal_regex_filter);
+	cvar_wrap_string("list_regex_filter", cui_listview_regex_filter);
 
-	cvars["regex_filter"] = make_unique<cvar_base_s>();
-	cvars["regex_filter"]->getter = [] () { return cui_normal_regex_filter; };
-	cvars["regex_filter"]->setter = [] (const string& val) { cui_normal_regex_filter = val; };
+	cvar_wrap_string("contexec_cmd_regex", cui_contexec_regex_filter);
 
-	cvars["list_regex_filter"] = make_unique<cvar_base_s>();
-	cvars["list_regex_filter"]->getter = [] () { return cui_listview_regex_filter; };
-	cvars["list_regex_filter"]->setter = [] (const string& val) { cui_listview_regex_filter = val; };
-
-	cvars["id"] = make_unique<cvar_base_s>();
-	cvars["id"]->getter = [] () { return to_string(cui_s_line); };
+	cvar_wrap_int("id", cui_s_line);
 	cvars["id"]->setter = [] (const string& val)
 	{
 		try
@@ -512,7 +495,6 @@ void cmd_init()
 
 		return to_string(ret);
 	};
-	cvars["last_visible_id"]->setter = [] (const string& val) {}; // read-only value
 
 	cvars["first_visible_id"] = make_unique<cvar_base_s>();
 	cvars["first_visible_id"]->getter = [] () 
@@ -522,7 +504,6 @@ void cmd_init()
 
 		return string("-1");
 	};
-	cvars["first_visible_id"]->setter = [] (const string& val) {}; // read-only value
 
 	cvars["last_visible_list"] = make_unique<cvar_base_s>();
 	cvars["last_visible_list"]->getter = [] () 
@@ -533,7 +514,6 @@ void cmd_init()
 
 		return to_string(ret);
 	};
-	cvars["last_visible_list"]->setter = [] (const string& val) {}; // read-only value
 
 	cvars["first_visible_list"] = make_unique<cvar_base_s>();
 	cvars["first_visible_list"]->getter = [] () 
@@ -543,71 +523,28 @@ void cmd_init()
 
 		return string("-1");
 	};
-	cvars["first_visible_list"]->setter = [] (const string& val) {}; // read-only value
 
 	cvars["VER"] = make_unique<cvar_base_s>();
 	cvars["VER"]->getter = [] () { return VERSION; };
-	cvars["VER"]->setter = [] (const string& val) { }; // read-only value
 
-	cvars["all_cols"] = make_unique<cvar_base_s>();
-	cvars["all_cols"]->getter = [] () { return cui_normal_all_cols; };
-	cvars["all_cols"]->setter = [] (const string& val) { cui_normal_all_cols = val; };
+	cvar_wrap_string("all_cols", cui_normal_all_cols);
+	cvar_wrap_string("cols", cui_normal_cols);
+	cvar_wrap_string("listview_cols", cui_listview_cols);
+	cvar_wrap_string("details_cols", cui_details_cols);
 
-	cvars["cols"] = make_unique<cvar_base_s>();
-	cvars["cols"]->getter = [] () { return cui_normal_cols; };
-	cvars["cols"]->setter = [] (const string& val) { cui_normal_cols = val; };
+	cvar_wrap_string("status_fields", cui_normal_status_fields);
+	cvar_wrap_string("listview_status_fields", cui_listview_status_fields);
 
-	cvars["listview_cols"] = make_unique<cvar_base_s>();
-	cvars["listview_cols"]->getter = [] () { return cui_listview_cols; };
-	cvars["listview_cols"]->setter = [] (const string& val) { cui_listview_cols = val; };
+	cvar_wrap_multistr("charset.row_separator", cui_row_separator);
+	cvar_wrap_multistr("charset.status_separator", cui_status_separator);
 
-	cvars["details_cols"] = make_unique<cvar_base_s>();
-	cvars["details_cols"]->getter = [] () { return cui_details_cols; };
-	cvars["details_cols"]->setter = [] (const string& val) { cui_details_cols = val; };
+	cvar_wrap_maskflag("lview_show_empty", cui_listview_filter, CUI_FILTER_EMPTY);
 
-	cvars["status_fields"] = make_unique<cvar_base_s>();
-	cvars["status_fields"]->getter = [] () { return cui_normal_status_fields; };
-	cvars["status_fields"]->setter = [] (const string& val) { cui_normal_status_fields = val; };
-
-	cvars["listview_status_fields"] = make_unique<cvar_base_s>();
-	cvars["listview_status_fields"]->getter = [] () { return cui_listview_status_fields; };
-	cvars["listview_status_fields"]->setter = [] (const string& val) { cui_listview_status_fields = val; };
-
-	cvars["charset.row_separator"] = make_unique<cvar_base_s>();
-	cvars["charset.row_separator"]->getter = [] () { return cui_row_separator.full_str(); };
-	cvars["charset.row_separator"]->setter = [] (const string& val)
-	{
-		wstring ws = w_converter.from_bytes(val);
-
-		vector<string> init_list;
-
-		for (auto wc : ws) init_list.push_back(w_converter.to_bytes(wc));
-
-		cui_row_separator = multistr_c(init_list);
-	};
-
-	cvars["charset.status_separator"] = make_unique<cvar_base_s>();
-	cvars["charset.status_separator"]->getter = [] () { return cui_status_separator.full_str(); };
-	cvars["charset.status_separator"]->setter = [] (const string& val)
-	{
-		wstring ws = w_converter.from_bytes(val);
-
-		vector<string> init_list;
-
-		for (auto wc : ws) init_list.push_back(w_converter.to_bytes(wc));
-
-		cui_status_separator = multistr_c(init_list);
-	};
-
-	cvars["lview_show_empty"] = make_unique<cvar_base_s>();
-	cvars["lview_show_empty"]->getter = [] () { return (cui_listview_filter & CUI_FILTER_EMPTY) ? "true" : "false"; };
-	cvars["lview_show_empty"]->setter = [] (const string& val)
-	{
-		if ((val == "true") && (cui_listview_filter ^ CUI_FILTER_EMPTY))
-			cui_listview_filter ^= CUI_FILTER_EMPTY;
-		if ((val == "false") && (cui_listview_filter & CUI_FILTER_EMPTY))
-			cui_listview_filter ^= CUI_FILTER_EMPTY;
-	};
+	cvar_wrap_maskflag("show_uncat", cui_normal_filter, CUI_FILTER_UNCAT);
+	cvar_wrap_maskflag("show_complete", cui_normal_filter, CUI_FILTER_COMPLETE);
+	cvar_wrap_maskflag("show_coming", cui_normal_filter, CUI_FILTER_COMING);
+	cvar_wrap_maskflag("show_failed", cui_normal_filter, CUI_FILTER_FAILED);
+	cvar_wrap_maskflag("show_nodue", cui_normal_filter, CUI_FILTER_NODUE);
 }
 
 int cmd_exec(string command)

@@ -128,3 +128,60 @@ bool cvar_is_deletable(const string& name) // allow deleting only cvar_s cvars
 	try { cvars.at(name); } catch (const out_of_range& e) { return false; }
 	return (dynamic_cast<cvar_s*>(cvars.at(name).get()) != 0);
 }
+
+void cvar_wrap_string(const string& name, string& var, const bool& ronly)
+{
+	cvars[name] = make_unique<cvar_base_s>();
+	cvars[name]->getter = [&var] () { return var; };
+
+	if (ronly) cvars[name]->setter = [] (const string& val) { };
+	else cvars[name]->setter = [&var] (const string& val) { var = val; };
+}
+
+void cvar_wrap_multistr(const string& name, multistr_c& var, const int& element_length, const bool& ronly)
+{
+	cvars[name] = make_unique<cvar_base_s>();
+	cvars[name]->getter = [&var] () { return var.full_str(); };
+
+	if (ronly) cvars[name]->setter = [] (const string& val) { };
+	else cvars[name]->setter = [&var, element_length] (const string& val)
+		{
+			wstring ws = w_converter.from_bytes(val);
+
+			vector<string> init_list;
+
+			for (int i = 0; i < ws.length(); i++)
+			{
+				if (i % element_length == 0) init_list.push_back("");
+
+				init_list.at(init_list.size() - 1) += w_converter.to_bytes(ws.at(i));
+			}
+
+			var = multistr_c(init_list);
+		};
+}
+
+void cvar_wrap_int(const string& name, int& var, const bool& ronly)
+{
+	cvars[name] = make_unique<cvar_base_s>();
+	cvars[name]->getter = [&var] () { return to_string(var); };
+
+	if (ronly) cvars[name]->setter = [] (const string& val) { };
+	else cvars[name]->setter = [&var] (const string& val)
+		{
+			try { var = stoi(val); } catch (const invalid_argument& e) {}
+		};
+}
+
+void cvar_wrap_maskflag(const string& name, int& mask, const int& flag, const bool& ronly)
+{
+	cvars[name] = make_unique<cvar_base_s>();
+	cvars[name]->getter = [&mask, flag] () { return (mask & flag) ? "true" : "false"; };
+
+	if (ronly) cvars[name]->setter = [] (const string& val) { };
+	else cvars[name]->setter = [&mask, flag] (const string& val)
+		{
+			if (((val == "true") && (mask ^ flag)) || ((val != "true") && (mask & flag)))
+				mask ^= flag;
+		};
+}
