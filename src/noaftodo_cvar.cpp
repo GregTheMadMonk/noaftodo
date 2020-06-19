@@ -173,6 +173,19 @@ void cvar_wrap_int(const string& name, int& var, const bool& ronly)
 		};
 }
 
+void cvar_wrap_bool(const string& name, bool& var, const bool& ronly)
+{
+	cvars[name] = make_unique<cvar_base_s>();
+	cvars[name]->getter = [&var] () { return var ? "true" : "false"; };
+
+	if (ronly) cvars[name]->setter = [] (const string& val) { };
+	else cvars[name]->setter = [&var] (const string& val)
+	{
+		if (((val == "true") && !var) || ((val == "false") && var))
+			var = !var;
+	};
+}
+
 void cvar_wrap_maskflag(const string& name, int& mask, const int& flag, const bool& ronly)
 {
 	cvars[name] = make_unique<cvar_base_s>();

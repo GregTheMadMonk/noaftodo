@@ -56,6 +56,7 @@ bool cvar_is_deletable(const std::string& name);
 void cvar_wrap_string(const std::string& name, std::string& var, const bool& ronly = false);
 void cvar_wrap_multistr(const std::string& name, multistr_c& var, const int& element_length = 1, const bool& ronly = false);
 void cvar_wrap_int(const std::string& name, int& var, const bool& ronly = false);
+void cvar_wrap_bool(const std::string& name, bool& var, const bool& ronly = false);
 void cvar_wrap_maskflag(const std::string& name, int& mask, const int& flag, const bool& ronly = false);
 
 #endif

@@ -82,6 +82,9 @@ extern std::string cui_listview_regex_filter;
 
 extern std::string cui_contexec_regex_filter;
 
+// colors / appearance
+extern bool cui_status_standout;
+
 // status fields
 extern std::string cui_normal_status_fields;
 extern std::string cui_listview_status_fields;

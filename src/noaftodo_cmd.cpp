@@ -474,6 +474,8 @@ void cmd_init()
 
 	cvar_wrap_string("contexec_cmd_regex", cui_contexec_regex_filter);
 
+	cvar_wrap_bool("colors.status_standout", cui_status_standout);
+
 	cvar_wrap_int("id", cui_s_line);
 	cvars["id"]->setter = [] (const string& val)
 	{

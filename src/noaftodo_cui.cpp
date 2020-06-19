@@ -27,6 +27,8 @@ string cui_listview_regex_filter;
 
 string cui_contexec_regex_filter;
 
+bool cui_status_standout;
+
 multistr_c cui_row_separator({ "|" });
 multistr_c cui_status_separator({ "|" });
 
@@ -650,7 +652,7 @@ void cui_listview_paint()
 		} catch (const out_of_range& e) {}
 	}
 
-	if (cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+	if (cui_status_standout) attron(A_STANDOUT);
 	attron(COLOR_PAIR(CUI_CP_STATUS));
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
@@ -800,7 +802,7 @@ void cui_normal_paint()
 		} catch (const out_of_range& e) {}
 	}
 
-	if (cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+	if (cui_status_standout) attron(A_STANDOUT);
 	attron(COLOR_PAIR(CUI_CP_STATUS));
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
@@ -991,7 +993,7 @@ void cui_command_paint()
 	}
 
 	move(cui_h - 1, 0);
-	if (cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+	if (cui_status_standout) attron(A_STANDOUT);
 	attron(COLOR_PAIR(CUI_CP_STATUS));
 	for (int x = 0; x < cui_w; x++) addch(' ');
 	move(cui_h - 1, 0);
@@ -1230,7 +1232,7 @@ string cui_prompt(const string& message)
 		}
 
 		move(cui_h - 1, 0);
-		if (cvar("colors.status_standout") == "true") attron(A_STANDOUT);
+		if (cui_status_standout) attron(A_STANDOUT);
 		attron(COLOR_PAIR(CUI_CP_STATUS));
 		for (int x = 0; x < cui_w; x++) addch(' ');
 		move(cui_h - 1, 0);
