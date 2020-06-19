@@ -29,6 +29,13 @@ string cui_contexec_regex_filter;
 
 bool cui_status_standout;
 
+int cui_color_bg;
+int cui_color_title;
+int cui_color_status;
+int cui_color_complete;
+int cui_color_coming;
+int cui_color_failed;
+
 multistr_c cui_row_separator({ "|" });
 multistr_c cui_status_separator({ "|" });
 
@@ -330,11 +337,11 @@ void cui_construct()
 	start_color();
 	use_default_colors();
 
-	init_pair(CUI_CP_TITLE, cvar("colors.title"), cvar("colors.background"));
-	init_pair(CUI_CP_GREEN_ENTRY, cvar("colors.entry_completed"), cvar("colors.background"));
-	init_pair(CUI_CP_YELLOW_ENTRY, cvar("colors.entry_coming"), cvar("colors.background"));
-	init_pair(CUI_CP_RED_ENTRY, cvar("colors.entry_failed"), cvar("colors.background"));
-	init_pair(CUI_CP_STATUS, cvar("colors.status"), cvar("colors.background"));
+	init_pair(CUI_CP_TITLE, cui_color_title, cui_color_bg);
+	init_pair(CUI_CP_GREEN_ENTRY, cui_color_complete, cui_color_bg);
+	init_pair(CUI_CP_YELLOW_ENTRY, cui_color_coming, cui_color_bg);
+	init_pair(CUI_CP_RED_ENTRY, cui_color_failed, cui_color_bg);
+	init_pair(CUI_CP_STATUS, cui_color_status, cui_color_bg);
 
 	halfdelay(2);
 	set_escdelay(0);

@@ -476,6 +476,13 @@ void cmd_init()
 
 	cvar_wrap_bool("colors.status_standout", cui_status_standout);
 
+	cvar_wrap_int("colors.background", cui_color_bg);
+	cvar_wrap_int("colors.title", cui_color_title);
+	cvar_wrap_int("colors.status", cui_color_status);
+	cvar_wrap_int("colors.entry_completed", cui_color_complete);
+	cvar_wrap_int("colors.entry_coming", cui_color_coming);
+	cvar_wrap_int("colors.entry_failed", cui_color_failed);
+
 	cvar_wrap_int("id", cui_s_line);
 	cvars["id"]->setter = [] (const string& val)
 	{
