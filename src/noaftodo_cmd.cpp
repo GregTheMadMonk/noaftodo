@@ -551,6 +551,15 @@ void cmd_init()
 	cvar_wrap_multistr("charset.row_separator", cui_row_separator);
 	cvar_wrap_int("charset.row_separator.offset", cui_row_separator_offset);
 	cvar_wrap_multistr("charset.status_separator", cui_status_separator);
+	cvar_wrap_multistr("charset.details_separator", cui_details_separator);
+
+	cvar_wrap_multistr("charset.box_border_v", cui_v_line_strong);
+	cvar_wrap_multistr("charset.box_border_h", cui_h_line_strong);
+	cvar_wrap_multistr("charset.box_ui_line_h", cui_h_line_light);
+	cvar_wrap_multistr("charset.box_corner_1", cui_1_corner);
+	cvar_wrap_multistr("charset.box_corner_2", cui_2_corner);
+	cvar_wrap_multistr("charset.box_corner_3", cui_3_corner);
+	cvar_wrap_multistr("charset.box_corner_4", cui_4_corner);
 
 	cvar_wrap_maskflag("lview_show_empty", cui_listview_filter, CUI_FILTER_EMPTY);
 

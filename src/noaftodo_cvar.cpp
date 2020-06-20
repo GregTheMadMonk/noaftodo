@@ -146,6 +146,12 @@ void cvar_wrap_multistr(const string& name, multistr_c& var, const int& element_
 	if (ronly) cvars[name]->setter = [] (const string& val) { };
 	else cvars[name]->setter = [&var, element_length] (const string& val)
 		{
+			if (element_length == 0)
+			{	// one string
+				var = multistr_c({ val });
+				return ;
+			}
+
 			wstring ws = w_converter.from_bytes(val);
 
 			vector<string> init_list;

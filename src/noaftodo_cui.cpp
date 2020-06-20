@@ -43,6 +43,14 @@ int cui_color_failed;
 multistr_c cui_row_separator({ "|" });
 int cui_row_separator_offset = 0;
 multistr_c cui_status_separator({ "|" });
+multistr_c cui_details_separator({ "|" });
+multistr_c cui_v_line_strong({ "|" });
+multistr_c cui_h_line_strong({ "-" });
+multistr_c cui_h_line_light({ "=" });
+multistr_c cui_1_corner({ "+" });
+multistr_c cui_2_corner({ "+" });
+multistr_c cui_3_corner({ "+" });
+multistr_c cui_4_corner({ "+" });
 
 string cui_normal_all_cols;
 string cui_normal_cols;
@@ -371,11 +379,8 @@ void cui_run()
 	cui_init();
 	cui_set_mode(CUI_MODE_NORMAL);
 
-	int frame = -1;
 	for (wint_t c = 0; ; (get_wch(&c) != ERR) ? : (c = 0))
 	{
-		if (c == 0) frame++;
-
 		if (li_has_changed()) li_load(false); // load only list contents, not the workspace
 
 		if (c != 0)
@@ -424,12 +429,28 @@ void cui_run()
 
 		if (cui_shift_multivars)
 		{
-			cui_row_separator.shift_const(frame);
-			cui_status_separator.shift_const(frame);
+			cui_v_line_strong.shift_const();
+			cui_h_line_strong.shift_const();
+			cui_h_line_light.shift_const();
+			cui_row_separator.shift_const();
+			cui_status_separator.shift_const();
+			cui_details_separator.shift_const();
+			cui_1_corner.shift_const();
+			cui_2_corner.shift_const();
+			cui_3_corner.shift_const();
+			cui_4_corner.shift_const();
 		}
 
+		cui_v_line_strong.reset();
+		cui_h_line_strong.reset();
+		cui_h_line_light.reset();
 		cui_row_separator.reset();
 		cui_status_separator.reset();
+		cui_details_separator.reset();
+		cui_1_corner.reset();
+		cui_2_corner.reset();
+		cui_3_corner.reset();
+		cui_4_corner.reset();
 
 		switch (cui_mode)
 		{
@@ -878,27 +899,27 @@ void cui_details_paint()
 
 	// draw details box
 	move(2, 3);
-	addstr(cvar("charset.box_corner_1").getter().c_str());
+	addstr(cui_1_corner.get().c_str());
 	move(cui_h - 3, 3);
-	addstr(cvar("charset.box_corner_3").getter().c_str());
+	addstr(cui_3_corner.get().c_str());
 	move(2, cui_w - 4);
-	addstr(cvar("charset.box_corner_2").getter().c_str());
+	addstr(cui_2_corner.get().c_str());
 	move(cui_h - 3, cui_w - 4);
-	addstr(cvar("charset.box_corner_4").getter().c_str());
+	addstr(cui_4_corner.get().c_str());
 
 	for (int i = 3; i <= cui_h - 4; i++) 
 	{ 
 		move(i, 3); 
-		addstr(cvar("charset.box_border_v").getter().c_str()); 
+		addstr(cui_v_line_strong.get().c_str()); 
 
 		move(i, cui_w - 4);
-		addstr(cvar("charset.box_border_v").getter().c_str()); 
+		addstr(cui_v_line_strong.get().c_str()); 
 	}
 
 	for (int j = 4; j < cui_w - 4; j++)
 	{
 		move(2, j);
-		addstr(cvar("charset.box_border_h").getter().c_str());
+		addstr(cui_h_line_strong.get().c_str());
 
 		for (int i = 3; i < cui_h - 3; i++)
 		{
@@ -907,7 +928,7 @@ void cui_details_paint()
 		}
 
 		move(cui_h - 3, j);
-		addstr(cvar("charset.box_border_h").getter().c_str());
+		addstr(cui_h_line_strong.get().c_str());
 	}
 
 	// fill the box with details
@@ -919,7 +940,7 @@ void cui_details_paint()
 	for (int i = 4; i < cui_w - 4; i++)
 	{
 		move(6, i);
-		addstr(cvar("charset.box_ui_line_h").getter().c_str());
+		addstr(cui_h_line_light.get().c_str());
 	}
 
 	move(7, 5);
@@ -936,7 +957,7 @@ void cui_details_paint()
 			const char& col = cui_details_cols.at(coln);
 
 			info_str += cui_columns.at(col).contents(entry, cui_s_line);
-			if (coln < cui_details_cols.length() - 1) info_str += " " + cvar("charset.details_separator").getter() + " ";
+			if (coln < cui_details_cols.length() - 1) info_str += " " + cui_details_separator.get() + " ";
 		} catch (const out_of_range& e) {}
 	}
 
@@ -945,7 +966,7 @@ void cui_details_paint()
 	for (int i = 4; i < cui_w - 4; i++)
 	{
 		move(8, i);
-		addstr(cvar("charset.box_ui_line_h").getter().c_str());
+		addstr(cui_h_line_light.get().c_str());
 	}
 
 	// draw description
@@ -1123,27 +1144,27 @@ void cui_help_paint()
 
 	// draw help box
 	move(2, 3);
-	addstr(cvar("charset.box_corner_1").getter().c_str());
+	addstr(cui_1_corner.get().c_str());
 	move(cui_h - 3, 3);
-	addstr(cvar("charset.box_corner_3").getter().c_str());
+	addstr(cui_3_corner.get().c_str());
 	move(2, cui_w - 4);
-	addstr(cvar("charset.box_corner_2").getter().c_str());
+	addstr(cui_2_corner.get().c_str());
 	move(cui_h - 3, cui_w - 4);
-	addstr(cvar("charset.box_corner_4").getter().c_str());
+	addstr(cui_4_corner.get().c_str());
 
 	for (int i = 3; i <= cui_h - 4; i++) 
 	{ 
 		move(i, 3); 
-		addstr(cvar("charset.box_border_v").getter().c_str()); 
+		addstr(cui_v_line_strong.get().c_str()); 
 
 		move(i, cui_w - 4);
-		addstr(cvar("charset.box_border_v").getter().c_str()); 
+		addstr(cui_v_line_strong.get().c_str()); 
 	}
 
 	for (int j = 4; j < cui_w - 4; j++)
 	{
 		move(2, j);
-		addstr(cvar("charset.box_border_h").getter().c_str());
+		addstr(cui_h_line_strong.get().c_str());
 
 		for (int i = 3; i < cui_h - 3; i++)
 		{
@@ -1152,7 +1173,7 @@ void cui_help_paint()
 		}
 
 		move(cui_h - 3, j);
-		addstr(cvar("charset.box_border_h").getter().c_str());
+		addstr(cui_h_line_strong.get().c_str());
 	}
 
 	// fill the box
@@ -1162,7 +1183,7 @@ void cui_help_paint()
 	for (int i = 4; i < cui_w - 4; i++)
 	{
 		move(6, i);
-		addstr(cvar("charset.box_ui_line_h").getter().c_str());
+		addstr(cui_h_line_light.get().c_str());
 	}
 
 	// draw description

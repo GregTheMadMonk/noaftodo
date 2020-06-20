@@ -38,7 +38,7 @@ public:
 	std::string get(const int& position = -1);
 	std::string full_str();
 	void shift(const int& steps = 1);
-	void shift_const(const int& steps);
+	void shift_const(const int& steps = 1);
 	void reset();
 };
 
