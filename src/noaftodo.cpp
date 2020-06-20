@@ -236,7 +236,7 @@ string multistr_c::get(const int& position)
 {
 	if (position == -1)
 	{
-		const string retval = this->vals.at(this->offset);
+		const string retval = this->vals.at((this->offset + this->const_offset) % this->vals.size());
 
 		this->shift();
 
@@ -256,7 +256,13 @@ string multistr_c::full_str()
 void multistr_c::shift(const int& steps)
 {
 	this->offset += steps;
-	if (this->offset >= this->vals.size()) this->reset();
+	if (this->offset >= this->vals.size()) this->offset %= this->vals.size();
+}
+
+void multistr_c::shift_const(const int& steps)
+{
+	this->const_offset += steps;
+	if (this->const_offset >= this->vals.size()) this->const_offset %= this->vals.size();
 }
 
 void multistr_c::reset()

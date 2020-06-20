@@ -31,12 +31,14 @@ class multistr_c
 {
 	std::vector<std::string> vals;
 	int offset = 0;
+	int const_offset = 0;
 public:
 	multistr_c(const std::vector<std::string>& init_list);
 
 	std::string get(const int& position = -1);
 	std::string full_str();
 	void shift(const int& steps = 1);
+	void shift_const(const int& steps);
 	void reset();
 };
 

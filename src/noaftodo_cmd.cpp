@@ -466,6 +466,8 @@ void cmd_init()
 	};
 
 	// "fake" cvars
+	cvar_wrap_int("halfdelay_time", cui_halfdelay_time);
+
 	cvar_wrap_int("tag_filter", cui_tag_filter);
 	cvar_wrap_int("filter", cui_normal_filter);
 
@@ -475,6 +477,8 @@ void cmd_init()
 	cvar_wrap_string("contexec_cmd_regex", cui_contexec_regex_filter);
 
 	cvar_wrap_bool("colors.status_standout", cui_status_standout);
+
+	cvar_wrap_bool("shift_multivars", cui_shift_multivars);
 
 	cvar_wrap_int("colors.background", cui_color_bg);
 	cvar_wrap_int("colors.title", cui_color_title);
@@ -545,6 +549,7 @@ void cmd_init()
 	cvar_wrap_string("listview_status_fields", cui_listview_status_fields);
 
 	cvar_wrap_multistr("charset.row_separator", cui_row_separator);
+	cvar_wrap_int("charset.row_separator.offset", cui_row_separator_offset);
 	cvar_wrap_multistr("charset.status_separator", cui_status_separator);
 
 	cvar_wrap_maskflag("lview_show_empty", cui_listview_filter, CUI_FILTER_EMPTY);

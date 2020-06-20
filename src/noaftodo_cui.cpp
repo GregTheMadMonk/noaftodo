@@ -19,6 +19,8 @@ map<char, cui_lview_col_s> cui_lview_columns;
 map<char, cui_col_s> cui_columns;
 map<char, function<string()>> cui_status_fields;
 
+int cui_halfdelay_time = 2;
+
 int cui_normal_filter;
 int cui_listview_filter;
 int cui_tag_filter;
@@ -29,6 +31,8 @@ string cui_contexec_regex_filter;
 
 bool cui_status_standout;
 
+bool cui_shift_multivars = false;
+
 int cui_color_bg;
 int cui_color_title;
 int cui_color_status;
@@ -37,6 +41,7 @@ int cui_color_coming;
 int cui_color_failed;
 
 multistr_c cui_row_separator({ "|" });
+int cui_row_separator_offset = 0;
 multistr_c cui_status_separator({ "|" });
 
 string cui_normal_all_cols;
@@ -343,7 +348,7 @@ void cui_construct()
 	init_pair(CUI_CP_RED_ENTRY, cui_color_failed, cui_color_bg);
 	init_pair(CUI_CP_STATUS, cui_color_status, cui_color_bg);
 
-	halfdelay(2);
+	halfdelay(cui_halfdelay_time);
 	set_escdelay(0);
 	curs_set(0);
 	noecho();
@@ -366,8 +371,11 @@ void cui_run()
 	cui_init();
 	cui_set_mode(CUI_MODE_NORMAL);
 
+	int frame = -1;
 	for (wint_t c = 0; ; (get_wch(&c) != ERR) ? : (c = 0))
 	{
+		if (c == 0) frame++;
+
 		if (li_has_changed()) li_load(false); // load only list contents, not the workspace
 
 		if (c != 0)
@@ -413,6 +421,12 @@ void cui_run()
 
 		cui_w = getmaxx(stdscr);
 		cui_h = getmaxy(stdscr);
+
+		if (cui_shift_multivars)
+		{
+			cui_row_separator.shift_const(frame);
+			cui_status_separator.shift_const(frame);
+		}
 
 		cui_row_separator.reset();
 		cui_status_separator.reset();
@@ -604,6 +618,7 @@ void cui_listview_paint()
 		for (int l = 0; l < v_list.size(); l++)
 		{
 			cui_row_separator.reset();
+			cui_row_separator.shift(cui_row_separator_offset * (l + 1));
 			if (l - cui_delta >= cui_h - 2) break;
 			if (l >= cui_delta)    
 			{
@@ -749,6 +764,7 @@ void cui_normal_paint()
 		for (int l = 0; l < v_list.size(); l++)
 		{
 			cui_row_separator.reset();
+			cui_row_separator.shift(cui_row_separator_offset * (l + 1));
 			if (l - cui_delta >= cui_h - 2) break;
 			if (l >= cui_delta)    
 			{

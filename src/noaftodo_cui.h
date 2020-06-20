@@ -73,6 +73,8 @@ constexpr int CUI_TAG_ALL = -1;
 extern int cui_mode;
 extern std::stack<int> cui_prev_modes;
 
+extern int cui_halfdelay_time;
+
 // filter values
 extern int cui_normal_filter;
 extern int cui_listview_filter;
@@ -84,6 +86,8 @@ extern std::string cui_contexec_regex_filter;
 
 // colors / appearance
 extern bool cui_status_standout;
+
+extern bool cui_shift_multivars;
 
 extern int cui_color_bg;
 extern int cui_color_title;
@@ -98,6 +102,7 @@ extern std::string cui_listview_status_fields;
 
 // characters
 extern multistr_c cui_row_separator;
+extern int cui_row_separator_offset;
 extern multistr_c cui_status_separator;
 
 // mode columns

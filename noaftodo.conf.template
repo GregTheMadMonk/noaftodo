@@ -75,6 +75,8 @@ set "allow_root" "false"
 
 set "contexec_cmd_regex" "^set regex_filter\ |^set list_regex_filter "
 
+set "halfdelay_time" "2"
+
 # global events
 set "on_daemon_launch_action" 		"!notify-send \"NOAFtodo v.\%VER\%\" \"Daemon is up and running\" &"
 
@@ -104,6 +106,7 @@ set "charset.box_ui_line_h" "-"
 set "charset.status_separator" "|"
 set "charset.details_separator" "|"
 set "charset.row_separator" "│"
+set "charset.row_separator.offset" "0"
 
 set "charset.box_border_v" "┃"
 set "charset.box_border_h" "━"
@@ -120,3 +123,4 @@ set "colors.entry_coming" "3"
 set "colors.entry_failed" "1"
 set "colors.status" "-1"
 set "colors.status_standout" "false"
+set "shift_multivars" "false"
