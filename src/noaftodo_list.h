@@ -62,8 +62,17 @@ struct less_than_noaftodo_entry
 					// sort by title
 					for (int i = 0; (i < e1.title.length()) && (i < e2.title.length()); i++)
 						if (e1.title.at(i) != e2.title.at(i)) return e1.title.at(i) < e2.title.at(i);
+						
+					// try to sort by description
+					try { // sort by number in description
+						return stod(e1.description) < stod(e2.description);
+					} catch (const std::invalid_argument& e) {
+						// sort by title
+						for (int i = 0; (i < e1.description.length()) && (i < e2.description.length()); i++)
+							if (e1.description.at(i) != e2.description.at(i)) return e1.description.at(i) < e2.description.at(i);
 
-					return false;
+						return false;
+					}
 				}
 			}
 		}
