@@ -652,11 +652,17 @@ int cmd_exec(string command)
 		{
 			if (words.at(i).at(0) == '!')
 			{
+				const bool wcui = cui_active;
+
+				if (wcui) cui_destroy();
+
 				string shell_command = words.at(i).substr(1);
 
 				log("Executing shell command: '" + shell_command + "'...");
 
 				system(shell_command.c_str());
+
+				if (wcui) cui_construct();
 			} else {
 				// search command in cmds
 
