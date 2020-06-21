@@ -11,7 +11,7 @@ constexpr int CMD_ERR_ARG_TYPE 		= 2;
 constexpr int CMD_ERR_EXTERNAL		= -1;
 
 extern std::map<std::string, std::function<int(const std::vector<std::string>& args)>> cmds;
-extern std::map<std::string, std::vector<std::string>> aliases;
+extern std::map<std::string, std::string> aliases;
 
 extern std::string cmd_buffer;
 

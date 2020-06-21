@@ -19,12 +19,12 @@ string conf_filename = "noaftodo.conf";
 extern char _binary_noaftodo_conf_template_start;
 extern char _binary_noaftodo_conf_template_end;
 
-void conf_load()
+void conf_load(const bool& predefine_cvars)
 {
-	conf_load(conf_filename);
+	conf_load(conf_filename, predefine_cvars);
 }
 
-void conf_load(const string& conf_file)
+void conf_load(const string& conf_file, const bool& predefine_cvars)
 {
 	if (conf_file == "default")
 	{
@@ -94,6 +94,8 @@ void conf_load(const string& conf_file)
 			}
 		}
 	}
+
+	if (!predefine_cvars) return;
 
 	for (auto it = cvars.begin(); it != cvars.end(); it++)
 		cvar(it->first).predefine();

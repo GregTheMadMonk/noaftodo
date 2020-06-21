@@ -41,6 +41,10 @@ ifeq ($(NO_ROOT_CHECK), 1)
 	CPP_FLAGS += -DNO_ROOT_CHECK
 endif
 
+ifeq ($(DEBUG), 1)
+	CPP_FLAGS += -g3
+endif
+
 all: obj_dir $(OBJ_FILES) noaftodo.conf.template doc
 	@echo Source files: $(CPP_FILES)
 	@echo Header files: $(H_FILES)

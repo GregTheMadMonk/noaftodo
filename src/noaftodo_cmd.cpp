@@ -22,7 +22,7 @@
 using namespace std;
 
 map<string, function<int(const vector<string>& args)>> cmds;
-map<string, vector<string>> aliases;
+map<string, string> aliases;
 
 string cmd_buffer = "";
 
@@ -77,8 +77,14 @@ void cmd_init()
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		vector<string> alargs;
-		for (int i = 1; i < args.size(); i++) alargs.push_back(args.at(i));
+		string alargs;
+		for (int i = 1; i < args.size(); i++) 
+		{
+			if (alargs != "") alargs += " ";
+			alargs += args.at(i);
+		}
+
+		log("Alias " + args.at(0) + " => " + alargs);
 
 		aliases[args.at(0)] = alargs;
 
@@ -412,12 +418,19 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "exec <filename>" - execute a config file. Execute default config with "exec default".
+	// command "exec <filename>[ script]" - execute a config file. Execute default config with "exec default". With "script" cvars from config are not set as default
 	cmds["exec"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		conf_load(args.at(0));
+		bool predef_cvars = true;
+
+		for (int i = 1; i < args.size(); i++)
+		{
+			if (args.at(i) == "script") predef_cvars = false;
+		}
+
+		conf_load(args.at(0), predef_cvars);
 
 		return 0;
 	};
@@ -665,9 +678,17 @@ int cmd_exec(string command)
 	for (int i = 0; i < words.size(); i++)
 	{
 		if (words.at(i) == ";") // command separator
-			offset = i + 1;
-		else if (i == offset)
 		{
+			offset = i + 1;
+
+			for (int k = offset; k < words.size(); k++) // update rest of the commands
+			{
+				if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
+					words.at(k) = format_str(words.at(k), t_list.at(cui_s_line));
+				else
+					words.at(k) = format_str(words.at(k), NULL_ENTRY);
+			}
+		} else if (i == offset) {
 			if (words.at(i).at(0) == '!')
 			{
 				const bool wcui = cui_active;
@@ -694,40 +715,34 @@ int cmd_exec(string command)
 				}
 
 				try {	// search for alias, prioritize
-					vector<string> oargs = aliases.at(words.at(i));
+					string alstr = aliases.at(words.at(i));
 
-					vector<string> newargs;
+					if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) alstr = format_str(alstr, t_list.at(cui_s_line));
+					else alstr = format_str(alstr, NULL_ENTRY);
 
-					for (int j = 1; j < oargs.size(); j++) 
-					{
-						if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) newargs.push_back(format_str(oargs.at(j), t_list.at(cui_s_line)));
-						else newargs.push_back(oargs.at(j));
-					}
-					for (int j = 0; j < cmdarg.size(); j++) 
+					for (int j = 0; j < cmdarg.size(); j++)
 					{
 						bool replaced = false;
 
-						for (int k = 0; k < oargs.size() - 1; k++)
+						int index = -1;
+						const string varname = "%arg" + to_string(j + 1) + "%";
+						while ((index = alstr.find(varname)) != string::npos)
 						{
-							int index = -1;
-							string varname = "%arg" + to_string(j + 1) + "%";
-							while ((index = newargs.at(k).find(varname)) != string::npos)
-							{
-								newargs[k].replace(index, varname.length(), cmdarg.at(j));
-								replaced = true;
-							}
+							alstr.replace(index, varname.length(), cmdarg.at(j));
+							replaced = true;
 						}
 
-						if (!replaced) newargs.push_back(cmdarg.at(j));
+						if (!replaced) alstr += " " + cmdarg.at(j);
 					}
 
-					const int ret = (cmds.at(oargs.at(0)))(newargs);
-
-					if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Wrong argument count";
-					if (ret == CMD_ERR_ARG_TYPE)	cui_status = "Wrong argument type";
-					if (ret == CMD_ERR_EXTERNAL)	cui_status = "Cannot execute command";
+					log("Executing alias " + words.at(i) + " => " + alstr);
+					cmd_exec(alstr);
 				} catch (const out_of_range& e) { // alias not found, try to execute a command
 					try {
+						string l = words.at(i) + " ";
+						for (int k = 0; k < cmdarg.size(); k++) l += "\"" + cmdarg.at(k) + "\" ";
+						log(l);
+
 						const int ret = (cmds.at(words.at(i)))(cmdarg);
 
 						if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Wrong argument count";
