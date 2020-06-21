@@ -4,6 +4,7 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 <img src="workflow.gif" width="576" height="324" alt="NOAFtodo workflow"></img>
 
 ### Current and future features (visit [NOAFtodo wiki](https://github.com/GregTheMadMonk/noaftodo/wiki) to see project roadmap and prepare for non-backwards-compatible changes in command interpreter)
+*If you have any problems with the program, please open an issue here. It's much faster than waiting for me to notice a mistake, and I try to fix things as soon as possible.*
 - [x] minimalisic interface written with ncurses
 - [x] multiple lists between which tasks can be moved
 - [x] primitive TODO list management: add and remove tasks with or without dues, mark tasks as completed, basic task editing
@@ -21,7 +22,9 @@ Also running without creating a config is supported with `noaftodo -c default`, 
 ### Building
 Run `make` (`gmake` on Solaris 11).
 
-If you don't have mqueue.h on your system, or don't want program to use it, you can set environment variable `NO_MQUEUE` to `1`, and NOAFtodo will compile with a primitive replacement instead.
+Build flags:
+* `NO_MQUEUE=1` - compile with a primitive replacement to message queues from **mqueue.h**, in case you don't have one on your system, or don't want to use it
+* `NO_ROOT_CHECK=1` - disable checking EUID for root privileges (same effect as `set allow_root true` in config, but just removes the feature from the program)
 #### Dependencies
 **ncurses**. You need it (on an Arch-based system: `sudo pacman -S ncurses`, on a Debian-based system: `sudo apt install libncurses5-dev`).
 
@@ -73,8 +76,8 @@ All tasks belong to the following categories and can be filtered by them in norm
 * d - `:d` (no autoexec) - deletes entry
 * gg - `:g 0`
 * [input number]g - `:g [input number]` - goes to the entry with index [input number], or closest if hidden
-* Gg - `:g [last item index]`
+* G - `:g [last item index]`
 * ll - `:list all` - show tasks from all lists
 * [input number]l - `:list [input number]` - switches to view only the list with index [input number]
-* U|F|C|V|N - `:vtoggle uncat|failed|coming|completed|nodue` - toggles uncategorized|failed|upcoming|completed|nodue entries visibility
-* / - `set regex_filter ` - filter tasks
+* U|F|C|V|N - `:toggle show_[uncat|failed|coming|completed|nodue]` - toggles uncategorized|failed|upcoming|completed|nodue entries visibility
+* / - `:set regex_filter ` - filter tasks

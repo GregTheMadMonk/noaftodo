@@ -24,6 +24,8 @@ using namespace std;
 map<string, function<int(const vector<string>& args)>> cmds;
 map<string, vector<string>> aliases;
 
+string cmd_buffer = "";
+
 void cmd_init()
 {
 	// command "q" - exit the program.
@@ -583,6 +585,12 @@ int cmd_exec(string command)
 	else
 		command = format_str(command, NULL_ENTRY);
 
+	if (cmd_buffer != "")
+	{
+		command = cmd_buffer + command;
+		cmd_buffer = "";
+	}
+
 	for (int i = 0; i < command.length(); i++)
 	{
 		const char c = command.at(i);
@@ -601,8 +609,7 @@ int cmd_exec(string command)
 				if (c == '\\') skip_special = true;
 				else { word += c; skip_special = false; }
 			}
-		} else if (skip_special) 
-		{
+		} else if (skip_special) {
 			word += c;
 			skip_special = false;
 		} else switch (c) {
@@ -642,6 +649,12 @@ int cmd_exec(string command)
 		}
 	}
 	if (word != "") words.push_back(word);
+
+	if (inquotes) // line break inside quotes
+	{
+		cmd_buffer = command;
+		return 0;
+	}
 
 	int offset = 0;
 	for (int i = 0; i < words.size(); i++)
