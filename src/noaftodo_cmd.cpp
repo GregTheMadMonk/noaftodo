@@ -566,10 +566,15 @@ void cmd_init()
 	cvar_wrap_maskflag("lview_show_empty", cui_listview_filter, CUI_FILTER_EMPTY);
 
 	cvar_wrap_maskflag("show_uncat", cui_normal_filter, CUI_FILTER_UNCAT);
+	cvar("show_uncat").ws_ignore = true;
 	cvar_wrap_maskflag("show_complete", cui_normal_filter, CUI_FILTER_COMPLETE);
+	cvar("show_complete").ws_ignore = true;
 	cvar_wrap_maskflag("show_coming", cui_normal_filter, CUI_FILTER_COMING);
+	cvar("show_coming").ws_ignore = true;
 	cvar_wrap_maskflag("show_failed", cui_normal_filter, CUI_FILTER_FAILED);
+	cvar("show_failed").ws_ignore = true;
 	cvar_wrap_maskflag("show_nodue", cui_normal_filter, CUI_FILTER_NODUE);
+	cvar("show_nodue").ws_ignore = true;
 }
 
 int cmd_exec(string command)

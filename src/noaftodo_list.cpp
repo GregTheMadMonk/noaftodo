@@ -131,6 +131,9 @@ void li_load(const bool& load_workspace)
 		{
 			auto it = cvars.begin();
 			for (int i = 0; i < offset; i++) it++;
+
+			if (cvar(it->first).ws_ignore) continue;
+
 			if (cvar(it->first).predef_val == "")
 			{
 				cvar_erase(it->first);
@@ -352,7 +355,7 @@ void li_save()
 	for (auto cvar_i = cvars.begin(); cvar_i != cvars.end(); cvar_i++)
 	{
 		const string key = cvar_i->first;
-		if (cvar(key).changed())
+		if (cvar(key).changed() && !cvar(key).ws_ignore)
 			ofile << "set \"" << key << "\" \"" << cvar(key).getter() << "\"" << endl;
 	}
 

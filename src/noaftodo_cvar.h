@@ -10,6 +10,8 @@
 
 struct cvar_base_s	// a base structure for cvars
 {
+	bool ws_ignore = false;
+
 	virtual ~cvar_base_s() = default;
 
 	std::string predef_val; // predefined value
