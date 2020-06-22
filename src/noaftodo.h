@@ -56,6 +56,9 @@ extern std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> w_converter;
 // program mode
 extern int run_mode;
 
+// params
+extern bool allow_root;
+
 // output options
 extern bool enable_log;
 extern bool verbose;

@@ -18,6 +18,8 @@ using namespace std;
 
 int run_mode;
 
+bool allow_root = false;
+
 bool verbose = false;
 bool enable_log = true;
 
@@ -100,7 +102,7 @@ int main(int argc, char* argv[])
 	conf_load();
 
 #ifndef NO_ROOT_CHECK
-	if ((geteuid() == 0) && (cvar("allow_root") != "true"))
+	if ((geteuid() == 0) && !allow_root)
 	{
 		log("Can't run as root! To disable this check, set \"allow_root\" to \"true\" in your config", LP_ERROR);
 		return 0;
@@ -113,8 +115,7 @@ int main(int argc, char* argv[])
 	if (run_mode == PM_DEFAULT)	
 	{
 		// if this option is enabled, start daemon in the forked process
-		if ((cvar("daemon.fork_autostart") == "true") &&
-		   !da_check_lockfile())
+		if (da_fork_autostart && !da_check_lockfile())
 			switch (fork())
 			{
 				case -1:

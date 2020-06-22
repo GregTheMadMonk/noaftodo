@@ -588,6 +588,17 @@ void cmd_init()
 	cvar("show_failed").ws_ignore = true;
 	cvar_wrap_maskflag("show_nodue", cui_normal_filter, CUI_FILTER_NODUE);
 	cvar("show_nodue").ws_ignore = true;
+
+	cvar_wrap_bool("allow_root", allow_root);
+	cvar_wrap_bool("daemon.fork_autostart", da_fork_autostart);
+
+	cvar_wrap_string("on_daemon_launch_action", da_launch_action);
+	cvar_wrap_string("on_task_failed_action", da_task_failed_action);
+	cvar_wrap_string("on_task_coming_action", da_task_coming_action);
+	cvar_wrap_string("on_task_completed_action", da_task_completed_action);
+	cvar_wrap_string("on_task_uncompleted_action", da_task_uncompleted_action);
+	cvar_wrap_string("on_task_new_action", da_task_new_action);
+	cvar_wrap_string("on_task_removed_action", da_task_removed_action);
 }
 
 int cmd_exec(string command)

@@ -26,6 +26,18 @@ constexpr char DA_LOCK_FILE[] = "/tmp/.noaftodo-dlock";
 // message size
 constexpr int DA_MSGSIZE = 256;
 
+// should daemon be automatically started when noaftodo is launched?
+extern bool da_fork_autostart;
+
+// daemon actions
+extern std::string da_launch_action;
+extern std::string da_task_failed_action;
+extern std::string da_task_coming_action;
+extern std::string da_task_completed_action;
+extern std::string da_task_uncompleted_action;
+extern std::string da_task_new_action;
+extern std::string da_task_removed_action;
+
 // is daemon running?
 extern bool da_running;
 

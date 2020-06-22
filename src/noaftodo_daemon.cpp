@@ -20,6 +20,16 @@
 
 using namespace std;
 
+bool da_fork_autostart = true;
+
+string da_launch_action;
+string da_task_failed_action;
+string da_task_coming_action;
+string da_task_completed_action;
+string da_task_uncompleted_action;
+string da_task_new_action;
+string da_task_removed_action;
+
 bool da_running = false;
 int da_clients = -1; // -1 if we don't care. Other numbers indicate
 			// amount of active noaftodo clients
@@ -58,7 +68,7 @@ void da_run()
 	log("OK");
 #endif
 
-	cmd_exec(format_str(cvar("on_daemon_launch_action"), {}));
+	cmd_exec(format_str(da_launch_action, {}));
 
 	da_running = true;
 	timespec tout;
@@ -189,13 +199,13 @@ void da_upd_cache(const bool& is_first_load)
 			da_cache.push_back(li_e);
 
 			if (li_e.completed)
-				cmd_exec(format_str(cvar("on_task_completed_action"), li_e, is_first_load));
+				cmd_exec(format_str(da_task_completed_action, li_e, is_first_load));
 			else if (li_e.is_failed())
-				cmd_exec(format_str(cvar("on_task_failed_action"), li_e, is_first_load));
+				cmd_exec(format_str(da_task_failed_action, li_e, is_first_load));
 			else if (li_e.is_coming())
-				cmd_exec(format_str(cvar("on_task_coming_action"), li_e, is_first_load));
+				cmd_exec(format_str(da_task_coming_action, li_e, is_first_load));
 			else if (!is_first_load)
-				cmd_exec(format_str(cvar("on_task_new_action"), li_e, is_first_load));
+				cmd_exec(format_str(da_task_new_action, li_e, is_first_load));
 
 			continue;
 		}
@@ -210,14 +220,14 @@ void da_upd_cache(const bool& is_first_load)
 		{
 			if (li_e.completed)
 			{
-				cmd_exec(format_str(cvar("on_task_completed_action"), li_e, false));
+				cmd_exec(format_str(da_task_completed_action, li_e, false));
 				cmd_exec(format_str(li_e.get_meta("on_completed"), li_e, false));
 			} else if (li_e.is_failed()) {
-				cmd_exec(format_str(cvar("on_task_failed_action"), li_e, true));
+				cmd_exec(format_str(da_task_failed_action, li_e, true));
 			} else if (li_e.is_coming()) {
-				cmd_exec(format_str(cvar("on_task_coming_action"), li_e, true));
+				cmd_exec(format_str(da_task_coming_action, li_e, true));
 			} else {
-				cmd_exec(format_str(cvar("on_task_uncompleted_action"), li_e, true));
+				cmd_exec(format_str(da_task_uncompleted_action, li_e, true));
 				cmd_exec(format_str(li_e.get_meta("on_uncompleted"), li_e, true));
 			}
 
@@ -242,7 +252,7 @@ void da_upd_cache(const bool& is_first_load)
 
 		if (removed)
 		{
-			cmd_exec(format_str(cvar("on_task_removed_action"), da_cache.at(i)));
+			cmd_exec(format_str(da_task_removed_action, da_cache.at(i)));
 			da_cache.erase(da_cache.begin() + i);
 		} else i++;
 	}
@@ -262,13 +272,13 @@ void da_check_dues(const bool& renotify)
 	{
 		if ((t_list.at(cui_s_line).is_failed()) && (renotify || (t_list.at(cui_s_line).due > da_cached_time)))
 		{
-			cmd_exec(format_str(cvar("on_task_failed_action"), t_list.at(cui_s_line), renotify));
+			cmd_exec(format_str(da_task_failed_action, t_list.at(cui_s_line), renotify));
 			if (!renotify)
 				cmd_exec(format_str(t_list.at(cui_s_line).get_meta("on_failed"), t_list.at(cui_s_line)));
 		}
 		else if ((t_list.at(cui_s_line).is_coming()) && (renotify || (t_list.at(cui_s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a1d"))))
 		{
-			cmd_exec(format_str(cvar("on_task_coming_action"), t_list.at(cui_s_line), renotify));
+			cmd_exec(format_str(da_task_coming_action, t_list.at(cui_s_line), renotify));
 			if (!renotify)
 				cmd_exec(format_str(t_list.at(cui_s_line).get_meta("on_coming"), t_list.at(cui_s_line)));
 		}
