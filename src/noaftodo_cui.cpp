@@ -356,7 +356,8 @@ void cui_construct()
 	init_pair(CUI_CP_RED_ENTRY, cui_color_failed, cui_color_bg);
 	init_pair(CUI_CP_STATUS, cui_color_status, cui_color_bg);
 
-	halfdelay(cui_halfdelay_time);
+	if (cui_halfdelay_time == 0) cbreak();
+	else halfdelay(cui_halfdelay_time);
 	set_escdelay(0);
 	curs_set(0);
 	noecho();
