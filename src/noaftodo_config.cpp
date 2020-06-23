@@ -95,6 +95,8 @@ void conf_load(const string& conf_file, const bool& predefine_cvars)
 		}
 	}
 
+	cmd_terminate();
+
 	if (!predefine_cvars) return;
 
 	for (auto it = cvars.begin(); it != cvars.end(); it++)

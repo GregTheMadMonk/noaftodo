@@ -195,6 +195,8 @@ void li_load(const bool& load_workspace)
 				if (entry == "[list]") 		mode = 1;
 				if (entry == "[workspace]") 	mode = 2;
 				if (entry == "[ver]") 		mode = 3;
+
+				if (mode != 2) cmd_terminate();
 			} else switch (mode) {
 				case 0: // tags
 					log("Added tag \"" + entry + "\" with index " + to_string(t_tags.size()));

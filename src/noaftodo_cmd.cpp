@@ -773,3 +773,13 @@ int cmd_exec(string command)
 
 	return 0;
 }
+
+void cmd_terminate()
+{
+	if (cmd_buffer == "") return;
+
+	cui_status = "Unterminated command";
+	log("Unterminated command at the end of execution. Skipping...", LP_ERROR);
+
+	cmd_buffer = "";
+}

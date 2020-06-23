@@ -17,5 +17,6 @@ extern std::string cmd_buffer;
 
 void cmd_init();
 int cmd_exec(std::string command);
+void cmd_terminate();
 
 #endif

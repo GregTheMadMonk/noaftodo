@@ -1058,6 +1058,7 @@ void cui_command_input(const wchar_t& key)
 				cmd_exec(w_converter.to_bytes(cui_command));
 				cui_command_history.push_back(cui_command);
 				cui_command_index = cui_command_history.size();
+				cmd_terminate();
 			}
 		case 27:
 			cui_command = L"";
