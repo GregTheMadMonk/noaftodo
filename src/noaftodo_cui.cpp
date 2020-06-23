@@ -40,17 +40,12 @@ int cui_color_complete;
 int cui_color_coming;
 int cui_color_failed;
 
-multistr_c cui_row_separator({ "|" });
 int cui_row_separator_offset = 0;
-multistr_c cui_status_separator({ "|" });
-multistr_c cui_details_separator({ "|" });
-multistr_c cui_v_line_strong({ "|" });
-multistr_c cui_h_line_strong({ "-" });
-multistr_c cui_h_line_light({ "=" });
-multistr_c cui_1_corner({ "+" });
-multistr_c cui_2_corner({ "+" });
-multistr_c cui_3_corner({ "+" });
-multistr_c cui_4_corner({ "+" });
+multistr_c cui_separators("|||");	// row, status, details separators
+multistr_c cui_box_strong("|-++++");	// vertical and horisontal line;
+					// 1st, 2nd, 3rd, 4th corner;
+					// more later
+multistr_c cui_box_light("|-++++");
 
 string cui_normal_all_cols;
 string cui_normal_cols;
@@ -430,28 +425,14 @@ void cui_run()
 
 		if (cui_shift_multivars)
 		{
-			cui_v_line_strong.shift_const();
-			cui_h_line_strong.shift_const();
-			cui_h_line_light.shift_const();
-			cui_row_separator.shift_const();
-			cui_status_separator.shift_const();
-			cui_details_separator.shift_const();
-			cui_1_corner.shift_const();
-			cui_2_corner.shift_const();
-			cui_3_corner.shift_const();
-			cui_4_corner.shift_const();
+			cui_box_strong.shift();
+			cui_box_light.shift();
+			cui_separators.shift();
 		}
 
-		cui_v_line_strong.reset();
-		cui_h_line_strong.reset();
-		cui_h_line_light.reset();
-		cui_row_separator.reset();
-		cui_status_separator.reset();
-		cui_details_separator.reset();
-		cui_1_corner.reset();
-		cui_2_corner.reset();
-		cui_3_corner.reset();
-		cui_4_corner.reset();
+		cui_box_strong.drop();
+		cui_box_light.drop();
+		cui_separators.drop();
 
 		switch (cui_mode)
 		{
@@ -606,7 +587,7 @@ void cui_listview_paint()
 			if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w)
 			{
 				move(0, x + w);
-				addstr((" " + cui_row_separator.get() + " ").c_str());
+				addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 			}
 			x += w + 3;
 			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
@@ -639,8 +620,8 @@ void cui_listview_paint()
 	else {
 		for (int l = 0; l < v_list.size(); l++)
 		{
-			cui_row_separator.reset();
-			cui_row_separator.shift(cui_row_separator_offset * (l + 1));
+			cui_separators.drop();
+			cui_separators.shift_at(CHAR_ROW_SEP, cui_row_separator_offset * (l + 1));
 			if (l - cui_delta >= cui_h - 2) break;
 			if (l >= cui_delta)    
 			{
@@ -663,7 +644,7 @@ void cui_listview_paint()
 						if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w)
 						{
 							move(l - cui_delta + 1, x + w);
-							addstr((" " + cui_row_separator.get() + " ").c_str());
+							addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 						}
 						x += w + 3;
 
@@ -690,7 +671,7 @@ void cui_listview_paint()
 			const string field = (cui_status_fields.at(c))();
 			if (field != "")
 			{
-				if (cui_status_l != "") cui_status_l = " " + cui_status_separator.get() + " " + cui_status_l;
+				if (cui_status_l != "") cui_status_l = " " + cui_separators.s_get(CHAR_STA_SEP) + " " + cui_status_l;
 		       		cui_status_l = field + cui_status_l;
 			}
 		} catch (const out_of_range& e) {}
@@ -753,7 +734,7 @@ void cui_normal_paint()
 			if (coln < cols.length() - 1) if (x + w < cui_w)
 			{
 				move(0, x + w);
-				addstr((" " + cui_row_separator.get() + " ").c_str());
+				addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 			}
 			x += w + 3;
 			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
@@ -785,8 +766,8 @@ void cui_normal_paint()
 	else {
 		for (int l = 0; l < v_list.size(); l++)
 		{
-			cui_row_separator.reset();
-			cui_row_separator.shift(cui_row_separator_offset * (l + 1));
+			cui_separators.drop();
+			cui_separators.shift_at(CHAR_ROW_SEP, cui_row_separator_offset * (l + 1));
 			if (l - cui_delta >= cui_h - 2) break;
 			if (l >= cui_delta)    
 			{
@@ -814,7 +795,7 @@ void cui_normal_paint()
 						if (coln < cols.length() - 1) if (x + w < cui_w)
 						{
 							move(l - cui_delta + 1, x + w);
-							addstr((" " + cui_row_separator.get() + " ").c_str());
+							addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 						}
 						x += w + 3;
 
@@ -841,7 +822,7 @@ void cui_normal_paint()
 			const string field = (cui_status_fields.at(c))();
 			if (field != "")
 			{
-				if (cui_status_l != "") cui_status_l = " " + cui_status_separator.get() + " " + cui_status_l;
+				if (cui_status_l != "") cui_status_l = " " + cui_separators.s_get(CHAR_STA_SEP) + " " + cui_status_l;
 		       		cui_status_l = field + cui_status_l;
 			}
 		} catch (const out_of_range& e) {}
@@ -900,27 +881,27 @@ void cui_details_paint()
 
 	// draw details box
 	move(2, 3);
-	addstr(cui_1_corner.get().c_str());
+	addstr(cui_box_strong.s_get(CHAR_CORN1).c_str());
 	move(cui_h - 3, 3);
-	addstr(cui_3_corner.get().c_str());
+	addstr(cui_box_strong.s_get(CHAR_CORN3).c_str());
 	move(2, cui_w - 4);
-	addstr(cui_2_corner.get().c_str());
+	addstr(cui_box_strong.s_get(CHAR_CORN2).c_str());
 	move(cui_h - 3, cui_w - 4);
-	addstr(cui_4_corner.get().c_str());
+	addstr(cui_box_strong.s_get(CHAR_CORN4).c_str());
 
 	for (int i = 3; i <= cui_h - 4; i++) 
 	{ 
 		move(i, 3); 
-		addstr(cui_v_line_strong.get().c_str()); 
+		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
 
 		move(i, cui_w - 4);
-		addstr(cui_v_line_strong.get().c_str()); 
+		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
 	}
 
 	for (int j = 4; j < cui_w - 4; j++)
 	{
 		move(2, j);
-		addstr(cui_h_line_strong.get().c_str());
+		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
 
 		for (int i = 3; i < cui_h - 3; i++)
 		{
@@ -929,7 +910,7 @@ void cui_details_paint()
 		}
 
 		move(cui_h - 3, j);
-		addstr(cui_h_line_strong.get().c_str());
+		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
 	}
 
 	// fill the box with details
@@ -941,7 +922,7 @@ void cui_details_paint()
 	for (int i = 4; i < cui_w - 4; i++)
 	{
 		move(6, i);
-		addstr(cui_h_line_light.get().c_str());
+		addstr(cui_box_light.s_get(CHAR_HLINE).c_str());
 	}
 
 	move(7, 5);
@@ -958,7 +939,7 @@ void cui_details_paint()
 			const char& col = cui_details_cols.at(coln);
 
 			info_str += cui_columns.at(col).contents(entry, cui_s_line);
-			if (coln < cui_details_cols.length() - 1) info_str += " " + cui_details_separator.get() + " ";
+			if (coln < cui_details_cols.length() - 1) info_str += " " + cui_separators.s_get(CHAR_DET_SEP) + " ";
 		} catch (const out_of_range& e) {}
 	}
 
@@ -967,7 +948,7 @@ void cui_details_paint()
 	for (int i = 4; i < cui_w - 4; i++)
 	{
 		move(8, i);
-		addstr(cui_h_line_light.get().c_str());
+		addstr(cui_box_light.s_get(CHAR_HLINE).c_str());
 	}
 
 	// draw description
@@ -1146,27 +1127,27 @@ void cui_help_paint()
 
 	// draw help box
 	move(2, 3);
-	addstr(cui_1_corner.get().c_str());
+	addstr(cui_box_strong.s_get(CHAR_CORN1).c_str());
 	move(cui_h - 3, 3);
-	addstr(cui_3_corner.get().c_str());
+	addstr(cui_box_strong.s_get(CHAR_CORN3).c_str());
 	move(2, cui_w - 4);
-	addstr(cui_2_corner.get().c_str());
+	addstr(cui_box_strong.s_get(CHAR_CORN2).c_str());
 	move(cui_h - 3, cui_w - 4);
-	addstr(cui_4_corner.get().c_str());
+	addstr(cui_box_strong.s_get(CHAR_CORN4).c_str());
 
 	for (int i = 3; i <= cui_h - 4; i++) 
 	{ 
 		move(i, 3); 
-		addstr(cui_v_line_strong.get().c_str()); 
+		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
 
 		move(i, cui_w - 4);
-		addstr(cui_v_line_strong.get().c_str()); 
+		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
 	}
 
 	for (int j = 4; j < cui_w - 4; j++)
 	{
 		move(2, j);
-		addstr(cui_h_line_strong.get().c_str());
+		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
 
 		for (int i = 3; i < cui_h - 3; i++)
 		{
@@ -1175,7 +1156,7 @@ void cui_help_paint()
 		}
 
 		move(cui_h - 3, j);
-		addstr(cui_h_line_strong.get().c_str());
+		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
 	}
 
 	// fill the box
@@ -1185,7 +1166,7 @@ void cui_help_paint()
 	for (int i = 4; i < cui_w - 4; i++)
 	{
 		move(6, i);
-		addstr(cui_h_line_light.get().c_str());
+		addstr(cui_box_light.s_get(CHAR_HLINE).c_str());
 	}
 
 	// draw description

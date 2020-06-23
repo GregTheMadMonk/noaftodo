@@ -563,18 +563,21 @@ void cmd_init()
 	cvar_wrap_string("status_fields", cui_normal_status_fields);
 	cvar_wrap_string("listview_status_fields", cui_listview_status_fields);
 
-	cvar_wrap_multistr("charset.row_separator", cui_row_separator);
+	cvar_wrap_multistr("charset.separators", cui_separators, 3);
+	cvar_wrap_multistr_element("charset.row_separator", cui_separators, CHAR_ROW_SEP);
 	cvar_wrap_int("charset.row_separator.offset", cui_row_separator_offset);
-	cvar_wrap_multistr("charset.status_separator", cui_status_separator);
-	cvar_wrap_multistr("charset.details_separator", cui_details_separator);
+	cvar_wrap_multistr_element("charset.status_separator", cui_separators, CHAR_STA_SEP);
+	cvar_wrap_multistr_element("charset.details_separator", cui_separators, CHAR_DET_SEP);
 
-	cvar_wrap_multistr("charset.box_border_v", cui_v_line_strong);
-	cvar_wrap_multistr("charset.box_border_h", cui_h_line_strong);
-	cvar_wrap_multistr("charset.box_ui_line_h", cui_h_line_light);
-	cvar_wrap_multistr("charset.box_corner_1", cui_1_corner);
-	cvar_wrap_multistr("charset.box_corner_2", cui_2_corner);
-	cvar_wrap_multistr("charset.box_corner_3", cui_3_corner);
-	cvar_wrap_multistr("charset.box_corner_4", cui_4_corner);
+	cvar_wrap_multistr("charset.box_strong", cui_box_strong, 6);
+	cvar_wrap_multistr("charset.box_light", cui_box_light, 6);
+	cvar_wrap_multistr_element("charset.box_border_v", cui_box_strong, CHAR_VLINE);
+	cvar_wrap_multistr_element("charset.box_border_h", cui_box_strong, CHAR_HLINE);
+	cvar_wrap_multistr_element("charset.box_corner_1", cui_box_strong, CHAR_CORN1);
+	cvar_wrap_multistr_element("charset.box_corner_2", cui_box_strong, CHAR_CORN2);
+	cvar_wrap_multistr_element("charset.box_corner_3", cui_box_strong, CHAR_CORN3);
+	cvar_wrap_multistr_element("charset.box_corner_4", cui_box_strong, CHAR_CORN4);
+	cvar_wrap_multistr_element("charset.box_ui_line_h", cui_box_light, CHAR_HLINE);
 
 	cvar_wrap_maskflag("lview_show_empty", cui_listview_filter, CUI_FILTER_EMPTY);
 

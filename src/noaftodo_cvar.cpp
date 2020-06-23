@@ -138,33 +138,35 @@ void cvar_wrap_string(const string& name, string& var, const bool& ronly)
 	else cvars[name]->setter = [&var] (const string& val) { var = val; };
 }
 
-void cvar_wrap_multistr(const string& name, multistr_c& var, const int& element_length, const bool& ronly)
+void cvar_wrap_multistr(const string& name, multistr_c& var, const int& length, const bool& ronly)
 {
 	cvars[name] = make_unique<cvar_base_s>();
-	cvars[name]->getter = [&var] () { return var.full_str(); };
-
+	cvars[name]->getter = [&var] () { return w_converter.to_bytes(var.str()); };
 	if (ronly) cvars[name]->setter = [] (const string& val) { };
-	else cvars[name]->setter = [&var, element_length] (const string& val)
-		{
-			if (element_length == 0)
-			{	// one string
-				var = multistr_c({ val });
-				return ;
-			}
+	else cvars[name]->setter = [name, &var, length] (const string& val)
+	{
+		var = multistr_c(val, length);
+	};
 
-			wstring ws = w_converter.from_bytes(val);
+	cvars[name]->ws_ignore = true; // otherwise it breaks a cvar
+}
 
-			vector<string> init_list;
+void cvar_wrap_multistr_element(const std::string& name, multistr_c& var, const int& index, const bool& ronly)
+{
+	cvars[name] = make_unique<cvar_base_s>();
+	cvars[name]->getter = [&var, index] () { return w_converter.to_bytes(var.at(index)); };
+	if (ronly) cvars[name]->setter = [] (const string& val) { };
+	else cvars[name]->setter = [&var, index] (const string& val)
+	{
+		vector<wchar_t> newval;
 
-			for (int i = 0; i < ws.length(); i++)
-			{
-				if (i % element_length == 0) init_list.push_back("");
+		for (wchar_t c : w_converter.from_bytes(val))
+			newval.push_back(c);
 
-				init_list.at(init_list.size() - 1) += w_converter.to_bytes(ws.at(i));
-			}
+		var.v_at(index) = newval;
+	};
 
-			var = multistr_c(init_list);
-		};
+	cvars[name]->ws_ignore = true; // predefined multistr_c's are broken :)
 }
 
 void cvar_wrap_int(const string& name, int& var, const bool& ronly)

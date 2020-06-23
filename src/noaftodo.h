@@ -29,17 +29,54 @@ constexpr char LP_ERROR = '!';
 // "multistr" class
 class multistr_c
 {
-	std::vector<std::string> vals;
-	int offset = 0;
-	int const_offset = 0;
-public:
-	multistr_c(const std::vector<std::string>& init_list);
+	/*
+	 * data:
+	 * 	a b c d
+	 * 	e f g h
+	 * 	i j
+	 * 	k
+	 * 	l
+	 *
+	 * shifts:
+	 * 	3 1 0 1
+	 *
+	 * offset = 1:
+	 * 	1 1 1 1
+	 *
+	 * resulting shifts:
+	 * 	4 2 1 2 <=> 4 2 1 0 as the last set consists of only two charaters
+	 *
+	 * return value:
+	 * 	l j g d
+	 */
 
-	std::string get(const int& position = -1);
-	std::string full_str();
+	std::vector<std::vector<wchar_t>> 	data;
+	std::vector<int>		shifts;
+
+	int offset;
+
+	void init(const std::wstring& istr, int len);
+public:
+	multistr_c(const std::string& str, const int& len = -1);
+	multistr_c(const std::wstring& str, const int& len = -1);
+
+	void drop();	// shifts = 0
+	void reset();	// shifts = 0 & offset = 0
+
+	int pos(const int& i);
+
+	wchar_t at(const int& i);
+	wchar_t get(const int& i = 0); // default argument = 0 for old char variables
+	std::string s_get(const int& i = 0);
+	std::vector<wchar_t>& v_at(const int& i);
+	std::wstring str();
+
 	void shift(const int& steps = 1);
-	void shift_const(const int& steps = 1);
-	void reset();
+	void shift_at(const int& index, const int& steps = 1);
+
+	int length();
+
+	void append(const std::vector<wchar_t>& app);
 };
 
 // special characters

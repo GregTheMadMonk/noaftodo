@@ -228,45 +228,87 @@ string replace_special(string str)
 }
 
 // multistr_c functions
-multistr_c::multistr_c(const vector<string>& init_list)
+multistr_c::multistr_c(const string& str, const int& len)
 {
-	this->vals = init_list;
+	wstring wstr = w_converter.from_bytes(str);
+	this->init(wstr, len);
 }
 
-string multistr_c::get(const int& position)
+multistr_c::multistr_c(const wstring& str, const int& len)
 {
-	if (position == -1)
-	{
-		const string retval = this->vals.at((this->offset + this->const_offset) % this->vals.size());
-
-		this->shift();
-
-		return retval;
-	} else return this->vals.at(position % this->vals.size());
+	this->init(str, len);
 }
 
-string multistr_c::full_str()
+void multistr_c::init(const wstring& istr, int len)
 {
-	string ret = "";
+	if (len == -1) len = istr.length();
+			
+	this->data = vector<vector<wchar_t>>(len, vector<wchar_t>());
+	this->shifts = vector<int>(len, 0);
 
-	for (auto s : this->vals) ret += s;
-
-	return ret;
+	for (int i = 0; i < istr.length(); i++)
+		this->data.at(i % len).push_back(istr.at(i));
 }
 
-void multistr_c::shift(const int& steps)
+void multistr_c::drop()
 {
-	this->offset += steps;
-	if (this->offset >= this->vals.size()) this->offset %= this->vals.size();
-}
-
-void multistr_c::shift_const(const int& steps)
-{
-	this->const_offset += steps;
-	if (this->const_offset >= this->vals.size()) this->const_offset %= this->vals.size();
+	for (int& s : this->shifts) s = 0;
 }
 
 void multistr_c::reset()
 {
+	this->drop();
 	this->offset = 0;
+}
+
+int multistr_c::pos(const int& i)
+{
+	return (this->offset + this->shifts.at(i)) % this->data.at(i).size();
+}
+
+wchar_t multistr_c::at(const int& i)
+{
+	return this->data.at(i).at(this->pos(i));
+}
+
+wchar_t multistr_c::get(const int& i)
+{
+	wchar_t ret = this->at(i);
+	this->shift_at(i);
+
+	return ret;
+}
+
+string multistr_c::s_get(const int& i)
+{
+	return w_converter.to_bytes(this->get(i));
+}
+
+vector<wchar_t>& multistr_c::v_at(const int& i)
+{
+	return this->data.at(i);
+}
+
+wstring multistr_c::str()
+{
+	wstring ret = L"";
+
+	for (int i = 0; i < this->length(); i++) ret += this->at(i);
+
+	return ret;
+}
+
+void multistr_c::shift(const int& steps) { this->offset += steps; }
+
+void multistr_c::shift_at(const int& index, const int& steps)
+{
+	this->shifts.at(index) = (this->shifts.at(index) + steps) % this->data.at(index).size();
+}
+
+int multistr_c::length() { return this->data.size(); }
+
+void multistr_c::append(const vector<wchar_t>& app)
+{
+	this->data.push_back(app);
+	this->shifts.push_back(0);
 }

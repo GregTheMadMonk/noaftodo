@@ -25,6 +25,7 @@ Run `make` (`gmake` on Solaris 11).
 Build flags:
 * `NO_MQUEUE=1` - compile with a primitive replacement to message queues from **mqueue.h**, in case you don't have one on your system, or don't want to use it
 * `NO_ROOT_CHECK=1` - disable checking EUID for root privileges (same effect as `set allow_root true` in config, but just removes the feature from the program)
+* `DEBUG=1` - just tuns on `-g3` flag
 #### Dependencies
 **ncurses**. You need it (on an Arch-based system: `sudo pacman -S ncurses`, on a Debian-based system: `sudo apt install libncurses5-dev`).
 

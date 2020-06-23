@@ -101,17 +101,22 @@ extern std::string cui_normal_status_fields;
 extern std::string cui_listview_status_fields;
 
 // characters
-extern multistr_c cui_row_separator;
+extern multistr_c cui_separators;
+extern multistr_c cui_box_strong;
+extern multistr_c cui_box_light;
+
 extern int cui_row_separator_offset;
-extern multistr_c cui_status_separator;
-extern multistr_c cui_details_separator;
-extern multistr_c cui_v_line_strong;
-extern multistr_c cui_h_line_strong;
-extern multistr_c cui_h_line_light;
-extern multistr_c cui_1_corner;
-extern multistr_c cui_2_corner;
-extern multistr_c cui_3_corner;
-extern multistr_c cui_4_corner;
+
+constexpr int CHAR_ROW_SEP = 0;
+constexpr int CHAR_STA_SEP = 1;
+constexpr int CHAR_DET_SEP = 2;
+
+constexpr int CHAR_VLINE = 0;
+constexpr int CHAR_HLINE = 1;
+constexpr int CHAR_CORN1 = 2;
+constexpr int CHAR_CORN2 = 3;
+constexpr int CHAR_CORN3 = 4;
+constexpr int CHAR_CORN4 = 5;
 
 // mode columns
 extern std::string cui_normal_all_cols;
