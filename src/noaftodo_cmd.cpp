@@ -271,39 +271,6 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "vtoggle uncat|complete|coming|failed|nodue" - toggle filters.
-	cmds["vtoggle"] = [] (const vector<string>& args)
-	{
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-		if (args.at(0) == "uncat") 	cui_normal_filter ^= CUI_FILTER_UNCAT;
-		if (args.at(0) == "complete") 	cui_normal_filter ^= CUI_FILTER_COMPLETE;
-		if (args.at(0) == "coming") 	cui_normal_filter ^= CUI_FILTER_COMING;
-		if (args.at(0) == "failed") 	cui_normal_filter ^= CUI_FILTER_FAILED;
-		if (args.at(0) == "nodue")	cui_normal_filter ^= CUI_FILTER_NODUE;
-
-		return 0;
-	};
-
-	// command "g <id>" - go to task with ID <id>.
-	cmds["g"] = [] (const vector<string>& args)
-	{
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-		try {
-			const int target = stoi(args.at(0));
-
-			if ((target >= 0) && (target < t_list.size()))
-				cui_s_line = target;
-			else return CMD_ERR_EXTERNAL;
-
-			return 0;
-		} catch (const invalid_argument& e) {
-			return CMD_ERR_ARG_TYPE;
-		}
-	};
-
-
 	// command "lrename[ <new_name>]" - rename list. If <new_name> is not specified or is the same as list id, list name is reset.
 	cmds["lrename"] = [] (const vector<string>& args)
 	{

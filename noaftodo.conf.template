@@ -57,6 +57,7 @@ bind "/" "set list_regex_filter " 16 false
 bind "e" "a \%due\% \"\%T\%\" \"\%D\%\" \%id\%; setmeta \%meta\%" 1 false
 
 # aliases
+# task operations
 alias duplicate a \%due\% \%T\% \%D\%
 # Aaand this is the place where you will ask me: "Hey, Greg, why do you do this,
 # why do you create an alias to reference from another alias instead of writing it 
