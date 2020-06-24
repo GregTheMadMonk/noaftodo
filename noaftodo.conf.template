@@ -32,10 +32,10 @@ bind "enter" "set tag_filter_copy; back" 16 true
 bind "L" "listview" 1 true
 bind ":" ":" 29 true
 bind "tab" "next" 1 true
-bind "up" "up" 9 true
-bind "k" "up" 9 true
-bind "down" "down" 9 true
-bind "j" "down" 9 true
+bind "up" "math id \%id\% - 1" 9 true
+bind "k" "math id \%id\% - 1" 9 true
+bind "down" "math id \%id\% + 1" 9 true
+bind "j" "math id \%id\% + 1" 9 true
 bind "up" "prev" 16 true
 bind "k" "prev" 16 true
 bind "down" "next" 16 true

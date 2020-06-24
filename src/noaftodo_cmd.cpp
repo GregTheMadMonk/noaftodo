@@ -91,42 +91,6 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "down" - navigate down the list.
-	cmds["down"] = [] (const vector<string>& args)
-	{
-		bool has_visible = false;
-		for (int i = 0; i < t_list.size(); i++) has_visible |= cui_is_visible(i);
-
-		if (!has_visible) return CMD_ERR_EXTERNAL;
-
-		if (cui_s_line < t_list.size() - 1) cui_s_line++;
-		else cui_s_line = 0;
-
-		if (!cui_is_visible(cui_s_line)) cmd_exec("down");
-
-		cui_delta = 0;
-
-		return 0;
-	};
-
-	// command "up" - navigate up the list.
-	cmds["up"] = [] (const vector<string>& args)
-	{
-		bool has_visible = false;
-		for (int i = 0; i < t_list.size(); i++) has_visible |= cui_is_visible(i);
-
-		if (!has_visible) return CMD_ERR_EXTERNAL;
-
-		if (cui_s_line > 0) cui_s_line--;
-		else cui_s_line = t_list.size() - 1;
-
-		if (!cui_is_visible(cui_s_line)) cmd_exec("up");
-
-		cui_delta = 0;
-
-		return 0;
-	};
-	
 	// command "next" - go to the next list
 	cmds["next"] = [] (const vector<string>& args)
 	{
@@ -334,6 +298,37 @@ void cmd_init()
 		return removed ? 0 : CMD_ERR_EXTERNAL;
 	};
 
+	// command "math <name> <num1> <op> <num2>" - calculate math expression (+,-,/,*) and write to cvar <name>
+	cmds["math"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 4) return CMD_ERR_ARG_COUNT;
+
+		try
+		{
+			const double a = stod(args.at(1));
+			const double b = stod(args.at(3));
+
+			switch (args.at(2).at(0))
+			{
+				case '+':
+					cvar(args.at(0)).setter(to_string(a + b));
+					break;
+				case '-':
+					cvar(args.at(0)).setter(to_string(a - b));
+					break;
+				case '*':
+					cvar(args.at(0)).setter(to_string(a * b));
+					break;
+				case '/':
+					if (b == 0) return CMD_ERR_ARG_TYPE;
+					cvar(args.at(0)).setter(to_string(a / b));
+					break;
+			}
+		} catch (const invalid_argument& e) { return CMD_ERR_ARG_TYPE; }
+
+		return 0;
+	};
+
 	// command "set <name>[ <value>]" - set cvar value. If <value> is not specified, reset cvar to default value.
 	cmds["set"] = [] (const vector<string>& args)
 	{
@@ -473,8 +468,20 @@ void cmd_init()
 		{
 			const int target = stoi(val);
 
+			const int dir = (target - cui_s_line >= 0) ? 1 : -1;
+
 			if ((target >= 0) && (target < t_list.size()))
 				cui_s_line = target;
+			else if (target < 0) cui_s_line = t_list.size() - 1;
+			else cui_s_line = 0;
+
+			if (cui_active)	while (!cui_is_visible(cui_s_line)) 
+			{
+				cui_s_line += dir;
+
+				if (cui_s_line < 0) cui_s_line = t_list.size() - 1;
+				else if (cui_s_line >= t_list.size()) cui_s_line = 0;
+			}
 		} catch (const invalid_argument& e) {}
 	};
 	cvars["id"]->predefine("0");

@@ -756,7 +756,7 @@ void cui_normal_paint()
 
 	if (v_list.size() != 0) 
 	{
-		while (!cui_is_visible(cui_s_line)) cmd_exec("down");
+		while (!cui_is_visible(cui_s_line)) cmd_exec("math id %id% + 1");
 		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == cui_s_line) cui_v_line = i;
 	}
 
