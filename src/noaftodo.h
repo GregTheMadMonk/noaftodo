@@ -13,7 +13,7 @@ constexpr char TITLE[] = "NOAFtodo";
 
 constexpr int LIST_V = 1;
 constexpr int CONF_V = 3;
-constexpr int MINOR_V = 5;
+constexpr int MINOR_V = 6;
 #define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(MINOR_V)
 
 // program modes
