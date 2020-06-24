@@ -123,7 +123,10 @@ bool noaftodo_entry::is_uncat()
 
 void li_load(const bool& load_workspace)
 {
+	log("=====================================================");
 	log("Loading list file " + li_filename);
+	log("=====================================================");
+
 	bool safemode = true;
 
 	if (load_workspace) // clear cvars
@@ -132,13 +135,17 @@ void li_load(const bool& load_workspace)
 			auto it = cvars.begin();
 			for (int i = 0; i < offset; i++) it++;
 
-			if (cvar(it->first).ws_ignore) continue;
+			if (cvar(it->first).flags & CVAR_FLAG_WS_IGNORE) continue;
+
+			log("Resetting cvar " + it->first + " from value " + cvar(it->first).getter());
 
 			if (cvar(it->first).predef_val == "")
 			{
 				cvar_erase(it->first);
 				if (cvar_is_deletable(it->first)) offset--;
 			} else cvar(it->first).reset();
+
+			log("to value " + cvar(it->first).getter());
 		}
 
 	auto t_list_copy = t_list;
@@ -357,8 +364,11 @@ void li_save()
 	for (auto cvar_i = cvars.begin(); cvar_i != cvars.end(); cvar_i++)
 	{
 		const string key = cvar_i->first;
-		if (cvar(key).changed() && !cvar(key).ws_ignore)
+		if (cvar(key).changed() && ((cvar(key).flags & CVAR_FLAG_WS_IGNORE) == 0))
+		{
+			log("Setting workspace var " + key + " (" + to_string(cvar(key).flags) + " | " + to_string(cvar(key).flags & CVAR_FLAG_WS_IGNORE) + ")");
 			ofile << "set \"" << key << "\" \"" << cvar(key).getter() << "\"" << endl;
+		}
 	}
 
 	ofile << endl << "[ver]" << endl << LIST_V << endl;

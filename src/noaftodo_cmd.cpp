@@ -91,28 +91,6 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "list[ <list_id>]" - navigate to list. If <list_id> is "all" or unspecified, view tasks from all lists.
-	cmds["list"] = [] (const vector<string>& args)
-	{
-		if (args.size() == 0) 
-		{ 
-			cui_tag_filter = CUI_TAG_ALL;
-			return 0;
-		}
-		
-		if (args.at(0) == "all") cui_tag_filter = CUI_TAG_ALL;
-		else try {
-			const int new_filter = stoi(args.at(0));
-
-			if (new_filter == cui_tag_filter) cui_tag_filter = CUI_TAG_ALL;
-			else cui_tag_filter = new_filter;
-		} catch (const invalid_argument& e) {
-			return CMD_ERR_ARG_TYPE;
-		}
-
-		return 0;
-	};
-
 	// command "down" - navigate down the list.
 	cmds["down"] = [] (const vector<string>& args)
 	{
@@ -451,6 +429,25 @@ void cmd_init()
 	cvar_wrap_int("halfdelay_time", cui_halfdelay_time);
 
 	cvar_wrap_int("tag_filter", cui_tag_filter);
+	cvars["tag_filter"]->setter = [] (const string& val)
+	{
+		try
+		{
+			if (val == "all") 
+			{
+				cui_tag_filter = CUI_TAG_ALL;
+				return;
+			}
+
+			const int new_filter = stoi(val);
+
+			if (new_filter == cui_tag_filter) cui_tag_filter = CUI_TAG_ALL;
+			else cui_tag_filter = new_filter;
+		} catch (const invalid_argument& e) {}
+	};
+	cvars["tag_filter"]->flags |= CVAR_FLAG_NO_PREDEF;
+	cvars["tag_filter"]->predefine("all");
+
 	cvar_wrap_int("filter", cui_normal_filter);
 
 	cvar_wrap_string("regex_filter", cui_normal_regex_filter);
@@ -469,7 +466,7 @@ void cmd_init()
 	cvar_wrap_int("colors.entry_coming", cui_color_coming);
 	cvar_wrap_int("colors.entry_failed", cui_color_failed);
 
-	cvar_wrap_int("id", cui_s_line);
+	cvar_wrap_int("id", cui_s_line, CVAR_FLAG_NO_PREDEF);
 	cvars["id"]->setter = [] (const string& val)
 	{
 		try
@@ -480,6 +477,7 @@ void cmd_init()
 				cui_s_line = target;
 		} catch (const invalid_argument& e) {}
 	};
+	cvars["id"]->predefine("0");
 
 	cvars["last_visible_id"] = make_unique<cvar_base_s>();
 	cvars["last_visible_id"]->getter = [] () 
@@ -490,6 +488,7 @@ void cmd_init()
 
 		return to_string(ret);
 	};
+	cvars["last_visible_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
 	cvars["first_visible_id"] = make_unique<cvar_base_s>();
 	cvars["first_visible_id"]->getter = [] () 
@@ -499,6 +498,7 @@ void cmd_init()
 
 		return string("-1");
 	};
+	cvars["first_visible_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
 	cvars["last_visible_list"] = make_unique<cvar_base_s>();
 	cvars["last_visible_list"]->getter = [] () 
@@ -509,6 +509,7 @@ void cmd_init()
 
 		return to_string(ret);
 	};
+	cvars["last_visible_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
 	cvars["first_visible_list"] = make_unique<cvar_base_s>();
 	cvars["first_visible_list"]->getter = [] () 
@@ -518,9 +519,11 @@ void cmd_init()
 
 		return string("-1");
 	};
+	cvars["first_visible_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
 	cvars["VER"] = make_unique<cvar_base_s>();
 	cvars["VER"]->getter = [] () { return VERSION; };
+	cvars["VER"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
 	cvar_wrap_string("all_cols", cui_normal_all_cols);
 	cvar_wrap_string("cols", cui_normal_cols);
@@ -548,16 +551,11 @@ void cmd_init()
 
 	cvar_wrap_maskflag("lview_show_empty", cui_listview_filter, CUI_FILTER_EMPTY);
 
-	cvar_wrap_maskflag("show_uncat", cui_normal_filter, CUI_FILTER_UNCAT);
-	cvar("show_uncat").ws_ignore = true;
-	cvar_wrap_maskflag("show_complete", cui_normal_filter, CUI_FILTER_COMPLETE);
-	cvar("show_complete").ws_ignore = true;
-	cvar_wrap_maskflag("show_coming", cui_normal_filter, CUI_FILTER_COMING);
-	cvar("show_coming").ws_ignore = true;
-	cvar_wrap_maskflag("show_failed", cui_normal_filter, CUI_FILTER_FAILED);
-	cvar("show_failed").ws_ignore = true;
-	cvar_wrap_maskflag("show_nodue", cui_normal_filter, CUI_FILTER_NODUE);
-	cvar("show_nodue").ws_ignore = true;
+	cvar_wrap_maskflag("show_uncat", cui_normal_filter, CUI_FILTER_UNCAT, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("show_complete", cui_normal_filter, CUI_FILTER_COMPLETE, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("show_coming", cui_normal_filter, CUI_FILTER_COMING, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("show_failed", cui_normal_filter, CUI_FILTER_FAILED, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("show_nodue", cui_normal_filter, CUI_FILTER_NODUE, CVAR_FLAG_WS_IGNORE);
 
 	cvar_wrap_bool("allow_root", allow_root);
 	cvar_wrap_bool("daemon.fork_autostart", da_fork_autostart);

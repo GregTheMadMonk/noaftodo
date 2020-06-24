@@ -41,7 +41,7 @@ bind "k" "prev" 16 true
 bind "down" "next" 16 true
 bind "j" "next" 16 true
 bind "G" "set id \%last_visible_id\%" 1 true
-bind "G" "list \%last_visible_list\%" 16 true
+bind "G" "set tag_filter \%last_visible_list\%" 16 true
 bind "a" "a a" 1 false
 bind "A" "a " 1 false
 bind " " "c" 1 true

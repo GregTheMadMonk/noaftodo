@@ -702,8 +702,11 @@ void cui_listview_input(const wchar_t& key)
 				cui_numbuffer = cvar("first_visible_list");
 				cui_status = 'g';
 			} else {
-				cmd_exec("list " + to_string(cui_numbuffer));
-				cui_numbuffer = -1;
+				if (cui_numbuffer >= -1)
+				{
+					cui_tag_filter = cui_numbuffer;
+					cui_numbuffer = -1;
+				}
 			}
 			break;
 		default:
@@ -853,8 +856,11 @@ void cui_normal_input(const wchar_t& key)
 				cui_numbuffer = cvar("first_visible_id");
 				cui_status = 'g';
 			} else {
-				cmd_exec("g " + to_string(cui_numbuffer));
-				cui_numbuffer = -1;
+				if ((cui_numbuffer >= 0) && (cui_numbuffer < t_list.size()))
+				{
+					cui_s_line = cui_numbuffer;
+					cui_numbuffer = -1;
+				}
 			}
 			break;
 		case 'l':
@@ -863,8 +869,8 @@ void cui_normal_input(const wchar_t& key)
 				cui_numbuffer = -2;
 				cui_status = 'l';
 			} else {
-				if (cui_numbuffer == -2) cmd_exec("list all");
-				else cmd_exec("list " + to_string(cui_numbuffer));
+				if (cui_numbuffer == -2) cui_tag_filter = CUI_TAG_ALL;
+				else cui_tag_filter = cui_numbuffer;
 				cui_numbuffer = -1;
 			}
 			break;

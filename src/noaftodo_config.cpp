@@ -100,5 +100,6 @@ void conf_load(const string& conf_file, const bool& predefine_cvars)
 	if (!predefine_cvars) return;
 
 	for (auto it = cvars.begin(); it != cvars.end(); it++)
-		cvar(it->first).predefine();
+		if ((cvar(it->first).flags & CVAR_FLAG_NO_PREDEF) == 0)
+			cvar(it->first).predefine();
 }

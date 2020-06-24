@@ -8,9 +8,13 @@
 
 #include "noaftodo.h"
 
+constexpr int CVAR_FLAG_RO = 0b1;
+constexpr int CVAR_FLAG_WS_IGNORE = 0b10;
+constexpr int CVAR_FLAG_NO_PREDEF = 0b100;
+
 struct cvar_base_s	// a base structure for cvars
 {
-	bool ws_ignore = false;
+	int flags = 0;
 
 	virtual ~cvar_base_s() = default;
 
@@ -31,8 +35,8 @@ struct cvar_base_s	// a base structure for cvars
 	bool operator!=(const int& rval);
 	bool operator!=(const cvar_base_s& rval);
 
-	void reset();		// set value = predefined value
-	void predefine();	// set predefined value = value
+	void reset();					// set value = predefined value
+	void predefine(const std::string& val = "");	// set predefined value = value
 
 	bool changed();
 
@@ -55,11 +59,11 @@ void cvar_erase(const std::string& name);
 
 bool cvar_is_deletable(const std::string& name);
 
-void cvar_wrap_string(const std::string& name, std::string& var, const bool& ronly = false);
-void cvar_wrap_multistr(const std::string& name, multistr_c& var, const int& length = 1, const bool& ronly = false);
-void cvar_wrap_multistr_element(const std::string& name, multistr_c& var, const int& index, const bool& ronly = false);
-void cvar_wrap_int(const std::string& name, int& var, const bool& ronly = false);
-void cvar_wrap_bool(const std::string& name, bool& var, const bool& ronly = false);
-void cvar_wrap_maskflag(const std::string& name, int& mask, const int& flag, const bool& ronly = false);
+void cvar_wrap_string(const std::string& name, std::string& var, const int& flags = 0);
+void cvar_wrap_multistr(const std::string& name, multistr_c& var, const int& length = 1, const int& flags = 0);
+void cvar_wrap_multistr_element(const std::string& name, multistr_c& var, const int& index, const int& flags = 0);
+void cvar_wrap_int(const std::string& name, int& var, const int& flags = 0);
+void cvar_wrap_bool(const std::string& name, bool& var, const int& flags = 0);
+void cvar_wrap_maskflag(const std::string& name, int& mask, const int& flag, const int& flags = 0);
 
 #endif
