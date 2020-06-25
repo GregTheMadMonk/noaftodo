@@ -888,20 +888,24 @@ void cui_details_paint()
 	addstr(cui_box_strong.s_get(CHAR_CORN2).c_str());
 	move(cui_h - 3, cui_w - 4);
 	addstr(cui_box_strong.s_get(CHAR_CORN4).c_str());
+	cui_box_strong.drop();
 
 	for (int i = 3; i <= cui_h - 4; i++) 
 	{ 
 		move(i, 3); 
 		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
+		cui_box_strong.drop();
 
 		move(i, cui_w - 4);
 		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
+		cui_box_strong.drop();
 	}
 
 	for (int j = 4; j < cui_w - 4; j++)
 	{
 		move(2, j);
 		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
+		cui_box_strong.drop();
 
 		for (int i = 3; i < cui_h - 3; i++)
 		{
@@ -911,6 +915,7 @@ void cui_details_paint()
 
 		move(cui_h - 3, j);
 		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
+		cui_box_strong.drop();
 	}
 
 	// fill the box with details
@@ -923,6 +928,7 @@ void cui_details_paint()
 	{
 		move(6, i);
 		addstr(cui_box_light.s_get(CHAR_HLINE).c_str());
+		cui_box_light.drop();
 	}
 
 	move(7, 5);
@@ -949,6 +955,7 @@ void cui_details_paint()
 	{
 		move(8, i);
 		addstr(cui_box_light.s_get(CHAR_HLINE).c_str());
+		cui_box_light.drop();
 	}
 
 	// draw description
@@ -1134,20 +1141,24 @@ void cui_help_paint()
 	addstr(cui_box_strong.s_get(CHAR_CORN2).c_str());
 	move(cui_h - 3, cui_w - 4);
 	addstr(cui_box_strong.s_get(CHAR_CORN4).c_str());
+	cui_box_strong.drop();
 
 	for (int i = 3; i <= cui_h - 4; i++) 
 	{ 
 		move(i, 3); 
 		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
+		cui_box_strong.drop();
 
 		move(i, cui_w - 4);
 		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
+		cui_box_strong.drop();
 	}
 
 	for (int j = 4; j < cui_w - 4; j++)
 	{
 		move(2, j);
 		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
+		cui_box_strong.drop();
 
 		for (int i = 3; i < cui_h - 3; i++)
 		{
@@ -1157,6 +1168,7 @@ void cui_help_paint()
 
 		move(cui_h - 3, j);
 		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
+		cui_box_strong.drop();
 	}
 
 	// fill the box
@@ -1167,6 +1179,7 @@ void cui_help_paint()
 	{
 		move(6, i);
 		addstr(cui_box_light.s_get(CHAR_HLINE).c_str());
+		cui_box_light.drop();
 	}
 
 	// draw description
