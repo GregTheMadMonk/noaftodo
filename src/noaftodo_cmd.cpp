@@ -298,32 +298,37 @@ void cmd_init()
 		return removed ? 0 : CMD_ERR_EXTERNAL;
 	};
 
-	// command "math <name> <num1> <op> <num2>" - calculate math expression (+,-,/,*) and write to cvar <name>
+	// command "math <num1> <op> <num2> <name>" - calculate math expression (+,-,/,*) and write to cvar <name>. If <name> is not specifed, just print the result out
 	cmds["math"] = [] (const vector<string>& args)
 	{
-		if (args.size() < 4) return CMD_ERR_ARG_COUNT;
+		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
 
 		try
 		{
-			const double a = stod(args.at(1));
-			const double b = stod(args.at(3));
+			const double a = stod(args.at(0));
+			const double b = stod(args.at(2));
 
-			switch (args.at(2).at(0))
+			double result = 0;
+
+			switch (args.at(1).at(0))
 			{
 				case '+':
-					cvar(args.at(0)).setter(to_string(a + b));
+					result = a + b;
 					break;
 				case '-':
-					cvar(args.at(0)).setter(to_string(a - b));
+					result = a - b;
 					break;
 				case '*':
-					cvar(args.at(0)).setter(to_string(a * b));
+					result = a * b;
 					break;
 				case '/':
 					if (b == 0) return CMD_ERR_ARG_TYPE;
-					cvar(args.at(0)).setter(to_string(a / b));
+					result = a / b;
 					break;
 			}
+
+			if (args.size() < 4) cui_status = to_string(result);
+			else cvar(args.at(3)).setter(to_string(result));
 		} catch (const invalid_argument& e) { return CMD_ERR_ARG_TYPE; }
 
 		return 0;
