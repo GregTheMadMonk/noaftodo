@@ -290,19 +290,18 @@ void li_load(const bool& load_workspace)
 	}
 
 	if (safemode)
+	{
+		errors |= ERR_LIST_V;
+
 		if (run_mode == PM_DAEMON) 
 		{
 			t_list = t_list_copy;
 			t_tags = t_tags_copy;
-		} else {
-			log("Errors encountered during list load. Starting in safe mode. "
-					"The possible cause of it may be list version mismatch. "
-					"Solution: back up your list, start NOAFtodo and execute :save. "
-					"Then restart the program and hope for the best.", LP_ERROR);
-			sleep(1);
-		}
+		} else log("List version mismatch. "
+			"Consult \"Troubleshooting\" section of help (\"noaftodo -h\"). ", LP_ERROR);
+	}
 
-	li_autosave = (!safemode) && (run_mode != PM_DAEMON); // don't allow daemon to save stuff
+	li_autosave = (errors == 0) && (!safemode) && (run_mode != PM_DAEMON); // don't allow daemon to save stuff
 
 	li_upd_stat();
 

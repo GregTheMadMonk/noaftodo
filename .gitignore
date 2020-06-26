@@ -2,3 +2,4 @@ noaftodo
 *.html
 obj/*
 doc/*
+!doc/troubleshooting.doc

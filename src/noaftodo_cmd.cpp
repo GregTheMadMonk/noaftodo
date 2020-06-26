@@ -442,22 +442,10 @@ void cmd_init()
 
 		if (args.at(0) != to_string(CONF_V))
 		{
-			log("File you are trying to load is declared to be for an outdated version of NOAFtodo (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + ") and might not work as expected. Fix it and restart " + TITLE + ". Config file: " + conf_filename + ", list file: " + li_filename + ". Exiting program now.", LP_ERROR);
-
-			switch (run_mode)
-			{
-				case PM_DEFAULT:
-					if (cui_active) cui_set_mode(CUI_MODE_EXIT);
-					else exit(1);
-					break;
-				case PM_DAEMON:
-					if (da_running) da_kill();
-					else exit(1);
-					break;
-				default:
-					exit(1);
-					break;
-			}
+			log("Config version mismatch (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + "). "
+				"Consult \"Troubleshooting\" section of help (\"noaftodo -h\").", LP_ERROR);
+			errors |= ERR_CONF_V;
+			li_autosave = false;
 		}
 
 		return 0;
@@ -466,8 +454,14 @@ void cmd_init()
 	// command "save[ <filename>]" - force the list save. If <filename> is not specified, override opened file.
 	cmds["save"] = [] (const vector<string>& args)
 	{
-		if (args.size() < 1)	li_save();
-		else 			li_save(args.at(0));
+		if (args.size() < 1)
+		{
+			if (errors == 0) li_save();
+			else {
+				log("Program is in safe mode due to errors. If you are sure, specify list filename manually.", LP_ERROR);
+				return CMD_ERR_EXTERNAL;
+			}
+		} else 			li_save(args.at(0));
 		return 0;
 	};
 

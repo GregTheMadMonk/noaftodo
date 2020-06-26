@@ -26,6 +26,10 @@ constexpr char LP_DEFAULT = 'i';
 constexpr char LP_IMPORTANT = 'I';
 constexpr char LP_ERROR = '!';
 
+// runtime errors
+constexpr int ERR_CONF_V = 0b1;
+constexpr int ERR_LIST_V = 0b10;
+
 // "multistr" class
 class multistr_c
 {
@@ -93,6 +97,9 @@ extern std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> w_converter;
 // program mode
 extern int run_mode;
 
+// error flag mask
+extern int errors;
+
 // params
 extern bool allow_root;
 
@@ -102,7 +109,7 @@ extern bool verbose;
 
 void print_help();
 
-void log(const std::string& message, const char& prefix = LP_DEFAULT);
+void log(const std::string& message, const char& prefix = LP_DEFAULT, const int& sleep_sec = 0);
 
 std::string format_str(std::string str, const noaftodo_entry& li_entry, const bool& renotify = false);
 
