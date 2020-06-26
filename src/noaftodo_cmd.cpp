@@ -178,17 +178,6 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "clrmeta" - erase task metadata.
-	cmds["clrmeta"] = [] (const vector<string>& args)
-	{
-		if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return CMD_ERR_EXTERNAL;
-
-		for (auto it = t_list[cui_s_line].meta.begin(); it != t_list[cui_s_line].meta.end(); it = t_list[cui_s_line].meta.begin())
-			t_list[cui_s_line].meta.erase(it->first);
-
-		return 0;
-	};
-
 	// command "lrename[ <new_name>]" - rename list. If <new_name> is not specified or is the same as list id, list name is reset.
 	cmds["lrename"] = [] (const vector<string>& args)
 	{
