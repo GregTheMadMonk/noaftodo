@@ -469,6 +469,10 @@ void cmd_init()
 	cvar_wrap_int("id", cui_s_line, CVAR_FLAG_NO_PREDEF);
 	cvars["id"]->setter = [] (const string& val)
 	{
+		bool is_visible = false;
+		for (int i = 0; i < t_list.size(); i++) is_visible |= cui_is_visible(i);
+		if (!is_visible) return; // don't try to set the ID when there's nothing on the screen
+
 		try
 		{
 			const int target = stoi(val);
