@@ -181,21 +181,21 @@ void cmd_init()
 		}
 	};
 
-	// command "setmeta <name>[ <value>]" - set task meta property. If <value> is not specified, property with name <name> is reset.
+	// command "setmeta[ <name1> <value1>[ <name2> <value2>[ ...]]]" - set task meta. If no arguments are specified, clear task meta. To add properties to meta, use "setmeta %meta% <name1> <value1>...". "setmeta <name>" will erase only <name> meta property
 	cmds["setmeta"] = [] (const vector<string>& args)
 	{
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
 		if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return CMD_ERR_EXTERNAL;
 
-		if (args.size() < 2)
-			t_list[cui_s_line].meta.erase(args.at(0));
-		else 
+		if (args.size() == 1)
 		{
-			if (args.size() % 2 == 1) return CMD_ERR_ARG_COUNT;
-			for (int i = 0; i < args.size(); i += 2)
-				t_list[cui_s_line].meta[args.at(i)] = args.at(i + 1);
+			t_list[cui_s_line].meta.erase(args.at(0));
+			return 0;
 		}
+
+		t_list[cui_s_line].meta.clear();
+
+		for (int i = 0; i + 1 < args.size(); i += 2)
+			t_list[cui_s_line].meta[args.at(i)] = args.at(i + 1);
 
 		if (li_autosave) li_save();
 
