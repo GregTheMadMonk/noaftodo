@@ -453,6 +453,15 @@ void cui_run()
 				break;
 		}
 
+		if (errors != 0) 
+		{
+			attrset(A_NORMAL);
+			int old_cx, old_cy;
+			getyx(stdscr, old_cy, old_cx);
+			cui_safemode_box();
+			move(old_cy, old_cx);
+		}
+
 		if (cui_mode == CUI_MODE_EXIT) break;
 	}
 
@@ -1250,6 +1259,65 @@ void cui_help_input(const wchar_t& key)
 		case '=':
 			cui_delta = 0;
 			break;
+	}
+}
+
+void cui_safemode_box()
+{
+	cui_box_strong.drop();
+
+	vector<string> mes_lines = { "SAFE MODE", "List won't autosave" };
+
+	if ((errors & ERR_CONF_V) != 0) mes_lines.push_back("Config version mismatch");
+	if ((errors & ERR_LIST_V) != 0) mes_lines.push_back("List version mismatch");
+
+	int maxlen = 0;
+
+	for (auto s : mes_lines) if (maxlen < s.length()) maxlen = s.length();
+
+	int x0 = cui_w - maxlen - 3;
+	int y0 = 2;
+
+	// draw message box
+	move(y0, x0);
+	addstr(cui_box_strong.s_get(CHAR_CORN1).c_str());
+	move(y0, cui_w - 1);
+	addstr(cui_box_strong.s_get(CHAR_CORN2).c_str());
+	move(y0 + 1 + mes_lines.size(), x0);
+	addstr(cui_box_strong.s_get(CHAR_CORN3).c_str());
+	move(y0 + 1 + mes_lines.size(), cui_w - 1);
+	addstr(cui_box_strong.s_get(CHAR_CORN4).c_str());
+	cui_box_strong.drop();
+
+	for (int i = x0 + 1; i < cui_w - 1; i++)
+	{
+		move(y0, i);
+		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
+		cui_box_strong.drop();
+
+		for (int j = 0; j < mes_lines.size(); j++)
+		{
+			move(y0 + 1 + j, i);
+			addch(' ');
+		}
+
+		move(y0 + 1 + mes_lines.size(), i);
+		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
+		cui_box_strong.drop();
+	}
+
+	for (int i = 0; i < mes_lines.size(); i++)
+	{
+		move(y0 + 1 + i, x0);
+		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str());
+		cui_box_strong.drop();
+
+		move(y0 + 1 + i, x0 + 1);
+		addstr(mes_lines.at(i).c_str());
+
+		move(y0 + 1 + i, cui_w - 1);
+		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str());
+		cui_box_strong.drop();
 	}
 }
 

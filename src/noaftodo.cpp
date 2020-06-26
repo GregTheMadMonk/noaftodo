@@ -18,6 +18,8 @@ using namespace std;
 
 int run_mode;
 
+int errors = 0;
+
 bool allow_root = false;
 
 bool verbose = false;
@@ -99,7 +101,7 @@ int main(int argc, char* argv[])
 	cmd_init();
 
 	// load the config
-	conf_load();
+	conf_load(true, true);
 
 #ifndef NO_ROOT_CHECK
 	if ((geteuid() == 0) && !allow_root)
@@ -173,7 +175,7 @@ void print_help()
 	for (auto line : lines) cout << line << endl;
 }
 
-void log(const string& message, const char& prefix)
+void log(const string& message, const char& prefix, const int& sleep_sec)
 {	
 	if (!enable_log) return;
 
@@ -184,6 +186,8 @@ void log(const string& message, const char& prefix)
 		if (wcui) cui_destroy();
 
 		cout << "[" << ti_log_time() << "][" << prefix << "] " << message << endl;
+
+		if (sleep_sec != 0) sleep(sleep_sec);
 
 		if (wcui) cui_construct();
 	}

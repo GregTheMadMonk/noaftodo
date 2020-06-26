@@ -1,0 +1,5 @@
+Troubleshooting:
+  Config version mismatch:
+    means that your config is declared for the other vesion of noaftodo. Go through list file and all config files you have included, and replace config version numbers in all "ver " commands (also, you would probably need to update some commands in configs. For this, see program changelogs on Github: https://github.com/GregTheMadMonk/noaftodo).
+  List version mismatch:
+    open NOAFtodo. If list loaded correctly, re-save it to another location with ":save <filename>" (just ":save" won't work in safemode!). <filename> could be the same as the list you have loaded, if you are a brave one. Program will save the list in correct format. If the list wasn't loaded correctly, you will have to modify it manually. Sad(

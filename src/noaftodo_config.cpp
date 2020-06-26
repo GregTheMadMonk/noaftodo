@@ -19,12 +19,12 @@ string conf_filename = "noaftodo.conf";
 extern char _binary_noaftodo_conf_template_start;
 extern char _binary_noaftodo_conf_template_end;
 
-void conf_load(const bool& predefine_cvars)
+void conf_load(const bool& predefine_cvars, const bool& create_template)
 {
-	conf_load(conf_filename, predefine_cvars);
+	conf_load(conf_filename, predefine_cvars, create_template);
 }
 
-void conf_load(const string& conf_file, const bool& predefine_cvars)
+void conf_load(const string& conf_file, const bool& predefine_cvars, const bool& create_template)
 {
 	if (conf_file == "default")
 	{
@@ -57,7 +57,8 @@ void conf_load(const string& conf_file, const bool& predefine_cvars)
 		ifstream iconf(conf_file);
 		if (!iconf.good())
 		{	// create a new config from a template
-			log("Config file does not exist!", LP_ERROR);
+			log("Config file does not exist (" + conf_file + ")!", LP_ERROR);
+			if (!create_template) return;
 			log("Creating a new one from template...");
 
 			ofstream oconf(conf_file);
