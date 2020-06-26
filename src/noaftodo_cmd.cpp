@@ -91,30 +91,6 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "next" - go to the next list
-	cmds["next"] = [] (const vector<string>& args)
-	{
-		cui_tag_filter++;
-
-		if (cui_tag_filter >= t_tags.size()) cui_tag_filter = CUI_TAG_ALL;
-
-		if (!cui_l_is_visible(cui_tag_filter)) cmd_exec("next");
-
-		return 0;
-	};
-
-	// command "prev" - go to the previous list
-	cmds["prev"] = [] (const vector<string>& args)
-	{
-		cui_tag_filter--;
-
-		if (cui_tag_filter < CUI_TAG_ALL) cui_tag_filter = t_tags.size() - 1;
-
-		if (!cui_l_is_visible(cui_tag_filter)) cmd_exec("prev");
-
-		return 0;
-	};
-
 	// command "c" - toggle selected task's "completed" property.
 	cmds["c"] = [] (const vector<string>& args)
 	{
@@ -130,7 +106,7 @@ void cmd_init()
 		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
 
 		li_rem(cui_s_line);
-		if (t_list.size() != 0) if (cui_s_line >= t_list.size()) cmd_exec("up");
+		if (t_list.size() != 0) if (cui_s_line >= t_list.size()) cmd_exec("math %id% - 1 id");
 
 		return 0;
 	};
@@ -447,6 +423,41 @@ void cmd_init()
 	};
 	cvars["tag_filter"]->flags |= CVAR_FLAG_NO_PREDEF;
 	cvars["tag_filter"]->predefine("all");
+
+	cvar_wrap_int("tag_filter_v", cui_tag_filter);
+	cvars["tag_filter_v"]->setter = [] (const string& val)
+	{
+		if (val == "all")
+		{
+			cui_tag_filter = CUI_TAG_ALL;
+			return;
+		}
+
+		try
+		{
+			const int new_filter = stoi(val);
+			const int dir = (new_filter >= cui_tag_filter) ? 1 : -1;
+
+			cui_tag_filter = new_filter;
+
+			while (!cui_l_is_visible(cui_tag_filter))
+			{
+				cui_tag_filter += dir;
+
+				if (cui_tag_filter >= (int)t_tags.size()) // wwithout (int) returns true
+									// with any negative cui_tag_filter
+				{
+					cui_tag_filter = CUI_TAG_ALL;
+					return;
+				}
+
+				if (cui_tag_filter < CUI_TAG_ALL)
+					cui_tag_filter = t_tags.size() - 1;
+			}
+		} catch (const invalid_argument& e) {}
+	};
+	cvars["tag_filter_v"]->flags |= CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvars["tag_filter_v"]->predefine("-1");
 
 	cvar_wrap_int("filter", cui_normal_filter);
 
