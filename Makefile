@@ -73,7 +73,7 @@ doc: doc_dir $(SRC_DIR)/noaftodo_cmd.cpp
 clean:
 	@echo Removing object files...
 	@-rm -rf $(OBJ_DIR)/*.o
-	@-rm -rf $(DOC_DIR)
+	@-rm $(DOC_DIR)/*doc.gen
 	@-rmdir $(OBJ_DIR) # will fail if OBJ_DIR is not empty - as we want!
 	@echo Removing execuatable
 	@-rm $(BINARY)
