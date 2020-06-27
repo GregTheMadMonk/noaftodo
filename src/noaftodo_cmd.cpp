@@ -384,6 +384,25 @@ void cmd_init()
 		return 0;
 	};
 
+	// command "!<command>" - execute shell command
+	cmds["!"] = [] (const vector<string>& args)
+	{
+		string cmdline = "";
+
+		for (const auto& arg : args) cmdline += arg + " ";
+
+		const bool wcui = cui_active;
+
+		if (wcui) cui_destroy();
+
+		log("Executing shell command: '" + cmdline + "'...");
+		system(cmdline.c_str());
+
+		if (wcui) cui_construct();
+
+		return 0;
+	};
+
 	// "fake" cvars
 	cvar_wrap_int("halfdelay_time", cui_halfdelay_time);
 
@@ -579,177 +598,210 @@ void cmd_init()
 	cvar_wrap_string("on_task_removed_action", da_task_removed_action);
 }
 
-int cmd_exec(string command)
+vector<string> cmd_break(const string& cmdline)
 {
-	vector<string> words;
-	string word = "";
+	vector<string> cmdqueue;
+	string temp = "";
+
 	bool inquotes = false;
 	bool skip_special = false;
-	bool shell_cmd = false;
+	for (int i = 0; i < cmdline.length(); i++)
+	{
+		const char c = cmdline.at(i);
 
+		if (skip_special)
+		{
+			temp += c;
+			skip_special = false;
+		} else switch (c) {
+			case '\\':
+				skip_special = true;
+				temp += c;
+				break;
+			case '"':
+				inquotes = !inquotes;
+				temp += c;
+				break;
+			case ';':
+				if (!inquotes)
+				{
+					if (temp != "")
+					{
+						cmdqueue.push_back(temp);
+						temp = "";
+					}
+					break;
+				}
+			default:
+				temp += c;
+				break;
+		}
+	}
+
+	if (inquotes || skip_special) // unterminated command (unterminated quotes or ends with '\')
+	{
+		cmd_buffer = cmdline;
+		return vector<string>();
+	}
+
+	if (temp != "") cmdqueue.push_back(temp);
+
+	return cmdqueue;
+}
+
+void cmd_run(string command)
+{
+	// replace variables
 	if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
 		command = format_str(command, t_list.at(cui_s_line));
 	else
 		command = format_str(command, NULL_ENTRY);
 
-	if (cmd_buffer != "")
+	vector<string> new_commands = cmd_break(command);
+
+	if (new_commands.size() == 0) return; // basiacally, an empty string, or just ';'s
+
+	if (new_commands.size() > 1) // more than one command in a string. Each can contain some more after
+					// variables are replaced with their values
 	{
-		command = cmd_buffer + command;
-		cmd_buffer = "";
+		log("Breaking " + command);
+		for (const auto& cmd : new_commands) cmd_run(cmd);
+		return;
 	}
+
+	log(command + " is elementary. Executing..");
+
+	// at this point, we know for sure that there's only one command in a string
+	// break it into tokens and execute
+	string name = "";	// command name (first word)
+	vector<string> args;	// command arguments
+	string word = "";	// buffer
+
+	bool inquotes = false;
+	bool skip_special = false;
+	bool shellcmd = false;
+
+	auto put = [&name, &args] (const string& val)
+	{
+		if (name == "") name = val;
+		else args.push_back(val);
+	};
+
+	int start = 0;	// to respect tabs and spaces at the line start
 
 	for (int i = 0; i < command.length(); i++)
 	{
 		const char c = command.at(i);
 
-		if (shell_cmd)
+		if ((i == start) && (c == '!'))	// "!" - shell command
 		{
-			if (!skip_special && (c == ';')) 
-			{
-				words.push_back(word);
-				word = "";
-				words.push_back(";");
-				shell_cmd = false;
-			} else {
-				if (skip_special) word += '\\';
-				
-				if (c == '\\') skip_special = true;
-				else { word += c; skip_special = false; }
-			}
-		} else if (skip_special) {
+			put("!");
+
+			shellcmd = true;
+			continue;
+		}
+
+		if (shellcmd) { // everything between "!" and ";" is passed to system() as-it-is
+			word += c;
+		} else if (skip_special) // symbol after '\' is added as-it-is
+		{
 			word += c;
 			skip_special = false;
 		} else switch (c) {
+			case '#': // comment. Stop execution
+				i = command.length();
+				break;
 			case '\\':
 				skip_special = true;
-				break;
-			case ' ': case '\t':
-				if (inquotes) word += c;
-				else 
-					if (word != "")
-					{
-						words.push_back(word);
-						word = "";
-					}
-				break;
-			case ';':
-				if (inquotes) word += c;
-				else
-				{
-					if (word != "")
-					{
-						words.push_back(word);
-						word = "";
-					}
-					words.push_back(";");
-				}
 				break;
 			case '"':
 				inquotes = !inquotes;
 				break;
-			case '!':
-				if (!inquotes) shell_cmd = true;
-				word += c;
-				break;
+			case ' ': case '\t': // token separator
+				if (!inquotes) // in quotes - just a symbol
+				{
+					if (word != "")
+					{
+						put(word);
+						word = "";
+					}
+					
+					if (name == "") start = i + 1; // space/tab at the beginning of a line.
+									// Command starts not earlier than at
+									// next symbol
+					break;
+				}
 			default:
 				word += c;
 		}
 	}
-	if (word != "") words.push_back(word);
 
-	if (inquotes) // line break inside quotes
-	{
-		cmd_buffer = command;
-		return 0;
-	}
+	// if we have reached this far, a command is at least properly terminated
+	cmd_buffer = "";
 
-	int offset = 0;
-	for (int i = 0; i < words.size(); i++)
-	{
-		if (words.at(i) == ";") // command separator
+	if (word != "") put(word);
+
+	if (name == "") return; // null command
+
+	try
+	{	// search for aliases, prioritize
+		string alstr = aliases.at(name);
+
+		// insert veriables
+		if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
+			alstr = format_str(alstr, t_list.at(cui_s_line));
+		else
+			alstr = format_str(alstr, NULL_ENTRY);
+
+		// insert alias arguments. Add unused ones to command line 
+		for (int j = 0; j < args.size(); j++)
 		{
-			offset = i + 1;
+			bool replaced = false;
 
-			for (int k = offset; k < words.size(); k++) // update rest of the commands
+			int index = -1;
+			const string varname = "%arg" + to_string(j + 1) + "%";
+			while ((index = alstr.find(varname)) != string::npos)
 			{
-				if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
-					words.at(k) = format_str(words.at(k), t_list.at(cui_s_line));
-				else
-					words.at(k) = format_str(words.at(k), NULL_ENTRY);
+				alstr.replace(index, varname.length(), args.at(j));
+				replaced = true;
 			}
-		} else if (i == offset) {
-			if (words.at(i).at(0) == '!')
+
+			if (!replaced) alstr += " \"" + replace_special(args.at(j)) + "\"";
+		}
+
+		cmd_run(alstr); // try to run
+	} catch (const out_of_range& e) { // no such alias
+		try
+		{
+			const int ret = (cmds.at(name))(args); // try to run command
+
+			if (ret != 0) switch (ret) // handle error return values
 			{
-				const bool wcui = cui_active;
-
-				if (wcui) cui_destroy();
-
-				string shell_command = words.at(i).substr(1);
-
-				log("Executing shell command: '" + shell_command + "'...");
-
-				system(shell_command.c_str());
-
-				if (wcui) cui_construct();
-			} else {
-				// search command in cmds
-
-				vector<string> cmdarg;
-
-				int j;
-				for (j = 1; i + j < words.size(); j++)
-				{
-					if (words.at(i + j) == ";") break;
-					cmdarg.push_back(words.at(i + j));
-				}
-
-				try {	// search for alias, prioritize
-					string alstr = aliases.at(words.at(i));
-
-					if ((cui_s_line >= 0) && (cui_s_line < t_list.size())) alstr = format_str(alstr, t_list.at(cui_s_line));
-					else alstr = format_str(alstr, NULL_ENTRY);
-
-					for (int j = 0; j < cmdarg.size(); j++)
-					{
-						bool replaced = false;
-
-						int index = -1;
-						const string varname = "%arg" + to_string(j + 1) + "%";
-						while ((index = alstr.find(varname)) != string::npos)
-						{
-							alstr.replace(index, varname.length(), cmdarg.at(j));
-							replaced = true;
-						}
-
-						if (!replaced) alstr += " " + cmdarg.at(j);
-					}
-
-					log("Executing alias " + words.at(i) + " => " + alstr);
-					cmd_exec(alstr);
-				} catch (const out_of_range& e) { // alias not found, try to execute a command
-					try {
-						string l = words.at(i) + " ";
-						for (int k = 0; k < cmdarg.size(); k++) l += "\"" + cmdarg.at(k) + "\" ";
-						log(l);
-
-						const int ret = (cmds.at(words.at(i)))(cmdarg);
-
-						if (ret == CMD_ERR_ARG_COUNT)	cui_status = "Wrong argument count";
-						if (ret == CMD_ERR_ARG_TYPE)	cui_status = "Wrong argument type";
-						if (ret == CMD_ERR_EXTERNAL)	cui_status = "Cannot execute command";
-					} catch (const out_of_range& e)
-					{
-						log("Command not found! (" + command + ")", LP_ERROR);
-						cui_status = "Command not found!";
-					}
-				}
-
-				offset += j;
+				case CMD_ERR_ARG_COUNT:
+					cui_status = "Wrong argument count!";
+					break;
+				case CMD_ERR_ARG_TYPE:
+					cui_status = "Wrog argument type!";
+					break;
+				case CMD_ERR_EXTERNAL:
+					cui_status = "Cannot execute command!";
+					break;
+				default:
+					cui_status = "Unknown execution error!";
 			}
+		} catch (const out_of_range& e) { // command not found
+			log("Command not found! (" + command + ")", LP_ERROR);
+			cui_status = "Command not found!";
 		}
 	}
+}
 
-	return 0;
+void cmd_exec(const string& command)
+{
+	log ("Attempting execution: " + command);
+	vector<string> cmdq = cmd_break(cmd_buffer + command);
+
+	for (const auto& cmd : cmdq) cmd_run(cmd);
 }
 
 void cmd_terminate()

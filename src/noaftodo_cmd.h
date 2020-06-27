@@ -16,7 +16,14 @@ extern std::map<std::string, std::string> aliases;
 extern std::string cmd_buffer;
 
 void cmd_init();
-int cmd_exec(std::string command);
+std::vector<std::string> cmd_break(const std::string& cmdline); // breaks the line into single commands
+								// respecting quotes and '\'
+
+void cmd_run(std::string command);	// if string consists of only one command, executes it,
+					// otherwise calls inself on each element of cmd_break output
+
+void cmd_exec(const std::string& command);	// initializes and starts execution of a command.
+						// respects non-null cmd_buffer
 void cmd_terminate();
 
 #endif
