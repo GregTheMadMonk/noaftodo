@@ -747,12 +747,6 @@ void cmd_run(string command)
 	{	// search for aliases, prioritize
 		string alstr = aliases.at(name);
 
-		// insert veriables
-		if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
-			alstr = format_str(alstr, t_list.at(cui_s_line));
-		else
-			alstr = format_str(alstr, NULL_ENTRY);
-
 		// insert alias arguments. Add unused ones to command line 
 		for (int j = 0; j < args.size(); j++)
 		{
