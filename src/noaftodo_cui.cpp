@@ -477,6 +477,7 @@ void cui_set_mode(const int& mode)
 {
 	if (mode == -1)
 	{
+		if (cui_prev_modes.size() == 0) return;
 		cui_mode = cui_prev_modes.top();
 		cui_prev_modes.pop();
 	} else {

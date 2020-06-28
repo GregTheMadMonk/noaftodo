@@ -23,6 +23,11 @@
 #                  you need this number
 
 alias toggle "if \%%arg1%\% \"set %arg1% false\" \"set %arg1% true\""
+alias : "set mode 2"
+alias ? "set mode 4"
+alias details "set mode 8"
+alias listview "set mode 16"
+alias back "set mode -1"
 
 # key bindings
 bind "esc" "math \%numbuffer\% = -1 ret; if \%ret\% q" 1 true

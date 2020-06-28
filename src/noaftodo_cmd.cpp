@@ -41,20 +41,6 @@ void cmd_init()
 		return 0;
 	};
 
-	// command ":" - enter the command mode.
-	cmd_cmds[":"] = [] (const vector<string>& args)
-	{
-		cui_set_mode(CUI_MODE_COMMAND);
-		return 0;
-	};
-
-	// command "?" - show the help message.
-	cmd_cmds["?"] = [] (const vector<string>& args)
-	{
-		cui_set_mode(CUI_MODE_HELP);
-		return 0;
-	};
-
 	// command "!<command>" - execute shell command
 	cmd_cmds["!"] = [] (const vector<string>& args)
 	{
@@ -71,29 +57,6 @@ void cmd_init()
 
 		if (wcui) cui_construct();
 
-		return 0;
-	};
-
-	// command "back" - go to previous mode.
-	cmd_cmds["back"] = [] (const vector<string>& args)
-	{
-		cui_set_mode(-1);
-		return 0;
-	};
-
-	// command "details" - view task details.
-	cmd_cmds["details"] = [] (const vector<string>& args)
-	{
-		if ((cui_s_line < 0) || (cui_s_line >= t_list.size()))
-			return CMD_ERR_EXTERNAL;
-		cui_set_mode(CUI_MODE_DETAILS);
-		return 0;
-	};
-
-	// command "listview" - go to the list view
-	cmd_cmds["listview"] = [] (const vector<string>& args)
-	{
-		cui_set_mode(CUI_MODE_LISTVIEW);
 		return 0;
 	};
 
@@ -483,6 +446,17 @@ void cmd_init()
 	cvar_wrap_int("colors.entry_completed", cui_color_complete);
 	cvar_wrap_int("colors.entry_coming", cui_color_coming);
 	cvar_wrap_int("colors.entry_failed", cui_color_failed);
+
+	cvar_wrap_int("mode", cui_mode, CVAR_FLAG_NO_PREDEF);
+	cvars["mode"]->setter = [] (const string& val)
+	{
+		try
+		{
+			cui_set_mode(stoi(val));
+			return 0;
+		} catch (const invalid_argument& e) { return CMD_ERR_ARG_TYPE; }
+	};
+	cvars["mode"]->predefine("-1");
 
 	cvar_wrap_int("id", cui_s_line, CVAR_FLAG_NO_PREDEF);
 	cvars["id"]->setter = [] (const string& val)
