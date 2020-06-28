@@ -381,6 +381,7 @@ void cui_run()
 
 		if (c != 0)
 		{
+			const int old_numbuffer = cui_numbuffer;
 			cui_status = "";
 			bool bind_fired = false;
 			for (const auto& bind : binds)
@@ -399,8 +400,6 @@ void cui_run()
 					bind_fired = true;
 				}
 
-			if (bind_fired) cui_numbuffer = -1;
-
 			if (!bind_fired) switch (cui_mode)
 			{
 				case CUI_MODE_NORMAL:
@@ -418,6 +417,8 @@ void cui_run()
 				case CUI_MODE_HELP:
 					cui_help_input(c);
 			}
+
+			if (old_numbuffer == cui_numbuffer) cui_numbuffer = -1;
 		}
 
 		cui_w = getmaxx(stdscr);
@@ -853,25 +854,6 @@ void cui_normal_input(const wchar_t& key)
 {
 	switch (key)
 	{
-		case '0': case '1': case '2': case '3': case '4':
-		case '5': case '6': case '7': case '8': case '9':
-			if (cui_numbuffer == -1) cui_numbuffer = 0;
-			cui_numbuffer = cui_numbuffer * 10 + (key - '0');
-			cui_status = to_string(cui_numbuffer);
-			break;
-		case 'g':
-			if (cui_numbuffer == -1) 
-			{
-				cui_numbuffer = cvar("first_visible_id");
-				cui_status = 'g';
-			} else {
-				if ((cui_numbuffer >= 0) && (cui_numbuffer < t_list.size()))
-				{
-					cui_s_line = cui_numbuffer;
-					cui_numbuffer = -1;
-				}
-			}
-			break;
 		case 'l':
 			if (cui_numbuffer == -1)
 			{

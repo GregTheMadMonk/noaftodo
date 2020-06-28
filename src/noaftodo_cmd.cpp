@@ -49,6 +49,25 @@ void cmd_init()
 		return 0;
 	};
 
+	// command "!<command>" - execute shell command
+	cmds["!"] = [] (const vector<string>& args)
+	{
+		string cmdline = "";
+
+		for (const auto& arg : args) cmdline += arg + " ";
+
+		const bool wcui = cui_active;
+
+		if (wcui) cui_destroy();
+
+		log("Executing shell command: '" + cmdline + "'...");
+		system(cmdline.c_str());
+
+		if (wcui) cui_construct();
+
+		return 0;
+	};
+
 	// command "back" - go to previous mode.
 	cmds["back"] = [] (const vector<string>& args)
 	{
@@ -290,11 +309,30 @@ void cmd_init()
 					if (b == 0) return CMD_ERR_ARG_TYPE;
 					result = a / b;
 					break;
+				case 'm':
+					if (args.at(1) == "max") result = (a >= b) ? a : b;
+					else if (args.at(1) == "min") result = (a < b) ? a : b;
+					break;
+				case '=':
+					if (args.size() < 4) cui_status = (a == b) ? "true" : "false";
+					else cvar(args.at(3)).setter((a == b) ? "true" : "false");
+					return 0;
 			}
 
 			if (args.size() < 4) cui_status = to_string(result);
 			else cvar(args.at(3)).setter(to_string(result));
 		} catch (const invalid_argument& e) { return CMD_ERR_ARG_TYPE; }
+
+		return 0;
+	};
+
+	// command "if <true|false> <do-if-true>[ <do-if-false>]" - simple if expression
+	cmds["if"] = [] (const vector<string>& args)
+	{
+		if (args.size() < 2) return CMD_ERR_ARG_COUNT;
+		
+		if (args.at(0) == "true") cmd_exec(args.at(1));
+		else if (args.size() > 2) cmd_exec(args.at(2));
 
 		return 0;
 	};
@@ -381,25 +419,6 @@ void cmd_init()
 		string message = "";
 		for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
 		cui_status = message;
-		return 0;
-	};
-
-	// command "!<command>" - execute shell command
-	cmds["!"] = [] (const vector<string>& args)
-	{
-		string cmdline = "";
-
-		for (const auto& arg : args) cmdline += arg + " ";
-
-		const bool wcui = cui_active;
-
-		if (wcui) cui_destroy();
-
-		log("Executing shell command: '" + cmdline + "'...");
-		system(cmdline.c_str());
-
-		if (wcui) cui_construct();
-
 		return 0;
 	};
 
@@ -596,6 +615,9 @@ void cmd_init()
 	cvar_wrap_string("on_task_uncompleted_action", da_task_uncompleted_action);
 	cvar_wrap_string("on_task_new_action", da_task_new_action);
 	cvar_wrap_string("on_task_removed_action", da_task_removed_action);
+
+	cvar_wrap_int("numbuffer", cui_numbuffer, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
+	cvars["numbuffer"]->predefine("-1");
 }
 
 vector<string> cmd_break(const string& cmdline)
@@ -736,8 +758,7 @@ void cmd_run(string command)
 		}
 	}
 
-	// if we have reached this far, a command is at least properly terminated
-	cmd_buffer = "";
+	cmd_buffer = ""; // if we have reached this far, a command is at least properly terminated
 
 	if (word != "") put(word);
 
@@ -763,7 +784,7 @@ void cmd_run(string command)
 			if (!replaced) alstr += " \"" + replace_special(args.at(j)) + "\"";
 		}
 
-		cmd_run(alstr); // try to run
+		cmd_exec(alstr); // try to run
 	} catch (const out_of_range& e) { // no such alias
 		try
 		{

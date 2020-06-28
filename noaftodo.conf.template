@@ -56,9 +56,24 @@ bind "/" "set regex_filter " 1 false
 bind "/" "set list_regex_filter " 16 false
 bind "e" "a \%due\% \"\%T\%\" \"\%D\%\" \%id\%; setmeta \%meta\%" 1 false
 
+alias numpress "math \%numbuffer\% max 0 numbuffer; math \%numbuffer\% * 10 numbuffer; math \%numbuffer\% + %arg1% numbuffer; echo \%numbuffer\%"
+
+bind "0" "numpress 0" 1 true
+bind "1" "numpress 1" 1 true
+bind "2" "numpress 2" 1 true
+bind "3" "numpress 3" 1 true
+bind "4" "numpress 4" 1 true
+bind "5" "numpress 5" 1 true
+bind "6" "numpress 6" 1 true
+bind "7" "numpress 7" 1 true
+bind "8" "numpress 8" 1 true
+bind "9" "numpress 9" 1 true
+
+bind "g" "math \%numbuffer\% = -1 ret; if \%ret\% \"set numbuffer \\%first_visible_id\\%; echo g\" \"set id \\%numbuffer\\%; set numbuffer -1\"" 1 true
+
 # aliases
 # task operations
-alias duplicate a \%due\% \"\%T\%\" \"\%D\%\"
+alias duplicate "a \%due\% \"\%T\%\" \"\%D\%\"; setmeta \%meta\%"
 # Aaand this is the place where you will ask me: "Hey, Greg, why do you do this,
 # why do you create an alias to reference from another alias instead of writing it 
 # as it is?" The answer is: I've tried, and it didn't work. Command interpreter in
