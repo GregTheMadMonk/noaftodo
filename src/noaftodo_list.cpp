@@ -185,7 +185,7 @@ void li_load(const bool& load_workspace)
 			if (entry == "") continue; // only non-empty lines
 
 			// trim string
-			while (entry.at(0) == ' ') 
+			while ((entry.at(0) == ' ') || (entry.at(0) == '\t'))
 			{
 				entry = entry.substr(1);
 				if (entry == "") break;

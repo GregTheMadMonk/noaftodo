@@ -35,19 +35,7 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 		{
 			if (*c == '\n')
 			{
-				// new line
-				if (entry != "")
-				{
-					while (entry.at(0) == ' ') 
-					{ 
-						entry = entry.substr(1);
-						if (entry == "") break;
-					}
-
-					if (entry != "") if (entry.at(0) != '#')
-						cmd_exec(entry);
-				}
-
+				cmd_exec(entry);
 				entry = "";
 			} else entry += *c;
 		}
@@ -82,17 +70,7 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 
 		while (getline(iconf, entry))
 		{
-			if (entry != "")
-			{
-				while (entry.at(0) == ' ') 
-				{ 
-					entry = entry.substr(1);
-					if (entry == "") break;
-				}
-
-				if (entry != "") if (entry.at(0) != '#')
-					cmd_exec(entry);
-			}
+			if (entry != "") cmd_exec(entry);
 		}
 	}
 

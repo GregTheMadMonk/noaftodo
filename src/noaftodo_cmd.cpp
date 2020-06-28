@@ -267,7 +267,7 @@ void cmd_init()
 		return removed ? 0 : CMD_ERR_EXTERNAL;
 	};
 
-	// command "math <num1> <op> <num2> <name>" - calculate math expression (+,-,/,*,=,min,max) and write to cvar <name>. If <name> is not specifed, just print the result out
+	// command "math <num1> <op> <num2> <name>" - calculate math expression (+,-,/,*,=,<,>,min,max) and write to cvar <name>. If <name> is not specifed, just print the result out
 	cmd_cmds["math"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
@@ -301,6 +301,14 @@ void cmd_init()
 				case '=':
 					if (args.size() < 4) cui_status = (a == b) ? "true" : "false";
 					else cvar(args.at(3)).setter((a == b) ? "true" : "false");
+					return 0;
+				case '<':
+					if (args.size() < 4) cui_status = (a < b) ? "true" : "false";
+					else cvar(args.at(3)).setter((a < b) ? "true" : "false");
+					return 0;
+				case '>':
+					if (args.size() > 4) cui_status = (a > b) ? "true" : "false";
+					else cvar(args.at(3)).setter((a > b) ? "true" : "false");
 					return 0;
 			}
 
