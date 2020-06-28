@@ -21,40 +21,42 @@
 
 using namespace std;
 
-map<string, function<int(const vector<string>& args)>> cmds;
-map<string, string> aliases;
+map<string, function<int(const vector<string>& args)>> cmd_cmds;
+map<string, string> cmd_aliases;
 
 string cmd_buffer;
 
 void cmd_init()
 {
 	cmd_buffer = "";
-	aliases.clear();
-	cmds.clear();
+	cmd_aliases.clear();
+	cmd_cmds.clear();
 
 	// command "q" - exit the program.
-	cmds["q"] = [] (const vector<string>& args)
+	cmd_cmds["q"] = [] (const vector<string>& args)
 	{
-		cui_mode = CUI_MODE_EXIT;
+		if (cui_active) cui_mode = CUI_MODE_EXIT;
+		else if ((run_mode == PM_DAEMON) && da_running) da_running = false;
+		else exit(0);
 		return 0;
 	};
 
 	// command ":" - enter the command mode.
-	cmds[":"] = [] (const vector<string>& args)
+	cmd_cmds[":"] = [] (const vector<string>& args)
 	{
 		cui_set_mode(CUI_MODE_COMMAND);
 		return 0;
 	};
 
 	// command "?" - show the help message.
-	cmds["?"] = [] (const vector<string>& args)
+	cmd_cmds["?"] = [] (const vector<string>& args)
 	{
 		cui_set_mode(CUI_MODE_HELP);
 		return 0;
 	};
 
 	// command "!<command>" - execute shell command
-	cmds["!"] = [] (const vector<string>& args)
+	cmd_cmds["!"] = [] (const vector<string>& args)
 	{
 		string cmdline = "";
 
@@ -73,14 +75,14 @@ void cmd_init()
 	};
 
 	// command "back" - go to previous mode.
-	cmds["back"] = [] (const vector<string>& args)
+	cmd_cmds["back"] = [] (const vector<string>& args)
 	{
 		cui_set_mode(-1);
 		return 0;
 	};
 
 	// command "details" - view task details.
-	cmds["details"] = [] (const vector<string>& args)
+	cmd_cmds["details"] = [] (const vector<string>& args)
 	{
 		if ((cui_s_line < 0) || (cui_s_line >= t_list.size()))
 			return CMD_ERR_EXTERNAL;
@@ -89,14 +91,14 @@ void cmd_init()
 	};
 
 	// command "listview" - go to the list view
-	cmds["listview"] = [] (const vector<string>& args)
+	cmd_cmds["listview"] = [] (const vector<string>& args)
 	{
 		cui_set_mode(CUI_MODE_LISTVIEW);
 		return 0;
 	};
 
 	// command "alias <command>" - create an alias for command.
-	cmds["alias"] = [] (const vector<string>& args)
+	cmd_cmds["alias"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
@@ -109,13 +111,13 @@ void cmd_init()
 
 		log("Alias " + args.at(0) + " => " + alargs);
 
-		aliases[args.at(0)] = alargs;
+		cmd_aliases[args.at(0)] = alargs;
 
 		return 0;
 	};
 
 	// command "c" - toggle selected task's "completed" property.
-	cmds["c"] = [] (const vector<string>& args)
+	cmd_cmds["c"] = [] (const vector<string>& args)
 	{
 		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
 
@@ -124,7 +126,7 @@ void cmd_init()
 	};
 
 	// command "d" - remove selected task.
-	cmds["d"] = [] (const vector<string>& args)
+	cmd_cmds["d"] = [] (const vector<string>& args)
 	{
 		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
 
@@ -135,7 +137,7 @@ void cmd_init()
 	};
 
 	// command "a <due> <title> <description>[ <id>]" - add or override a task. If <id> is not specified, a new task is created. If not, a task with <id> will be overriden.
-	cmds["a"] = [] (const vector<string>& args)
+	cmd_cmds["a"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
 
@@ -181,7 +183,7 @@ void cmd_init()
 	};
 
 	// command "setmeta[ <name1> <value1>[ <name2> <value2>[ ...]]]" - set task meta. If no arguments are specified, clear task meta. To add properties to meta, use "setmeta %meta% <name1> <value1>...". "setmeta <name>" will erase only <name> meta property
-	cmds["setmeta"] = [] (const vector<string>& args)
+	cmd_cmds["setmeta"] = [] (const vector<string>& args)
 	{
 		if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return CMD_ERR_EXTERNAL;
 
@@ -201,27 +203,8 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "lrename[ <new_name>]" - rename list. If <new_name> is not specified or is the same as list id, list name is reset.
-	cmds["lrename"] = [] (const vector<string>& args)
-	{
-		if (cui_tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
-
-		if ((args.size() < 1) && (cui_tag_filter < t_tags.size())) 
-		{ 
-			t_tags[cui_tag_filter] = to_string(cui_tag_filter);
-			return 0;
-		}
-
-		while (cui_tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
-
-		t_tags[cui_tag_filter] = args.at(0);
-		if (li_autosave) li_save();
-
-		return 0;
-	};
-
 	// command "lclear" - clear list.
-	cmds["lclear"] = [] (const vector<string>& args)
+	cmd_cmds["lclear"] = [] (const vector<string>& args)
 	{
 		if (cui_tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
 
@@ -233,7 +216,7 @@ void cmd_init()
 	};
 
 	// command "lmv <list_id>" - move selected task to a list.
-	cmds["lmv"] = [] (const vector<string>& args)
+	cmd_cmds["lmv"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
@@ -248,7 +231,7 @@ void cmd_init()
 	};
 
 	// command "bind <key> <command> <mode> <autoexec>" - bind <key> to <command>. <mode> speciifes, which modes use this bind (mask, see noaftodo_cui.h for CUI_MODE_* values). If <autoexec> is "true", execute command on key hit, otherwise just go into command mode with it.
-	cmds["bind"] = [] (const vector<string>& args)
+	cmd_cmds["bind"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 4) return CMD_ERR_ARG_COUNT;
 
@@ -269,7 +252,7 @@ void cmd_init()
 	};
 
 	// command "unbind <key>" - remove bind from key
-	cmds["unbind"] = [] (const vector<string>& args)
+	cmd_cmds["unbind"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
@@ -286,8 +269,8 @@ void cmd_init()
 		return removed ? 0 : CMD_ERR_EXTERNAL;
 	};
 
-	// command "math <num1> <op> <num2> <name>" - calculate math expression (+,-,/,*) and write to cvar <name>. If <name> is not specifed, just print the result out
-	cmds["math"] = [] (const vector<string>& args)
+	// command "math <num1> <op> <num2> <name>" - calculate math expression (+,-,/,*,=,min,max) and write to cvar <name>. If <name> is not specifed, just print the result out
+	cmd_cmds["math"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
 
@@ -331,7 +314,7 @@ void cmd_init()
 	};
 
 	// command "if <true|false> <do-if-true>[ <do-if-false>]" - simple if expression
-	cmds["if"] = [] (const vector<string>& args)
+	cmd_cmds["if"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 2) return CMD_ERR_ARG_COUNT;
 		
@@ -342,7 +325,7 @@ void cmd_init()
 	};
 
 	// command "set <name>[ <value>]" - set cvar value. If <value> is not specified, reset cvar to default value.
-	cmds["set"] = [] (const vector<string>& args)
+	cmd_cmds["set"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
@@ -358,7 +341,7 @@ void cmd_init()
 	};
 
 	// command "toggle <name>" - toggles variable value between "true" and "false"
-	cmds["toggle"] = [] (const vector<string>& args)
+	cmd_cmds["toggle"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
@@ -371,7 +354,7 @@ void cmd_init()
 	};
 
 	// command "exec <filename>[ script]" - execute a config file. Execute default config with "exec default". With "script" cvars from config are not set as default
-	cmds["exec"] = [] (const vector<string>& args)
+	cmd_cmds["exec"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
@@ -388,7 +371,7 @@ void cmd_init()
 	};
 
 	// command "ver <VERSION>" - is used to specify config version to notify about possible outdated config files.
-	cmds["ver"] = [] (const vector<string>& args)
+	cmd_cmds["ver"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
@@ -404,7 +387,7 @@ void cmd_init()
 	};
 
 	// command "save[ <filename>]" - force the list save. If <filename> is not specified, override opened file.
-	cmds["save"] = [] (const vector<string>& args)
+	cmd_cmds["save"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1)
 		{
@@ -418,11 +401,13 @@ void cmd_init()
 	};
 
 	// command "echo[ args...]" - print the following in status.
-	cmds["echo"] = [] (const vector<string>& args)
+	cmd_cmds["echo"] = [] (const vector<string>& args)
 	{
 		string message = "";
 		for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
-		cui_status = message;
+
+		if (cui_active) cui_status = message;
+		else log("echo :: " + message, LP_IMPORTANT);
 		return 0;
 	};
 
@@ -444,6 +429,8 @@ void cmd_init()
 
 			if (new_filter == cui_tag_filter) cui_tag_filter = CUI_TAG_ALL;
 			else cui_tag_filter = new_filter;
+
+			cvars["pname"]->predefine(to_string(cui_tag_filter));
 		} catch (const invalid_argument& e) {}
 	};
 	cvars["tag_filter"]->flags |= CVAR_FLAG_NO_PREDEF;
@@ -479,6 +466,8 @@ void cmd_init()
 				if (cui_tag_filter < CUI_TAG_ALL)
 					cui_tag_filter = t_tags.size() - 1;
 			}
+
+			cvars["pname"]->predefine(to_string(cui_tag_filter));
 		} catch (const invalid_argument& e) {}
 	};
 	cvars["tag_filter_v"]->flags |= CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
@@ -530,6 +519,27 @@ void cmd_init()
 		} catch (const invalid_argument& e) {}
 	};
 	cvars["id"]->predefine("0");
+
+	cvars["pname"] = make_unique<cvar_base_s>(); // parent [list] name
+	cvars["pname"]->getter = [] () 
+	{
+		if (cui_tag_filter == CUI_TAG_ALL) return string("All lists");
+
+		if (cui_tag_filter < t_tags.size()) return t_tags.at(cui_tag_filter);
+
+		return to_string(cui_tag_filter);
+	};
+	cvars["pname"]->setter = [] (const string& val)
+	{
+		if (cui_tag_filter < 0) return;
+
+		while (cui_tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
+
+		t_tags[cui_tag_filter] = val;
+
+		if (li_autosave) li_save();
+	};
+	cvars["pname"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["last_visible_id"] = make_unique<cvar_base_s>();
 	cvars["last_visible_id"]->getter = [] () 
@@ -771,8 +781,8 @@ void cmd_run(string command)
 	if (name == "") { log_offset--; return; } // null command
 
 	try
-	{	// search for aliases, prioritize
-		string alstr = aliases.at(name);
+	{	// search for cmd_aliases, prioritize
+		string alstr = cmd_aliases.at(name);
 
 		// insert alias arguments. Add unused ones to command line 
 		for (int j = 0; j < args.size(); j++)
@@ -794,7 +804,7 @@ void cmd_run(string command)
 	} catch (const out_of_range& e) { // no such alias
 		try
 		{
-			const int ret = (cmds.at(name))(args); // try to run command
+			const int ret = (cmd_cmds.at(name))(args); // try to run command
 
 			if (ret != 0) switch (ret) // handle error return values
 			{

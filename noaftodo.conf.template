@@ -23,10 +23,10 @@
 #                  you need this number
 
 # key bindings
+bind "esc" "math \%numbuffer\% = -1 ret; if \%ret\% q" 1 true
 bind "q" "q" 1 true
-bind "esc" "q" 1 true
 bind "q" "back" 28 true
-bind "esc" "back" 28 true
+bind "esc" "math \%numbuffer\% = -1 ret; if \%ret\% back" 28 true
 bind "enter" "details" 1 true
 bind "enter" "set tag_filter_copy; back" 16 true
 bind "L" "listview" 1 true

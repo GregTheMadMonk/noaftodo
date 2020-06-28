@@ -201,8 +201,7 @@ string format_str(string str, const noaftodo_entry& li_entry, const bool& renoti
 	int index = -1;
 
 	// fire all prompts
-	if (cui_active)
-		while ((index = str.find("%prompt%")) 	!= string::npos) str.replace(index, 8, cui_prompt());
+	while ((index = str.find("%prompt%")) 	!= string::npos) str.replace(index, 8, cui_active ? cui_prompt() : [] () { string input; cout << "prompt :: "; cin >> input; return input; }());
 
 	// replace entry data
 	if (li_entry != NULL_ENTRY)
