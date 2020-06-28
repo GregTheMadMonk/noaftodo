@@ -106,6 +106,7 @@ extern bool allow_root;
 // output options
 extern bool enable_log;
 extern bool verbose;
+extern int log_offset;
 
 void print_help();
 

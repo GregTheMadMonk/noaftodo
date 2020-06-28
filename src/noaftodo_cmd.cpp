@@ -24,10 +24,14 @@ using namespace std;
 map<string, function<int(const vector<string>& args)>> cmds;
 map<string, string> aliases;
 
-string cmd_buffer = "";
+string cmd_buffer;
 
 void cmd_init()
 {
+	cmd_buffer = "";
+	aliases.clear();
+	cmds.clear();
+
 	// command "q" - exit the program.
 	cmds["q"] = [] (const vector<string>& args)
 	{
@@ -673,6 +677,7 @@ vector<string> cmd_break(const string& cmdline)
 
 void cmd_run(string command)
 {
+	log_offset++;
 	// replace variables
 	if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
 		command = format_str(command, t_list.at(cui_s_line));
@@ -681,13 +686,14 @@ void cmd_run(string command)
 
 	vector<string> new_commands = cmd_break(command);
 
-	if (new_commands.size() == 0) return; // basiacally, an empty string, or just ';'s
+	if (new_commands.size() == 0) { log_offset--; return; } // basiacally, an empty string, or just ';'s
 
 	if (new_commands.size() > 1) // more than one command in a string. Each can contain some more after
 					// variables are replaced with their values
 	{
 		log("Breaking " + command);
 		for (const auto& cmd : new_commands) cmd_run(cmd);
+		log_offset--;
 		return;
 	}
 
@@ -762,7 +768,7 @@ void cmd_run(string command)
 
 	if (word != "") put(word);
 
-	if (name == "") return; // null command
+	if (name == "") { log_offset--; return; } // null command
 
 	try
 	{	// search for aliases, prioritize
@@ -809,6 +815,8 @@ void cmd_run(string command)
 			cui_status = "Command not found!";
 		}
 	}
+
+	log_offset--;
 }
 
 void cmd_exec(const string& command)

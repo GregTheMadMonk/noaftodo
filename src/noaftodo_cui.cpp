@@ -697,33 +697,7 @@ void cui_listview_paint()
 }
 
 void cui_listview_input(const wchar_t& key)
-{
-	switch (key)
-	{
-		case '0': case '1': case '2': case '3': case '4':
-		case '5': case '6': case '7': case '8': case '9':
-			if (cui_numbuffer == -1) cui_numbuffer = 0;
-			cui_numbuffer = cui_numbuffer * 10 + (key - '0');
-			cui_status = to_string(cui_numbuffer);
-			break;
-		case 'g':
-			if (cui_numbuffer == -1) 
-			{
-				cui_numbuffer = cvar("first_visible_list");
-				cui_status = 'g';
-			} else {
-				if (cui_numbuffer >= -1)
-				{
-					cui_tag_filter = cui_numbuffer;
-					cui_numbuffer = -1;
-				}
-			}
-			break;
-		default:
-			cui_numbuffer = -1;
-			break;
-	}
-}
+{ }
 
 void cui_normal_paint()
 {
@@ -851,25 +825,7 @@ void cui_normal_paint()
 }
 
 void cui_normal_input(const wchar_t& key)
-{
-	switch (key)
-	{
-		case 'l':
-			if (cui_numbuffer == -1)
-			{
-				cui_numbuffer = -2;
-				cui_status = 'l';
-			} else {
-				if (cui_numbuffer == -2) cui_tag_filter = CUI_TAG_ALL;
-				else cui_tag_filter = cui_numbuffer;
-				cui_numbuffer = -1;
-			}
-			break;
-		default:
-			cui_numbuffer = -1;
-			break;
-	}
-}
+{ }
 
 void cui_details_paint()
 {
