@@ -233,9 +233,9 @@ void cmd_init()
 	// command "bind <key> <command> <mode> <autoexec>" - bind <key> to <command>. <mode> speciifes, which modes use this bind (mask, see noaftodo_cui.h for CUI_MODE_* values). If <autoexec> is "true", execute command on key hit, otherwise just go into command mode with it.
 	cmd_cmds["bind"] = [] (const vector<string>& args)
 	{
-		if (args.size() < 4) return CMD_ERR_ARG_COUNT;
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		try {
+		if (args.size() >= 4) try {
 			const string skey = args.at(0);
 			const string scomm = args.at(1);
 			const int smode = stoi(args.at(2));
@@ -249,12 +249,10 @@ void cmd_init()
 		} catch (const invalid_argument& e) {
 			return CMD_ERR_ARG_TYPE;
 		}
-	};
 
-	// command "unbind <key>" - remove bind from key
-	cmd_cmds["unbind"] = [] (const vector<string>& args)
-	{
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+		if (args.size() > 1) return CMD_ERR_ARG_COUNT;
+
+		log("Unbinding " + args.at(0));
 
 		bool removed = false;
 
