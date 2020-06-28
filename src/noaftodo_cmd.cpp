@@ -340,19 +340,6 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "toggle <name>" - toggles variable value between "true" and "false"
-	cmd_cmds["toggle"] = [] (const vector<string>& args)
-	{
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-		if (cvar(args.at(0)) == "true") 
-			cvar(args.at(0)) = "false"; // cannot just do cvars.erase(args.at(0)) because
-							// someone might've set it to true in their default config
-		else cvar(args.at(0)) = "true";
-
-		return 0;
-	};
-
 	// command "exec <filename>[ script]" - execute a config file. Execute default config with "exec default". With "script" cvars from config are not set as default
 	cmd_cmds["exec"] = [] (const vector<string>& args)
 	{
