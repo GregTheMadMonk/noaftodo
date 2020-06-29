@@ -178,7 +178,7 @@ void da_upd_cache(const bool& is_first_load)
 	log("Updating daemon cache...", LP_IMPORTANT);
 	li_load();
 
-	vector<noaftodo_entry> t_list_copy = t_list;
+	const auto t_list_copy = t_list;
 
 	for (int i = 0; i < t_list_copy.size(); i++)
 	{
@@ -266,6 +266,7 @@ void da_upd_cache(const bool& is_first_load)
 
 void da_check_dues(const bool& renotify)
 {
+	const auto t_list_copy = t_list;
 	// da_check_dues supposes that the cache is up to date with the list
 	// and da_cache and t_list contain the same entries
 	for (cui_s_line = 0; cui_s_line < t_list.size(); cui_s_line++)	
@@ -285,6 +286,12 @@ void da_check_dues(const bool& renotify)
 	}
 
 	cui_s_line = -1;
+
+	if (t_list != t_list_copy) 
+	{
+		li_save();
+		da_upd_cache(); // I'm sorry
+	}
 }
 
 void da_kill()
