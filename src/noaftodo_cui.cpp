@@ -21,8 +21,7 @@ map<char, function<string()>> cui_status_fields;
 
 int cui_halfdelay_time = 2;
 
-int cui_normal_filter;
-int cui_listview_filter;
+int cui_filter;
 int cui_tag_filter;
 string cui_normal_regex_filter;
 string cui_listview_regex_filter;
@@ -274,18 +273,14 @@ void cui_init()
 
 	cui_status_fields['f'] = [] ()
 	{
-		return string((cui_normal_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
-			string((cui_normal_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
-			string((cui_normal_filter & CUI_FILTER_COMING) ? "C" : "_") + 
-			string((cui_normal_filter & CUI_FILTER_FAILED) ? "F" : "_") +
-			string((cui_normal_filter & CUI_FILTER_NODUE) ? "N" : "_") + 
-			((cui_normal_regex_filter == "") ? "" : (" [" + cui_normal_regex_filter + "]"));
-	};
-
-	cui_status_fields['F'] = [] ()
-	{
-			return ((cui_listview_filter & CUI_FILTER_EMPTY) ? "0" : "_") +
-				((cui_listview_regex_filter == "") ? "" : (" [" + cui_listview_regex_filter + "]"));
+		return string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
+			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
+			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") + 
+			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
+			string((cui_filter & CUI_FILTER_NODUE) ? "N" : "_") + 
+			string((cui_filter & CUI_FILTER_EMPTY) ? "0" : "_") +
+			((cui_normal_regex_filter == "") ? "" : (" [e " + cui_normal_regex_filter + "]")) +
+			((cui_listview_regex_filter == "") ? "" : (" [l " + cui_listview_regex_filter + "]"));
 	};
 
 	cui_status_fields['i'] = [] ()
@@ -536,13 +531,13 @@ bool cui_is_visible(const int& entryID)
 
 	bool ret = ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == entry.tag));
 
-	if (entry.completed) 	ret = ret && (cui_normal_filter & CUI_FILTER_COMPLETE);
-	if (entry.is_failed()) 	ret = ret && (cui_normal_filter & CUI_FILTER_FAILED);
-	if (entry.is_coming()) 	ret = ret && (cui_normal_filter & CUI_FILTER_COMING);
+	if (entry.completed) 	ret = ret && (cui_filter & CUI_FILTER_COMPLETE);
+	if (entry.is_failed()) 	ret = ret && (cui_filter & CUI_FILTER_FAILED);
+	if (entry.is_coming()) 	ret = ret && (cui_filter & CUI_FILTER_COMING);
 
-	if (entry.get_meta("nodue") == "true") ret = ret && (cui_normal_filter & CUI_FILTER_NODUE);
+	if (entry.get_meta("nodue") == "true") ret = ret && (cui_filter & CUI_FILTER_NODUE);
 
-	if (entry.is_uncat())	ret = ret && (cui_normal_filter & CUI_FILTER_UNCAT);
+	if (entry.is_uncat())	ret = ret && (cui_filter & CUI_FILTER_UNCAT);
 
 	// fit regex
 	if (cui_normal_regex_filter != "")
@@ -562,8 +557,9 @@ bool cui_l_is_visible(const int& list_id)
 
 	bool ret = false;
 
-	if (cui_listview_filter ^ CUI_FILTER_EMPTY)
-		for (auto e : t_list) ret |= (e.tag == list_id);
+	if ((cui_filter & CUI_FILTER_EMPTY) == 0)
+		for (int i = 0; i < t_list.size(); i++)
+			ret |= ((t_list.at(i).tag == list_id) && cui_is_visible(i));
 	else ret = true;
 
 	// fit regex

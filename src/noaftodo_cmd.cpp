@@ -429,7 +429,7 @@ void cmd_init()
 	cvars["tag_filter_v"]->flags |= CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 	cvars["tag_filter_v"]->predefine("-1");
 
-	cvar_wrap_int("filter", cui_normal_filter);
+	cvar_wrap_int("filter", cui_filter);
 
 	cvar_wrap_string("regex_filter", cui_normal_regex_filter);
 	cvar_wrap_string("list_regex_filter", cui_listview_regex_filter);
@@ -578,13 +578,13 @@ void cmd_init()
 	cvar_wrap_multistr_element("charset.box_corner_4", cui_box_strong, CHAR_CORN4);
 	cvar_wrap_multistr_element("charset.box_ui_line_h", cui_box_light, CHAR_HLINE);
 
-	cvar_wrap_maskflag("lview_show_empty", cui_listview_filter, CUI_FILTER_EMPTY);
+	cvar_wrap_maskflag("lview_show_empty", cui_filter, CUI_FILTER_EMPTY);
 
-	cvar_wrap_maskflag("show_uncat", cui_normal_filter, CUI_FILTER_UNCAT, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("show_complete", cui_normal_filter, CUI_FILTER_COMPLETE, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("show_coming", cui_normal_filter, CUI_FILTER_COMING, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("show_failed", cui_normal_filter, CUI_FILTER_FAILED, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("show_nodue", cui_normal_filter, CUI_FILTER_NODUE, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("show_uncat", cui_filter, CUI_FILTER_UNCAT, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("show_complete", cui_filter, CUI_FILTER_COMPLETE, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("show_coming", cui_filter, CUI_FILTER_COMING, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("show_failed", cui_filter, CUI_FILTER_FAILED, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("show_nodue", cui_filter, CUI_FILTER_NODUE, CVAR_FLAG_WS_IGNORE);
 
 	cvar_wrap_bool("allow_root", allow_root);
 	cvar_wrap_bool("daemon.fork_autostart", da_fork_autostart);

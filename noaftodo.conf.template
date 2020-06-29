@@ -54,10 +54,11 @@ bind "A" "a " 1 false
 bind " " "c" 1 true
 bind "d" "d" 1 false
 bind "?" "?" 57 true
-bind "F" "toggle show_failed" 1 true
-bind "U" "toggle show_uncat" 1 true
-bind "C" "toggle show_coming" 1 true
-bind "V" "toggle show_complete" 1 true
+bind "F" "toggle show_failed" 17 true
+bind "U" "toggle show_uncat" 17 true
+bind "C" "toggle show_coming" 17 true
+bind "V" "toggle show_complete" 17 true
+bind ")" "toggle lview_show_empty" 17 true
 bind "N" "toggle show_nodue" 1 true
 bind "/" "set regex_filter " 1 false
 bind "/" "set list_regex_filter " 16 false
@@ -126,7 +127,7 @@ set "listview_cols" "itep"
 set "details_cols" "dl"
 
 set "status_fields" "piflms"
-set "listview_status_fields" "Fms"
+set "listview_status_fields" "fms"
 
 set "charset.box_strong" "┃━┏┓┗┛"
 set "charset.box_light" "|-++++"
