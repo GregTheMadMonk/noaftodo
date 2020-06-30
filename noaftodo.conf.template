@@ -35,7 +35,7 @@ alias numpress "math \%numbuffer\% max 0 numbuffer; math \%numbuffer\% * 10 numb
 alias ll "math \%numbuffer\% = -2 ret; if \%ret\% \"set tag_filter -1\" \"set tag_filter \\%numbuffer\\%\""
 
 # TASK OPERATIONS
-alias duplicate "a \%due\% \"\%T\%\" \"\%D\%\"; setmeta \%meta\%"
+alias duplicate "a \%due\% \"\%title\%\" \"\%desc\%\"; setmeta \%meta\%"
 alias postpone set due \%due\%a%arg1%
 alias reschedule set due %arg1%
 alias makerec setmeta \%meta\% on_completed \"postpone %arg1%\; set comp\"
@@ -66,15 +66,15 @@ bind "A" "a " 1 false
 bind " " "toggle comp" 1 true
 bind "d" "d" 1 false
 bind "?" "?" 57 true
-bind "F" "toggle show_failed" 17 true
-bind "U" "toggle show_uncat" 17 true
-bind "C" "toggle show_coming" 17 true
-bind "V" "toggle show_complete" 17 true
-bind ")" "toggle lview_show_empty" 17 true
-bind "N" "toggle show_nodue" 1 true
-bind "/" "set regex_filter " 1 false
-bind "/" "set list_regex_filter " 16 false
-bind "e" "a \%due\% \"\%T\%\" \"\%D\%\" \%id\%; setmeta \%meta\%" 1 false
+bind "F" "toggle filter.failed" 17 true
+bind "U" "toggle filter.uncat" 17 true
+bind "C" "toggle filter.coming" 17 true
+bind "V" "toggle filter.complete" 17 true
+bind ")" "toggle filter.empty" 17 true
+bind "N" "toggle filter.nodue" 1 true
+bind "/" "set norm.regex_filter " 1 false
+bind "/" "set livi.regex_filter " 16 false
+bind "e" "a \%due\% \"\%title\%\" \"\%desc\%\" \%id\%; setmeta \%meta\%" 1 false
 
 bind "0" "numpress 0" 17 true
 bind "1" "numpress 1" 17 true
@@ -151,9 +151,9 @@ set "colors.status_standout" "false"
 # DAEMON ACTIONS
 set "on_daemon_launch_action" 		"!notify-send \"NOAFtodo v.\%VER\%\" \"Daemon is up and running\" &"
 
-set "on_task_completed_action"		"!\%N\% && notify-send \"You have completed a task!\" \"\%T\%: \%D\%\" -u low &"
-set "on_task_uncompleted_action" 	"!notify-send \"Task is marked \\\"Not Completed\\\" again!\" \"\%T\%: \%D\%\" &"
-set "on_task_failed_action" 		"!\%N\% && notify-send \"Task due is now!\" \"\%T\%: \%D\%\" -u critical || notify-send \"You have a failed task! Come on, it\'s never too late!\" \"\%T\%: \%D\%\" -u critical &"
-set "on_task_coming_action" 		"!notify-send \"You have an upcoming task!\" \"\%T\%: \%D\%\" &"
-set "on_task_new_action" 		"!notify-send \"You have a new task!\" \"\%T\%: \%D\%\" -u low &"
-set "on_task_removed_action" 		"!notify-send \"You have removed a task!\" \"\%T\%: \%D\%\" -u critical &"
+set "on_task_completed_action"		"!\%N\% && notify-send \"You have completed a task!\" \"\%title\%: \%desc\%\" -u low &"
+set "on_task_uncompleted_action" 	"!notify-send \"Task is marked \\\"Not Completed\\\" again!\" \"\%title\%: \%desc\%\" &"
+set "on_task_failed_action" 		"!\%N\% && notify-send \"Task due is now!\" \"\%title\%: \%desc\%\" -u critical || notify-send \"You have a failed task! Come on, it\'s never too late!\" \"\%title\%: \%desc\%\" -u critical &"
+set "on_task_coming_action" 		"!notify-send \"You have an upcoming task!\" \"\%title\%: \%desc\%\" &"
+set "on_task_new_action" 		"!notify-send \"You have a new task!\" \"\%title\%: \%desc\%\" -u low &"
+set "on_task_removed_action" 		"!notify-send \"You have removed a task!\" \"\%title\%: \%desc\%\" -u critical &"
