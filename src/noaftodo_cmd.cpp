@@ -86,15 +86,6 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "c" - toggle selected task's "completed" property.
-	cmd_cmds["c"] = [] (const vector<string>& args)
-	{
-		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
-
-		li_comp(cui_s_line);
-		return 0;
-	};
-
 	// command "d" - remove selected task.
 	cmd_cmds["d"] = [] (const vector<string>& args)
 	{
@@ -522,6 +513,22 @@ void cmd_init()
 		return replace_special(cmd_sel_entry->meta_str());
 	};
 	cvars["meta"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+
+	cvars["comp"] = make_unique<cvar_base_s>();
+	cvars["comp"]->getter = [] () 
+	{
+		return (cmd_sel_entry == nullptr) ? "false" : (cmd_sel_entry->completed ? "true" : "false" );
+	};
+	cvars["comp"]->setter = [] (const string& val)
+	{
+		if (cmd_sel_entry == nullptr) return;
+
+		if ((cmd_sel_entry->completed && (val != "true")) ||
+			(!cmd_sel_entry->completed && (val == "true")))
+				li_comp(cui_s_line);
+	};
+	cvars["comp"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvars["comp"]->predefine("false");
 
 	cvars["parent"] = make_unique<cvar_base_s>();
 	cvars["parent"]->getter = [] ()

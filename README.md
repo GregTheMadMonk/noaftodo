@@ -15,7 +15,7 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 - [ ] option to configure program with source-code only (being considered, thinking of a way to do this and provide new functionality on top of just using a config file)
 - [ ] \(not a feature really\) documentation
 
-Default list is created as **~/.noaftodo-list** and delault config is copied to **~/.config/noaftodo.conf**.
+Default list is created as **$HOME/.noaftodo-list** and delault config is copied to **$XDG_CONFIG_HOME/noaftodo.conf** or **$HOME/.config/noaftodo.conf**, if **$XDG_CONFIG_HOME** is not defined.
 
 Also running without creating a config is supported with `noaftodo -c default`, as default config is included in the program during compilation.
 
