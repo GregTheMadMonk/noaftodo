@@ -22,6 +22,7 @@
 #                  |
 #                  you need this number
 
+# ALIASES
 alias toggle "if \%%arg1%\% \"set %arg1% false\" \"set %arg1% true\""
 alias : "set mode 2"
 alias ? "set mode 4"
@@ -33,7 +34,14 @@ alias numpress "math \%numbuffer\% max 0 numbuffer; math \%numbuffer\% * 10 numb
 
 alias ll "math \%numbuffer\% = -2 ret; if \%ret\% \"set tag_filter -1\" \"set tag_filter \\%numbuffer\\%\""
 
-# key bindings
+# TASK OPERATIONS
+alias duplicate "a \%due\% \"\%T\%\" \"\%D\%\"; setmeta \%meta\%"
+alias postpone set due \%due\%a%arg1%
+alias reschedule set due %arg1%
+alias makerec setmeta \%meta\% on_completed \"postpone %arg1%\; set comp\"
+alias makerec_fixed setmeta \%meta\% on_completed \"reschedule a%arg1%\; set comp\"
+
+# KEY BINDINGS
 bind "esc" "math \%numbuffer\% = -1 ret; if \%ret\% q" 1 true
 bind "q" "q" 1 true
 bind "q" "back" 28 true
@@ -79,29 +87,68 @@ bind "7" "numpress 7" 17 true
 bind "8" "numpress 8" 17 true
 bind "9" "numpress 9" 17 true
 
-bind "g" "math \%numbuffer\% = -1 ret; if \%ret\% \"set numbuffer \\%first_visible_id\\%; echo g\" \"set id \\%numbuffer\\%; set numbuffer -1\"; set ret" 1 true
-bind "l" "math \%numbuffer\% = -1 ret; if \%ret\% \"set numbuffer -2; echo l\" \"ll; set numbuffer -1\"; set ret" 1 true
-bind "g" "math \%numbuffer\% = -1 ret; if \%ret\% \"set numbuffer \\%first_visible_list\\%; echo g\" \"set tag_filter \\%numbuffer\\%; set numbuffer -1\"; set ret" 16 true
+bind "g" "math \%numbuffer\% = -1 ret;
+		if \%ret\% \"set numbuffer \\%first_visible_id\\%;
+		echo g\" \"set id \\%numbuffer\\%;
+		set numbuffer -1\";
+		set ret" 1 true
+bind "l" "math \%numbuffer\% = -1 ret;
+		if \%ret\% \"set numbuffer -2;
+		echo l\" \"ll;
+		set numbuffer -1\";
+		set ret" 1 true
+bind "g" "math \%numbuffer\% = -1 ret;
+		if \%ret\% \"set numbuffer \\%first_visible_list\\%;
+			echo g\" \"set tag_filter \\%numbuffer\\%;
+			set numbuffer -1\";
+		set ret" 16 true
 
-# aliases
-# task operations
-alias duplicate "a \%due\% \"\%T\%\" \"\%D\%\"; setmeta \%meta\%"
-alias postpone set due \%due\%a%arg1%
-alias reschedule set due %arg1%
-alias makerec setmeta \%meta\% on_completed \"postpone %arg1%\; set comp\"
-alias makerec_fixed setmeta \%meta\% on_completed \"reschedule a%arg1%\; set comp\"
-
-# daemon settings
-set "daemon.fork_autostart" "true"
-set "daemon.list_upd_ticks" "1"
-
+# SETTINGS
+# CORE
 set "allow_root" "false"
+set "autorun_daemon" "true"
 
-set "contexec_cmd_regex" "^set regex_filter\ |^set list_regex_filter "
+set "cmd.contexec" "^set regex_filter\ |^set list_regex_filter "
 
+# FILTERS
+set "norm.regex_filter" ""
+set "livi.regex_filter" ""
+
+set "tag_filter" "-1"	# all lists
+set "filter" "31" 	# 0b11111
+
+# UI SETUP
 set "halfdelay_time" "2"
 
-# global events
+set "frameshift_multistr" "false"
+
+set "norm.cols.all"	"ifldtD"
+set "norm.cols"		"ifdtD"
+set "livi.cols"		"itep"
+set "det.cols"		"dl"
+
+set "norm.status_fields" "piflms"
+set "livi.status_fields" "fms"
+
+# CHARACTER SET
+set "charset.box_strong" "┃━┏┓┗┛"
+set "charset.box_light" "|-++++"
+set "charset.separators" "│||"
+
+# CHARACTER SET: MISC
+set "charset.separators.row.offset" "0"
+
+# COLORSCHEME
+set "colors.bg" "-1"
+set "colors.title" "12"
+set "colors.status" "-1"
+set "colors.entry_completed" "2"
+set "colors.entry_coming" "3"
+set "colors.entry_failed" "1"
+
+set "colors.status_standout" "false"
+
+# DAEMON ACTIONS
 set "on_daemon_launch_action" 		"!notify-send \"NOAFtodo v.\%VER\%\" \"Daemon is up and running\" &"
 
 set "on_task_completed_action"		"!\%N\% && notify-send \"You have completed a task!\" \"\%T\%: \%D\%\" -u low &"
@@ -110,32 +157,3 @@ set "on_task_failed_action" 		"!\%N\% && notify-send \"Task due is now!\" \"\%T\
 set "on_task_coming_action" 		"!notify-send \"You have an upcoming task!\" \"\%T\%: \%D\%\" &"
 set "on_task_new_action" 		"!notify-send \"You have a new task!\" \"\%T\%: \%D\%\" -u low &"
 set "on_task_removed_action" 		"!notify-send \"You have removed a task!\" \"\%T\%: \%D\%\" -u critical &"
-
-# default fitlers
-set "filter" "31" # 0b11111
-set "tag_filter" "-1"
-set "regex_filter" ""
-
-# appearance
-set "all_cols" "ifldtD"
-set "cols" "ifdtD"
-set "listview_cols" "itep"
-set "details_cols" "dl"
-
-set "status_fields" "piflms"
-set "listview_status_fields" "fms"
-
-set "charset.box_strong" "┃━┏┓┗┛"
-set "charset.box_light" "|-++++"
-set "charset.separators" "│||"
-
-set "charset.row_separator.offset" "0"
-
-set "colors.background" "-1"
-set "colors.title" "12"
-set "colors.entry_completed" "2"
-set "colors.entry_coming" "3"
-set "colors.entry_failed" "1"
-set "colors.status" "-1"
-set "colors.status_standout" "false"
-set "shift_multivars" "false"

@@ -345,84 +345,11 @@ void cmd_init()
 	};
 
 	// "fake" cvars
-	cvar_wrap_int("halfdelay_time", cui_halfdelay_time);
+	// CORE CVARS
+	cvar_wrap_bool("allow_root", allow_root);
+	cvar_wrap_bool("autorun_daemon", da_fork_autostart);
 
-	cvar_wrap_int("tag_filter", cui_tag_filter);
-	cvars["tag_filter"]->setter = [] (const string& val)
-	{
-		try
-		{
-			if (val == "all") 
-			{
-				cui_tag_filter = CUI_TAG_ALL;
-				return;
-			}
-
-			const int new_filter = stoi(val);
-
-			if (new_filter == cui_tag_filter) cui_tag_filter = CUI_TAG_ALL;
-			else cui_tag_filter = new_filter;
-
-			cvars["pname"]->predefine(to_string(cui_tag_filter));
-		} catch (const invalid_argument& e) {}
-	};
-	cvars["tag_filter"]->flags |= CVAR_FLAG_NO_PREDEF;
-	cvars["tag_filter"]->predefine("all");
-
-	cvar_wrap_int("tag_filter_v", cui_tag_filter);
-	cvars["tag_filter_v"]->setter = [] (const string& val)
-	{
-		if (val == "all")
-		{
-			cui_tag_filter = CUI_TAG_ALL;
-			return;
-		}
-
-		try
-		{
-			const int new_filter = stoi(val);
-			const int dir = (new_filter >= cui_tag_filter) ? 1 : -1;
-
-			cui_tag_filter = new_filter;
-
-			while (!cui_l_is_visible(cui_tag_filter))
-			{
-				cui_tag_filter += dir;
-
-				if (cui_tag_filter >= (int)t_tags.size()) // wwithout (int) returns true
-									// with any negative cui_tag_filter
-				{
-					cui_tag_filter = CUI_TAG_ALL;
-					return;
-				}
-
-				if (cui_tag_filter < CUI_TAG_ALL)
-					cui_tag_filter = t_tags.size() - 1;
-			}
-
-			cvars["pname"]->predefine(to_string(cui_tag_filter));
-		} catch (const invalid_argument& e) {}
-	};
-	cvars["tag_filter_v"]->flags |= CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
-	cvars["tag_filter_v"]->predefine("-1");
-
-	cvar_wrap_int("filter", cui_filter);
-
-	cvar_wrap_string("regex_filter", cui_normal_regex_filter);
-	cvar_wrap_string("list_regex_filter", cui_listview_regex_filter);
-
-	cvar_wrap_string("contexec_cmd_regex", cui_contexec_regex_filter);
-
-	cvar_wrap_bool("colors.status_standout", cui_status_standout);
-
-	cvar_wrap_bool("shift_multivars", cui_shift_multivars);
-
-	cvar_wrap_int("colors.background", cui_color_bg);
-	cvar_wrap_int("colors.title", cui_color_title);
-	cvar_wrap_int("colors.status", cui_color_status);
-	cvar_wrap_int("colors.entry_completed", cui_color_complete);
-	cvar_wrap_int("colors.entry_coming", cui_color_coming);
-	cvar_wrap_int("colors.entry_failed", cui_color_failed);
+	cvar_wrap_string("cmd.contexec", cui_contexec_regex_filter);
 
 	cvar_wrap_int("mode", cui_mode, CVAR_FLAG_NO_PREDEF);
 	cvars["mode"]->setter = [] (const string& val)
@@ -435,6 +362,7 @@ void cmd_init()
 	};
 	cvars["mode"]->predefine("-1");
 
+	// ENTRY FIELDS
 	cvar_wrap_int("id", cui_s_line, CVAR_FLAG_NO_PREDEF);
 	cvars["id"]->setter = [] (const string& val)
 	{
@@ -464,33 +392,33 @@ void cmd_init()
 	};
 	cvars["id"]->predefine("0");
 
-	cvars["T"] = make_unique<cvar_base_s>();
-	cvars["T"]->getter = [] ()
+	cvars["title"] = make_unique<cvar_base_s>();
+	cvars["title"]->getter = [] ()
 	{
 		if (cmd_sel_entry == nullptr)  return string();
 		return cmd_sel_entry->title;
 	};
-	cvars["T"]->setter = [] (const string& val)
+	cvars["title"]->setter = [] (const string& val)
 	{
 		if (cmd_sel_entry == nullptr) return;
 		cmd_sel_entry->title = val;
 		if (li_autosave) li_save();
 	};
-	cvars["T"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvars["title"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
-	cvars["D"] = make_unique<cvar_base_s>();
-	cvars["D"]->getter = [] ()
+	cvars["desc"] = make_unique<cvar_base_s>();
+	cvars["desc"]->getter = [] ()
 	{
 		if (cmd_sel_entry == nullptr)  return string();
 		return cmd_sel_entry->description;
 	};
-	cvars["D"]->setter = [] (const string& val)
+	cvars["desc"]->setter = [] (const string& val)
 	{
 		if (cmd_sel_entry == nullptr) return;
 		cmd_sel_entry->description = val;
 		if (li_autosave) li_save();
 	};
-	cvars["D"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvars["desc"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["due"] = make_unique<cvar_base_s>();
 	cvars["due"]->getter = [] ()
@@ -568,87 +496,129 @@ void cmd_init()
 	};
 	cvars["pname"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
-	cvars["last_visible_id"] = make_unique<cvar_base_s>();
-	cvars["last_visible_id"]->getter = [] () 
+	// FILTERS
+	cvar_wrap_string("norm.regex_filter", cui_normal_regex_filter);
+	cvar_wrap_string("livi.regex_filter", cui_listview_regex_filter);
+
+	cvar_wrap_int("tag_filter", cui_tag_filter);
+	cvars["tag_filter"]->setter = [] (const string& val)
 	{
-		int ret = -1;
-		for (int i = 0; i < t_list.size(); i++)
-			if (cui_is_visible(i)) ret = i;
+		try
+		{
+			if (val == "all") 
+			{
+				cui_tag_filter = CUI_TAG_ALL;
+				return;
+			}
 
-		return to_string(ret);
+			const int new_filter = stoi(val);
+
+			if (new_filter == cui_tag_filter) cui_tag_filter = CUI_TAG_ALL;
+			else cui_tag_filter = new_filter;
+
+			cvars["pname"]->predefine(to_string(cui_tag_filter));
+		} catch (const invalid_argument& e) {}
 	};
-	cvars["last_visible_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	cvars["tag_filter"]->flags |= CVAR_FLAG_NO_PREDEF;
+	cvars["tag_filter"]->predefine("all");
 
-	cvars["first_visible_id"] = make_unique<cvar_base_s>();
-	cvars["first_visible_id"]->getter = [] () 
+	cvar_wrap_int("tag_filter_v", cui_tag_filter);
+	cvars["tag_filter_v"]->setter = [] (const string& val)
 	{
-		for (int i = 0; i < t_list.size(); i++)
-			if (cui_is_visible(i)) return to_string(i);
+		if (val == "all")
+		{
+			cui_tag_filter = CUI_TAG_ALL;
+			return;
+		}
 
-		return string("-1");
+		try
+		{
+			const int new_filter = stoi(val);
+			const int dir = (new_filter >= cui_tag_filter) ? 1 : -1;
+
+			cui_tag_filter = new_filter;
+
+			while (!cui_l_is_visible(cui_tag_filter))
+			{
+				cui_tag_filter += dir;
+
+				if (cui_tag_filter >= (int)t_tags.size()) // wwithout (int) returns true
+									// with any negative cui_tag_filter
+				{
+					cui_tag_filter = CUI_TAG_ALL;
+					return;
+				}
+
+				if (cui_tag_filter < CUI_TAG_ALL)
+					cui_tag_filter = t_tags.size() - 1;
+			}
+
+			cvars["pname"]->predefine(to_string(cui_tag_filter));
+		} catch (const invalid_argument& e) {}
 	};
-	cvars["first_visible_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	cvars["tag_filter_v"]->flags |= CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvars["tag_filter_v"]->predefine("-1");
 
-	cvars["last_visible_list"] = make_unique<cvar_base_s>();
-	cvars["last_visible_list"]->getter = [] () 
-	{
-		int ret = -1;
-		for (int i = 0; i < t_tags.size(); i++)
-			if (cui_l_is_visible(i)) ret = i;
+	cvar_wrap_int("filter", cui_filter);
 
-		return to_string(ret);
-	};
-	cvars["last_visible_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	// FILTER BITS
+	cvar_wrap_maskflag("filter.uncat", cui_filter, CUI_FILTER_UNCAT, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("filter.complete", cui_filter, CUI_FILTER_COMPLETE, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("filter.coming", cui_filter, CUI_FILTER_COMING, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("filter.failed", cui_filter, CUI_FILTER_FAILED, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("filter.nodue", cui_filter, CUI_FILTER_NODUE, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_maskflag("filter.empty", cui_filter, CUI_FILTER_EMPTY);
 
-	cvars["first_visible_list"] = make_unique<cvar_base_s>();
-	cvars["first_visible_list"]->getter = [] () 
-	{
-		for (int i = 0; i < t_tags.size(); i++)
-			if (cui_l_is_visible(i)) return to_string(i);
+	// UI SETUP
+	cvar_wrap_int("halfdelay_time", cui_halfdelay_time);
 
-		return string("-1");
-	};
-	cvars["first_visible_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	cvar_wrap_bool("frameshift_multistr", cui_shift_multivars);
 
-	cvars["VER"] = make_unique<cvar_base_s>();
-	cvars["VER"]->getter = [] () { return VERSION; };
-	cvars["VER"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	cvar_wrap_string("norm.cols.all", cui_normal_all_cols);
+	cvar_wrap_string("norm.cols", cui_normal_cols);
+	cvar_wrap_string("livi.cols", cui_listview_cols);
+	cvar_wrap_string("det.cols", cui_details_cols);
 
-	cvar_wrap_string("all_cols", cui_normal_all_cols);
-	cvar_wrap_string("cols", cui_normal_cols);
-	cvar_wrap_string("listview_cols", cui_listview_cols);
-	cvar_wrap_string("details_cols", cui_details_cols);
+	cvar_wrap_string("norm.status_fields", cui_normal_status_fields);
+	cvar_wrap_string("livi.status_fields", cui_listview_status_fields);
 
-	cvar_wrap_string("status_fields", cui_normal_status_fields);
-	cvar_wrap_string("listview_status_fields", cui_listview_status_fields);
-
+	// CHARACTER SET
 	cvar_wrap_multistr("charset.separators", cui_separators, 3);
-	cvar_wrap_multistr_element("charset.row_separator", cui_separators, CHAR_ROW_SEP);
-	cvar_wrap_int("charset.row_separator.offset", cui_row_separator_offset);
-	cvar_wrap_multistr_element("charset.status_separator", cui_separators, CHAR_STA_SEP);
-	cvar_wrap_multistr_element("charset.details_separator", cui_separators, CHAR_DET_SEP);
-
 	cvar_wrap_multistr("charset.box_strong", cui_box_strong, 6);
 	cvar_wrap_multistr("charset.box_light", cui_box_light, 6);
-	cvar_wrap_multistr_element("charset.box_border_v", cui_box_strong, CHAR_VLINE);
-	cvar_wrap_multistr_element("charset.box_border_h", cui_box_strong, CHAR_HLINE);
-	cvar_wrap_multistr_element("charset.box_corner_1", cui_box_strong, CHAR_CORN1);
-	cvar_wrap_multistr_element("charset.box_corner_2", cui_box_strong, CHAR_CORN2);
-	cvar_wrap_multistr_element("charset.box_corner_3", cui_box_strong, CHAR_CORN3);
-	cvar_wrap_multistr_element("charset.box_corner_4", cui_box_strong, CHAR_CORN4);
-	cvar_wrap_multistr_element("charset.box_ui_line_h", cui_box_light, CHAR_HLINE);
 
-	cvar_wrap_maskflag("lview_show_empty", cui_filter, CUI_FILTER_EMPTY);
+	// SINGLE CHARACTER WRAPPERS
+	cvar_wrap_multistr_element("charset.separators.row", cui_separators, CHAR_ROW_SEP);
+	cvar_wrap_multistr_element("charset.separators.status", cui_separators, CHAR_STA_SEP);
+	cvar_wrap_multistr_element("charset.separators.details", cui_separators, CHAR_DET_SEP);
 
-	cvar_wrap_maskflag("show_uncat", cui_filter, CUI_FILTER_UNCAT, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("show_complete", cui_filter, CUI_FILTER_COMPLETE, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("show_coming", cui_filter, CUI_FILTER_COMING, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("show_failed", cui_filter, CUI_FILTER_FAILED, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("show_nodue", cui_filter, CUI_FILTER_NODUE, CVAR_FLAG_WS_IGNORE);
+	cvar_wrap_multistr_element("charset.box_strong.v", cui_box_strong, CHAR_VLINE);
+	cvar_wrap_multistr_element("charset.box_strong.h", cui_box_strong, CHAR_HLINE);
+	cvar_wrap_multistr_element("charset.box_strong.corn1", cui_box_strong, CHAR_CORN1);
+	cvar_wrap_multistr_element("charset.box_strong.corn2", cui_box_strong, CHAR_CORN2);
+	cvar_wrap_multistr_element("charset.box_strong.corn3", cui_box_strong, CHAR_CORN3);
+	cvar_wrap_multistr_element("charset.box_strong.corn4", cui_box_strong, CHAR_CORN4);
+	cvar_wrap_multistr_element("charset.box_light.v", cui_box_light, CHAR_VLINE);
+	cvar_wrap_multistr_element("charset.box_light.h", cui_box_light, CHAR_HLINE);
+	cvar_wrap_multistr_element("charset.box_light.corn1", cui_box_light, CHAR_CORN1);
+	cvar_wrap_multistr_element("charset.box_light.corn2", cui_box_light, CHAR_CORN2);
+	cvar_wrap_multistr_element("charset.box_light.corn3", cui_box_light, CHAR_CORN3);
+	cvar_wrap_multistr_element("charset.box_light.corn4", cui_box_light, CHAR_CORN4);
 
-	cvar_wrap_bool("allow_root", allow_root);
-	cvar_wrap_bool("daemon.fork_autostart", da_fork_autostart);
+	// CHARACTER SET: MISC
+	cvar_wrap_int("charset.separators.row.offset", cui_row_separator_offset);
 
+	// COLORSCHEME
+	cvar_wrap_int("colors.bg", cui_color_bg);
+	cvar_wrap_int("colors.title", cui_color_title);
+	cvar_wrap_int("colors.status", cui_color_status);
+	cvar_wrap_int("colors.entry_completed", cui_color_complete);
+	cvar_wrap_int("colors.entry_coming", cui_color_coming);
+	cvar_wrap_int("colors.entry_failed", cui_color_failed);
+
+	cvar_wrap_bool("colors.status_standout", cui_status_standout);
+
+	// DAEMON ACTIONS
 	cvar_wrap_string("on_daemon_launch_action", da_launch_action);
 	cvar_wrap_string("on_task_failed_action", da_task_failed_action);
 	cvar_wrap_string("on_task_coming_action", da_task_coming_action);
@@ -657,8 +627,55 @@ void cmd_init()
 	cvar_wrap_string("on_task_new_action", da_task_new_action);
 	cvar_wrap_string("on_task_removed_action", da_task_removed_action);
 
+	// HELPER CVARS
+	cvars["last_v_id"] = make_unique<cvar_base_s>();
+	cvars["last_v_id"]->getter = [] () 
+	{
+		int ret = -1;
+		for (int i = 0; i < t_list.size(); i++)
+			if (cui_is_visible(i)) ret = i;
+
+		return to_string(ret);
+	};
+	cvars["last_v_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+
+	cvars["first_v_id"] = make_unique<cvar_base_s>();
+	cvars["first_v_id"]->getter = [] () 
+	{
+		for (int i = 0; i < t_list.size(); i++)
+			if (cui_is_visible(i)) return to_string(i);
+
+		return string("-1");
+	};
+	cvars["first_v_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+
+	cvars["last_v_list"] = make_unique<cvar_base_s>();
+	cvars["last_v_list"]->getter = [] () 
+	{
+		int ret = -1;
+		for (int i = 0; i < t_tags.size(); i++)
+			if (cui_l_is_visible(i)) ret = i;
+
+		return to_string(ret);
+	};
+	cvars["last_v_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+
+	cvars["first_v_list"] = make_unique<cvar_base_s>();
+	cvars["first_v_list"]->getter = [] () 
+	{
+		for (int i = 0; i < t_tags.size(); i++)
+			if (cui_l_is_visible(i)) return to_string(i);
+
+		return string("-1");
+	};
+	cvars["first_v_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+
 	cvar_wrap_int("numbuffer", cui_numbuffer, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
 	cvars["numbuffer"]->predefine("-1");
+
+	cvars["VER"] = make_unique<cvar_base_s>();
+	cvars["VER"]->getter = [] () { return VERSION; };
+	cvars["VER"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 }
 
 vector<string> cmd_break(const string& cmdline)
