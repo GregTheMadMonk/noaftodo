@@ -454,14 +454,8 @@ void cmd_init()
 	// command "save[ <filename>]" - force the list save. If <filename> is not specified, override opened file.
 	cmds["save"] = [] (const vector<string>& args)
 	{
-		if (args.size() < 1)
-		{
-			if (errors == 0) li_save();
-			else {
-				log("Program is in safe mode due to errors. If you are sure, specify list filename manually.", LP_ERROR);
-				return CMD_ERR_EXTERNAL;
-			}
-		} else 			li_save(args.at(0));
+		if (args.size() < 1) return li_save();
+		else return li_save(args.at(0));
 		return 0;
 	};
 

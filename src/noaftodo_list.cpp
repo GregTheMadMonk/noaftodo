@@ -314,13 +314,15 @@ void li_load(const string& filename, const bool& load_workspace)
 	li_load(load_workspace);
 }
 
-void li_save()
+int li_save(const string& filename)
 {
-	if (li_has_changed())
+	if ((filename == li_filename) && li_has_changed())
 	{
 		log("File was modified since its last recorded change. Skipping save!", LP_ERROR);
-		return;
+		return 1;
 	}
+
+	li_filename = filename;
 
 	log("Saving...");
 
@@ -367,12 +369,18 @@ void li_save()
 	li_upd_stat();
 
 	log("Changes written to file " + li_filename);
+
+	return 0;
 }
 
-void li_save(const string& filename)
+int li_save()
 {
-	li_filename = filename;
-	li_save();
+	if (errors != 0)
+	{
+		log("Aborting li_save() in safe mode: saving in safe mode is prohibited without an explicit path specifition", LP_ERROR);
+		return 1;
+	}
+	return li_save(li_filename);
 }
 
 void li_upd_stat()

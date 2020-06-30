@@ -90,8 +90,8 @@ extern struct stat li_file_stat;
 void li_load(const bool& load_workspace = true);
 void li_load(const std::string& filename, const bool& load_workspace = true);
 
-void li_save();
-void li_save(const std::string& filename);
+int li_save();
+int li_save(const std::string& filename);
 
 void li_upd_stat();
 bool li_has_changed();
