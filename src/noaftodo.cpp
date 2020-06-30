@@ -1,5 +1,6 @@
 #include "noaftodo.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <pwd.h>
@@ -37,8 +38,11 @@ int main(int argc, char* argv[])
 
 	run_mode = PM_DEFAULT;
 
-	li_filename = string(getpwuid(getuid())->pw_dir) + "/.noaftodo-list";
-	conf_filename = string(getpwuid(getuid())->pw_dir) + "/.config/noaftodo.conf";
+	const char* home = getenv("HOME");
+	const char* xdg_conf = getenv("XDG_CONFIG_HOME");
+
+	li_filename = string((home == nullptr) ? "." : home) + "/.noaftodo-list";
+	conf_filename = string((xdg_conf == nullptr) ? ((home == nullptr) ? "." : home) : xdg_conf) + "/noaftodo.conf";
 
 	// parse arguments
 	for (int i = 1; i < argc; i++)
