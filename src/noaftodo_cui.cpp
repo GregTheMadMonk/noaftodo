@@ -529,7 +529,7 @@ bool cui_is_visible(const int& entryID)
 
 	const auto& entry = t_list.at(entryID);
 
-	bool ret = ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == entry.tag));
+	bool ret = ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == entry.tag) || (cui_mode == CUI_MODE_LISTVIEW));
 
 	if (entry.completed) 	ret = ret && (cui_filter & CUI_FILTER_COMPLETE);
 	if (entry.is_failed()) 	ret = ret && (cui_filter & CUI_FILTER_FAILED);
