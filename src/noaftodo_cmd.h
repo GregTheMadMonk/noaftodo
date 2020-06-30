@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-constexpr int CMD_ERR_ARG_COUNT 	= 1;
-constexpr int CMD_ERR_ARG_TYPE 		= 2;
-constexpr int CMD_ERR_EXTERNAL		= -1;
+constexpr int CMD_ERR_ARG_COUNT 	= 2;
+constexpr int CMD_ERR_ARG_TYPE 		= 3;
+constexpr int CMD_ERR_EXTERNAL		= 1;
 
 extern std::map<std::string, std::function<int(const std::vector<std::string>& args)>> cmd_cmds;
 extern std::map<std::string, std::string> cmd_aliases;
