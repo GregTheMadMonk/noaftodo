@@ -185,22 +185,7 @@ void cmd_init()
 		return 0;
 	};
 
-	// command "lmv <list_id>" - move selected task to a list.
-	cmd_cmds["lmv"] = [] (const vector<string>& args)
-	{
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-		try {
-			t_list[cui_s_line].tag = stoi(args.at(0));
-			if (li_autosave) li_save();
-
-			return 0;
-		} catch (const invalid_argument& e) {
-			return CMD_ERR_ARG_TYPE;
-		}
-	};
-
-	// command "bind <key> <command> <mode> <autoexec>" - bind <key> to <command>. <mode> speciifes, which modes use this bind (mask, see noaftodo_cui.h for CUI_MODE_* values). If <autoexec> is "true", execute command on key hit, otherwise just go into command mode with it.
+	// command "bind <key> <command> <mode> <autoexec>" - bind <key> to <command>. <mode> speciifes, which modes use this bind (mask, see noaftodo_cui.h for CUI_MODE_* values). If <autoexec> is "true", execute command on key hit, otherwise just go into command mode with it. Running as just "bind <key>" removes a bind.
 	cmd_cmds["bind"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
@@ -237,7 +222,7 @@ void cmd_init()
 		return removed ? 0 : CMD_ERR_EXTERNAL;
 	};
 
-	// command "math <num1> <op> <num2> <name>" - calculate math expression (+,-,/,*,=,<,>,min,max) and write to cvar <name>. If <name> is not specifed, just print the result out
+	// command "math <num1> <op> <num2>[ <name>]" - calculate math expression (+,-,/,*,=,<,>,min,max) and write to cvar <name>. If <name> is not specifed, just print the result out
 	cmd_cmds["math"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
@@ -537,6 +522,23 @@ void cmd_init()
 		return replace_special(cmd_sel_entry->meta_str());
 	};
 	cvars["meta"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+
+	cvars["parent"] = make_unique<cvar_base_s>();
+	cvars["parent"]->getter = [] ()
+	{
+		if (cmd_sel_entry == nullptr)  return string();
+		return to_string(cmd_sel_entry->tag);
+	};
+	cvars["parent"]->setter = [] (const string& val)
+	{
+		if (cmd_sel_entry == nullptr) return;
+		try
+		{
+			cmd_sel_entry->tag = stoi(val);
+			if (li_autosave) li_save();
+		} catch (const invalid_argument& e) { }
+	};
+	cvars["parent"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["pname"] = make_unique<cvar_base_s>(); // parent [list] name
 	cvars["pname"]->getter = [] () 
