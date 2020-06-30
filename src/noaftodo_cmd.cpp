@@ -16,7 +16,6 @@
 #include "noaftodo_cui.h"
 #include "noaftodo_cvar.h"
 #include "noaftodo_daemon.h"
-#include "noaftodo_list.h"
 #include "noaftodo_time.h"
 
 using namespace std;
@@ -25,6 +24,8 @@ map<string, function<int(const vector<string>& args)>> cmd_cmds;
 map<string, string> cmd_aliases;
 
 string cmd_buffer;
+
+noaftodo_entry* cmd_sel_entry = nullptr;
 
 void cmd_init()
 {
@@ -64,6 +65,12 @@ void cmd_init()
 	cmd_cmds["alias"] = [] (const vector<string>& args)
 	{
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		if (args.size() == 1)
+		{
+			cmd_aliases.erase(args.at(0));
+			return 0;
+		}
 
 		string alargs;
 		for (int i = 1; i < args.size(); i++) 
@@ -133,11 +140,11 @@ void cmd_init()
 					if (li_autosave) li_save();
 				}
 				else return CMD_ERR_EXTERNAL;
-			}	
+			}
 
 			// go to created task
 			for (int i = 0; i < t_list.size(); i++)
-				if (t_list.at(i) == new_entry) cmd_exec("g " + to_string(i));
+				if (t_list.at(i) == new_entry) cui_s_line = i;
 
 			return 0;
 		} catch (const invalid_argument& e) {
@@ -480,6 +487,56 @@ void cmd_init()
 		} catch (const invalid_argument& e) {}
 	};
 	cvars["id"]->predefine("0");
+
+	cvars["T"] = make_unique<cvar_base_s>();
+	cvars["T"]->getter = [] ()
+	{
+		if (cmd_sel_entry == nullptr)  return string();
+		return cmd_sel_entry->title;
+	};
+	cvars["T"]->setter = [] (const string& val)
+	{
+		if (cmd_sel_entry == nullptr) return;
+		cmd_sel_entry->title = val;
+		if (li_autosave) li_save();
+	};
+	cvars["T"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+
+	cvars["D"] = make_unique<cvar_base_s>();
+	cvars["D"]->getter = [] ()
+	{
+		if (cmd_sel_entry == nullptr)  return string();
+		return cmd_sel_entry->description;
+	};
+	cvars["D"]->setter = [] (const string& val)
+	{
+		if (cmd_sel_entry == nullptr) return;
+		cmd_sel_entry->description = val;
+		if (li_autosave) li_save();
+	};
+	cvars["D"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+
+	cvars["due"] = make_unique<cvar_base_s>();
+	cvars["due"]->getter = [] ()
+	{
+		if (cmd_sel_entry == nullptr)  return string();
+		return ti_cmd_str(cmd_sel_entry->due);
+	};
+	cvars["due"]->setter = [] (const string& val)
+	{
+		if (cmd_sel_entry == nullptr) return;
+		cmd_sel_entry->due = ti_to_long(val);
+		if (li_autosave) li_save();
+	};
+	cvars["due"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+
+	cvars["meta"] = make_unique<cvar_base_s>();
+	cvars["meta"]->getter = [] ()
+	{
+		if (cmd_sel_entry == nullptr)  return string();
+		return replace_special(cmd_sel_entry->meta_str());
+	};
+	cvars["meta"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["pname"] = make_unique<cvar_base_s>(); // parent [list] name
 	cvars["pname"]->getter = [] () 

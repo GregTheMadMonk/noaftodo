@@ -88,7 +88,8 @@ const std::vector<std::string> SPECIAL =
 { 
 	"\\",
 	"\"", 
-	";"
+	";",
+	" "
 };
 
 // string <-> wstring converter

@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "noaftodo_list.h"
+
 constexpr int CMD_ERR_ARG_COUNT 	= 2;
 constexpr int CMD_ERR_ARG_TYPE 		= 3;
 constexpr int CMD_ERR_EXTERNAL		= 1;
@@ -14,6 +16,8 @@ extern std::map<std::string, std::function<int(const std::vector<std::string>& a
 extern std::map<std::string, std::string> cmd_aliases;
 
 extern std::string cmd_buffer;
+
+extern noaftodo_entry* cmd_sel_entry;
 
 void cmd_init();
 std::vector<std::string> cmd_break(const std::string& cmdline); // breaks the line into single commands

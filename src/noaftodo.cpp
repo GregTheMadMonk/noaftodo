@@ -198,26 +198,20 @@ void log(const string& message, const char& prefix, const int& sleep_sec)
 
 string format_str(string str, const noaftodo_entry& li_entry, const bool& renotify)
 {
+	if (li_entry == NULL_ENTRY) cmd_sel_entry = nullptr;
+	else cmd_sel_entry = &li_entry;
+
 	int index = -1;
 
 	// fire all prompts
 	while ((index = str.find("%prompt%")) 	!= string::npos) str.replace(index, 8, cui_active ? cui_prompt() : [] () { string input; cout << "prompt :: "; cin >> input; return input; }());
-
-	// replace entry data
-	if (li_entry != NULL_ENTRY)
-	{
-		while ((index = str.find("%T%")) 	!= string::npos) str.replace(index, 3, replace_special(li_entry.title));
-		while ((index = str.find("%D%")) 	!= string::npos) str.replace(index, 3, replace_special(li_entry.description));
-		while ((index = str.find("%due%")) 	!= string::npos) str.replace(index, 5, ti_cmd_str(li_entry.due));
-		while ((index = str.find("%meta%"))	!= string::npos) str.replace(index, 6, li_entry.meta_str());
-	}
 
 	while ((index = str.find("%N%")) 	!= string::npos) str.replace(index, 3, renotify ? "false" : "true");
 
 	// replace %cvars% with their values
 	for (auto it = cvars.begin(); it != cvars.end(); it++)
 		while ((index = str.find("%" + it->first + "%")) != string::npos)
-			str.replace(index, 2 + it->first.length(), *it->second);
+			str.replace(index, 2 + it->first.length(), replace_special(*it->second));
 
 	return str;
 }
