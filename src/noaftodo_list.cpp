@@ -333,6 +333,8 @@ int li_save(const string& filename)
 
 	log("Saving...");
 
+	li_sort();
+
 	ofstream ofile;
 	ofile.open(li_filename, ios::out | ios::trunc);
 
@@ -417,7 +419,7 @@ void li_add(const noaftodo_entry& li_entry)
 	log("Adding " + li_entry.title + "...");
 	t_list.push_back(li_entry);
 
-	li_sort(); // will also autosave
+	if (li_autosave) li_save();
 
 	da_send("A");
 }
@@ -448,14 +450,20 @@ void li_rem(const int& entryID)
 	log("Removing " + t_list.at(entryID).title + "...");
 	t_list.erase(t_list.begin() + entryID);
 
-	li_sort();
+	if (li_autosave) li_save();
 
 	da_send("R");
 }
 
 void li_sort()
 {
+	// sort entries
 	std::sort(t_list.begin(), t_list.end(), less_than_noaftodo_entry());
 
-	if (li_autosave) li_save();
+	// clean useless tags
+	for (int i = t_tags.size() - 1; i >= 0; i--)
+	{
+		if (t_tags.at(i) != to_string(i)) break;
+		t_tags.erase(t_tags.begin() + i);
+	}
 }

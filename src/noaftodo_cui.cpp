@@ -614,7 +614,9 @@ void cui_listview_paint()
 
 	if (v_list.size() != 0) 
 	{
-		while (!cui_l_is_visible(cui_tag_filter)) cui_tag_filter++;
+		while (!cui_l_is_visible(cui_tag_filter) && (cui_tag_filter < t_tags.size())) 
+			cui_tag_filter++; 
+		if (cui_tag_filter == t_tags.size()) cui_tag_filter = CUI_TAG_ALL;
 		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == cui_tag_filter) cui_v_line = i;
 	}
 
