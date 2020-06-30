@@ -77,3 +77,10 @@ clean:
 	@-rmdir $(OBJ_DIR) # will fail if OBJ_DIR is not empty - as we want!
 	@echo Removing execuatable
 	@-rm $(BINARY)
+
+install:
+	@-mkdir -p $(PKGROOT)/usr/bin
+	cp $(BINARY) $(PKGROOT)/usr/bin
+
+uninstall:
+	rm $(PKGROOT)/usr/bin/$(BINARY)
