@@ -4,6 +4,7 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 <img src="workflow.gif" width="576" height="324" alt="NOAFtodo workflow"></img>
 
 ### Current and future features (see [NOAFtodo roadmap](https://github.com/GregTheMadMonk/noaftodo/projects/1) to prepare for non-backwards-compatible changes in command interpreter)
+### This README is kinda... not very informative. If you want to know more about building and using the program, there is a [manual](https://github.com/GregTheMadMonk/noaftodo/wiki/Manual) being created on the Wiki. After it is finished, the README will also be re-written.
 *If you have any problems with the program, please open an issue here. It's much faster than waiting for me to notice a mistake, and I try to fix things as soon as possible.*
 - [x] minimalisic interface written with ncurses
 - [x] multiple lists between which tasks can be moved
@@ -60,29 +61,3 @@ Hope it makes sense.
 You should also know that you can execute system commands with `!<command>`.
 
 The best way to somewhat understand how NOAFtodo command-line works now will be reading **nooaftodo.conf.template**.
-
-### Task categories
-All tasks belong to the following categories and can be filtered by them in normal mode:
-* Completed (marked completed manually)
-* Failed (due has passed)
-* (up)Coming (due is in less than 24 hours)
-* Nodue (doesn't have a due)
-* Uncategorized - all other
-
-### Some of the default normal mode shortcuts:
-* ? - `:?` - shows help
-* q or \<esc> - `:q` - exit program
-* up arrow or k - `:up` - navigate up the list
-* down arrow or j - `:down` - navigate down the list
-* a - `:a a ` (no autoexec) - adds entry (relative time)
-* A - `:a` (no autoexec) - adds entry
-* \<enter> - `:details` - show full information about entry
-* \<space> - `:c` - toggles entry completion
-* d - `:d` (no autoexec) - deletes entry
-* gg - `:g 0`
-* [input number]g - `:g [input number]` - goes to the entry with index [input number], or closest if hidden
-* G - `:g [last item index]`
-* ll - `:list all` - show tasks from all lists
-* [input number]l - `:list [input number]` - switches to view only the list with index [input number]
-* U|F|C|V|N - `:toggle show_[uncat|failed|coming|completed|nodue]` - toggles uncategorized|failed|upcoming|completed|nodue entries visibility
-* / - `:set regex_filter ` - filter tasks
