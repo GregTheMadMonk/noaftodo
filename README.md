@@ -19,6 +19,10 @@ Default list is created as **$HOME/.noaftodo-list** and delault config is copied
 
 Also running without creating a config is supported with `noaftodo -c default`, as default config is included in the program during compilation.
 
+### Installing
+#### AUR
+Program is available in **AUR** as **noaftodo-git**.
+
 ### Building
 Run `make` (`gmake` on Solaris 11).
 
