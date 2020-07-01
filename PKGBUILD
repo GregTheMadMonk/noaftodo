@@ -1,8 +1,3 @@
-# This is an example PKGBUILD file. Use this as a start to creating your own,
-# and remove these comments. For more information, see 'man PKGBUILD'.
-# NOTE: Please fill out the license field for your package! If it is unknown,
-# then please put 'unknown'.
-
 # Maintainer: Gregory Dushkin (GregTheMadMonk) <yagreg7@gmail.com>
 pkgname=noaftodo-git
 pkgver=1.4.0
@@ -15,12 +10,12 @@ depends=(ncurses)
 makedepends=(git make)
 optdepends=('libnotify: provides notify-send commandused in default config' 
 		'dunst: possible notification daemon for notify-send to work')
-source=("git+$url")
+source=("git+$url#branch=pkg")
 md5sums=('SKIP')
 
 pkgver() {
 	cd noaftodo
-	printf "1.4.0_%s" "$(git rev-list --count HEAD)"
+	printf "1.4.0_%s_%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 build() {
@@ -32,4 +27,6 @@ package() {
 	cd noaftodo
 	PKGROOT="$pkgdir" make install
 	install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+	install -Dm644 noaftodo.conf.template -t "$pkgdir/etc/$pkgname"
+	install -Dm644 scripts/* -t "$pkgdir/etc/$pkgname/scripts"
 }

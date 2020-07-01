@@ -79,8 +79,7 @@ clean:
 	@-rm $(BINARY)
 
 install:
-	@-mkdir -p $(PKGROOT)/usr/bin
-	cp $(BINARY) $(PKGROOT)/usr/bin
+	install -Dm755 $(PKGROOT)/usr/bin/$(BINARY)
 
 uninstall:
 	rm $(PKGROOT)/usr/bin/$(BINARY)
