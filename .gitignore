@@ -3,3 +3,4 @@ noaftodo
 obj/*
 doc/*
 !doc/troubleshooting.doc
+src/noaftodo_embed.cpp
