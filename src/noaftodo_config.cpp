@@ -16,8 +16,7 @@ using namespace std;
 
 string conf_filename = "noaftodo.conf";
 
-extern char _binary_noaftodo_conf_template_start;
-extern char _binary_noaftodo_conf_template_end;
+extern string TCONF;
 
 void conf_load(const bool& predefine_cvars, const bool& create_template)
 {
@@ -31,13 +30,13 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 		log("Loading default config...");
 
 		string entry = "";
-		for (char* c = &_binary_noaftodo_conf_template_start; c < &_binary_noaftodo_conf_template_end; c++)
+		for (char c : TCONF)
 		{
-			if (*c == '\n')
+			if (c == '\n')
 			{
 				cmd_exec(entry);
 				entry = "";
-			} else entry += *c;
+			} else entry += c;
 		}
 	} else {
 		log("Loading config from " + conf_file + "...");
@@ -55,8 +54,7 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 
 			oconf << "ver " << CONF_V << endl;
 
-			for (char* c = &_binary_noaftodo_conf_template_start; c < &_binary_noaftodo_conf_template_end; c++)
-				oconf << *c;
+			for (char c : TCONF) oconf << c;
 		}
 
 		iconf = ifstream(conf_file);

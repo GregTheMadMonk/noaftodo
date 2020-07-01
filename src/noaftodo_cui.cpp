@@ -75,8 +75,7 @@ int cui_command_index = 0;
 
 bool cui_active = false;
 
-extern char _binary_doc_doc_gen_start;
-extern char _binary_doc_doc_gen_end;
+extern string DOC;
 
 void cui_init()
 {
@@ -1140,8 +1139,8 @@ void cui_help_paint()
 	int y = 8 + tdelta;
 	int tabs = 0;
 	string cui_help;
-	for (char* c = &_binary_doc_doc_gen_start; c < &_binary_doc_doc_gen_end; c++)
-		cui_help += string(1, *c);
+	for (char c : DOC)
+		cui_help += string(1, c);
 
 	for (int i = 0; i < cui_help.length(); i++)
 	{

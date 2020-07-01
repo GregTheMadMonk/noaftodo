@@ -29,8 +29,7 @@ int log_offset = 0;
 
 wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
 
-extern char _binary_doc_doc_gen_start;
-extern char _binary_doc_doc_gen_end;
+extern string DOC;
 
 int main(int argc, char* argv[])
 {
@@ -157,8 +156,8 @@ void print_help()
 	const int TAB_W = 25;
 	int tabs = 0;
 
-	for (char *c = &_binary_doc_doc_gen_start; c < &_binary_doc_doc_gen_end; c++)
-		switch(*c)
+	for (char c : DOC)
+		switch(c)
 		{
 			case '\n':
 				lines.push_back("");
@@ -170,7 +169,7 @@ void print_help()
 				while (lines.at(lines.size() - 1).length() < TAB_W * tabs) lines[lines.size() - 1] += " ";
 				break;
 			default:
-				lines[lines.size() - 1] += *c;
+				lines[lines.size() - 1] += c;
 				break;
 		}
 
