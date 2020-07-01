@@ -6,8 +6,8 @@ DOC_DIR := doc
 
 CPP := g++
 
-CPP_FLAGS += -DNCURSES_WIDECHAR -fpermissive
-CPP_LINKER_FLAGS += -lncursesw
+CXXFLAGS += -DNCURSES_WIDECHAR -fpermissive
+LDFLAGS += -lncursesw
 
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
 H_FILES := $(wildcard $(SRC_DIR)/*.h)
@@ -32,35 +32,35 @@ ifeq ($(UNAME_S),Haiku)
 endif
 
 ifeq ($(NO_MQUEUE), 1)
-	CPP_FLAGS += -DNO_MQUEUE
+	CXXFLAGS += -DNO_MQUEUE
 else
-	CPP_LINKER_FLAGS += -lrt
+	LDFLAGS += -lrt
 endif
 
 ifeq ($(NO_ROOT_CHECK), 1)
-	CPP_FLAGS += -DNO_ROOT_CHECK
+	CXXFLAGS += -DNO_ROOT_CHECK
 endif
 
 ifeq ($(DEBUG), 1)
-	CPP_FLAGS += -g3
+	CXXFLAGS += -g3
 endif
 
 all: obj_dir $(OBJ_FILES) noaftodo.conf.template doc
 	@echo Source files: $(CPP_FILES)
 	@echo Header files: $(H_FILES)
 	@echo Object files: $(OBJ_FILES)
-	@echo g++ flags: $(CPP_FLAGS)
-	@echo Linker flags: $(CPP_LINKER_FLAGS)
+	@echo g++ flags: $(CXXFLAGS)
+	@echo Linker flags: $(LDFLAGS)
 	@echo Creting embed config...
 	$(OBJCOPY) --input-target binary --output-target $(shell $(OBJDUMP) -f $(OBJ_DIR)/noaftodo_config.o | grep file\ format | sed 's/.*file\ format.//g') --binary-architecture $(shell $(OBJDUMP) -f $(OBJ_DIR)/noaftodo_config.o | grep architecture | sed 's/architecture:\ //g' | sed 's/,.*//g') noaftodo.conf.template $(OBJ_DIR)/noaftodo_config_template.o
 	@echo Creating embed help...
 	$(OBJCOPY) --input-target binary --output-target $(shell $(OBJDUMP) -f $(OBJ_DIR)/noaftodo_config.o | grep file\ format | sed 's/.*file\ format.//g') --binary-architecture $(shell $(OBJDUMP) -f $(OBJ_DIR)/noaftodo_config.o | grep architecture | sed 's/architecture:\ //g' | sed 's/,.*//g') $(DOC_DIR)/doc.gen $(OBJ_DIR)/noaftodo_doc.o
 	@echo Linking binary $(BINARY)...
-	$(CPP) $(CPP_FLAGS) -o $(BINARY) $(OBJ_FILES) $(OBJ_DIR)/noaftodo_config_template.o $(OBJ_DIR)/noaftodo_doc.o $(CPP_LINKER_FLAGS)
+	$(CPP) $(CXXFLAGS) -o $(BINARY) $(OBJ_FILES) $(OBJ_DIR)/noaftodo_config_template.o $(OBJ_DIR)/noaftodo_doc.o $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(H_FILES)
 	@echo Compiling $@...
-	$(CPP) $(CPP_FLAGS) -c -o $@ $<
+	$(CPP) $(CXXFLAGS) -c -o $@ $<
 
 obj_dir:
 	@-mkdir $(OBJ_DIR)

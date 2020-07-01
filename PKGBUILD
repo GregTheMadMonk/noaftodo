@@ -7,7 +7,7 @@ arch=(x86_64 i686)
 url="https://github.com/gregthemadmonk/noaftodo.git"
 license=('GPL3')
 depends=(ncurses)
-makedepends=(git make)
+makedepends=(git make binutils)
 optdepends=('libnotify: provides notify-send commandused in default config' 
 		'dunst: possible notification daemon for notify-send to work')
 source=("git+$url#branch=pkg")
