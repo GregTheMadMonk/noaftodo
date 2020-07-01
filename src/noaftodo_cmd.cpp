@@ -734,9 +734,9 @@ void cmd_run(string command)
 	log_offset++;
 	// replace variables
 	if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
-		command = format_str(command, t_list.at(cui_s_line));
+		command = format_str(command, &t_list.at(cui_s_line));
 	else
-		command = format_str(command, NULL_ENTRY);
+		command = format_str(command, nullptr);
 
 	vector<string> new_commands = cmd_break(command);
 

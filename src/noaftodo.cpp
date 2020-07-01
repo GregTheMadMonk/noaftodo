@@ -199,10 +199,9 @@ void log(const string& message, const char& prefix, const int& sleep_sec)
 	}
 }
 
-string format_str(string str, const noaftodo_entry& li_entry, const bool& renotify)
+string format_str(string str, noaftodo_entry* const li_entry, const bool& renotify)
 {
-	if (li_entry == NULL_ENTRY) cmd_sel_entry = nullptr;
-	else cmd_sel_entry = &li_entry;
+	cmd_sel_entry = li_entry;
 
 	int index = -1;
 

@@ -385,7 +385,7 @@ void cui_run()
 					else 
 					{
 						if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
-							cui_command = w_converter.from_bytes(format_str(bind.command, t_list.at(cui_s_line)));
+							cui_command = w_converter.from_bytes(format_str(bind.command, &t_list.at(cui_s_line)));
 						else
 							cui_command = w_converter.from_bytes(bind.command);
 						cui_set_mode(CUI_MODE_COMMAND);

@@ -40,8 +40,6 @@ struct noaftodo_entry
 	bool is_uncat() const;
 };
 
-const noaftodo_entry NULL_ENTRY = { .tag = -1 };
-
 struct less_than_noaftodo_entry
 {
 	inline bool operator() (const noaftodo_entry& e1, const noaftodo_entry& e2)
