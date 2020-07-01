@@ -19,14 +19,6 @@ OBJ_FILES := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(patsubst %.cpp,%.o,$(CPP_FIL
 
 UNAME_S := $(shell uname -s)
 
-ifeq ($(UNAME_S),SunOS)
-	OBJCOPY := "/usr/gnu/bin/objcopy"
-	OBJDUMP := "/usr/gnu/bin/objdump"
-else
-	OBJCOPY := "/bin/objcopy"
-	OBJDUMP := "/bin/objdump"
-endif
-
 ifeq ($(UNAME_S),Haiku) 
 	# couldn't find mqueue.h on Haiku
 	NO_MQUEUE := 1
