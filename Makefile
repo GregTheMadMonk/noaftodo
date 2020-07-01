@@ -4,7 +4,16 @@ SRC_DIR := src
 OBJ_DIR := obj
 DOC_DIR := doc
 
-CPP := g++
+ifneq (, $(shell which g++))
+	CXX := g++
+else
+ifneq (, $(shell which clang++))
+	CXX := clang++
+else
+	$(error "No C++ compiler fount on the system")
+endif
+endif
+
 
 CXXFLAGS += -DNCURSES_WIDECHAR -fpermissive
 LDFLAGS += -lncursesw
@@ -47,15 +56,15 @@ all: embeds obj_dir $(OBJ_FILES)
 	@echo g++ flags: $(CXXFLAGS)
 	@echo Linker flags: $(LDFLAGS)
 	@echo Linking binary $(BINARY)...
-	$(CPP) $(CXXFLAGS) -o $(BINARY) $(OBJ_FILES) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $(BINARY) $(OBJ_FILES) $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(H_FILES)
 	@echo Compiling $@...
-	$(CPP) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJ_DIR)/noaftodo_embed.o: $(SRC_DIR)/noaftodo_embed.cpp
 	@echo Compiling $@...
-	$(CPP) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 obj_dir:
 	@-mkdir $(OBJ_DIR)
