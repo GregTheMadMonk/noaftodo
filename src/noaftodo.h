@@ -14,7 +14,13 @@ constexpr char TITLE[] = "NOAFtodo";
 constexpr int LIST_V = 1;
 constexpr int CONF_V = 4;
 constexpr int MINOR_V = 0;
+#ifndef V_SUFFIX
 #define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(MINOR_V)
+#else
+#define XMSTR(s) MSTR(s)
+#define MSTR(s) #s
+#define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(MINOR_V) + " " + XMSTR(V_SUFFIX)
+#endif
 
 // program modes
 constexpr int PM_DEFAULT = 0;

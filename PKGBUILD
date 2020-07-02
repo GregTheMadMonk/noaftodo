@@ -21,7 +21,7 @@ build() {
 
 package() {
 	cd noaftodo
-	PKGROOT="$pkgdir" make install
+	V_SUFFIX=AUR PKGROOT="$pkgdir" make install
 	install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 	install -Dm644 noaftodo.conf.template -t "$pkgdir/etc/$pkgname"
 	install -Dm644 scripts/* -t "$pkgdir/etc/$pkgname/scripts"

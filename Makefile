@@ -49,6 +49,10 @@ ifeq ($(DEBUG), 1)
 	CXXFLAGS += -g3
 endif
 
+ifneq (,$(V_SUFFIX))
+	CXXFLAGS += -DV_SUFFIX="$(V_SUFFIX)"
+endif
+
 all: embeds obj_dir $(OBJ_FILES) 
 	@echo Source files: $(CPP_FILES)
 	@echo Header files: $(H_FILES)
