@@ -496,6 +496,11 @@ void cui_set_mode(const int& mode)
 			cvar("tag_filter_copy") = cui_tag_filter;
 			break;
 		case CUI_MODE_DETAILS:
+			if ((cui_s_line < 0) || (cui_s_line >= t_list.size()))
+			{
+				cui_set_mode(-1);
+				return;
+			}
 			cui_delta = 0;
 			curs_set(0);
 			break;
