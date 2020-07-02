@@ -36,9 +36,13 @@ void cmd_init()
 	// command "q" - exit the program.
 	cmd_cmds["q"] = [] (const vector<string>& args)
 	{
-		if (cui_active) cui_mode = CUI_MODE_EXIT;
-		else if ((run_mode == PM_DAEMON) && da_running) da_running = false;
-		else exit(0);
+		try {
+			noaftodo_exit(stoi(args.at(0)));
+			return 0;
+		} catch (const invalid_argument& e) {
+		} catch (const out_of_range& e) { }
+
+		noaftodo_exit();
 		return 0;
 	};
 

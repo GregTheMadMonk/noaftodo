@@ -1,5 +1,6 @@
 #include "noaftodo.h"
 
+#include <csignal>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -27,6 +28,8 @@ bool verbose = false;
 bool enable_log = true;
 int log_offset = 0;
 
+int exit_value = 0;
+
 wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
 
 extern string DOC;
@@ -34,6 +37,15 @@ extern string DOC;
 int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, "");
+
+	auto handler = [] (int signum)
+	{
+		log("Exit requested by signal: " + to_string(signum), LP_IMPORTANT);
+		noaftodo_exit(signum);
+	};
+
+	signal(SIGINT, handler);
+	signal(SIGTERM, handler);
 
 	run_mode = PM_DEFAULT;
 
@@ -54,13 +66,13 @@ int main(int argc, char* argv[])
 		else if (strcmp(argv[i], "-k") * strcmp(argv[i], "--kill-daemon") == 0)
 		{
 			da_kill();
-			return 0;
+			noaftodo_exit();
 		}
 		// argument "-r, --refire" - if daemon is running, re-fire startup events (like, notifications)
 		else if (strcmp(argv[i], "-r") * strcmp(argv[i], "--refire") == 0)
 		{
 			da_send("N");
-			return 0;
+			noaftodo_exit();
 		} 
 		// argument "-c, --config" - specify config file
 		else if (strcmp(argv[i], "-c") * strcmp(argv[i], "--config") == 0)
@@ -71,7 +83,7 @@ int main(int argc, char* argv[])
 				i++;
 			} else {
 				log("Config not specified after " + string(argv[i]), LP_ERROR);
-				return 1;
+				noaftodo_exit(1);
 			}
 		}
 		// argument "-l, --list" - specify list file
@@ -83,7 +95,7 @@ int main(int argc, char* argv[])
 				i++;
 			} else {
 				log("List file not specified after " + string(argv[i]), LP_ERROR);
-				return 1;
+				noaftodo_exit(1);
 			}
 		}
 		// argument "-v, --verbose" - print all messages
@@ -98,7 +110,7 @@ int main(int argc, char* argv[])
 	if (run_mode == PM_HELP) 
 	{
 		print_help();
-		return 0;
+		noaftodo_exit();
 	}
 
 	// init the command-line interpreter
@@ -111,7 +123,7 @@ int main(int argc, char* argv[])
 	if ((geteuid() == 0) && !allow_root)
 	{
 		log("Can't run as root! To disable this check, set \"allow_root\" to \"true\" in your config", LP_ERROR);
-		return 0;
+		noaftodo_exit(1);
 	}
 #endif
 
@@ -145,7 +157,7 @@ int main(int argc, char* argv[])
 
 	if (run_mode == PM_DAEMON)	da_run();
 
-	return 0;
+	return exit_value;
 }
 
 void print_help()
@@ -197,6 +209,18 @@ void log(const string& message, const char& prefix, const int& sleep_sec)
 
 		if (wcui) cui_construct();
 	}
+}
+
+void noaftodo_exit(const int& val)
+{
+	log("Exiting with value: " + to_string(val));
+
+	// if UI or daemon were not started yet, just exit
+	// otherwise, notify components: they have to finish
+	// their job first
+	if (cui_active) { cui_mode = CUI_MODE_EXIT; exit_value = val; }
+	else if ((run_mode == PM_DAEMON) && da_running) { da_running = false; exit_value = val; }
+	else exit(val);
 }
 
 string format_str(string str, noaftodo_entry* const li_entry, const bool& renotify)
