@@ -68,7 +68,7 @@ void da_run()
 	log("OK");
 #endif
 
-	cmd_exec(format_str(da_launch_action, {}));
+	cmd_exec(format_str(da_launch_action, nullptr, true));
 
 	da_running = true;
 	timespec tout;

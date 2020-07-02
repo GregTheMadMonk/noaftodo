@@ -149,7 +149,7 @@ set "colors.entry_failed" "1"
 set "colors.status_standout" "false"
 
 # DAEMON ACTIONS
-set "on_daemon_launch_action" 		"!notify-send \"NOAFtodo v.\%VER\%\" \"Daemon is up and running\" &"
+set "on_daemon_launch_action" 		"!notify-send \"NOAFtodo v.%VER%\" \"Daemon is up and running\" &"
 
 set "on_task_completed_action"		"!\%N\% && notify-send \"You have completed a task!\" \"\%title\%: \%desc\%\" -u low &"
 set "on_task_uncompleted_action" 	"!notify-send \"Task is marked \\\"Not Completed\\\" again!\" \"\%title\%: \%desc\%\" &"
