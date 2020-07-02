@@ -38,6 +38,7 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 				entry = "";
 			} else entry += c;
 		}
+		cmd_exec(entry);
 	} else {
 		log("Loading config from " + conf_file + "...");
 
@@ -65,11 +66,8 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 		}
 
 		string entry;
-
 		while (getline(iconf, entry))
-		{
-			if (entry != "") cmd_exec(entry);
-		}
+			cmd_exec(entry);
 	}
 
 	cmd_terminate();

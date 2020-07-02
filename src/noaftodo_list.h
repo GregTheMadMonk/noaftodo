@@ -17,8 +17,8 @@ struct noaftodo_entry
 	int tag; // also tag = -1 indicates a null entry
 
 	std::map<std::string, std::string> meta;
-	std::string get_meta(const std::string& str);
-	std::string get_meta(const std::string& str) const;
+	std::string get_meta(const std::string& str, const std::string& def = "");
+	std::string get_meta(const std::string& str, const std::string& def = "") const;
 
 	bool sim(const noaftodo_entry& e2);
 	bool sim(const noaftodo_entry& e2) const;

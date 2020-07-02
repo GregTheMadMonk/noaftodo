@@ -277,7 +277,7 @@ void da_check_dues(const bool& renotify)
 			if (!renotify)
 				cmd_exec(format_str(t_list.at(cui_s_line).get_meta("on_failed"), &t_list.at(cui_s_line)));
 		}
-		else if ((t_list.at(cui_s_line).is_coming()) && (renotify || (t_list.at(cui_s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a1d"))))
+		else if ((t_list.at(cui_s_line).is_coming()) && (renotify || (t_list.at(cui_s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a" + t_list.at(cui_s_line).get_meta("warn_time", "1d")))))
 		{
 			cmd_exec(format_str(da_task_coming_action, &t_list.at(cui_s_line), renotify));
 			if (!renotify)

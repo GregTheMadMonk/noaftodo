@@ -20,17 +20,17 @@ bool li_autosave = true;
 
 struct stat li_file_stat;
 
-string noaftodo_entry::get_meta(const string& str) const
+string noaftodo_entry::get_meta(const string& str, const string& def) const
 {
 	try 
 	{
-		return this->meta.at(str);
-	} catch (const out_of_range& e) { return ""; }
+		return (this->meta.at(str) == "") ? def : this->meta.at(str);
+	} catch (const out_of_range& e) { return def; }
 }
 
-string noaftodo_entry::get_meta(const string& str)
+string noaftodo_entry::get_meta(const string& str, const string& def)
 {
-	return const_cast<const noaftodo_entry*>(this)->get_meta(str);
+	return const_cast<const noaftodo_entry*>(this)->get_meta(str, def);
 }
 
 bool noaftodo_entry::operator==(const noaftodo_entry& comp)
@@ -100,7 +100,7 @@ bool noaftodo_entry::is_failed()
 
 bool noaftodo_entry::is_coming() const
 {
-	return !this->completed && !this->is_failed() && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a1d"));
+	return !this->completed && !this->is_failed() && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a" + this->get_meta("warn_time", "1d")));
 }
 
 bool noaftodo_entry::is_coming()
