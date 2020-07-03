@@ -25,6 +25,7 @@ int errors = 0;
 bool allow_root = false;
 
 bool verbose = false;
+bool pure = false;
 bool enable_log = true;
 int log_offset = 0;
 
@@ -92,6 +93,10 @@ int main(int argc, char* argv[]) {
 		// argument "-v, --verbose" - print all messages
 		else if (strcmp(argv[i], "-v") * strcmp(argv[i], "--verbose") == 0) {
 			verbose = true;
+		}
+		// argument "-p, --pure" - use pure output. No intents, no time, just text
+		else if (strcmp(argv[i], "-p") * strcmp(argv[i], "--pure") == 0) {
+			pure = true;
 		} else log("Unrecognized parameter \"" + string(argv[i]), LP_ERROR);
 	}
 
@@ -184,8 +189,11 @@ void log(const string& message, const char& prefix, const int& sleep_sec)
 	if ((prefix != LP_DEFAULT) || verbose) {
 		if (wcui) cui_destroy();
 
-		cout << "[" << ti_log_time() << "][" << prefix << "] ";
-		if (verbose) for (int i = 0; i < log_offset; i++) cout << "  ";
+		if (!pure) {
+			cout << "[" << ti_log_time() << "][" << prefix << "] ";
+			for (int i = 0; i < log_offset; i++) cout << "  ";
+		}
+
 		cout << message << endl;
 
 		if (sleep_sec != 0) sleep(sleep_sec);
@@ -211,7 +219,13 @@ string format_str(string str, noaftodo_entry* const li_entry, const bool& renoti
 	int index = -1;
 
 	// fire all prompts
-	while ((index = str.find("%prompt%")) 	!= string::npos) str.replace(index, 8, cui_active ? cui_prompt() : [] () { string input; cout << "prompt :: "; cin >> input; return input; }());
+	while ((index = str.find("%prompt%")) 	!= string::npos) str.replace(index, 8, cui_active ? cui_prompt() : [] () {
+		string input;
+		if (!pure) cout << "prompt :: ";
+		getline(cin, input);
+		log("Input :" + input);
+		return input;
+	}());
 
 	while ((index = str.find("%N%")) 	!= string::npos) str.replace(index, 3, renotify ? "false" : "true");
 

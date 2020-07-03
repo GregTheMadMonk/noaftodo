@@ -324,7 +324,7 @@ void cmd_init() {
 		for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
 
 		if (cui_active) cui_status = message;
-		else log("echo :: " + message, LP_IMPORTANT);
+		else log((pure ? "" : "echo :: ") + message, LP_IMPORTANT);
 		return 0;
 	};
 
