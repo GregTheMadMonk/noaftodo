@@ -1,0 +1,13 @@
+# naftodo list file
+[tags]
+# tags start at index 0 and go on
+
+[list]
+"-"\"202007050048"\"test"\"test"\"0"\
+
+[workspace]
+ver 4
+set "tag_filter" "-1"
+
+[ver]
+1

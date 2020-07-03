@@ -310,6 +310,14 @@ void cmd_init() {
 		return 0;
 	};
 
+	// command "load <filename>" - load the list file
+	cmd_cmds["load"] = [] (const vector<string>& args) {
+		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
+
+		li_load(args.at(0), true);
+		return 0;
+	};
+
 	// command "echo[ args...]" - print the following in status.
 	cmd_cmds["echo"] = [] (const vector<string>& args) {
 		string message = "";
@@ -327,7 +335,7 @@ void cmd_init() {
 
 	cvar_wrap_string("cmd.contexec", cui_contexec_regex_filter);
 
-	cvar_wrap_int("mode", cui_mode, CVAR_FLAG_NO_PREDEF);
+	cvar_wrap_int("mode", cui_mode, CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE);
 	cvars["mode"]->setter = [] (const string& val) {
 		try {
 			cui_set_mode(stoi(val));
