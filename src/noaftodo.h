@@ -26,6 +26,7 @@ constexpr int MINOR_V = 1;
 constexpr int PM_DEFAULT = 0;
 constexpr int PM_HELP = 1;
 constexpr int PM_DAEMON = 2;
+constexpr int PM_INTERP = 3;
 
 // log prefixes
 constexpr char LP_DEFAULT = 'i';

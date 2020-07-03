@@ -54,12 +54,27 @@ int main(int argc, char* argv[]) {
 	li_filename = string((home == nullptr) ? "." : home) + "/.noaftodo-list";
 	conf_filename = string((xdg_conf == nullptr) ? ((home == nullptr) ? "." : home) : xdg_conf) + "/noaftodo.conf";
 
+	// init the command-line interpreter
+	cmd_init();
+
 	// parse arguments
 	for (int i = 1; i < argc; i++) {
 		// argument "-h, --help" - print help message
 		if (strcmp(argv[i], "-h") * strcmp(argv[i], "--help") == 0) run_mode = PM_HELP;
 		// argument "-d, --daemon" - start daemon
 		else if (strcmp(argv[i], "-d") * strcmp(argv[i], "--daemon") == 0) run_mode = PM_DAEMON;
+		// argument "-I, --interpreter" - start in interpreter mode. Argument after it will be executed as a command
+		else if (strcmp(argv[i], "-I") * strcmp(argv[i], "--interpreter") == 0) run_mode = PM_INTERP;
+		// argument "-C, --command" - execute a command
+		else if (strcmp(argv[i], "-C") * strcmp(argv[i], "--command") == 0) {
+			if (i < argc - 1) {
+				cmd_exec(string(argv[i + 1]));
+				i++;
+			} else {
+				log("No command specified!", LP_ERROR);
+				noaftodo_exit(1);
+			}
+		}
 		// argument "-k, --kill-daemon" - kill daemon
 		else if (strcmp(argv[i], "-k") * strcmp(argv[i], "--kill-daemon") == 0) {
 			da_kill();
@@ -107,8 +122,11 @@ int main(int argc, char* argv[]) {
 		noaftodo_exit();
 	}
 
-	// init the command-line interpreter
-	cmd_init();
+	// interpreter starts without preloading anything
+	if (run_mode == PM_INTERP) {
+		string line;
+		while (getline(cin, line)) cmd_exec(line);
+	}
 
 	// load the config
 	conf_load(true, true);
