@@ -77,16 +77,14 @@ bool cui_active = false;
 
 extern string DOC;
 
-void cui_init()
-{
+void cui_init() {
 	log("Initializing console UI...");
 
 	// initialize columns
 	cui_columns['t'] = 
 	{ 
 		"Title", 
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return free / 4;
 		},
 		[](const noaftodo_entry& e, const int& id) 
@@ -97,8 +95,7 @@ void cui_init()
 	cui_columns['f'] = 
 	{ 
 		"Flags", 
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return 5;
 		},
 		[](const noaftodo_entry& e, const int& id) 
@@ -114,8 +111,7 @@ void cui_init()
 	cui_columns['l'] = 
 	{ 
 		"List", 
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return free / 10;
 		},
 		[](const noaftodo_entry& e, const int& id) 
@@ -130,8 +126,7 @@ void cui_init()
 	cui_columns['d'] = 
 	{ 
 		"Due", 
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return 16;
 		},
 		[](const noaftodo_entry& e, const int& id) 
@@ -143,8 +138,7 @@ void cui_init()
 	cui_columns['D'] = 
 	{ 
 		"Description", 
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return free;
 		},
 		[](const noaftodo_entry& e, const int& id) 
@@ -155,8 +149,7 @@ void cui_init()
 	cui_columns['i'] = 
 	{ 
 		"ID", 
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return 3;
 		},
 		[](const noaftodo_entry& e, const int& id) 
@@ -169,8 +162,7 @@ void cui_init()
 	cui_lview_columns['i'] = 
 	{ 
 		"ID", 
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return 3;
 		},
 		[](const int& list_id) 
@@ -183,8 +175,7 @@ void cui_init()
 	cui_lview_columns['t'] = 
 	{ 
 		"Title", 
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return free / 4;
 		},
 		[](const int& list_id) 
@@ -194,15 +185,12 @@ void cui_init()
 		} 
 	};
 
-	cui_lview_columns['e'] =
-	{
+	cui_lview_columns['e'] = {
 		"Entries",
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return 7;
 		},
-		[](const int& list_id)
-		{
+		[](const int& list_id) {
 			if (list_id == CUI_TAG_ALL) return to_string(t_list.size());
 
 			int ret = 0;
@@ -215,8 +203,7 @@ void cui_init()
 	cui_lview_columns['p'] = 
 	{ 
 		"%", 
-		[](const int& w, const int& free, const int& cols)
-		{
+		[](const int& w, const int& free, const int& cols) {
 			return 4;
 		},
 		[](const int& list_id) 
@@ -225,8 +212,7 @@ void cui_init()
 			int tot = 0;
 
 			for (auto e : t_list)
-				if ((e.tag == list_id) || (CUI_TAG_ALL == list_id))
-				{
+				if ((e.tag == list_id) || (CUI_TAG_ALL == list_id)) {
 					if (e.completed) ret++;
 					tot++;
 				}
@@ -237,22 +223,18 @@ void cui_init()
 	};
 
 	// initialize status fields
-	cui_status_fields['s'] = [] ()
-	{
+	cui_status_fields['s'] = [] () {
 		return cui_status;
 	};
 
-	cui_status_fields['l'] = [] ()
-	{
+	cui_status_fields['l'] = [] () {
 		if (cui_tag_filter == CUI_TAG_ALL) return string("All lists");
 
 		return "List " + to_string(cui_tag_filter) + (((cui_tag_filter < t_tags.size()) && (t_tags.at(cui_tag_filter) != to_string(cui_tag_filter))) ? (": " + t_tags.at(cui_tag_filter)) : "");
 	};
 
-	cui_status_fields['m'] = [] ()
-	{
-		switch (cui_mode)
-		{
+	cui_status_fields['m'] = [] () {
+		switch (cui_mode) {
 			case CUI_MODE_NORMAL:
 				return string("NORMAL");
 				break;
@@ -270,8 +252,7 @@ void cui_init()
 		}
 	};
 
-	cui_status_fields['f'] = [] ()
-	{
+	cui_status_fields['f'] = [] () {
 		return string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
 			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
 			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") + 
@@ -282,8 +263,7 @@ void cui_init()
 			((cui_listview_regex_filter == "") ? "" : (" [l " + cui_listview_regex_filter + "]"));
 	};
 
-	cui_status_fields['i'] = [] ()
-	{
+	cui_status_fields['i'] = [] () {
 		bool has_visible = false;
 
 		for (int i = 0; i < t_list.size(); i++) has_visible |= cui_is_visible(i);
@@ -293,14 +273,12 @@ void cui_init()
 		return to_string(cui_s_line) + "/" + to_string(t_list.size() - 1);
 	};
 
-	cui_status_fields['p'] = [] ()
-	{
+	cui_status_fields['p'] = [] () {
 		int total = 0;
 		int comp = 0;
 
 		for (int i = 0; i < t_list.size(); i++)
-			if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag))
-			{
+			if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag)) {
 				total++;
 				if (t_list.at(i).completed) comp++;
 			}
@@ -310,14 +288,12 @@ void cui_init()
 		return to_string((int)(100.0 * comp / total)) + "%";
 	};
 
-	cui_status_fields['P'] = [] ()
-	{
+	cui_status_fields['P'] = [] () {
 		int total = 0;
 		int comp = 0;
 
 		for (int i = 0; i < t_list.size(); i++)
-			if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag))
-			{
+			if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag)) {
 				total++;
 				if (t_list.at(i).completed) comp++;
 			}
@@ -333,8 +309,7 @@ void cui_init()
 	cui_construct();
 }
 
-void cui_construct()
-{
+void cui_construct() {
 	initscr();
 	start_color();
 	use_default_colors();
@@ -358,33 +333,27 @@ void cui_construct()
 	cui_active = true;
 }
 
-void cui_destroy()
-{
+void cui_destroy() {
 	endwin();
 	cui_active = false;
 }
 
-void cui_run()
-{
+void cui_run() {
 	cui_init();
 	cui_set_mode(CUI_MODE_NORMAL);
 
-	for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0))
-	{
+	for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0)) {
 		if (li_has_changed()) li_load(false); // load only list contents, not the workspace
 		else if ((c == 0) && (!cui_shift_multivars)) continue;
 
-		if (c > 0)
-		{
+		if (c > 0) {
 			const int old_numbuffer = cui_numbuffer;
 			cui_status = "";
 			bool bind_fired = false;
 			for (const auto& bind : binds)
-				if ((bind.mode & cui_mode) && (bind.key == c))
-				{
+				if ((bind.mode & cui_mode) && (bind.key == c)) {
 					if (bind.autoexec) cmd_exec(bind.command);
-					else 
-					{
+					else  {
 						if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
 							cui_command = w_converter.from_bytes(format_str(bind.command, &t_list.at(cui_s_line)));
 						else
@@ -395,8 +364,7 @@ void cui_run()
 					bind_fired = true;
 				}
 
-			if (!bind_fired) switch (cui_mode)
-			{
+			if (!bind_fired) switch (cui_mode) {
 				case CUI_MODE_NORMAL:
 					cui_normal_input(c);
 					break;
@@ -419,8 +387,7 @@ void cui_run()
 		cui_w = getmaxx(stdscr);
 		cui_h = getmaxy(stdscr);
 
-		if (cui_shift_multivars)
-		{
+		if (cui_shift_multivars) {
 			cui_box_strong.shift();
 			cui_box_light.shift();
 			cui_separators.shift();
@@ -430,8 +397,7 @@ void cui_run()
 		cui_box_light.drop();
 		cui_separators.drop();
 
-		switch (cui_mode)
-		{
+		switch (cui_mode) {
 			case CUI_MODE_NORMAL:
 				cui_normal_paint();
 				break;
@@ -449,8 +415,7 @@ void cui_run()
 				break;
 		}
 
-		if (errors != 0) 
-		{
+		if (errors != 0)  {
 			attrset(A_NORMAL);
 			int old_cx, old_cy;
 			getyx(stdscr, old_cy, old_cx);
@@ -468,10 +433,8 @@ void cui_run()
 	da_send("D");
 }
 
-void cui_set_mode(const int& mode)
-{
-	if (mode == -1)
-	{
+void cui_set_mode(const int& mode) {
+	if (mode == -1) {
 		if (cui_prev_modes.size() == 0) return;
 		cui_mode = cui_prev_modes.top();
 		cui_prev_modes.pop();
@@ -482,11 +445,9 @@ void cui_set_mode(const int& mode)
 
 	cui_delta = 0;
 
-	switch (cui_mode)
-	{
+	switch (cui_mode) {
 		case CUI_MODE_NORMAL:
-			if (cvar("tag_filter_copy") != "")
-			{
+			if (cvar("tag_filter_copy") != "") {
 				cui_tag_filter = cvar("tag_filter_copy");
 				cvar_erase("tag_filter_copy");
 			}
@@ -497,8 +458,7 @@ void cui_set_mode(const int& mode)
 			cvar("tag_filter_copy") = cui_tag_filter;
 			break;
 		case CUI_MODE_DETAILS:
-			if ((cui_s_line < 0) || (cui_s_line >= t_list.size()))
-			{
+			if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) {
 				cui_set_mode(-1);
 				return;
 			}
@@ -517,18 +477,15 @@ void cui_set_mode(const int& mode)
 	}
 }
 
-void cui_bind(const cui_bind_s& bind)
-{
+void cui_bind(const cui_bind_s& bind) {
 	binds.push_back(bind);
 }
 
-void cui_bind(const wchar_t& key, const string& command, const int& mode, const bool& autoexec)
-{
+void cui_bind(const wchar_t& key, const string& command, const int& mode, const bool& autoexec) {
 	cui_bind({ key, command, mode, autoexec });
 }
 
-bool cui_is_visible(const int& entryID)
-{
+bool cui_is_visible(const int& entryID) {
 	if (t_list.size() == 0) return false;
 	if ((entryID < 0) && (entryID >= t_list.size())) return false;
 
@@ -545,8 +502,7 @@ bool cui_is_visible(const int& entryID)
 	if (entry.is_uncat())	ret = ret && (cui_filter & CUI_FILTER_UNCAT);
 
 	// fit regex
-	if (cui_normal_regex_filter != "")
-	{
+	if (cui_normal_regex_filter != "") {
 		regex rf_regex(cui_normal_regex_filter);
 
 		ret = ret && (regex_search(entry.title, rf_regex) || regex_search(entry.description, rf_regex));
@@ -555,8 +511,7 @@ bool cui_is_visible(const int& entryID)
 	return ret;
 }
 
-bool cui_l_is_visible(const int& list_id)
-{
+bool cui_l_is_visible(const int& list_id) {
 	if (list_id == CUI_TAG_ALL) return true;
 	if ((list_id < 0) || (list_id >= t_tags.size())) return false;
 
@@ -568,8 +523,7 @@ bool cui_l_is_visible(const int& list_id)
 	else ret = true;
 
 	// fit regex
-	if (cui_listview_regex_filter != "")
-	{
+	if (cui_listview_regex_filter != "") {
 		regex rf_regex(cui_listview_regex_filter);
 
 		ret = ret && regex_search(t_tags.at(list_id), rf_regex);
@@ -578,26 +532,22 @@ bool cui_l_is_visible(const int& list_id)
 	return ret;
 }
 
-void cui_listview_paint()
-{
+void cui_listview_paint() {
 	// draw table title
 	move(0, 0);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
 	for (int i = 0; i < cui_w; i++) addch(' ');
 
 	int x = 0;
-	for (int coln = 0; coln < cui_listview_cols.length(); coln++)
-	{
-		try
-		{
+	for (int coln = 0; coln < cui_listview_cols.length(); coln++) {
+		try {
 			const char& col = cui_listview_cols.at(coln);
 			if (x >= cui_w) break;
 			move(0, x);
 			const int w = cui_lview_columns.at(col).width(cui_w, cui_w - x, cui_listview_cols.length());
 			addstr(cui_lview_columns.at(col).title.c_str());
 
-			if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w)
-			{
+			if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w) {
 				move(0, x + w);
 				addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 			}
@@ -611,14 +561,12 @@ void cui_listview_paint()
 	v_list.push_back(-1);
 	int cui_v_line = -2;
 	for (int l = 0; l < t_tags.size(); l++)
-		if (cui_l_is_visible(l)) 
-		{
+		if (cui_l_is_visible(l))  {
 			v_list.push_back(l);
 			if (l == cui_tag_filter) cui_v_line = v_list.size() - 1;
 		}
 
-	if (v_list.size() != 0) 
-	{
+	if (v_list.size() != 0)  {
 		while (!cui_l_is_visible(cui_tag_filter) && (cui_tag_filter < t_tags.size())) 
 			cui_tag_filter++; 
 		if (cui_tag_filter == t_tags.size()) cui_tag_filter = CUI_TAG_ALL;
@@ -632,31 +580,26 @@ void cui_listview_paint()
 	int last_string = 1;
 	if (v_list.size() == 0) cui_tag_filter = CUI_TAG_ALL;
 	else {
-		for (int l = 0; l < v_list.size(); l++)
-		{
+		for (int l = 0; l < v_list.size(); l++) {
 			cui_separators.drop();
 			cui_separators.shift_at(CHAR_ROW_SEP, cui_row_separator_offset * (l + 1));
 			if (l - cui_delta >= cui_h - 2) break;
-			if (l >= cui_delta)    
-			{
+			if (l >= cui_delta)     {
 				if (l == cui_v_line) attron(A_STANDOUT);
 
 				x = 0;
 				move(l - cui_delta + 1, x);
 				for (int i = 0; i < cui_w; i++) addch(' ');
 
-				for (int coln = 0; coln < cui_listview_cols.length(); coln++)
-				{
-					try
-					{
+				for (int coln = 0; coln < cui_listview_cols.length(); coln++) {
+					try {
 						const char& col = cui_listview_cols.at(coln);
 						if (x >= cui_w) break;
 						move(l - cui_delta + 1, x);
 						const int w = cui_lview_columns.at(col).width(cui_w, cui_w - x, cui_listview_cols.length());
 						addstr((cui_lview_columns.at(col).contents(v_list.at(l))).c_str());
 
-						if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w)
-						{
+						if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w) {
 							move(l - cui_delta + 1, x + w);
 							addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 						}
@@ -679,12 +622,10 @@ void cui_listview_paint()
 
 	string cui_status_l = "";
 
-	for (const char& c : cui_listview_status_fields)
-	{
+	for (const char& c : cui_listview_status_fields) {
 		try {
 			const string field = (cui_status_fields.at(c))();
-			if (field != "")
-			{
+			if (field != "") {
 				if (cui_status_l != "") cui_status_l = " " + cui_separators.s_get(CHAR_STA_SEP) + " " + cui_status_l;
 		       		cui_status_l = field + cui_status_l;
 			}
@@ -703,8 +644,7 @@ void cui_listview_paint()
 void cui_listview_input(const wchar_t& key)
 { }
 
-void cui_normal_paint()
-{
+void cui_normal_paint() {
 	// draw table title
 	move(0, 0);
 	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
@@ -712,18 +652,15 @@ void cui_normal_paint()
 
 	int x = 0;
 	const string cols = (cui_tag_filter == CUI_TAG_ALL) ? cui_normal_all_cols : cui_normal_cols;
-	for (int coln = 0; coln < cols.length(); coln++)
-	{
-		try
-		{
+	for (int coln = 0; coln < cols.length(); coln++) {
+		try {
 			const char& col = cols.at(coln);
 			if (x >= cui_w) break;
 			move(0, x);
 			const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
 			addstr(cui_columns.at(col).title.c_str());
 
-			if (coln < cols.length() - 1) if (x + w < cui_w)
-			{
+			if (coln < cols.length() - 1) if (x + w < cui_w) {
 				move(0, x + w);
 				addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 			}
@@ -736,14 +673,12 @@ void cui_normal_paint()
 	vector<int> v_list;
 	int cui_v_line = -1;
 	for (int l = 0; l < t_list.size(); l++)
-		if (cui_is_visible(l)) 
-		{
+		if (cui_is_visible(l))  {
 			v_list.push_back(l);
 			if (l == cui_s_line) cui_v_line = v_list.size() - 1;
 		}
 
-	if (v_list.size() != 0) 
-	{
+	if (v_list.size() != 0)  {
 		while (!cui_is_visible(cui_s_line)) cmd_exec("math %id% + 1 id"); // sorry, it just includes all precautions I don't want to write again
 		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == cui_s_line) cui_v_line = i;
 	}
@@ -755,13 +690,11 @@ void cui_normal_paint()
 	int last_string = 1;
 	if (v_list.size() == 0) cui_s_line = -1;
 	else {
-		for (int l = 0; l < v_list.size(); l++)
-		{
+		for (int l = 0; l < v_list.size(); l++) {
 			cui_separators.drop();
 			cui_separators.shift_at(CHAR_ROW_SEP, cui_row_separator_offset * (l + 1));
 			if (l - cui_delta >= cui_h - 2) break;
-			if (l >= cui_delta)    
-			{
+			if (l >= cui_delta)     {
 				const noaftodo_entry& entry = t_list.at(v_list.at(l));
 				
 				if (l == cui_v_line) attron(A_STANDOUT);
@@ -773,18 +706,15 @@ void cui_normal_paint()
 				move(l - cui_delta + 1, x);
 				for (int i = 0; i < cui_w; i++) addch(' ');
 
-				for (int coln = 0; coln < cols.length(); coln++)
-				{
-					try
-					{
+				for (int coln = 0; coln < cols.length(); coln++) {
+					try {
 						const char& col = cols.at(coln);
 						if (x >= cui_w) break;
 						move(l - cui_delta + 1, x);
 						const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
 						addstr((cui_columns.at(col).contents(entry, v_list.at(l))).c_str());
 
-						if (coln < cols.length() - 1) if (x + w < cui_w)
-						{
+						if (coln < cols.length() - 1) if (x + w < cui_w) {
 							move(l - cui_delta + 1, x + w);
 							addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 						}
@@ -807,12 +737,10 @@ void cui_normal_paint()
 
 	string cui_status_l = "";
 
-	for (const char& c : cui_normal_status_fields)
-	{
+	for (const char& c : cui_normal_status_fields) {
 		try {
 			const string field = (cui_status_fields.at(c))();
-			if (field != "")
-			{
+			if (field != "") {
 				if (cui_status_l != "") cui_status_l = " " + cui_separators.s_get(CHAR_STA_SEP) + " " + cui_status_l;
 		       		cui_status_l = field + cui_status_l;
 			}
@@ -831,8 +759,7 @@ void cui_normal_paint()
 void cui_normal_input(const wchar_t& key)
 { }
 
-void cui_details_paint()
-{
+void cui_details_paint() {
 	const int tdelta = cui_delta;
 	cui_normal_paint();
 
@@ -858,14 +785,12 @@ void cui_details_paint()
 		cui_box_strong.drop();
 	}
 
-	for (int j = 4; j < cui_w - 4; j++)
-	{
+	for (int j = 4; j < cui_w - 4; j++) {
 		move(2, j);
 		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
 		cui_box_strong.drop();
 
-		for (int i = 3; i < cui_h - 3; i++)
-		{
+		for (int i = 3; i < cui_h - 3; i++) {
 			move(i, j);
 			addch(' ');
 		}
@@ -881,8 +806,7 @@ void cui_details_paint()
 	move(4, 5);
 	addstr(entry.title.c_str());
 
-	for (int i = 4; i < cui_w - 4; i++)
-	{
+	for (int i = 4; i < cui_w - 4; i++) {
 		move(6, i);
 		addstr(cui_box_light.s_get(CHAR_HLINE).c_str());
 		cui_box_light.drop();
@@ -895,10 +819,8 @@ void cui_details_paint()
 		tag = ": " + t_tags.at(entry.tag);
 
 	string info_str = "";
-	for (int coln = 0; coln < cui_details_cols.length(); coln++)
-	{
-		try
-		{
+	for (int coln = 0; coln < cui_details_cols.length(); coln++) {
+		try {
 			const char& col = cui_details_cols.at(coln);
 
 			info_str += cui_columns.at(col).contents(entry, cui_s_line);
@@ -908,8 +830,7 @@ void cui_details_paint()
 
 	addstr(info_str.c_str()); 
 
-	for (int i = 4; i < cui_w - 4; i++)
-	{
+	for (int i = 4; i < cui_w - 4; i++) {
 		move(8, i);
 		addstr(cui_box_light.s_get(CHAR_HLINE).c_str());
 		cui_box_light.drop();
@@ -920,16 +841,13 @@ void cui_details_paint()
 	wstring desc = w_converter.from_bytes(entry.description);
 	int x = 5;
 	int y = 10 + tdelta;
-	for (int i = 0; i < desc.length(); i++)
-	{
-		if (x == cui_w - 5)
-		{
+	for (int i = 0; i < desc.length(); i++) {
+		if (x == cui_w - 5) {
 			x = 5;
 			y++;
 		}
 
-		if (y == cui_h - 4) 
-		{
+		if (y == cui_h - 4)  {
 			move(cui_h - 4, 5);
 			addstr("<- ... ->");
 			break; // could've implemented scrolling
@@ -946,10 +864,8 @@ void cui_details_paint()
 	}
 }
 
-void cui_details_input(const wchar_t& key)
-{
-	switch (key)
-	{
+void cui_details_input(const wchar_t& key) {
+	switch (key) {
 		case KEY_RIGHT:
 			cui_delta--;
 			break;
@@ -964,10 +880,8 @@ void cui_details_input(const wchar_t& key)
 	}
 }
 
-void cui_command_paint()
-{
-	switch (cui_prev_modes.top())
-	{
+void cui_command_paint() {
+	switch (cui_prev_modes.top()) {
 		case CUI_MODE_NORMAL:
 			cui_normal_paint();
 			break;
@@ -993,13 +907,10 @@ void cui_command_paint()
 	move(cui_h - 1, 1 + cui_command_cursor - offset);
 }
 
-void cui_command_input(const wchar_t& key)
-{
-	switch (key)
-	{
+void cui_command_input(const wchar_t& key) {
+	switch (key) {
 		case 10:
-			if (cui_command != L"")
-			{
+			if (cui_command != L"") {
 				cmd_exec(w_converter.to_bytes(cui_command));
 				cui_command_history.push_back(cui_command);
 				cui_command_index = cui_command_history.size();
@@ -1014,8 +925,7 @@ void cui_command_input(const wchar_t& key)
 						// KEY_BACKSPACE - e.g., alacritty
 			cui_command_index = cui_command_history.size();
 
-			if (cui_command_cursor > 0)
-			{
+			if (cui_command_cursor > 0) {
 				cui_command = cui_command.substr(0, cui_command_cursor - 1) + cui_command.substr(cui_command_cursor, cui_command.length() - cui_command_cursor);
 				cui_command_cursor--;
 			}
@@ -1038,8 +948,7 @@ void cui_command_input(const wchar_t& key)
 			break;
 		case KEY_UP:
 			// go up the history
-			if (cui_command_index > 0)
-			{
+			if (cui_command_index > 0) {
 				if (cui_command_index == cui_command_history.size()) cui_command_t = cui_command;
 				cui_command_index--;
 				cui_command = cui_command_history[cui_command_index];
@@ -1049,8 +958,7 @@ void cui_command_input(const wchar_t& key)
 			break;
 		case KEY_DOWN:
 			// go down the history
-			if (cui_command_index < cui_command_history.size() - 1)
-			{
+			if (cui_command_index < cui_command_history.size() - 1) {
 				cui_command_index++;
 				cui_command = cui_command_history[cui_command_index];
 			} else if (cui_command_index == cui_command_history.size() - 1) {
@@ -1074,8 +982,7 @@ void cui_command_input(const wchar_t& key)
 
 			// continious command execution
 			contexec:
-			if (cui_contexec_regex_filter != "")
-			{
+			if (cui_contexec_regex_filter != "") {
 				regex ce_regex(cui_contexec_regex_filter);
 
 				if (regex_search(w_converter.to_bytes(cui_command), ce_regex))
@@ -1084,8 +991,7 @@ void cui_command_input(const wchar_t& key)
 	}
 }
 
-void cui_help_paint()
-{
+void cui_help_paint() {
 	const int tdelta = cui_delta;
 	cui_normal_paint();
 
@@ -1111,14 +1017,12 @@ void cui_help_paint()
 		cui_box_strong.drop();
 	}
 
-	for (int j = 4; j < cui_w - 4; j++)
-	{
+	for (int j = 4; j < cui_w - 4; j++) {
 		move(2, j);
 		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
 		cui_box_strong.drop();
 
-		for (int i = 3; i < cui_h - 3; i++)
-		{
+		for (int i = 3; i < cui_h - 3; i++) {
 			move(i, j);
 			addch(' ');
 		}
@@ -1132,8 +1036,7 @@ void cui_help_paint()
 	move(4, 5);
 	addstr((string(TITLE) + " v." + VERSION).c_str());
 
-	for (int i = 4; i < cui_w - 4; i++)
-	{
+	for (int i = 4; i < cui_w - 4; i++) {
 		move(6, i);
 		addstr(cui_box_light.s_get(CHAR_HLINE).c_str());
 		cui_box_light.drop();
@@ -1148,16 +1051,13 @@ void cui_help_paint()
 	for (char c : DOC)
 		cui_help += string(1, c);
 
-	for (int i = 0; i < cui_help.length(); i++)
-	{
-		if (x == cui_w - 5)
-		{
+	for (int i = 0; i < cui_help.length(); i++) {
+		if (x == cui_w - 5) {
 			x = 5;
 			y++;
 		}
 		
-		if (y >= cui_h - 4) 
-		{
+		if (y >= cui_h - 4)  {
 			move(cui_h - 4, 5);
 			addstr("<- ... ->");
 			break;
@@ -1168,8 +1068,7 @@ void cui_help_paint()
 		move(y, x);
 
 		constexpr int TAB_W = 30;
-		switch (c)
-		{
+		switch (c) {
 			case '\n':
 				y++;
 				tabs = 0;
@@ -1188,10 +1087,8 @@ void cui_help_paint()
 	cui_delta = tdelta;
 }
 
-void cui_help_input(const wchar_t& key)
-{
-	switch (key)
-	{
+void cui_help_input(const wchar_t& key) {
+	switch (key) {
 		case KEY_RIGHT:
 			cui_delta--;
 			break;
@@ -1204,8 +1101,7 @@ void cui_help_input(const wchar_t& key)
 	}
 }
 
-void cui_safemode_box()
-{
+void cui_safemode_box() {
 	cui_box_strong.drop();
 
 	vector<string> mes_lines = { "SAFE MODE", "List won't autosave" };
@@ -1231,14 +1127,12 @@ void cui_safemode_box()
 	addstr(cui_box_strong.s_get(CHAR_CORN4).c_str());
 	cui_box_strong.drop();
 
-	for (int i = x0 + 1; i < cui_w - 1; i++)
-	{
+	for (int i = x0 + 1; i < cui_w - 1; i++) {
 		move(y0, i);
 		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
 		cui_box_strong.drop();
 
-		for (int j = 0; j < mes_lines.size(); j++)
-		{
+		for (int j = 0; j < mes_lines.size(); j++) {
 			move(y0 + 1 + j, i);
 			addch(' ');
 		}
@@ -1248,8 +1142,7 @@ void cui_safemode_box()
 		cui_box_strong.drop();
 	}
 
-	for (int i = 0; i < mes_lines.size(); i++)
-	{
+	for (int i = 0; i < mes_lines.size(); i++) {
 		move(y0 + 1 + i, x0);
 		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str());
 		cui_box_strong.drop();
@@ -1263,17 +1156,14 @@ void cui_safemode_box()
 	}
 }
 
-string cui_prompt(const string& message)
-{
+string cui_prompt(const string& message) {
 	cui_command = L"";
 	curs_set(1);
 	cui_command_index = cui_command_history.size();
 	cui_command_cursor = cui_command.length();
 
-	for (wint_t c = 0; ; get_wch(&c))
-	{
-		switch (c)
-		{
+	for (wint_t c = 0; ; get_wch(&c)) {
+		switch (c) {
 			case 10:
 				return w_converter.to_bytes(cui_command);
 				break;
@@ -1301,18 +1191,15 @@ string cui_prompt(const string& message)
 	return "";
 }
 
-void cui_filter_history()
-{
+void cui_filter_history() {
 	for (int i = 0; i < cui_command_history.size() - 1; i++)
-		if (cui_command_history[i] == w_converter.from_bytes("")) 
-		{
+		if (cui_command_history[i] == w_converter.from_bytes(""))  {
 			cui_command_history.erase(cui_command_history.begin() + i);
 			i--;
 		}
 }
 
-wchar_t cui_key_from_str(const string& str)
-{
+wchar_t cui_key_from_str(const string& str) {
 	if (str.length() == 1)
 		return str.at(0);
 

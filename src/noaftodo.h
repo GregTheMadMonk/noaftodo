@@ -37,8 +37,7 @@ constexpr int ERR_CONF_V = 0b1;
 constexpr int ERR_LIST_V = 0b10;
 
 // "multistr" class
-class multistr_c
-{
+class multistr_c {
 	/*
 	 * data:
 	 * 	a b c d

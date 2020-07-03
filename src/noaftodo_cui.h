@@ -10,24 +10,21 @@
 #include "noaftodo.h"
 #include "noaftodo_list.h"
 
-struct cui_bind_s
-{
+struct cui_bind_s {
 	wchar_t key;
 	std::string command;
 	int mode;
 	bool autoexec;
 };
 
-struct cui_col_s
-{
+struct cui_col_s {
 	std::string title;
 
 	std::function<int(const int& w, const int& free, const int& col_n)> width;
 	std::function<std::string(const noaftodo_entry& entry, const int& id)> contents;
 };
 
-struct cui_lview_col_s
-{
+struct cui_lview_col_s {
 	std::string title;
 
 	std::function<int(const int& w, const int& free, const int& col_n)> width;

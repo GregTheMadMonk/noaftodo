@@ -39,11 +39,9 @@ int da_interval = 1;
 vector<noaftodo_entry> da_cache;
 long da_cached_time = 0;
 
-void da_run()
-{
+void da_run() {
 	// init cache
-	if (da_check_lockfile())
-	{
+	if (da_check_lockfile()) {
 		log("Lockfile " + string(DA_LOCK_FILE) + " exists. If daemon is not running, you can delete it or run noaftodo -k.", LP_ERROR);
 		return;
 	} else {
@@ -60,8 +58,7 @@ void da_run()
 	attr.mq_flags = 0;
 	mqd_t mq = mq_open(DA_MQ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &attr);
 
-	if (mq == -1)
-	{
+	if (mq == -1) {
 		log("Failed!", LP_ERROR);
 		return;
 	}
@@ -76,8 +73,7 @@ void da_run()
 	da_upd_cache(true);
 	da_cached_time = ti_to_long("a0d");
 
-	while (da_running)
-	{
+	while (da_running) {
 		if (li_has_changed()) da_upd_cache();
 
 		da_check_dues();
@@ -87,8 +83,7 @@ void da_run()
 #ifdef NO_MQUEUE
 		string msg;
 		vector<string> msgs;
-		auto getmsg = [&msgs] ()
-		{
+		auto getmsg = [&msgs] () {
 			ifstream q_in(DA_MQ_NAME);
 
 			if (!q_in.good()) return;
@@ -115,19 +110,17 @@ void da_run()
 #endif
 
 #ifdef NO_MQUEUE
-		while (msgs.size() > 0)
+		while (msgs.size() > 0) {
 #else
-		while (status >= 0)
+		while (status >= 0) {
 #endif
-		{
 #ifdef NO_MQUEUE
 			msg = msgs.at(0);
 			msgs.erase(msgs.begin());
 #endif
 			log(msg, LP_IMPORTANT);
 
-			switch (msg[0])
-			{
+			switch (msg[0]) {
 				case 'K':
 					da_running = false;
 					break;
@@ -141,8 +134,7 @@ void da_run()
 					if (da_clients != -1) da_clients++;
 					break;
 				case 'D':
-					if (da_clients != -1)
-					{
+					if (da_clients != -1) {
 						da_clients--;
 						if (da_clients == 0) da_running = false;
 					}
@@ -173,21 +165,18 @@ void da_run()
 	da_unlock();
 }
 
-void da_upd_cache(const bool& is_first_load)
-{
+void da_upd_cache(const bool& is_first_load) {
 	log("Updating daemon cache...", LP_IMPORTANT);
 	li_load();
 
 	const auto t_list_copy = t_list;
 
-	for (int i = 0; i < t_list_copy.size(); i++)
-	{
+	for (int i = 0; i < t_list_copy.size(); i++) {
 		cui_s_line = i;
 		int cached_id = -1;
 
 		for (int j = 0; j < da_cache.size(); j++)
-			if (da_cache.at(j).sim(t_list_copy.at(i)))
-			{
+			if (da_cache.at(j).sim(t_list_copy.at(i))) {
 				cached_id  = j;
 				break;
 			}
@@ -198,8 +187,7 @@ void da_upd_cache(const bool& is_first_load)
 		{	// add to cache
 			da_cache.push_back(li_e);
 
-			if (li_e.completed)
-			{
+			if (li_e.completed) {
 				if (li_e.get_meta("ignore_global_on_completed") != "true")
 					cmd_exec(format_str(da_task_completed_action, &li_e, is_first_load));
 			} else if (li_e.is_failed()) {
@@ -221,10 +209,8 @@ void da_upd_cache(const bool& is_first_load)
 		if (ca_e == li_e) continue; // skip the unchanged entries
 
 		// entry completion switched
-		if (ca_e.completed != li_e.completed)
-		{
-			if (li_e.completed)
-			{
+		if (ca_e.completed != li_e.completed) {
+			if (li_e.completed) {
 				if (li_e.get_meta("ignore_global_on_completed") != "true")
 					cmd_exec(format_str(da_task_completed_action, &li_e, false));
 				cmd_exec(format_str(li_e.get_meta("on_completed"), &li_e, false));
@@ -253,43 +239,36 @@ void da_upd_cache(const bool& is_first_load)
 	cui_s_line = -1;
 
 	// clear cache from deleted tasks
-	for (int i = 0; i < da_cache.size();)
-	{
+	for (int i = 0; i < da_cache.size();) {
 		bool removed = true;
 		for (int j = 0; j < t_list.size(); j++)
 			removed &= !t_list.at(j).sim(da_cache.at(i));
 
-		if (removed)
-		{
+		if (removed) {
 			if (da_cache.at(i).get_meta("ignore_global_on_removed") != "true")
 				cmd_exec(format_str(da_task_removed_action, &da_cache.at(i)));
 			da_cache.erase(da_cache.begin() + i);
 		} else i++;
 	}
 
-	if (t_list != t_list_copy) 
-	{
+	if (t_list != t_list_copy)  {
 		li_save();
 		da_upd_cache(); // I'm sorry
 	}
 }
 
-void da_check_dues(const bool& renotify)
-{
+void da_check_dues(const bool& renotify) {
 	const auto t_list_copy = t_list;
 	// da_check_dues supposes that the cache is up to date with the list
 	// and da_cache and t_list contain the same entries
-	for (cui_s_line = 0; cui_s_line < t_list.size(); cui_s_line++)	
-	{
-		if ((t_list.at(cui_s_line).is_failed()) && (renotify || (t_list.at(cui_s_line).due > da_cached_time)))
-		{
+	for (cui_s_line = 0; cui_s_line < t_list.size(); cui_s_line++)	 {
+		if ((t_list.at(cui_s_line).is_failed()) && (renotify || (t_list.at(cui_s_line).due > da_cached_time))) {
 			if (t_list.at(cui_s_line).get_meta("ignore_global_on_failed") != "true")
 				cmd_exec(format_str(da_task_failed_action, &t_list.at(cui_s_line), renotify));
 			if (!renotify)
 				cmd_exec(format_str(t_list.at(cui_s_line).get_meta("on_failed"), &t_list.at(cui_s_line)));
 		}
-		else if ((t_list.at(cui_s_line).is_coming()) && (renotify || (t_list.at(cui_s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a" + t_list.at(cui_s_line).get_meta("warn_time", "1d")))))
-		{
+		else if ((t_list.at(cui_s_line).is_coming()) && (renotify || (t_list.at(cui_s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a" + t_list.at(cui_s_line).get_meta("warn_time", "1d"))))) {
 			if (t_list.at(cui_s_line).get_meta("ignore_global_on_coming") != "true")
 				cmd_exec(format_str(da_task_coming_action, &t_list.at(cui_s_line), renotify));
 			if (!renotify)
@@ -299,15 +278,13 @@ void da_check_dues(const bool& renotify)
 
 	cui_s_line = -1;
 
-	if (t_list != t_list_copy) 
-	{
+	if (t_list != t_list_copy)  {
 		li_save();
 		da_upd_cache(); // I'm sorry
 	}
 }
 
-void da_kill()
-{
+void da_kill() {
 	log("Killing the daemon...");
 	da_send("K");
 	da_unlock();
@@ -316,10 +293,8 @@ void da_kill()
 #endif
 }
 
-void da_send(const char message[])
-{
-	if (!da_check_lockfile())
-	{
+void da_send(const char message[]) {
+	if (!da_check_lockfile()) {
 		log("Lock file not found. Run or restart the daemon. Message not sent!", LP_ERROR);
 		return;
 	}
@@ -342,8 +317,7 @@ void da_send(const char message[])
 	attr.mq_flags = 0;
 	mqd_t mq = mq_open(DA_MQ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &attr);
 
-	if (mq == -1)
-	{
+	if (mq == -1) {
 		log("Failed!", LP_ERROR);
 		return;
 	}
@@ -360,8 +334,7 @@ void da_send(const char message[])
 #endif
 }
 
-void da_lock()
-{
+void da_lock() {
 	log("Creating lock file...");
 	ofstream l_file(DA_LOCK_FILE);
 
@@ -373,14 +346,12 @@ void da_lock()
 	l_file.close();
 }
 
-void da_unlock()
-{
+void da_unlock() {
 	log("Removing lock file...");
 	remove(DA_LOCK_FILE);
 }
 
-bool da_check_lockfile()
-{
+bool da_check_lockfile() {
 	ifstream l_file(DA_LOCK_FILE);
 	return l_file.good();
 }

@@ -18,22 +18,17 @@ string conf_filename = "noaftodo.conf";
 
 extern string TCONF;
 
-void conf_load(const bool& predefine_cvars, const bool& create_template)
-{
+void conf_load(const bool& predefine_cvars, const bool& create_template) {
 	conf_load(conf_filename, predefine_cvars, create_template);
 }
 
-void conf_load(const string& conf_file, const bool& predefine_cvars, const bool& create_template)
-{
-	if (conf_file == "default")
-	{
+void conf_load(const string& conf_file, const bool& predefine_cvars, const bool& create_template) {
+	if (conf_file == "default") {
 		log("Loading default config...");
 
 		string entry = "";
-		for (char c : TCONF)
-		{
-			if (c == '\n')
-			{
+		for (char c : TCONF) {
+			if (c == '\n') {
 				cmd_exec(entry);
 				entry = "";
 			} else entry += c;
@@ -59,8 +54,7 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 		}
 
 		iconf = ifstream(conf_file);
-		if (!iconf.good())
-		{
+		if (!iconf.good()) {
 			log("Something went wrong!", LP_ERROR);
 			return;
 		}

@@ -3,8 +3,7 @@
 using namespace std;
 using namespace chrono;
 
-string ti_log_time()
-{
+string ti_log_time() {
 	const time_t t = system_clock::to_time_t(system_clock::now());
 	tm l_ti = *localtime(&t);
 
@@ -13,18 +12,15 @@ string ti_log_time()
 		":" + ((l_ti.tm_sec < 10) ? "0" : "") + to_string(l_ti.tm_sec);
 }
 
-long ti_to_long(const tm& t_tm)
-{
+long ti_to_long(const tm& t_tm) {
 	return t_tm.tm_min + t_tm.tm_hour * 1e2 + t_tm.tm_mday * 1e4 + t_tm.tm_mon * 1e6 + t_tm.tm_year * 1e8;
 }
 
-long ti_to_long(const string& t_str)
-{
+long ti_to_long(const string& t_str) {
 	return ti_to_long(ti_to_tm(t_str));
 }
 
-tm ti_to_tm(const string& t_str)
-{
+tm ti_to_tm(const string& t_str) {
 	tm ti = {0};
 	const time_t t = system_clock::to_time_t(system_clock::now());
 	tm l_ti = *localtime(&t);
@@ -45,18 +41,14 @@ tm ti_to_tm(const string& t_str)
 
 	bool absolute = true;
 
-	for (int i = 0; i <= t_str.length(); i++)
-	{
+	for (int i = 0; i <= t_str.length(); i++) {
 		const char c = (i == t_str.length()) ? 'a' : t_str.at(i);
 
 		if (isdigit(c)) { minute = minute * 10 + (c - '0'); c_min = true; }
-		else 
-		{
-			switch (c)
-			{
+		else  {
+			switch (c) {
 				case 'a':
-					if (absolute) 
-					{
+					if (absolute)  {
 						if (!c_year) ti.tm_year = l_ti.tm_year;
 						else ti.tm_year = year;
 
@@ -123,8 +115,7 @@ tm ti_to_tm(const string& t_str)
 	if (ti.tm_min >= 60) { ti.tm_hour += ti.tm_min / 60; ti.tm_min = ti.tm_min % 60; }
 	if (ti.tm_hour >= 24) { ti.tm_mday += ti.tm_hour / 24; ti.tm_hour = ti.tm_hour % 24; }
 	int days_in_month = (ti.tm_mon == 2) ? ((ti.tm_year % 4 == 0) ? 29 : 28) : ((ti.tm_mon <= 7) ? (30 + (ti.tm_mon % 2)) : (31 - (ti.tm_mon % 2)));
-	while (ti.tm_mday > days_in_month)
-	{
+	while (ti.tm_mday > days_in_month) {
 		ti.tm_mday -= days_in_month;
 		ti.tm_mon++;
 
@@ -136,8 +127,7 @@ tm ti_to_tm(const string& t_str)
 	return ti;
 }
 
-tm ti_to_tm(const long& t_long)
-{
+tm ti_to_tm(const long& t_long) {
 	tm ret = { 0 };
 
 	ret.tm_sec = 0;
@@ -150,27 +140,22 @@ tm ti_to_tm(const long& t_long)
 	return ret;
 }
 
-string ti_f_str(const tm& t_tm)
-{
-	const auto t_str = [](const int& integer)
-	{
+string ti_f_str(const tm& t_tm) {
+	const auto t_str = [](const int& integer) {
 		return ((integer < 10) ? "0" : "") + to_string(integer);
 	};
 
 	return to_string(t_tm.tm_year) + "/" + t_str(t_tm.tm_mon) + "/" + t_str(t_tm.tm_mday) + " " + t_str(t_tm.tm_hour) + ":" + t_str(t_tm.tm_min);
 }
 
-string ti_f_str(const long& t_long)
-{
+string ti_f_str(const long& t_long) {
 	return ti_f_str(ti_to_tm(t_long));
 }
 
-string ti_cmd_str(const tm& t_tm)
-{
+string ti_cmd_str(const tm& t_tm) {
 	return to_string(t_tm.tm_year) + "y" + to_string(t_tm.tm_mon) + "m" + to_string(t_tm.tm_mday) + "d" + to_string(t_tm.tm_hour) + "h" + to_string(t_tm.tm_min);
 }
 
-string ti_cmd_str(const long& t_long)
-{
+string ti_cmd_str(const long& t_long) {
 	return ti_cmd_str(ti_to_tm(t_long));
 }

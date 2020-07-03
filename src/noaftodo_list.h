@@ -8,8 +8,7 @@
 #include <sys/types.h>
 #include <vector>
 
-struct noaftodo_entry
-{
+struct noaftodo_entry {
 	bool completed;
 	long due;
 	std::string title;
@@ -40,20 +39,16 @@ struct noaftodo_entry
 	bool is_uncat() const;
 };
 
-struct less_than_noaftodo_entry
-{
-	inline bool operator() (const noaftodo_entry& e1, const noaftodo_entry& e2)
-	{
+struct less_than_noaftodo_entry {
+	inline bool operator() (const noaftodo_entry& e1, const noaftodo_entry& e2) {
 		// if only one of entries is "nodue" - it comes after
 		if ((e1.get_meta("nodue") == "true") &&  (e2.get_meta("nodue") != "true")) return false;
 		if ((e2.get_meta("nodue") == "true") &&  (e1.get_meta("nodue") != "true")) return true;
 
 		// if both are "nodue"
-		if ((e1.get_meta("nodue") == "true") &&  (e2.get_meta("nodue") == "true"))
-		{
+		if ((e1.get_meta("nodue") == "true") &&  (e2.get_meta("nodue") == "true")) {
 			if (e1.tag != e2.tag) return e1.tag < e2.tag; // sort by tag
-			else	// if tags are equal, sort by title
-			{
+			else {	// if tags are equal, sort by title 
 				try { // sort by number in title
 					return stod(e1.title) < stod(e2.title);
 				} catch (const std::invalid_argument& e) {

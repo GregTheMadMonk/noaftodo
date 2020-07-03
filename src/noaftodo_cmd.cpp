@@ -27,15 +27,13 @@ string cmd_buffer;
 
 noaftodo_entry* cmd_sel_entry = nullptr;
 
-void cmd_init()
-{
+void cmd_init() {
 	cmd_buffer = "";
 	cmd_aliases.clear();
 	cmd_cmds.clear();
 
 	// command "q" - exit the program.
-	cmd_cmds["q"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["q"] = [] (const vector<string>& args) {
 		try {
 			noaftodo_exit(stoi(args.at(0)));
 			return 0;
@@ -47,8 +45,7 @@ void cmd_init()
 	};
 
 	// command "!<command>" - execute shell command
-	cmd_cmds["!"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["!"] = [] (const vector<string>& args) {
 		string cmdline = "";
 
 		for (const auto& arg : args) cmdline += arg + " ";
@@ -66,19 +63,16 @@ void cmd_init()
 	};
 
 	// command "alias <command>" - create an alias for command.
-	cmd_cmds["alias"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["alias"] = [] (const vector<string>& args) {
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		if (args.size() == 1)
-		{
+		if (args.size() == 1) {
 			cmd_aliases.erase(args.at(0));
 			return 0;
 		}
 
 		string alargs;
-		for (int i = 1; i < args.size(); i++) 
-		{
+		for (int i = 1; i < args.size(); i++)  {
 			if (alargs != "") alargs += " ";
 			alargs += args.at(i);
 		}
@@ -91,8 +85,7 @@ void cmd_init()
 	};
 
 	// command "d" - remove selected task.
-	cmd_cmds["d"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["d"] = [] (const vector<string>& args) {
 		if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
 
 		li_rem(cui_s_line);
@@ -102,16 +95,14 @@ void cmd_init()
 	};
 
 	// command "a <due> <title> <description>[ <id>]" - add or override a task. If <id> is not specified, a new task is created. If not, a task with <id> will be overriden.
-	cmd_cmds["a"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["a"] = [] (const vector<string>& args) {
 		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
 
 		try {
 			noaftodo_entry new_entry;
 			new_entry.completed = false;
 
-			if (args.at(0) == "-")
-			{
+			if (args.at(0) == "-") {
 				new_entry.due = ti_to_long("a10000y");
 				new_entry.meta["nodue"] = "true";
 			}
@@ -122,12 +113,10 @@ void cmd_init()
 			new_entry.tag = (cui_tag_filter == CUI_TAG_ALL) ? 0 : cui_tag_filter;
 			
 			if (args.size() < 4) li_add(new_entry);
-			else
-			{
+			else {
 				const int id = stoi(args.at(3));
 
-				if ((id >= 0) && (id < t_list.size())) 
-				{
+				if ((id >= 0) && (id < t_list.size()))  {
 					new_entry.meta = t_list.at(id).meta;
 					new_entry.tag = t_list.at(id).tag;
 					t_list[id] = new_entry;
@@ -148,12 +137,10 @@ void cmd_init()
 	};
 
 	// command "setmeta[ <name1> <value1>[ <name2> <value2>[ ...]]]" - set task meta. If no arguments are specified, clear task meta. To add properties to meta, use "setmeta %meta% <name1> <value1>...". "setmeta <name>" will erase only <name> meta property
-	cmd_cmds["setmeta"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["setmeta"] = [] (const vector<string>& args) {
 		if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return CMD_ERR_EXTERNAL;
 
-		if (args.size() == 1)
-		{
+		if (args.size() == 1) {
 			t_list[cui_s_line].meta.erase(args.at(0));
 			return 0;
 		}
@@ -169,8 +156,7 @@ void cmd_init()
 	};
 
 	// command "lclear" - clear list.
-	cmd_cmds["lclear"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["lclear"] = [] (const vector<string>& args) {
 		if (cui_tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
 
 		for (int i = 0; i < t_list.size(); )
@@ -181,8 +167,7 @@ void cmd_init()
 	};
 
 	// command "bind <key> <command> <mode> <autoexec>" - bind <key> to <command>. <mode> speciifes, which modes use this bind (mask, see noaftodo_cui.h for CUI_MODE_* values). If <autoexec> is "true", execute command on key hit, otherwise just go into command mode with it. Running as just "bind <key>" removes a bind.
-	cmd_cmds["bind"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["bind"] = [] (const vector<string>& args) {
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
 		if (args.size() >= 4) try {
@@ -207,8 +192,7 @@ void cmd_init()
 		bool removed = false;
 
 		for (int i = 0; i < binds.size(); i++)
-			if (cui_key_from_str(args.at(0)) == binds.at(i).key)
-			{
+			if (cui_key_from_str(args.at(0)) == binds.at(i).key) {
 				binds.erase(binds.begin() + i);
 				i--;
 				removed = true;
@@ -218,19 +202,16 @@ void cmd_init()
 	};
 
 	// command "math <num1> <op> <num2>[ <name>]" - calculate math expression (+,-,/,*,=,<,>,min,max) and write to cvar <name>. If <name> is not specifed, just print the result out
-	cmd_cmds["math"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["math"] = [] (const vector<string>& args) {
 		if (args.size() < 3) return CMD_ERR_ARG_COUNT;
 
-		try
-		{
+		try {
 			const double a = stod(args.at(0));
 			const double b = stod(args.at(2));
 
 			double result = 0;
 
-			switch (args.at(1).at(0))
-			{
+			switch (args.at(1).at(0)) {
 				case '+':
 					result = a + b;
 					break;
@@ -270,8 +251,7 @@ void cmd_init()
 	};
 
 	// command "if <true|false> <do-if-true>[ <do-if-false>]" - simple if expression
-	cmd_cmds["if"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["if"] = [] (const vector<string>& args) {
 		if (args.size() < 2) return CMD_ERR_ARG_COUNT;
 		
 		if (args.at(0) == "true") cmd_exec(args.at(1));
@@ -281,12 +261,10 @@ void cmd_init()
 	};
 
 	// command "set <name>[ <value>]" - set cvar value. If <value> is not specified, reset cvar to default value.
-	cmd_cmds["set"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["set"] = [] (const vector<string>& args) {
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		if (args.size() < 2)
-		{
+		if (args.size() < 2) {
 			cvar_reset(args.at(0));
 
 			return 0;
@@ -297,14 +275,12 @@ void cmd_init()
 	};
 
 	// command "exec <filename>[ script]" - execute a config file. Execute default config with "exec default". With "script" cvars from config are not set as default
-	cmd_cmds["exec"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["exec"] = [] (const vector<string>& args) {
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
 		bool predef_cvars = true;
 
-		for (int i = 1; i < args.size(); i++)
-		{
+		for (int i = 1; i < args.size(); i++) {
 			if (args.at(i) == "script") predef_cvars = false;
 		}
 
@@ -314,12 +290,10 @@ void cmd_init()
 	};
 
 	// command "ver <VERSION>" - is used to specify config version to notify about possible outdated config files.
-	cmd_cmds["ver"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["ver"] = [] (const vector<string>& args) {
 		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
 
-		if (args.at(0) != to_string(CONF_V))
-		{
+		if (args.at(0) != to_string(CONF_V)) {
 			log("Config version mismatch (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + "). "
 				"Consult \"Troubleshooting\" section of help (\"noaftodo -h\").", LP_ERROR);
 			errors |= ERR_CONF_V;
@@ -330,16 +304,14 @@ void cmd_init()
 	};
 
 	// command "save[ <filename>]" - force the list save. If <filename> is not specified, override opened file.
-	cmd_cmds["save"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["save"] = [] (const vector<string>& args) {
 		if (args.size() < 1) return li_save();
 		else return li_save(args.at(0));
 		return 0;
 	};
 
 	// command "echo[ args...]" - print the following in status.
-	cmd_cmds["echo"] = [] (const vector<string>& args)
-	{
+	cmd_cmds["echo"] = [] (const vector<string>& args) {
 		string message = "";
 		for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
 
@@ -356,10 +328,8 @@ void cmd_init()
 	cvar_wrap_string("cmd.contexec", cui_contexec_regex_filter);
 
 	cvar_wrap_int("mode", cui_mode, CVAR_FLAG_NO_PREDEF);
-	cvars["mode"]->setter = [] (const string& val)
-	{
-		try
-		{
+	cvars["mode"]->setter = [] (const string& val) {
+		try {
 			cui_set_mode(stoi(val));
 			return 0;
 		} catch (const invalid_argument& e) { return CMD_ERR_ARG_TYPE; }
@@ -368,14 +338,12 @@ void cmd_init()
 
 	// ENTRY FIELDS
 	cvar_wrap_int("id", cui_s_line, CVAR_FLAG_NO_PREDEF);
-	cvars["id"]->setter = [] (const string& val)
-	{
+	cvars["id"]->setter = [] (const string& val) {
 		bool is_visible = false;
 		for (int i = 0; i < t_list.size(); i++) is_visible |= cui_is_visible(i);
 		if (!is_visible) return; // don't try to set the ID when there's nothing on the screen
 
-		try
-		{
+		try {
 			const int target = stoi(val);
 
 			const int dir = (target - cui_s_line >= 0) ? 1 : -1;
@@ -385,8 +353,7 @@ void cmd_init()
 			else if (target < 0) cui_s_line = t_list.size() - 1;
 			else cui_s_line = 0;
 
-			if (cui_active)	while (!cui_is_visible(cui_s_line)) 
-			{
+			if (cui_active)	while (!cui_is_visible(cui_s_line))  {
 				cui_s_line += dir;
 
 				if (cui_s_line < 0) cui_s_line = t_list.size() - 1;
@@ -397,13 +364,11 @@ void cmd_init()
 	cvars["id"]->predefine("0");
 
 	cvars["title"] = make_unique<cvar_base_s>();
-	cvars["title"]->getter = [] ()
-	{
+	cvars["title"]->getter = [] () {
 		if (cmd_sel_entry == nullptr)  return string();
 		return cmd_sel_entry->title;
 	};
-	cvars["title"]->setter = [] (const string& val)
-	{
+	cvars["title"]->setter = [] (const string& val) {
 		if (cmd_sel_entry == nullptr) return;
 		cmd_sel_entry->title = val;
 		if (li_autosave) li_save();
@@ -411,13 +376,11 @@ void cmd_init()
 	cvars["title"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["desc"] = make_unique<cvar_base_s>();
-	cvars["desc"]->getter = [] ()
-	{
+	cvars["desc"]->getter = [] () {
 		if (cmd_sel_entry == nullptr)  return string();
 		return cmd_sel_entry->description;
 	};
-	cvars["desc"]->setter = [] (const string& val)
-	{
+	cvars["desc"]->setter = [] (const string& val) {
 		if (cmd_sel_entry == nullptr) return;
 		cmd_sel_entry->description = val;
 		if (li_autosave) li_save();
@@ -425,13 +388,11 @@ void cmd_init()
 	cvars["desc"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["due"] = make_unique<cvar_base_s>();
-	cvars["due"]->getter = [] ()
-	{
+	cvars["due"]->getter = [] () {
 		if (cmd_sel_entry == nullptr)  return string();
 		return ti_cmd_str(cmd_sel_entry->due);
 	};
-	cvars["due"]->setter = [] (const string& val)
-	{
+	cvars["due"]->setter = [] (const string& val) {
 		if (cmd_sel_entry == nullptr) return;
 		cmd_sel_entry->due = ti_to_long(val);
 		if (li_autosave) li_save();
@@ -439,20 +400,17 @@ void cmd_init()
 	cvars["due"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["meta"] = make_unique<cvar_base_s>();
-	cvars["meta"]->getter = [] ()
-	{
+	cvars["meta"]->getter = [] () {
 		if (cmd_sel_entry == nullptr)  return string();
 		return replace_special(cmd_sel_entry->meta_str());
 	};
 	cvars["meta"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["comp"] = make_unique<cvar_base_s>();
-	cvars["comp"]->getter = [] () 
-	{
+	cvars["comp"]->getter = [] ()  {
 		return (cmd_sel_entry == nullptr) ? "false" : (cmd_sel_entry->completed ? "true" : "false" );
 	};
-	cvars["comp"]->setter = [] (const string& val)
-	{
+	cvars["comp"]->setter = [] (const string& val) {
 		if (cmd_sel_entry == nullptr) return;
 
 		if ((cmd_sel_entry->completed && (val != "true")) ||
@@ -463,16 +421,13 @@ void cmd_init()
 	cvars["comp"]->predefine("false");
 
 	cvars["parent"] = make_unique<cvar_base_s>();
-	cvars["parent"]->getter = [] ()
-	{
+	cvars["parent"]->getter = [] () {
 		if (cmd_sel_entry == nullptr)  return string();
 		return to_string(cmd_sel_entry->tag);
 	};
-	cvars["parent"]->setter = [] (const string& val)
-	{
+	cvars["parent"]->setter = [] (const string& val) {
 		if (cmd_sel_entry == nullptr) return;
-		try
-		{
+		try {
 			cmd_sel_entry->tag = stoi(val);
 			if (li_autosave) li_save();
 		} catch (const invalid_argument& e) { }
@@ -480,16 +435,14 @@ void cmd_init()
 	cvars["parent"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["pname"] = make_unique<cvar_base_s>(); // parent [list] name
-	cvars["pname"]->getter = [] () 
-	{
+	cvars["pname"]->getter = [] ()  {
 		if (cui_tag_filter == CUI_TAG_ALL) return string("All lists");
 
 		if (cui_tag_filter < t_tags.size()) return t_tags.at(cui_tag_filter);
 
 		return to_string(cui_tag_filter);
 	};
-	cvars["pname"]->setter = [] (const string& val)
-	{
+	cvars["pname"]->setter = [] (const string& val) {
 		if (cui_tag_filter < 0) return;
 
 		while (cui_tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
@@ -505,12 +458,9 @@ void cmd_init()
 	cvar_wrap_string("livi.regex_filter", cui_listview_regex_filter);
 
 	cvar_wrap_int("tag_filter", cui_tag_filter);
-	cvars["tag_filter"]->setter = [] (const string& val)
-	{
-		try
-		{
-			if (val == "all") 
-			{
+	cvars["tag_filter"]->setter = [] (const string& val) {
+		try {
+			if (val == "all")  {
 				cui_tag_filter = CUI_TAG_ALL;
 				return;
 			}
@@ -527,28 +477,24 @@ void cmd_init()
 	cvars["tag_filter"]->predefine("all");
 
 	cvar_wrap_int("tag_filter_v", cui_tag_filter);
-	cvars["tag_filter_v"]->setter = [] (const string& val)
-	{
-		if (val == "all")
-		{
+	cvars["tag_filter_v"]->setter = [] (const string& val) {
+		if (val == "all") {
 			cui_tag_filter = CUI_TAG_ALL;
 			return;
 		}
 
-		try
-		{
+		try {
 			const int new_filter = stoi(val);
 			const int dir = (new_filter >= cui_tag_filter) ? 1 : -1;
 
 			cui_tag_filter = new_filter;
 
-			while (!cui_l_is_visible(cui_tag_filter))
-			{
+			while (!cui_l_is_visible(cui_tag_filter)) {
 				cui_tag_filter += dir;
 
-				if (cui_tag_filter >= (int)t_tags.size()) // wwithout (int) returns true
-									// with any negative cui_tag_filter
-				{
+				if (cui_tag_filter >= (int)t_tags.size()) { 
+					// without (int) returns true
+					// with any negative cui_tag_filter
 					cui_tag_filter = CUI_TAG_ALL;
 					return;
 				}
@@ -633,8 +579,7 @@ void cmd_init()
 
 	// HELPER CVARS
 	cvars["last_v_id"] = make_unique<cvar_base_s>();
-	cvars["last_v_id"]->getter = [] () 
-	{
+	cvars["last_v_id"]->getter = [] ()  {
 		int ret = -1;
 		for (int i = 0; i < t_list.size(); i++)
 			if (cui_is_visible(i)) ret = i;
@@ -644,8 +589,7 @@ void cmd_init()
 	cvars["last_v_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
 	cvars["first_v_id"] = make_unique<cvar_base_s>();
-	cvars["first_v_id"]->getter = [] () 
-	{
+	cvars["first_v_id"]->getter = [] ()  {
 		for (int i = 0; i < t_list.size(); i++)
 			if (cui_is_visible(i)) return to_string(i);
 
@@ -654,8 +598,7 @@ void cmd_init()
 	cvars["first_v_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
 	cvars["last_v_list"] = make_unique<cvar_base_s>();
-	cvars["last_v_list"]->getter = [] () 
-	{
+	cvars["last_v_list"]->getter = [] ()  {
 		int ret = -1;
 		for (int i = 0; i < t_tags.size(); i++)
 			if (cui_l_is_visible(i)) ret = i;
@@ -665,8 +608,7 @@ void cmd_init()
 	cvars["last_v_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
 	cvars["first_v_list"] = make_unique<cvar_base_s>();
-	cvars["first_v_list"]->getter = [] () 
-	{
+	cvars["first_v_list"]->getter = [] ()  {
 		for (int i = 0; i < t_tags.size(); i++)
 			if (cui_l_is_visible(i)) return to_string(i);
 
@@ -682,19 +624,16 @@ void cmd_init()
 	cvars["VER"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 }
 
-vector<string> cmd_break(const string& cmdline)
-{
+vector<string> cmd_break(const string& cmdline) {
 	vector<string> cmdqueue;
 	string temp = "";
 
 	bool inquotes = false;
 	bool skip_special = false;
-	for (int i = 0; i < cmdline.length(); i++)
-	{
+	for (int i = 0; i < cmdline.length(); i++) {
 		const char c = cmdline.at(i);
 
-		if (skip_special)
-		{
+		if (skip_special) {
 			temp += c;
 			skip_special = false;
 		} else switch (c) {
@@ -707,10 +646,8 @@ vector<string> cmd_break(const string& cmdline)
 				temp += c;
 				break;
 			case ';':
-				if (!inquotes)
-				{
-					if (temp != "")
-					{
+				if (!inquotes) {
+					if (temp != "") {
 						cmdqueue.push_back(temp);
 						temp = "";
 					}
@@ -722,8 +659,7 @@ vector<string> cmd_break(const string& cmdline)
 		}
 	}
 
-	if (inquotes || skip_special) // unterminated command (unterminated quotes or ends with '\')
-	{
+	if (inquotes || skip_special) { // unterminated command (unterminated quotes or ends with '\')
 		cmd_buffer = cmdline;
 		return vector<string>();
 	}
@@ -733,8 +669,7 @@ vector<string> cmd_break(const string& cmdline)
 	return cmdqueue;
 }
 
-void cmd_run(string command)
-{
+void cmd_run(string command) {
 	log_offset++;
 	// replace variables
 	if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
@@ -746,9 +681,9 @@ void cmd_run(string command)
 
 	if (new_commands.size() == 0) { log_offset--; return; } // basiacally, an empty string, or just ';'s
 
-	if (new_commands.size() > 1) // more than one command in a string. Each can contain some more after
-					// variables are replaced with their values
-	{
+	if (new_commands.size() > 1) {
+		// more than one command in a string. Each can contain some more after
+		// variables are replaced with their values
 		log("Breaking " + command);
 		for (const auto& cmd : new_commands) cmd_run(cmd);
 		log_offset--;
@@ -767,20 +702,17 @@ void cmd_run(string command)
 	bool skip_special = false;
 	bool shellcmd = false;
 
-	auto put = [&name, &args] (const string& val)
-	{
+	auto put = [&name, &args] (const string& val) {
 		if (name == "") name = val;
 		else args.push_back(val);
 	};
 
 	int start = 0;	// to respect tabs and spaces at the line start
 
-	for (int i = 0; i < command.length(); i++)
-	{
+	for (int i = 0; i < command.length(); i++) {
 		const char c = command.at(i);
 
-		if ((i == start) && (c == '!'))	// "!" - shell command
-		{
+		if ((i == start) && (c == '!'))	{ // "!" - shell command
 			put("!");
 
 			shellcmd = true;
@@ -789,8 +721,7 @@ void cmd_run(string command)
 
 		if (shellcmd) { // everything between "!" and ";" is passed to system() as-it-is
 			word += c;
-		} else if (skip_special) // symbol after '\' is added as-it-is
-		{
+		} else if (skip_special) { // symbol after '\' is added as-it-is
 			word += c;
 			skip_special = false;
 		} else switch (c) {
@@ -804,10 +735,8 @@ void cmd_run(string command)
 				inquotes = !inquotes;
 				break;
 			case ' ': case '\t': // token separator
-				if (!inquotes) // in quotes - just a symbol
-				{
-					if (word != "")
-					{
+				if (!inquotes) { // in quotes - just a symbol
+					if (word != "") {
 						put(word);
 						word = "";
 					}
@@ -833,14 +762,12 @@ void cmd_run(string command)
 		string alstr = cmd_aliases.at(name);
 
 		// insert alias arguments. Add unused ones to command line 
-		for (int j = 0; j < args.size(); j++)
-		{
+		for (int j = 0; j < args.size(); j++) {
 			bool replaced = false;
 
 			int index = -1;
 			const string varname = "%arg" + to_string(j + 1) + "%";
-			while ((index = alstr.find(varname)) != string::npos)
-			{
+			while ((index = alstr.find(varname)) != string::npos) {
 				alstr.replace(index, varname.length(), args.at(j));
 				replaced = true;
 			}
@@ -850,12 +777,10 @@ void cmd_run(string command)
 
 		cmd_exec(alstr); // try to run
 	} catch (const out_of_range& e) { // no such alias
-		try
-		{
+		try {
 			const int ret = (cmd_cmds.at(name))(args); // try to run command
 
-			if (ret != 0) switch (ret) // handle error return values
-			{
+			if (ret != 0) switch (ret) { // handle error return values
 				case CMD_ERR_ARG_COUNT:
 					cui_status = "Wrong argument count!";
 					break;
@@ -877,16 +802,14 @@ void cmd_run(string command)
 	log_offset--;
 }
 
-void cmd_exec(const string& command)
-{
+void cmd_exec(const string& command) {
 	log ("Attempting execution: " + command);
 	vector<string> cmdq = cmd_break(cmd_buffer + command);
 
 	for (const auto& cmd : cmdq) cmd_run(cmd);
 }
 
-void cmd_terminate()
-{
+void cmd_terminate() {
 	if (cmd_buffer == "") return;
 
 	cui_status = "Unterminated command";
