@@ -369,11 +369,12 @@ void cui_run()
 	cui_init();
 	cui_set_mode(CUI_MODE_NORMAL);
 
-	for (wint_t c = 0; ; (get_wch(&c) != ERR) ? : (c = 0))
+	for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0))
 	{
 		if (li_has_changed()) li_load(false); // load only list contents, not the workspace
+		else if ((c == 0) && (!cui_shift_multivars)) continue;
 
-		if (c != 0)
+		if (c > 0)
 		{
 			const int old_numbuffer = cui_numbuffer;
 			cui_status = "";
