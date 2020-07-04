@@ -24,40 +24,15 @@ Also running without creating a config is supported with `noaftodo -c default`, 
 #### AUR
 Program is available in **AUR** as **noaftodo-git**.
 
-### Building
+### Building [[more](https://github.com/GregTheMadMonk/noaftodo/wiki/Manual#building)]
 Run `make` (`gmake` on Solaris 11).
 
-Build flags:
-* `NO_MQUEUE=1` - compile with a primitive replacement to message queues from **mqueue.h**, in case you don't have one on your system, or don't want to use it
-* `NO_ROOT_CHECK=1` - disable checking EUID for root privileges (same effect as `set allow_root true` in config, but just removes the feature from the program)
-* `DEBUG=1` - just tuns on `-g3` flag
 #### Dependencies
-**ncurses**. You need it (on an Arch-based system: `sudo pacman -S ncurses`, on a Debian-based system: `sudo apt install libncurses5-dev`).
-
-Also, default config makes daemon use **notify-send** on task events (provided by `libnotify` and `libnotify-bin` on Arch and Debian based distributions respectively, requires notification deamon of your choise).
+* **ncurses** (on an Arch-based system: `sudo pacman -S ncurses`, on a Debian-based system: `sudo apt install libncurses5-dev`)
+* (optional) **notify-send** (provided by `libnotify` and `libnotify-bin` on Arch and Debian based distributions respectively) and a notification deamon of your choise
 
 ### Configuring
 See **noaftodo.conf.template** if you want an example configuration.
 
-### Adding a task, and just using NOAFtodo
-Run `noaftodo -h` or press `?` in normal mode (use left and right arrows to scroll). The help message should cover most of the things you need.
-
-The only thing you will probably find confusing is time and date fromat used: you specify time as `[a]YYYYyMMmDDdHHhμμ`, where:
-* `YYYYy` - year YYYY
-* `MMm` - MM'th month
-* `DDd` - DD'th day
-* `HHh` - hour of day (24-hour format)
-* `μμ` - μμ minutes
-* `a` at the beginning is optional and indicates that instead of reading the input as due, it should be added to current time and then counted as task due.
-You can set only one property or several of them. Unset properties will be reset to their current values, or zero if `a` is specified.
-
-Examples:
-* `a15h` - task due is in 15 hours from now
-* `15h00` - task due is today at 3:00 pm. Note that is `00` is not specified in the end the minutes for due will be set to teir current value and might not be 00
-* `15h00a1d` - task due is tomorrow at 3:00 pm: absolute and relative dues can be combined
-
-Hope it makes sense.
-
-You should also know that you can execute system commands with `!<command>`.
-
-The best way to somewhat understand how NOAFtodo command-line works now will be reading **nooaftodo.conf.template**.
+### Adding tasks, and just using NOAFtodo
+See [the manual](https://github.com/GregTheMadMonk/noaftodo/wiki/Manual).
