@@ -59,8 +59,8 @@ bind "up" "math \%tag_filter_v\% - 1 tag_filter_v" 16 true
 bind "k" "math \%tag_filter_v\% - 1 tag_filter_v" 16 true
 bind "down" "math \%tag_filter_v\% + 1 tag_filter_v" 16 true
 bind "j" "math \%tag_filter_v\% + 1 tag_filter_v" 16 true
-bind "G" "set id \%last_visible_id\%" 1 true
-bind "G" "set tag_filter \%last_visible_list\%" 16 true
+bind "G" "set id \%last_v_id\%" 1 true
+bind "G" "set tag_filter \%last_v_list\%" 16 true
 bind "a" "a a" 1 false
 bind "A" "a " 1 false
 bind " " "toggle comp" 1 true
@@ -88,7 +88,7 @@ bind "8" "numpress 8" 17 true
 bind "9" "numpress 9" 17 true
 
 bind "g" "math \%numbuffer\% = -1;
-		if \%ret\% \"set numbuffer \\%first_visible_id\\%;
+		if \%ret\% \"set numbuffer \\%first_v_id\\%;
 		echo g\" \"set id \\%numbuffer\\%;
 		set numbuffer -1\";
 		set ret" 1 true
@@ -98,7 +98,7 @@ bind "l" "math \%numbuffer\% = -1;
 		set numbuffer -1\";
 		set ret" 1 true
 bind "g" "math \%numbuffer\% = -1;
-		if \%ret\% \"set numbuffer \\%first_visible_list\\%;
+		if \%ret\% \"set numbuffer \\%first_v_list\\%;
 			echo g\" \"set tag_filter \\%numbuffer\\%;
 			set numbuffer -1\";
 		set ret" 16 true
