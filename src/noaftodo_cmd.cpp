@@ -8,7 +8,9 @@
  * If hell exists, this is my ticket there.
  */
 
+#include <algorithm>
 #include <cstdlib>
+#include <iostream>
 #include <stdexcept>
 
 #include "noaftodo.h"
@@ -52,13 +54,32 @@ void cmd_init() {
 		for (const auto& arg : args) cmdline += arg + " ";
 
 		const bool wcui = cui_active;
-
 		if (wcui) cui_destroy();
 
-		log("Executing shell command: '" + cmdline + "'...");
-		system(cmdline.c_str());
+		char buffer[128];
+		string result = "";
+		FILE* pipe = popen(cmdline.c_str(), "r");
+		if (!pipe) {
+			log("popen() failed", LP_ERROR);
+			return CMD_ERR_EXTERNAL;
+		}
+
+		try {
+			while (fgets(buffer, sizeof buffer, pipe) != NULL) {
+				cout << buffer;
+				result += buffer;
+			}
+		} catch (...) {
+			pclose(pipe);
+			return CMD_ERR_EXTERNAL;
+		}
 
 		if (wcui) cui_construct();
+
+		pclose(pipe);
+
+		result.erase(remove(result.begin(), result.end(), '\n'), result.end());
+		cmd_retval = result;
 
 		return 0;
 	};
