@@ -32,7 +32,7 @@ alias back "set mode -1"
 
 alias numpress "math \%numbuffer\% max 0 numbuffer; math \%numbuffer\% * 10 numbuffer; math \%numbuffer\% + %arg1% numbuffer; echo \%numbuffer\%"
 
-alias ll "math \%numbuffer\% = -2 ret; if \%ret\% \"set tag_filter -1\" \"set tag_filter \\%numbuffer\\%\""
+alias ll "math \%numbuffer\% = -2; if \%ret\% \"set tag_filter -1\" \"set tag_filter \\%numbuffer\\%\""
 
 # TASK OPERATIONS
 alias duplicate "a \%due\% \"\%title\%\" \"\%desc\%\"; setmeta \%meta\%"
@@ -42,10 +42,10 @@ alias makerec setmeta \%meta\% on_completed \"postpone %arg1%\; set comp\"
 alias makerec_fixed setmeta \%meta\% on_completed \"reschedule a%arg1%\; set comp\"
 
 # KEY BINDINGS
-bind "esc" "math \%numbuffer\% = -1 ret; if \%ret\% q" 1 true
+bind "esc" "math \%numbuffer\% = -1; if \%ret\% q" 1 true
 bind "q" "q" 1 true
 bind "q" "back" 28 true
-bind "esc" "math \%numbuffer\% = -1 ret; if \%ret\% back" 28 true
+bind "esc" "math \%numbuffer\% = -1; if \%ret\% back" 28 true
 bind "enter" "details" 1 true
 bind "enter" "set tag_filter_copy; back" 16 true
 bind "L" "listview" 1 true
@@ -87,17 +87,17 @@ bind "7" "numpress 7" 17 true
 bind "8" "numpress 8" 17 true
 bind "9" "numpress 9" 17 true
 
-bind "g" "math \%numbuffer\% = -1 ret;
+bind "g" "math \%numbuffer\% = -1;
 		if \%ret\% \"set numbuffer \\%first_visible_id\\%;
 		echo g\" \"set id \\%numbuffer\\%;
 		set numbuffer -1\";
 		set ret" 1 true
-bind "l" "math \%numbuffer\% = -1 ret;
+bind "l" "math \%numbuffer\% = -1;
 		if \%ret\% \"set numbuffer -2;
 		echo l\" \"ll;
 		set numbuffer -1\";
 		set ret" 1 true
-bind "g" "math \%numbuffer\% = -1 ret;
+bind "g" "math \%numbuffer\% = -1;
 		if \%ret\% \"set numbuffer \\%first_visible_list\\%;
 			echo g\" \"set tag_filter \\%numbuffer\\%;
 			set numbuffer -1\";

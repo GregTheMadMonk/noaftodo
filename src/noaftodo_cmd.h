@@ -15,6 +15,7 @@ constexpr int CMD_ERR_EXTERNAL		= 1;
 extern std::map<std::string, std::function<int(const std::vector<std::string>& args)>> cmd_cmds;
 extern std::map<std::string, std::string> cmd_aliases;
 
+extern std::string cmd_retval;
 extern std::string cmd_buffer;
 
 extern noaftodo_entry* cmd_sel_entry;

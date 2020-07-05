@@ -23,6 +23,7 @@ using namespace std;
 map<string, function<int(const vector<string>& args)>> cmd_cmds;
 map<string, string> cmd_aliases;
 
+string cmd_retval = "";
 string cmd_buffer;
 
 noaftodo_entry* cmd_sel_entry = nullptr;
@@ -230,20 +231,20 @@ void cmd_init() {
 					else if (args.at(1) == "min") result = (a < b) ? a : b;
 					break;
 				case '=':
-					if (args.size() < 4) cui_status = (a == b) ? "true" : "false";
+					if (args.size() < 4) cmd_retval = (a == b) ? "true" : "false";
 					else cvar(args.at(3)).setter((a == b) ? "true" : "false");
 					return 0;
 				case '<':
-					if (args.size() < 4) cui_status = (a < b) ? "true" : "false";
+					if (args.size() < 4) cmd_retval = (a < b) ? "true" : "false";
 					else cvar(args.at(3)).setter((a < b) ? "true" : "false");
 					return 0;
 				case '>':
-					if (args.size() > 4) cui_status = (a > b) ? "true" : "false";
+					if (args.size() > 4) cmd_retval = (a > b) ? "true" : "false";
 					else cvar(args.at(3)).setter((a > b) ? "true" : "false");
 					return 0;
 			}
 
-			if (args.size() < 4) cui_status = to_string(result);
+			if (args.size() < 4) cmd_retval = to_string(result);
 			else cvar(args.at(3)).setter(to_string(result));
 		} catch (const invalid_argument& e) { return CMD_ERR_ARG_TYPE; }
 
@@ -323,7 +324,7 @@ void cmd_init() {
 		string message = "";
 		for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
 
-		if (cui_active) cui_status = message;
+		if (cui_active) cmd_retval = message;
 		else log((pure ? "" : "echo :: ") + message, LP_IMPORTANT);
 		return 0;
 	};
@@ -627,6 +628,8 @@ void cmd_init() {
 	cvar_wrap_int("numbuffer", cui_numbuffer, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
 	cvars["numbuffer"]->predefine("-1");
 
+	cvar_wrap_string("ret", cmd_retval, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
+
 	cvars["VER"] = make_unique<cvar_base_s>();
 	cvars["VER"]->getter = [] () { return VERSION; };
 	cvars["VER"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
@@ -790,22 +793,24 @@ void cmd_run(string command) {
 
 			if (ret != 0) switch (ret) { // handle error return values
 				case CMD_ERR_ARG_COUNT:
-					cui_status = "Wrong argument count!";
+					cmd_retval = "Wrong argument count!";
 					break;
 				case CMD_ERR_ARG_TYPE:
-					cui_status = "Wrog argument type!";
+					cmd_retval = "Wrog argument type!";
 					break;
 				case CMD_ERR_EXTERNAL:
-					cui_status = "Cannot execute command!";
+					cmd_retval = "Cannot execute command!";
 					break;
 				default:
-					cui_status = "Unknown execution error!";
+					cmd_retval = "Unknown execution error!";
 			}
 		} catch (const out_of_range& e) { // command not found
 			log("Command not found! (" + command + ")", LP_ERROR);
-			cui_status = "Command not found!";
+			cmd_retval = "Command not found!";
 		}
 	}
+
+	cui_status = cmd_retval;
 
 	log_offset--;
 }
