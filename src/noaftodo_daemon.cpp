@@ -28,6 +28,7 @@ string da_task_coming_action;
 string da_task_completed_action;
 string da_task_uncompleted_action;
 string da_task_new_action;
+string da_task_edited_action;
 string da_task_removed_action;
 
 bool da_running = false;
@@ -176,7 +177,7 @@ void da_upd_cache(const bool& is_first_load) {
 		int cached_id = -1;
 
 		for (int j = 0; j < da_cache.size(); j++)
-			if (da_cache.at(j).sim(t_list_copy.at(i))) {
+			if (da_cache.at(j).get_meta("eid") == t_list_copy.at(i).get_meta("eid")) {
 				cached_id  = j;
 				break;
 			}
@@ -225,8 +226,15 @@ void da_upd_cache(const bool& is_first_load) {
 					cmd_exec(format_str(da_task_uncompleted_action, &li_e, true));
 				cmd_exec(format_str(li_e.get_meta("on_uncompleted"), &li_e, true));
 			}
+		}
 
-			continue;
+		// a task was edited
+		if ((ca_e.due != li_e.due) || (ca_e.tag != li_e.tag)
+			       || (ca_e.title != li_e.title) || (ca_e.description != li_e.description))
+		{
+			if (li_e.get_meta("ignore_global_on_edited") != "true")
+				cmd_exec(format_str(da_task_edited_action, &li_e, true));
+			cmd_exec(format_str(li_e.get_meta("on_edited"), &li_e, true));
 		}
 
 		// something else has changed

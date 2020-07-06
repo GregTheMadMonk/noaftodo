@@ -17,7 +17,7 @@ struct cvar_base_s {	// a base structure for cvars
 
 	virtual ~cvar_base_s() = default;
 
-	std::string predef_val; // predefined value
+	std::string predef_val = ""; // predefined value
 
 	std::function<std::string()> getter = [] () { return std::string(""); };
 	std::function<void(const std::string& val)> setter = [] (const std::string& val) { };

@@ -41,6 +41,8 @@ alias reschedule set due %arg1%
 alias makerec setmeta \%meta\% on_completed \"postpone %arg1%\; set comp\"
 alias makerec_fixed setmeta \%meta\% on_completed \"reschedule a%arg1%\; set comp\"
 
+alias sort "math \%numbuffer\% = %arg1%; if \%ret\% \"set sort_by %arg2%\%sort_by\%; set numbuffer -1; echo \%sort_by\%\""
+
 # KEY BINDINGS
 bind "esc" "math \%numbuffer\% = -1; if \%ret\% q" 1 true
 bind "q" "q" 1 true
@@ -103,6 +105,8 @@ bind "g" "math \%numbuffer\% = -1;
 			set numbuffer -1\";
 		set ret" 16 true
 
+bind "s" "math \%numbuffer\% = -1; if \%ret\% \"set sort_by\"; sort 1 d; sort 2 l; sort 3 t; sort 4 D; echo \%sort_by\%" 1 true
+
 # SETTINGS
 # CORE
 set "allow_root" "false"
@@ -130,6 +134,8 @@ set "det.cols"		"dl"
 set "norm.status_fields" "piflms"
 set "livi.status_fields" "fms"
 
+set "sort_by" "dltD"
+
 # CHARACTER SET
 set "charset.box_strong" "┃━┏┓┗┛"
 set "charset.box_light" "|-++++"
@@ -156,4 +162,5 @@ set "on_task_uncompleted_action" 	"!notify-send \"Task is marked \\\"Not Complet
 set "on_task_failed_action" 		"!\%N\% && notify-send \"Task due is now!\" \"\%title\%: \%desc\%\" -u critical || notify-send \"You have a failed task! Come on, it\'s never too late!\" \"\%title\%: \%desc\%\" -u critical &"
 set "on_task_coming_action" 		"!notify-send \"You have an upcoming task!\" \"\%title\%: \%desc\%\" &"
 set "on_task_new_action" 		"!notify-send \"You have a new task!\" \"\%title\%: \%desc\%\" -u low &"
-set "on_task_removed_action" 		"!notify-send \"You have removed a task!\" \"\%title\%: \%desc\%\" -u critical &"
+set "on_task_edited_action" 		"!notify-send \"A task was edited!\" \"\%title\%: \%desc\%\" &"
+set "on_task_removed_action" 		"!notify-send \"A task has been removed!\" \"\%title\%: \%desc\%\" -u critical &"

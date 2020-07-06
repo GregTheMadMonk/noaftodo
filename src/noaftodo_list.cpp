@@ -18,6 +18,8 @@ vector<string> t_tags;
 string li_filename = ".noaftodo-list";
 bool li_autosave = true;
 
+string li_sort_order = "ldtD";
+
 struct stat li_file_stat;
 
 string noaftodo_entry::get_meta(const string& str, const string& def) const {
@@ -101,6 +103,19 @@ bool noaftodo_entry::is_uncat() const {
 
 bool noaftodo_entry::is_uncat() {
 	return const_cast<const noaftodo_entry*>(this)->is_uncat();
+}
+
+void noaftodo_entry::name() {
+	if (this->get_meta("eid") == "")
+		for (int i = 0; ; i++) {
+			bool found = false;
+			for (const auto& e : t_list) found |= (e.get_meta("eid") == "e" + to_string(i));
+
+			if (!found) {
+				this->meta["eid"] = "e" + to_string(i);
+				break;
+			}
+		}
 }
 
 void li_load(const bool& load_workspace) {
@@ -297,7 +312,8 @@ int li_save(const string& filename) {
 
 	log("Saving...");
 
-	li_sort();
+	auto t_list_copy = t_list;
+	li_prepare(t_list_copy);
 
 	ofstream ofile;
 	ofile.open(li_filename, ios::out | ios::trunc);
@@ -309,7 +325,7 @@ int li_save(const string& filename) {
 		ofile << tag << endl;
 
 	ofile << endl << "[list]" << endl;
-	for (const auto& entry : t_list) {
+	for (const auto& entry : t_list_copy) {
 		ofile << "\"" << (entry.completed ? 'v' : '-') 
 			<< "\"\\\"" << entry.due 
 			<< "\"\\\"" << replace_special(entry.title)
@@ -328,7 +344,7 @@ int li_save(const string& filename) {
 	ofile << "ver " << CONF_V << endl;
 	for (auto cvar_i = cvars.begin(); cvar_i != cvars.end(); cvar_i++) {
 		const string key = cvar_i->first;
-		if (cvar(key).changed() && ((cvar(key).flags & CVAR_FLAG_WS_IGNORE) == 0)) {
+		if ((cvar(key).flags & CVAR_FLAG_WS_IGNORE) == 0) if (cvar(key).changed()) {
 			log("Setting workspace var " + key + " (" + to_string(cvar(key).flags) + " | " + to_string(cvar(key).flags & CVAR_FLAG_WS_IGNORE) + ")");
 			ofile << "set \"" << key << "\" \"" << cvar(key).getter() << "\"" << endl;
 		}
@@ -374,6 +390,7 @@ void li_add(const noaftodo_entry& li_entry) {
 	log("Adding " + li_entry.title + "...");
 	t_list.push_back(li_entry);
 
+	li_sort();
 	if (li_autosave) li_save();
 
 	da_send("A");
@@ -407,12 +424,26 @@ void li_rem(const int& entryID) {
 }
 
 void li_sort() {
+	std::sort(t_list.begin(), t_list.end(), less_than_noaftodo_entry_order());
+}
+
+void li_prepare(vector<noaftodo_entry>& list) {
+	// identify entries
+	for (auto& entry : list)
+		if (entry.get_meta("eid") == "") entry.name();
 	// sort entries
-	std::sort(t_list.begin(), t_list.end(), less_than_noaftodo_entry());
+	std::sort(list.begin(), list.end(), less_than_noaftodo_entry());
 
 	// clean useless tags
 	for (int i = t_tags.size() - 1; i >= 0; i--) {
 		if (t_tags.at(i) != to_string(i)) break;
 		t_tags.erase(t_tags.begin() + i);
 	}
+}
+
+int li_find(const string& eid) {
+	for (int i = 0; i < t_list.size(); i++)
+		if (t_list.at(i).get_meta("eid") == eid) return i;
+
+	return -1;
 }

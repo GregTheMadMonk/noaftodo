@@ -36,6 +36,7 @@ extern std::string da_task_coming_action;
 extern std::string da_task_completed_action;
 extern std::string da_task_uncompleted_action;
 extern std::string da_task_new_action;
+extern std::string da_task_edited_action;
 extern std::string da_task_removed_action;
 
 // is daemon running?

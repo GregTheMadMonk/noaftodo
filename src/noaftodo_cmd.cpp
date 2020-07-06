@@ -163,11 +163,14 @@ void cmd_init() {
 		if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return CMD_ERR_EXTERNAL;
 
 		if (args.size() == 1) {
+			if (args.at(0) == "eid") return CMD_ERR_EXTERNAL;
 			t_list[cui_s_line].meta.erase(args.at(0));
 			return 0;
 		}
 
+		const string eid = t_list[cui_s_line].get_meta("eid");
 		t_list[cui_s_line].meta.clear();
+		t_list[cui_s_line].meta["eid"] = eid;
 
 		for (int i = 0; i + 1 < args.size(); i += 2)
 			t_list[cui_s_line].meta[args.at(i)] = args.at(i + 1);
@@ -334,9 +337,8 @@ void cmd_init() {
 
 	// command "load <filename>" - load the list file
 	cmd_cmds["load"] = [] (const vector<string>& args) {
-		if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-		li_load(args.at(0), true);
+		if (args.size() < 1) li_load(true);
+		else li_load(args.at(0), true);
 		return 0;
 	};
 
@@ -395,7 +397,7 @@ void cmd_init() {
 
 	cvars["title"] = make_unique<cvar_base_s>();
 	cvars["title"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string();
+		if (cmd_sel_entry == nullptr)  return string("");
 		return cmd_sel_entry->title;
 	};
 	cvars["title"]->setter = [] (const string& val) {
@@ -407,7 +409,7 @@ void cmd_init() {
 
 	cvars["desc"] = make_unique<cvar_base_s>();
 	cvars["desc"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string();
+		if (cmd_sel_entry == nullptr)  return string("");
 		return cmd_sel_entry->description;
 	};
 	cvars["desc"]->setter = [] (const string& val) {
@@ -419,7 +421,7 @@ void cmd_init() {
 
 	cvars["due"] = make_unique<cvar_base_s>();
 	cvars["due"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string();
+		if (cmd_sel_entry == nullptr)  return string("");
 		return ti_cmd_str(cmd_sel_entry->due);
 	};
 	cvars["due"]->setter = [] (const string& val) {
@@ -431,7 +433,7 @@ void cmd_init() {
 
 	cvars["meta"] = make_unique<cvar_base_s>();
 	cvars["meta"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string();
+		if (cmd_sel_entry == nullptr)  return string("");
 		return replace_special(cmd_sel_entry->meta_str());
 	};
 	cvars["meta"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
@@ -452,7 +454,7 @@ void cmd_init() {
 
 	cvars["parent"] = make_unique<cvar_base_s>();
 	cvars["parent"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string();
+		if (cmd_sel_entry == nullptr)  return string("");
 		return to_string(cmd_sel_entry->tag);
 	};
 	cvars["parent"]->setter = [] (const string& val) {
@@ -541,6 +543,18 @@ void cmd_init() {
 
 	cvar_wrap_int("filter", cui_filter);
 
+	cvar_wrap_string("sort_by", li_sort_order);
+	cvars["sort_by"]->setter = [] (const string& val) {
+		li_sort_order = "";
+
+		for (const char& c : val)
+			if (li_sort_order.find(c) == string::npos) li_sort_order += c;
+
+		//li_sort_order = string(li_sort_order.begin(), unique(li_sort_order.begin(), li_sort_order.end()));
+		if (li_sort_order.length() > 4) li_sort_order = li_sort_order.substr(0, 4);
+		li_sort();
+	};
+
 	// FILTER BITS
 	cvar_wrap_maskflag("filter.uncat", cui_filter, CUI_FILTER_UNCAT, CVAR_FLAG_WS_IGNORE);
 	cvar_wrap_maskflag("filter.complete", cui_filter, CUI_FILTER_COMPLETE, CVAR_FLAG_WS_IGNORE);
@@ -605,6 +619,7 @@ void cmd_init() {
 	cvar_wrap_string("on_task_completed_action", da_task_completed_action);
 	cvar_wrap_string("on_task_uncompleted_action", da_task_uncompleted_action);
 	cvar_wrap_string("on_task_new_action", da_task_new_action);
+	cvar_wrap_string("on_task_edited_action", da_task_edited_action);
 	cvar_wrap_string("on_task_removed_action", da_task_removed_action);
 
 	// HELPER CVARS
