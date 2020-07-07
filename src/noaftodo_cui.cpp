@@ -171,6 +171,20 @@ void cui_init() {
 			return to_string(list_id);
 		} 
 	};
+
+	cui_lview_columns['f'] =
+	{
+		"Flags",
+		[] (const int& w, const int& free, const int& cols) {
+			return 5;
+		},
+		[] (const int& list_id) {
+			if (list_id == -1) return string(" ");
+			return string(li_tag_completed(list_id) ? "V" : "") +
+				string(li_tag_coming(list_id) ? "C" : "") +
+				string(li_tag_failed(list_id) ? "F" : "");
+		}
+	};
 	
 	cui_lview_columns['t'] = 
 	{ 
@@ -586,6 +600,9 @@ void cui_listview_paint() {
 			if (l - cui_delta >= cui_h - 2) break;
 			if (l >= cui_delta)     {
 				if (l == cui_v_line) attron(A_STANDOUT);
+				if (li_tag_completed(v_list.at(l))) attron(COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD);	// list consists of completed entries
+				else if (li_tag_failed(v_list.at(l))) attron(COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD);	// list contains a failed entry
+				else if (li_tag_coming(v_list.at(l))) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// list contains an upcoming entry
 
 				x = 0;
 				move(l - cui_delta + 1, x);

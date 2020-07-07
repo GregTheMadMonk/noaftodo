@@ -447,3 +447,24 @@ int li_find(const string& eid) {
 
 	return -1;
 }
+
+bool li_tag_completed(const int& tagID) {
+	for (const auto& e : t_list)
+		if ((e.tag == tagID) && (!e.completed)) return false;
+
+	return true;
+}
+
+bool li_tag_coming(const int& tagID) {
+	for (const auto& e : t_list)
+		if ((e.tag == tagID) && (e.is_coming())) return true;
+
+	return false;
+}
+
+bool li_tag_failed(const int& tagID) {
+	for (const auto& e : t_list)
+		if ((e.tag == tagID) && (e.is_failed())) return true;
+
+	return false;
+}

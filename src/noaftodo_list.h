@@ -161,4 +161,8 @@ void li_prepare(std::vector<noaftodo_entry>& list);
 
 int li_find(const std::string& eid);
 
+bool li_tag_completed(const int& tagID);
+bool li_tag_coming(const int& tagID);
+bool li_tag_failed(const int& tagID);
+
 #endif

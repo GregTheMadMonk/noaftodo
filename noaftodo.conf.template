@@ -128,7 +128,7 @@ set "frameshift_multistr" "false"
 
 set "norm.cols.all"	"ifldtD"
 set "norm.cols"		"ifdtD"
-set "livi.cols"		"itep"
+set "livi.cols"		"iftep"
 set "det.cols"		"dl"
 
 set "norm.status_fields" "piflms"
