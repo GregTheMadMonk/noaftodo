@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <regex>
 #include <stdexcept>
 
 #include "noaftodo.h"
@@ -723,6 +724,35 @@ void cmd_run(string command) {
 		command = format_str(command, &t_list.at(cui_s_line));
 	else
 		command = format_str(command, nullptr);
+
+	// search for shell variables
+	regex shr("\\$[[:alpha:]]\\w*\\b"); // I <3 StackOverflow
+
+	sregex_iterator it(command.begin(), command.end(), shr);
+	sregex_iterator end;
+
+	{
+		string newcom = command;
+		int index = -1;
+
+		for (; it != end; it++) {
+			for (int i = 0; i < it->size(); i++) {
+				const string var = (*it)[i];
+				const char* rep = getenv(var.substr(1).c_str());
+				if (rep != nullptr) {
+					log("Replacing environment variable " + var + " with \"" + rep + "\"", LP_IMPORTANT);
+					while ((index = newcom.find(var)) != string::npos) // not the best solution but I'm fine with it
+						newcom.replace(index, var.length(), rep);
+				}
+			}
+		}
+
+		command = newcom;
+
+		if (getenv("HOME") != nullptr)
+			while ((index = command.find("~/")) != string::npos)
+				command.replace(index, 2, getenv("HOME") + string("/"));
+	}
 
 	vector<string> new_commands = cmd_break(command);
 
