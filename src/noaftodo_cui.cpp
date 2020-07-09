@@ -179,7 +179,6 @@ void cui_init() {
 			return 5;
 		},
 		[] (const int& list_id) {
-			if (list_id == -1) return string(" ");
 			return string(li_tag_completed(list_id) ? "V" : "") +
 				string(li_tag_coming(list_id) ? "C" : "") +
 				string(li_tag_failed(list_id) ? "F" : "");
