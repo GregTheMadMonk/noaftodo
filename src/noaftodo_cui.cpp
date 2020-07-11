@@ -657,8 +657,7 @@ void cui_listview_paint() {
 	attrset(A_NORMAL);
 }
 
-void cui_listview_input(const wchar_t& key)
-{ }
+void cui_listview_input(const wchar_t& key) { }
 
 void cui_normal_paint() {
 	// draw table title
@@ -772,50 +771,13 @@ void cui_normal_paint() {
 	attrset(A_NORMAL);
 }
 
-void cui_normal_input(const wchar_t& key)
-{ }
+void cui_normal_input(const wchar_t& key) { }
 
 void cui_details_paint() {
 	const int tdelta = cui_delta;
 	cui_normal_paint();
 
-	// draw details box
-	move(2, 3);
-	addstr(cui_box_strong.s_get(CHAR_CORN1).c_str());
-	move(cui_h - 3, 3);
-	addstr(cui_box_strong.s_get(CHAR_CORN3).c_str());
-	move(2, cui_w - 4);
-	addstr(cui_box_strong.s_get(CHAR_CORN2).c_str());
-	move(cui_h - 3, cui_w - 4);
-	addstr(cui_box_strong.s_get(CHAR_CORN4).c_str());
-	cui_box_strong.drop();
-
-	for (int i = 3; i <= cui_h - 4; i++) 
-	{ 
-		move(i, 3); 
-		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
-		cui_box_strong.drop();
-
-		move(i, cui_w - 4);
-		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
-		cui_box_strong.drop();
-	}
-
-	for (int j = 4; j < cui_w - 4; j++) {
-		move(2, j);
-		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
-		cui_box_strong.drop();
-
-		for (int i = 3; i < cui_h - 3; i++) {
-			move(i, j);
-			addch(' ');
-		}
-
-		move(cui_h - 3, j);
-		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
-		cui_box_strong.drop();
-	}
-
+	cui_draw_box(3, 2, cui_w - 6, cui_h - 4, cui_box_strong);
 	// fill the box with details
 	// Title
 	const noaftodo_entry& entry = t_list.at(cui_s_line);
@@ -1011,42 +973,7 @@ void cui_help_paint() {
 	const int tdelta = cui_delta;
 	cui_normal_paint();
 
-	// draw help box
-	move(2, 3);
-	addstr(cui_box_strong.s_get(CHAR_CORN1).c_str());
-	move(cui_h - 3, 3);
-	addstr(cui_box_strong.s_get(CHAR_CORN3).c_str());
-	move(2, cui_w - 4);
-	addstr(cui_box_strong.s_get(CHAR_CORN2).c_str());
-	move(cui_h - 3, cui_w - 4);
-	addstr(cui_box_strong.s_get(CHAR_CORN4).c_str());
-	cui_box_strong.drop();
-
-	for (int i = 3; i <= cui_h - 4; i++) 
-	{ 
-		move(i, 3); 
-		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
-		cui_box_strong.drop();
-
-		move(i, cui_w - 4);
-		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str()); 
-		cui_box_strong.drop();
-	}
-
-	for (int j = 4; j < cui_w - 4; j++) {
-		move(2, j);
-		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
-		cui_box_strong.drop();
-
-		for (int i = 3; i < cui_h - 3; i++) {
-			move(i, j);
-			addch(' ');
-		}
-
-		move(cui_h - 3, j);
-		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
-		cui_box_strong.drop();
-	}
+	cui_draw_box(3, 2, cui_w - 6, cui_h - 4, cui_box_strong);
 
 	// fill the box
 	move(4, 5);
@@ -1133,42 +1060,11 @@ void cui_safemode_box() {
 	int y0 = 2;
 
 	// draw message box
-	move(y0, x0);
-	addstr(cui_box_strong.s_get(CHAR_CORN1).c_str());
-	move(y0, cui_w - 1);
-	addstr(cui_box_strong.s_get(CHAR_CORN2).c_str());
-	move(y0 + 1 + mes_lines.size(), x0);
-	addstr(cui_box_strong.s_get(CHAR_CORN3).c_str());
-	move(y0 + 1 + mes_lines.size(), cui_w - 1);
-	addstr(cui_box_strong.s_get(CHAR_CORN4).c_str());
-	cui_box_strong.drop();
-
-	for (int i = x0 + 1; i < cui_w - 1; i++) {
-		move(y0, i);
-		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
-		cui_box_strong.drop();
-
-		for (int j = 0; j < mes_lines.size(); j++) {
-			move(y0 + 1 + j, i);
-			addch(' ');
-		}
-
-		move(y0 + 1 + mes_lines.size(), i);
-		addstr(cui_box_strong.s_get(CHAR_HLINE).c_str());
-		cui_box_strong.drop();
-	}
+	cui_draw_box(x0, y0, maxlen + 2, mes_lines.size() + 2, cui_box_strong);
 
 	for (int i = 0; i < mes_lines.size(); i++) {
-		move(y0 + 1 + i, x0);
-		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str());
-		cui_box_strong.drop();
-
 		move(y0 + 1 + i, x0 + 1);
 		addstr(mes_lines.at(i).c_str());
-
-		move(y0 + 1 + i, cui_w - 1);
-		addstr(cui_box_strong.s_get(CHAR_VLINE).c_str());
-		cui_box_strong.drop();
 	}
 }
 
@@ -1228,4 +1124,43 @@ wchar_t cui_key_from_str(const string& str) {
 	if (str == "tab")	return 9;
 
 	return 0;
+}
+
+void cui_draw_box(const int& x, const int& y, const int& w, const int& h, multistr_c& chars) {
+	// draw corners
+	move(y, x);
+	addstr(chars.s_get(CHAR_CORN1).c_str());
+	move(y, x + w - 1);
+	addstr(chars.s_get(CHAR_CORN2).c_str());
+	move(y + h - 1, x);
+	addstr(chars.s_get(CHAR_CORN3).c_str());
+	move(y + h - 1, x + w - 1);
+	addstr(chars.s_get(CHAR_CORN4).c_str());
+
+	chars.drop();
+
+	for (int i = y + 1; i < y + h - 1; i++) {
+		move(i, x);
+		addstr(chars.s_get(CHAR_VLINE).c_str());
+		chars.drop();
+
+		move(i, x + w - 1);
+		addstr(chars.s_get(CHAR_VLINE).c_str());
+		chars.drop();
+	}
+
+	for (int j = x + 1; j < x + w - 1; j++) {
+		move(y, j);
+		addstr(chars.s_get(CHAR_HLINE).c_str());
+		chars.drop();
+
+		for (int i = y + 1; i < y + h - 1; i++) {
+			move(i, j);
+			addch(' ');
+		}
+
+		move(y + h - 1, j);
+		addstr(chars.s_get(CHAR_HLINE).c_str());
+		chars.drop();
+	}
 }
