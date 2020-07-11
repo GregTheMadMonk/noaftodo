@@ -375,6 +375,7 @@ void cui_run() {
 					}
 
 					bind_fired = true;
+					break;
 				}
 
 			if (!bind_fired) switch (cui_mode) {

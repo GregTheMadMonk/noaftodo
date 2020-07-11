@@ -51,6 +51,7 @@ bind "esc" "math \%numbuffer\% = -1; if \%ret\% back" 28 true
 bind "enter" "details" 1 true
 bind "enter" "set tag_filter_copy; back" 16 true
 bind "L" "listview" 1 true
+bind "L" "back" 16 true
 bind ":" ":" 29 true
 bind "tab" "math \%tag_filter_v\% + 1 tag_filter_v" 1 true
 bind "up" "math \%id\% - 1 id" 9 true
