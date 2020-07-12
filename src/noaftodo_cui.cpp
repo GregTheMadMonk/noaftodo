@@ -1,10 +1,5 @@
 #include "noaftodo_cui.h"
 
-#ifdef __sun
-#include <ncurses/curses.h>
-# else
-#include <curses.h>
-#endif
 #include <regex>
 
 #include "noaftodo_cmd.h"
@@ -429,7 +424,7 @@ void cui_run() {
 				break;
 		}
 
-		if (errors != 0)  {
+		if (errors != 0) {
 			attrset(A_NORMAL);
 			int old_cx, old_cy;
 			getyx(stdscr, old_cy, old_cx);
@@ -728,7 +723,7 @@ void cui_normal_paint() {
 						if (x >= cui_w) break;
 						move(l - cui_delta + 1, x);
 						const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
-						addstr((cui_columns.at(col).contents(entry, v_list.at(l))).c_str());
+						cui_text_box(x, l - cui_delta + 1, w, 1, cui_columns.at(col).contents(entry, v_list.at(l)), false);
 
 						if (coln < cols.length() - 1) if (x + w < cui_w) {
 							move(l - cui_delta + 1, x + w);
@@ -778,12 +773,12 @@ void cui_details_paint() {
 	const int tdelta = cui_delta;
 	cui_normal_paint();
 
-	cui_draw_box(3, 2, cui_w - 6, cui_h - 4, cui_box_strong);
+	cui_draw_border(3, 2, cui_w - 6, cui_h - 4, cui_box_strong);
+	cui_clear_box(4, 3, cui_w - 8, cui_h - 6);
 	// fill the box with details
 	// Title
 	const noaftodo_entry& entry = t_list.at(cui_s_line);
-	move(4, 5);
-	addstr(entry.title.c_str());
+	cui_text_box(5, 4, cui_w - 10, 1, entry.title);
 
 	for (int i = 4; i < cui_w - 4; i++) {
 		move(6, i);
@@ -791,8 +786,6 @@ void cui_details_paint() {
 		cui_box_light.drop();
 	}
 
-	move(7, 5);
-	
 	string tag = "";
 	if (entry.tag < t_tags.size()) if (t_tags.at(entry.tag) != to_string(entry.tag))
 		tag = ": " + t_tags.at(entry.tag);
@@ -807,7 +800,7 @@ void cui_details_paint() {
 		} catch (const out_of_range& e) {}
 	}
 
-	addstr(info_str.c_str()); 
+	cui_text_box(5, 7, cui_w - 10, 1, info_str);
 
 	for (int i = 4; i < cui_w - 4; i++) {
 		move(8, i);
@@ -817,30 +810,7 @@ void cui_details_paint() {
 
 	// draw description
 	// we want text wrapping here
-	wstring desc = w_converter.from_bytes(entry.description);
-	int x = 5;
-	int y = 10 + tdelta;
-	for (int i = 0; i < desc.length(); i++) {
-		if (x == cui_w - 5) {
-			x = 5;
-			y++;
-		}
-
-		if (y == cui_h - 4)  {
-			move(cui_h - 4, 5);
-			addstr("<- ... ->");
-			break; // could've implemented scrolling
-				// but come on, who writes descriptions
-				// that long in a TODO-list :)
-		}
-
-		move(y, x);
-		if (y >= 10) addstr(w_converter.to_bytes(desc.at(i)).c_str());
-
-		x++;
-
-		cui_delta = tdelta;
-	}
+	cui_text_box(5, 10, cui_w - 10, cui_h - 14, entry.description);
 }
 
 void cui_details_input(const wchar_t& key) {
@@ -974,7 +944,8 @@ void cui_help_paint() {
 	const int tdelta = cui_delta;
 	cui_normal_paint();
 
-	cui_draw_box(3, 2, cui_w - 6, cui_h - 4, cui_box_strong);
+	cui_draw_border(3, 2, cui_w - 6, cui_h - 4, cui_box_strong);
+	cui_clear_box(4, 3, cui_w - 8, cui_h - 6);
 
 	// fill the box
 	move(4, 5);
@@ -1061,7 +1032,8 @@ void cui_safemode_box() {
 	int y0 = 2;
 
 	// draw message box
-	cui_draw_box(x0, y0, maxlen + 2, mes_lines.size() + 2, cui_box_strong);
+	cui_draw_border(x0, y0, maxlen + 2, mes_lines.size() + 2, cui_box_strong);
+	cui_clear_box(x0 + 1, y0 + 1, maxlen, mes_lines.size());
 
 	for (int i = 0; i < mes_lines.size(); i++) {
 		move(y0 + 1 + i, x0 + 1);
@@ -1127,7 +1099,15 @@ wchar_t cui_key_from_str(const string& str) {
 	return 0;
 }
 
-void cui_draw_box(const int& x, const int& y, const int& w, const int& h, multistr_c& chars) {
+void cui_clear_box(const int& x, const int& y, const int& w, const int& h) {
+	for (int j = x; j < x + w; j++)
+		for (int i = y; i < y + h; i++) {
+			move(i, j);
+			addch(' ');
+		}
+}
+
+void cui_draw_border(const int& x, const int& y, const int& w, const int& h, multistr_c& chars) {
 	// draw corners
 	move(y, x);
 	addstr(chars.s_get(CHAR_CORN1).c_str());
@@ -1140,6 +1120,7 @@ void cui_draw_box(const int& x, const int& y, const int& w, const int& h, multis
 
 	chars.drop();
 
+	// draw vertical lines
 	for (int i = y + 1; i < y + h - 1; i++) {
 		move(i, x);
 		addstr(chars.s_get(CHAR_VLINE).c_str());
@@ -1150,18 +1131,154 @@ void cui_draw_box(const int& x, const int& y, const int& w, const int& h, multis
 		chars.drop();
 	}
 
+	// draw horizontal lines
 	for (int j = x + 1; j < x + w - 1; j++) {
 		move(y, j);
 		addstr(chars.s_get(CHAR_HLINE).c_str());
 		chars.drop();
 
-		for (int i = y + 1; i < y + h - 1; i++) {
-			move(i, j);
-			addch(' ');
-		}
-
 		move(y + h - 1, j);
 		addstr(chars.s_get(CHAR_HLINE).c_str());
 		chars.drop();
 	}
+}
+
+void cui_text_box(const int& x, const int& y, const int& w, const int& h, const string& str, const bool& show_md) {
+	if (!show_md) {
+		int t_x = x;
+		int t_y = y;
+		wstring w_str = w_converter.from_bytes(str);
+		for (int i = 0; i < w_str.length(); i++) {
+			if (t_x >= x + w) { t_x = x; t_y++; }
+			if (t_y >= y + h) break;
+
+			move(t_y, t_x);
+			addstr(w_converter.to_bytes(w_str.at(i)).c_str());
+			t_x++;
+		}
+
+		return;
+	}
+
+	int text_attrs = A_NORMAL;
+	int pair = 0;
+	attr_get(&text_attrs, &pair, NULL);
+
+	regex bold_r("\\*\\*[^\\ ][^\\*\\*]*[^\\ ]\\*\\*");
+	regex italic_r("\\*[^\\ ,^\\*][^\\*]*[^\\ ,*\\*]\\*");
+	regex striked_r("~~[^\\ ][^~~]*[^\\ ]~~");
+
+	vector<string> tokens;
+	vector<int> attrs; // what attributes need to be toggled
+	// subdivide a string into tokens
+	auto do_split = [] (string s, const regex& r) {
+		if (s == "") return vector<string>(1, "");
+		vector<string> split;
+		smatch match;
+		bool from_start;
+
+		while (regex_search(s, match, r)) {
+			int split_on = match.position();
+			if (split_on != 0) {
+				if (split.size() == 0) split.push_back("");
+				split.push_back(s.substr(0, split_on));
+			}
+			split.push_back(s.substr(split_on, match.length()));
+			s = s.substr(split_on + match.length());
+		}
+
+		if (s != "") {
+			if (split.size() == 0) split.push_back("");
+			split.push_back(s);
+		}
+
+		return split;
+	};
+
+	// fill in bold
+	tokens = do_split(str, bold_r);
+	for (int i = 0; i < tokens.size(); i++) {
+		attrs.push_back(A_BOLD);
+		int index = -1;
+		while ((index = tokens.at(i).find("**")) != string::npos) tokens[i].replace(index, 2, "");
+	}
+
+	// fill in italic
+	vector<string> new_tokens;
+	vector<int> new_attrs;
+	for (int i = 0; i < tokens.size(); i++) {
+		auto next = do_split(tokens.at(i), italic_r);
+
+		if (next.size() == 1) {
+			new_attrs.push_back(attrs.at(i));
+			new_tokens.push_back(next.at(0));
+			continue;
+		}
+
+		for (int j = 0; j < next.size(); j++) {
+			new_tokens.push_back(next.at(j));
+
+			if (j == 0) new_attrs.push_back(A_ITALIC | attrs.at(i));
+			else new_attrs.push_back(A_ITALIC);
+		}
+	}
+
+	tokens = new_tokens;
+	attrs = new_attrs;
+
+	new_tokens.clear();
+	new_attrs.clear();
+
+	for (int i = 0; i < tokens.size(); i++) {
+		int index = -1;
+		while ((index = tokens.at(i).find("*")) != string::npos) tokens[i].replace(index, 1, "");
+	}
+
+	// fill UNDERLINE (striketrough in markdown)
+	for (int i = 0; i < tokens.size(); i++) {
+		auto next = do_split(tokens.at(i), striked_r);
+
+		if (next.size() == 1) {
+			new_attrs.push_back(attrs.at(i));
+			new_tokens.push_back(next.at(0));
+			continue;
+		}
+
+		for (int j = 0; j < next.size(); j++) {
+			new_tokens.push_back(next.at(j));
+
+			if (j == 0) new_attrs.push_back(A_UNDERLINE | attrs.at(i));
+			else new_attrs.push_back(A_UNDERLINE);
+		}
+	}
+
+	tokens = new_tokens;
+	attrs = new_attrs;
+
+	for (int i = 0; i < tokens.size(); i++) {
+		int index = -1;
+		while ((index = tokens.at(i).find("~~")) != string::npos) tokens[i].replace(index, 2, "");
+	}
+
+	// start printing the text
+	int t_x = x;
+	int t_y = y;
+	int p_attrs = 0;
+	for (int i = 0; i < tokens.size(); i++) {
+		p_attrs ^= attrs.at(i);
+		wstring w_str = w_converter.from_bytes(tokens.at(i));
+		attrset(text_attrs | p_attrs);
+		for (int j = 0; j < w_str.length(); j++) {
+			if (t_x >= x + w) { t_x = x; t_y++; }
+			if (t_y >= y + h) break;
+
+			move(t_y, t_x);
+			addstr(w_converter.to_bytes(w_str.at(j)).c_str());
+			t_x++;
+		}
+
+		if (t_y >= y + h) break;
+	}
+
+	attrset(text_attrs);
 }

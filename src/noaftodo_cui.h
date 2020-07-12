@@ -7,6 +7,12 @@
 #include <string>
 #include <vector>
 
+#ifdef __sun
+#include <ncurses/curses.h>
+# else
+#include <curses.h>
+#endif
+
 #include "noaftodo.h"
 #include "noaftodo_list.h"
 
@@ -182,5 +188,8 @@ void cui_filter_history();
 wchar_t cui_key_from_str(const std::string& str);
 
 // drawer functions
-void cui_draw_box(const int& x, const int& y, const int& w, const int& h, multistr_c& chars);
+
+void cui_clear_box(const int& x, const int& y, const int& w, const int& h);
+void cui_draw_border(const int& x, const int& y, const int& w, const int& h, multistr_c& chars);
+void cui_text_box(const int& x, const int& y, const int& w, const int& h, const std::string& str, const bool& show_md = true);
 #endif
