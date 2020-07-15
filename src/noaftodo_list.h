@@ -157,6 +157,7 @@ void li_rem(const std::string& eid);
 void li_rem(const int& entryID);
 
 void li_sort();
+void li_identify_all();
 void li_prepare(std::vector<noaftodo_entry>& list);
 
 int li_find(const std::string& eid);

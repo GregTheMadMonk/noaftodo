@@ -313,6 +313,7 @@ int li_save(const string& filename) {
 
 	log("Saving...");
 
+	li_identify_all();
 	auto t_list_copy = t_list;
 	li_prepare(t_list_copy);
 
@@ -390,6 +391,7 @@ bool li_has_changed() {
 void li_add(const noaftodo_entry& li_entry) {
 	log("Adding " + li_entry.title + "...");
 	t_list.push_back(li_entry);
+	t_list[t_list.size() - 1].name();
 
 	li_sort();
 	if (li_autosave) li_save();
@@ -428,10 +430,13 @@ void li_sort() {
 	std::sort(t_list.begin(), t_list.end(), less_than_noaftodo_entry_order());
 }
 
-void li_prepare(vector<noaftodo_entry>& list) {
+void li_identify_all() {
 	// identify entries
-	for (auto& entry : list)
+	for (auto& entry : t_list)
 		if (entry.get_meta("eid") == "") entry.name();
+}
+
+void li_prepare(vector<noaftodo_entry>& list) {
 	// sort entries
 	std::sort(list.begin(), list.end(), less_than_noaftodo_entry());
 
