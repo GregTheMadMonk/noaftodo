@@ -248,9 +248,12 @@ string format_str(string str, noaftodo_entry* const li_entry, const bool& renoti
 	while ((index = str.find("%N%")) 	!= string::npos) str.replace(index, 3, renotify ? "false" : "true");
 
 	// replace %cvars% with their values
-	for (auto it = cvars.begin(); it != cvars.end(); it++)
-		while ((index = str.find("%" + it->first + "%")) != string::npos)
+	for (auto it = cvars.begin(); it != cvars.end(); it++) {
+		while ((index = str.find("%%" + it->first + "%%")) != string::npos)
 			str.replace(index, 2 + it->first.length(), replace_special(*it->second));
+		while ((index = str.find("%" + it->first + "%")) != string::npos)
+			str.replace(index, 2 + it->first.length(), *it->second);
+	}
 
 	return str;
 }

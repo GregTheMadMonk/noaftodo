@@ -435,7 +435,7 @@ void cmd_init() {
 	cvars["meta"] = make_unique<cvar_base_s>();
 	cvars["meta"]->getter = [] () {
 		if (cmd_sel_entry == nullptr)  return string("");
-		return replace_special(cmd_sel_entry->meta_str());
+		return cmd_sel_entry->meta_str();
 	};
 	cvars["meta"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 

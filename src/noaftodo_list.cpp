@@ -69,7 +69,7 @@ string noaftodo_entry::meta_str() const {
 
 	for (auto it = this->meta.begin(); it != this->meta.end(); it++) {
 		if (meta != "") meta += " ";
-		meta += it->first + " " + it->second;
+		meta += "\"" + it->first + "\" \"" + it->second + "\"";
 	}
 
 	return meta;
