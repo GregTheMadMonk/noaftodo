@@ -632,25 +632,7 @@ void cui_listview_paint() {
 
 	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
 
-	string cui_status_l = "";
-
-	for (const char& c : cui_listview_status_fields) {
-		try {
-			const string field = (cui_status_fields.at(c))();
-			if (field != "") {
-				if (cui_status_l != "") cui_status_l = " " + cui_separators.s_get(CHAR_STA_SEP) + " " + cui_status_l;
-		       		cui_status_l = field + cui_status_l;
-			}
-		} catch (const out_of_range& e) {}
-	}
-
-	if (cui_status_standout) attron(A_STANDOUT);
-	attron(COLOR_PAIR(CUI_CP_STATUS));
-	move(cui_h - 1, 0);
-	for (int x = 0; x < cui_w; x++) addch(' ');
-	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());
-	addstr(cui_status_l.c_str());
-	attrset(A_NORMAL);
+	cui_draw_status(cui_listview_status_fields);
 }
 
 void cui_listview_input(const wchar_t& key) { }
@@ -746,25 +728,7 @@ void cui_normal_paint() {
 
 	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
 
-	string cui_status_l = "";
-
-	for (const char& c : cui_normal_status_fields) {
-		try {
-			const string field = (cui_status_fields.at(c))();
-			if (field != "") {
-				if (cui_status_l != "") cui_status_l = " " + cui_separators.s_get(CHAR_STA_SEP) + " " + cui_status_l;
-		       		cui_status_l = field + cui_status_l;
-			}
-		} catch (const out_of_range& e) {}
-	}
-
-	if (cui_status_standout) attron(A_STANDOUT);
-	attron(COLOR_PAIR(CUI_CP_STATUS));
-	move(cui_h - 1, 0);
-	for (int x = 0; x < cui_w; x++) addch(' ');
-	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());
-	addstr(cui_status_l.c_str());
-	attrset(A_NORMAL);
+	cui_draw_status(cui_normal_status_fields);
 }
 
 void cui_normal_input(const wchar_t& key) { }
@@ -1078,7 +1042,7 @@ string cui_prompt(const string& message) {
 
 void cui_filter_history() {
 	for (int i = 0; i < cui_command_history.size() - 1; i++)
-		if (cui_command_history[i] == w_converter.from_bytes(""))  {
+		if (cui_command_history[i] == L"")  {
 			cui_command_history.erase(cui_command_history.begin() + i);
 			i--;
 		}
@@ -1097,6 +1061,28 @@ wchar_t cui_key_from_str(const string& str) {
 	if (str == "tab")	return 9;
 
 	return 0;
+}
+
+void cui_draw_status(const string& fields) {
+	string cui_status_l = "";
+
+	for (const char& c : fields) {
+		try {
+			const string field = (cui_status_fields.at(c))();
+			if (field != "") {
+				if (cui_status_l != "") cui_status_l = " " + cui_separators.s_get(CHAR_STA_SEP) + " " + cui_status_l;
+		       		cui_status_l = field + cui_status_l;
+			}
+		} catch (const out_of_range& e) {}
+	}
+
+	if (cui_status_standout) attron(A_STANDOUT);
+	attron(COLOR_PAIR(CUI_CP_STATUS));
+	move(cui_h - 1, 0);
+	for (int x = 0; x < cui_w; x++) addch(' ');
+	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());
+	cui_text_box(cui_w - 1 - w_converter.from_bytes(cui_status_l).length(), cui_h - 1, cui_w, 1, cui_status_l);
+	attrset(A_NORMAL);
 }
 
 void cui_clear_box(const int& x, const int& y, const int& w, const int& h) {

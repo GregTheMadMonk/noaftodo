@@ -188,6 +188,7 @@ void cui_filter_history();
 wchar_t cui_key_from_str(const std::string& str);
 
 // drawer functions
+void cui_draw_status(const std::string& fields);
 
 void cui_clear_box(const int& x, const int& y, const int& w, const int& h);
 void cui_draw_border(const int& x, const int& y, const int& w, const int& h, multistr_c& chars);
