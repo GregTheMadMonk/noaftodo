@@ -582,9 +582,9 @@ void cui_listview_paint() {
 		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == cui_tag_filter) cui_v_line = i;
 	}
 
-	cui_delta = 0;
-	if (cui_v_line - cui_delta >= cui_h - 2) cui_delta = cui_v_line - cui_h + 3;
-	if (cui_v_line - cui_delta < 0) cui_delta = cui_v_line;
+	int list_offset = 0;
+	if (cui_v_line - list_offset >= cui_h - 2) list_offset = cui_v_line - cui_h + 3;
+	if (cui_v_line - list_offset < 0) list_offset = cui_v_line;
 
 	int last_string = 1;
 	if (v_list.size() == 0) cui_tag_filter = CUI_TAG_ALL;
@@ -592,27 +592,27 @@ void cui_listview_paint() {
 		for (int l = 0; l < v_list.size(); l++) {
 			cui_separators.drop();
 			cui_separators.shift_at(CHAR_ROW_SEP, cui_row_separator_offset * (l + 1));
-			if (l - cui_delta >= cui_h - 2) break;
-			if (l >= cui_delta)     {
+			if (l - list_offset >= cui_h - 2) break;
+			if (l >= list_offset)     {
 				if (l == cui_v_line) attron(A_STANDOUT);
 				if (li_tag_completed(v_list.at(l))) attron(COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD);	// list consists of completed entries
 				else if (li_tag_failed(v_list.at(l))) attron(COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD);	// list contains a failed entry
 				else if (li_tag_coming(v_list.at(l))) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// list contains an upcoming entry
 
 				x = 0;
-				move(l - cui_delta + 1, x);
+				move(l - list_offset + 1, x);
 				for (int i = 0; i < cui_w; i++) addch(' ');
 
 				for (int coln = 0; coln < cui_listview_cols.length(); coln++) {
 					try {
 						const char& col = cui_listview_cols.at(coln);
 						if (x >= cui_w) break;
-						move(l - cui_delta + 1, x);
+						move(l - list_offset + 1, x);
 						const int w = cui_lview_columns.at(col).width(cui_w, cui_w - x, cui_listview_cols.length());
 						addstr((cui_lview_columns.at(col).contents(v_list.at(l))).c_str());
 
 						if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w) {
-							move(l - cui_delta + 1, x + w);
+							move(l - list_offset + 1, x + w);
 							addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 						}
 						x += w + 3;
@@ -621,11 +621,11 @@ void cui_listview_paint() {
 					} catch (const out_of_range& e) {}
 				}
 
-				move(l - cui_delta + 1, cui_w - 1);
+				move(l - list_offset + 1, cui_w - 1);
 				addstr(" ");
 
 				attrset(A_NORMAL);
-				last_string = l - cui_delta + 2;
+				last_string = l - list_offset + 2;
 			}
 		}
 	}
@@ -676,9 +676,9 @@ void cui_normal_paint() {
 		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == cui_s_line) cui_v_line = i;
 	}
 
-	cui_delta = 0;
-	if (cui_v_line - cui_delta >= cui_h - 2) cui_delta = cui_v_line - cui_h + 3;
-	if (cui_v_line - cui_delta < 0) cui_delta = cui_v_line;
+	int list_offset = 0;
+	if (cui_v_line - list_offset >= cui_h - 2) list_offset = cui_v_line - cui_h + 3;
+	if (cui_v_line - list_offset < 0) list_offset = cui_v_line;
 
 	int last_string = 1;
 	if (v_list.size() == 0) cui_s_line = -1;
@@ -686,8 +686,8 @@ void cui_normal_paint() {
 		for (int l = 0; l < v_list.size(); l++) {
 			cui_separators.drop();
 			cui_separators.shift_at(CHAR_ROW_SEP, cui_row_separator_offset * (l + 1));
-			if (l - cui_delta >= cui_h - 2) break;
-			if (l >= cui_delta)     {
+			if (l - list_offset >= cui_h - 2) break;
+			if (l >= list_offset)     {
 				const noaftodo_entry& entry = t_list.at(v_list.at(l));
 				
 				if (l == cui_v_line) attron(A_STANDOUT);
@@ -696,19 +696,19 @@ void cui_normal_paint() {
 				else if (entry.is_coming()) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// an upcoming entry
 
 				x = 0;
-				move(l - cui_delta + 1, x);
+				move(l - list_offset + 1, x);
 				for (int i = 0; i < cui_w; i++) addch(' ');
 
 				for (int coln = 0; coln < cols.length(); coln++) {
 					try {
 						const char& col = cols.at(coln);
 						if (x >= cui_w) break;
-						move(l - cui_delta + 1, x);
+						move(l - list_offset + 1, x);
 						const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
-						cui_text_box(x, l - cui_delta + 1, w, 1, cui_columns.at(col).contents(entry, v_list.at(l)));
+						cui_text_box(x, l - list_offset + 1, w, 1, cui_columns.at(col).contents(entry, v_list.at(l)));
 
 						if (coln < cols.length() - 1) if (x + w < cui_w) {
-							move(l - cui_delta + 1, x + w);
+							move(l - list_offset + 1, x + w);
 							addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
 						}
 						x += w + 3;
@@ -717,11 +717,11 @@ void cui_normal_paint() {
 					} catch (const out_of_range& e) {}
 				}
 
-				move(l - cui_delta + 1, cui_w - 1);
+				move(l - list_offset + 1, cui_w - 1);
 				addstr(" ");
 
 				attrset(A_NORMAL);
-				last_string = l - cui_delta + 2;
+				last_string = l - list_offset + 2;
 			}
 		}
 	}
@@ -734,7 +734,6 @@ void cui_normal_paint() {
 void cui_normal_input(const wchar_t& key) { }
 
 void cui_details_paint() {
-	const int tdelta = cui_delta;
 	cui_normal_paint();
 
 	cui_draw_border(3, 2, cui_w - 6, cui_h - 4, cui_box_strong);
@@ -774,15 +773,15 @@ void cui_details_paint() {
 
 	// draw description
 	// we want text wrapping here
-	cui_text_box(5, 10, cui_w - 10, cui_h - 14, entry.description);
+	cui_text_box(5, 10, cui_w - 10, cui_h - 14, entry.description, true, cui_delta);
 }
 
 void cui_details_input(const wchar_t& key) {
 	switch (key) {
-		case KEY_RIGHT:
-			cui_delta--;
-			break;
 		case KEY_LEFT:
+			if (cui_delta > 0) cui_delta--;
+			break;
+		case KEY_RIGHT:
 			cui_delta++;
 			break;
 		case '=':
@@ -905,7 +904,6 @@ void cui_command_input(const wchar_t& key) {
 }
 
 void cui_help_paint() {
-	const int tdelta = cui_delta;
 	cui_normal_paint();
 
 	cui_draw_border(3, 2, cui_w - 6, cui_h - 4, cui_box_strong);
@@ -923,56 +921,20 @@ void cui_help_paint() {
 
 	// draw description
 	// we want text wrapping here
-	int x = 5;
-	int y = 8 + tdelta;
-	int tabs = 0;
 	string cui_help;
 	for (char c : DOC)
 		cui_help += string(1, c);
 
-	for (int i = 0; i < cui_help.length(); i++) {
-		if (x == cui_w - 5) {
-			x = 5;
-			y++;
-		}
-		
-		if (y >= cui_h - 4)  {
-			move(cui_h - 4, 5);
-			addstr("<- ... ->");
-			break;
-		}
-
-		const char c = cui_help.at(i);
-
-		move(y, x);
-
-		constexpr int TAB_W = 30;
-		switch (c) {
-			case '\n':
-				y++;
-				tabs = 0;
-				x = 5;
-				break;
-			case '\t':
-				tabs++;
-				x = tabs * TAB_W;
-				break;
-			default:
-				if (y >= 8) addch(c);
-				x++;
-		}
-	}
-
-	cui_delta = tdelta;
+	cui_text_box(5, 8, cui_w - 10, cui_h - 12, cui_help, true, cui_delta);
 }
 
 void cui_help_input(const wchar_t& key) {
 	switch (key) {
-		case KEY_RIGHT:
-			cui_delta--;
-			break;
 		case KEY_LEFT:
-			if (cui_delta < 0) cui_delta++;
+			if (cui_delta > 0) cui_delta--;
+			break;
+		case KEY_RIGHT:
+			cui_delta++;
 			break;
 		case '=':
 			cui_delta = 0;
@@ -1129,19 +1091,34 @@ void cui_draw_border(const int& x, const int& y, const int& w, const int& h, mul
 	}
 }
 
-void cui_text_box(const int& x, const int& y, const int& w, const int& h, const string& str, const bool& show_md) {
+void cui_text_box(const int& x, const int& y, const int& w, const int& h, const string& str, const bool& show_md, const int& line_offset) {
 	int t_x = x;
-	int t_y = y;
+	int t_y = y - line_offset;
 
-	auto putwch = [&t_x, &t_y, &w, &h, &x, &y] (const wchar_t& wch) {
+	auto putwch = [&t_x, &t_y, &w, &h, &x, &y, &line_offset] (const wchar_t& wch) {
+		switch (wch) {
+			case L'\n':
+				t_x = x;
+				t_y++;
+				return;
+			case L'\t':
+				t_x += 4;
+				if (t_x >= x + w) {
+					t_x = x;
+					t_y++;
+				}
+				return;
+		}
 		if (t_x >= x + w) {
 			t_x = x;
 			t_y++;
 		}
 		if (t_y >= y + h) return;
 
-		move(t_y, t_x);
-		addstr(w_converter.to_bytes(wch).c_str());
+		if (t_y >= y) {
+			move(t_y, t_x);
+			addstr(w_converter.to_bytes(wch).c_str());
+		}
 		t_x++;
 	};
 
@@ -1161,12 +1138,17 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 	int attrs = 0;
 	int i = 0;
 	for (; i < wstr.length(); i++) {
-		if (wstr.substr(i, 2) == L"**") { attrs ^= A_BOLD; i++; attrset(attrs | text_attrs); continue; }
-		if (wstr.substr(i, 1) == L"*") { attrs ^= A_ITALIC; attrset(attrs | text_attrs); continue; }
-		if (wstr.substr(i, 2) == L"~~") { attrs ^= A_UNDERLINE; i++; attrset(attrs | text_attrs); continue; }
+		for (const auto& sw : cui_md_switches)
+			if (wstr.substr(i, sw.second.length()) == sw.second) {
+				attrs ^= sw.first;
+				i += sw.second.length() - 1;
+				attrset(attrs | text_attrs);
+				goto skip_putwch;
+			}
 
-		const auto& wch = wstr.at(i);
-		putwch(wch);
+		putwch(wstr.at(i));
+
+		skip_putwch:;
 	}
 
 	attrset(text_attrs);

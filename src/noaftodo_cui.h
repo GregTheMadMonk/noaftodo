@@ -128,6 +128,13 @@ extern std::string cui_listview_cols;
 // binds
 extern std::vector<cui_bind_s> binds;
 
+// markdown style switches
+const std::vector<std::pair<int, std::wstring>> cui_md_switches = {
+	{ A_BOLD,	L"**"	},
+	{ A_ITALIC,	L"*"	},
+	{ A_UNDERLINE,	L"~~"	}
+};
+
 // interface size
 extern int cui_w, cui_h;
 
@@ -192,5 +199,5 @@ void cui_draw_status(const std::string& fields);
 
 void cui_clear_box(const int& x, const int& y, const int& w, const int& h);
 void cui_draw_border(const int& x, const int& y, const int& w, const int& h, multistr_c& chars);
-void cui_text_box(const int& x, const int& y, const int& w, const int& h, const std::string& str, const bool& show_md = true);
+void cui_text_box(const int& x, const int& y, const int& w, const int& h, const std::string& str, const bool& show_md = true, const int& line_offset = 0);
 #endif
