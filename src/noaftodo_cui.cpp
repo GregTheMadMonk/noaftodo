@@ -1159,14 +1159,14 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 	attr_get(&text_attrs, &pair, NULL);
 
 	int attrs = 0;
-	for (int i = 0; i < wstr.length(); i++) {
+	int i = 0;
+	for (; i < wstr.length(); i++) {
+		if (wstr.substr(i, 2) == L"**") { attrs ^= A_BOLD; i++; attrset(attrs | text_attrs); continue; }
+		if (wstr.substr(i, 1) == L"*") { attrs ^= A_ITALIC; attrset(attrs | text_attrs); continue; }
+		if (wstr.substr(i, 2) == L"~~") { attrs ^= A_UNDERLINE; i++; attrset(attrs | text_attrs); continue; }
+
 		const auto& wch = wstr.at(i);
-
 		putwch(wch);
-
-		if (wstr.substr(i + 1, 2) == L"**") { attrs ^= A_BOLD; i += 2; attrset(attrs | text_attrs); }
-		else if (wstr.substr(i + 1, 1) == L"*") { attrs ^= A_ITALIC; i++; attrset(attrs | text_attrs); }
-		else if (wstr.substr(i + 1, 2) == L"~~") { attrs ^= A_UNDERLINE; i += 2; attrset(attrs | text_attrs); }
 	}
 
 	attrset(text_attrs);
