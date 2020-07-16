@@ -1,3 +1,4 @@
+[![Packaging status](https://repology.org/badge/vertical-allrepos/noaftodo.svg)](https://repology.org/project/noaftodo/versions)
 # NOAFtodo
 A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolutely no clue why.
 
