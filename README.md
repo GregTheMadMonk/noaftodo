@@ -1,5 +1,7 @@
-[![Packaging status](https://repology.org/badge/vertical-allrepos/noaftodo.svg)](https://repology.org/project/noaftodo/versions)
 # NOAFtodo
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/noaftodo.svg)](https://repology.org/project/noaftodo/versions)
+
 A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolutely no clue why.
 
 <img src="workflow.gif" width="576" height="324" alt="NOAFtodo workflow"></img>

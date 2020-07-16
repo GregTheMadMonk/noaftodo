@@ -723,7 +723,7 @@ void cui_normal_paint() {
 						if (x >= cui_w) break;
 						move(l - cui_delta + 1, x);
 						const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
-						cui_text_box(x, l - cui_delta + 1, w, 1, cui_columns.at(col).contents(entry, v_list.at(l)), false);
+						cui_text_box(x, l - cui_delta + 1, w, 1, cui_columns.at(col).contents(entry, v_list.at(l)));
 
 						if (coln < cols.length() - 1) if (x + w < cui_w) {
 							move(l - cui_delta + 1, x + w);
@@ -1144,19 +1144,27 @@ void cui_draw_border(const int& x, const int& y, const int& w, const int& h, mul
 }
 
 void cui_text_box(const int& x, const int& y, const int& w, const int& h, const string& str, const bool& show_md) {
-	if (!show_md) {
-		int t_x = x;
-		int t_y = y;
-		wstring w_str = w_converter.from_bytes(str);
-		for (int i = 0; i < w_str.length(); i++) {
-			if (t_x >= x + w) { t_x = x; t_y++; }
-			if (t_y >= y + h) break;
+	int t_x = x;
+	int t_y = y;
 
-			move(t_y, t_x);
-			addstr(w_converter.to_bytes(w_str.at(i)).c_str());
-			t_x++;
+	auto putwch = [&t_x, &t_y, &w, &h, &x, &y] (const wchar_t& wch) {
+		if (t_x >= x + w) {
+			t_x = x;
+			t_y++;
 		}
+		if (t_y >= y + h) return;
 
+		move(t_y, t_x);
+		addstr(w_converter.to_bytes(wch).c_str());
+		t_x++;
+	};
+
+	wstring wstr = w_converter.from_bytes(str);
+	if (!show_md) {
+		for (const auto& wch : wstr) {
+			putwch(wch);
+			if (t_y >= y + h) return;
+		}
 		return;
 	}
 
@@ -1164,120 +1172,15 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 	int pair = 0;
 	attr_get(&text_attrs, &pair, NULL);
 
-	regex bold_r("\\*\\*[^\\ ][^\\*\\*]*[^\\ ]\\*\\*");
-	regex italic_r("\\*[^\\ ,^\\*][^\\*]*[^\\ ,*\\*]\\*");
-	regex striked_r("~~[^\\ ][^~~]*[^\\ ]~~");
+	int attrs = 0;
+	for (int i = 0; i < wstr.length(); i++) {
+		const auto& wch = wstr.at(i);
 
-	vector<string> tokens;
-	vector<int> attrs; // what attributes need to be toggled
-	// subdivide a string into tokens
-	auto do_split = [] (string s, const regex& r) {
-		if (s == "") return vector<string>(1, "");
-		vector<string> split;
-		smatch match;
-		bool from_start;
+		putwch(wch);
 
-		while (regex_search(s, match, r)) {
-			int split_on = match.position();
-			if (split_on != 0) {
-				if (split.size() == 0) split.push_back("");
-				split.push_back(s.substr(0, split_on));
-			}
-			split.push_back(s.substr(split_on, match.length()));
-			s = s.substr(split_on + match.length());
-		}
-
-		if (s != "") {
-			if (split.size() == 0) split.push_back("");
-			split.push_back(s);
-		}
-
-		return split;
-	};
-
-	// fill in bold
-	tokens = do_split(str, bold_r);
-	for (int i = 0; i < tokens.size(); i++) {
-		attrs.push_back(A_BOLD);
-		int index = -1;
-		while ((index = tokens.at(i).find("**")) != string::npos) tokens[i].replace(index, 2, "");
-	}
-
-	// fill in italic
-	vector<string> new_tokens;
-	vector<int> new_attrs;
-	for (int i = 0; i < tokens.size(); i++) {
-		auto next = do_split(tokens.at(i), italic_r);
-
-		if (next.size() == 1) {
-			new_attrs.push_back(attrs.at(i));
-			new_tokens.push_back(next.at(0));
-			continue;
-		}
-
-		for (int j = 0; j < next.size(); j++) {
-			new_tokens.push_back(next.at(j));
-
-			if (j == 0) new_attrs.push_back(A_ITALIC | attrs.at(i));
-			else new_attrs.push_back(A_ITALIC);
-		}
-	}
-
-	tokens = new_tokens;
-	attrs = new_attrs;
-
-	new_tokens.clear();
-	new_attrs.clear();
-
-	for (int i = 0; i < tokens.size(); i++) {
-		int index = -1;
-		while ((index = tokens.at(i).find("*")) != string::npos) tokens[i].replace(index, 1, "");
-	}
-
-	// fill UNDERLINE (striketrough in markdown)
-	for (int i = 0; i < tokens.size(); i++) {
-		auto next = do_split(tokens.at(i), striked_r);
-
-		if (next.size() == 1) {
-			new_attrs.push_back(attrs.at(i));
-			new_tokens.push_back(next.at(0));
-			continue;
-		}
-
-		for (int j = 0; j < next.size(); j++) {
-			new_tokens.push_back(next.at(j));
-
-			if (j == 0) new_attrs.push_back(A_UNDERLINE | attrs.at(i));
-			else new_attrs.push_back(A_UNDERLINE);
-		}
-	}
-
-	tokens = new_tokens;
-	attrs = new_attrs;
-
-	for (int i = 0; i < tokens.size(); i++) {
-		int index = -1;
-		while ((index = tokens.at(i).find("~~")) != string::npos) tokens[i].replace(index, 2, "");
-	}
-
-	// start printing the text
-	int t_x = x;
-	int t_y = y;
-	int p_attrs = 0;
-	for (int i = 0; i < tokens.size(); i++) {
-		p_attrs ^= attrs.at(i);
-		wstring w_str = w_converter.from_bytes(tokens.at(i));
-		attrset(text_attrs | p_attrs);
-		for (int j = 0; j < w_str.length(); j++) {
-			if (t_x >= x + w) { t_x = x; t_y++; }
-			if (t_y >= y + h) break;
-
-			move(t_y, t_x);
-			addstr(w_converter.to_bytes(w_str.at(j)).c_str());
-			t_x++;
-		}
-
-		if (t_y >= y + h) break;
+		if (wstr.substr(i + 1, 2) == L"**") { attrs ^= A_BOLD; i += 2; attrset(attrs | text_attrs); }
+		else if (wstr.substr(i + 1, 1) == L"*") { attrs ^= A_ITALIC; i++; attrset(attrs | text_attrs); }
+		else if (wstr.substr(i + 1, 2) == L"~~") { attrs ^= A_UNDERLINE; i += 2; attrset(attrs | text_attrs); }
 	}
 
 	attrset(text_attrs);
