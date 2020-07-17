@@ -70,7 +70,7 @@ int cui_command_index = 0;
 
 bool cui_active = false;
 
-extern string DOC;
+extern string CMDS_HELP;
 
 void cui_init() {
 	log("Initializing console UI...");
@@ -922,7 +922,7 @@ void cui_help_paint() {
 	// draw description
 	// we want text wrapping here
 	string cui_help;
-	for (char c : DOC)
+	for (char c : CMDS_HELP)
 		cui_help += string(1, c);
 
 	cui_text_box(5, 8, cui_w - 10, cui_h - 12, cui_help, true, cui_delta);
@@ -1137,7 +1137,14 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 
 	int attrs = 0;
 	int i = 0;
+	bool skip_special = false;
 	for (; i < wstr.length(); i++) {
+		if (skip_special) {
+			putwch(wstr.at(i));
+			skip_special = false;
+			continue;
+		}
+
 		for (const auto& sw : cui_md_switches)
 			if (wstr.substr(i, sw.second.length()) == sw.second) {
 				attrs ^= sw.first;
@@ -1146,7 +1153,8 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 				goto skip_putwch;
 			}
 
-		putwch(wstr.at(i));
+		if (wstr.at(i) == L'\\') skip_special = true;
+		else putwch(wstr.at(i));
 
 		skip_putwch:;
 	}

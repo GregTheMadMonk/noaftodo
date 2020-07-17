@@ -33,7 +33,7 @@ int exit_value = 0;
 
 wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
 
-extern string DOC;
+extern string HELP;
 
 int main(int argc, char* argv[]) {
 	setlocale(LC_ALL, "");
@@ -61,6 +61,11 @@ int main(int argc, char* argv[]) {
 	for (int i = 1; i < argc; i++) {
 		// argument "-h, --help" - print help message
 		if (strcmp(argv[i], "-h") * strcmp(argv[i], "--help") == 0) run_mode = PM_HELP;
+		// argument "-V, --version" - print program version
+		else if (strcmp(argv[i], "-V") * strcmp(argv[i], "--version") == 0) {
+			cout << TITLE << " v." << VERSION << endl;
+			noaftodo_exit();
+		}
 		// argument "-d, --daemon" - start daemon
 		else if (strcmp(argv[i], "-d") * strcmp(argv[i], "--daemon") == 0) run_mode = PM_DAEMON;
 		// argument "-I, --interpreter" - start in interpreter mode. Argument after it will be executed as a command
@@ -170,32 +175,14 @@ int main(int argc, char* argv[]) {
 }
 
 void print_help() {
-	vector<string> lines;
-	lines.push_back("");
-
-	const int TAB_W = 25;
-	int tabs = 0;
-
-	for (char c : DOC)
-		switch(c) {
-			case '\n':
-				lines.push_back("");
-				tabs = 0;
-				break;
-			case '\t':
-				tabs++;
-
-				while (lines.at(lines.size() - 1).length() < TAB_W * tabs) lines[lines.size() - 1] += " ";
-				break;
-			default:
-				lines[lines.size() - 1] += c;
-				break;
-		}
-
+	cout << TITLE << endl;
 #ifdef NO_MQUEUE
 	cout << "Built with NO_MQUEUE" << endl;
 #endif
-	for (auto line : lines) cout << line << endl;
+	cout << "Usage:" << endl <<
+		"\tnoaftodo [OPTIONS]" << endl;
+	cout << HELP << endl;
+	cout << "For more information, see " << TITLE << " manpage." << endl;
 }
 
 void log(const string& message, const char& prefix, const int& sleep_sec)

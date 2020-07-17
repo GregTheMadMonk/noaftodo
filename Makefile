@@ -74,13 +74,14 @@ obj_dir:
 	@-mkdir $(OBJ_DIR)
 
 embeds:
-	$(shell ./docgen.sh)
+	$(shell ./tools/docgen.sh)
 
 clean:
 	@echo Removing object files...
 	@-rm -rf $(OBJ_DIR)/*.o
 	@-rm $(SRC_DIR)/noaftodo_embed.cpp
 	@-rm $(DOC_DIR)/*doc.gen
+	@-rm $(DOC_DIR)/*.man
 	@-rmdir $(OBJ_DIR) # will fail if OBJ_DIR is not empty - as we want!
 	@echo Removing execuatable
 	@-rm $(BINARY)
