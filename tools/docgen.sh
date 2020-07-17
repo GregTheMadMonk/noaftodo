@@ -1,7 +1,7 @@
 #!/bin/sh
 
-echo -e "Command mode commands:\n$(grep -i 'command \"' src/noaftodo_cmd.cpp | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > doc/cmd.doc.gen
-echo -e "Command-line arguments:\n$(grep -i 'argument \"' src/noaftodo.cpp | sort | sed 's/.*\/\/ argument \"/\t/g;s/\".*- /\n\t\t/g')" > doc/arg.doc.gen
+printf "Command mode commands:\n$(grep -i 'command \"' src/noaftodo_cmd.cpp | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > doc/cmd.doc.gen
+printf "Command-line arguments:\n$(grep -i 'argument \"' src/noaftodo.cpp | sort | sed 's/.*\/\/ argument \"/\t/g;s/\".*- /\n\t\t/g')" > doc/arg.doc.gen
 
 echo "#include <string>
 std::string HELP = \"$(sed 's/\\/\\\\/g' doc/arg.doc.gen | sed 's/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')\";
@@ -12,7 +12,7 @@ LIST_V=$(grep ' LIST_V = ' src/noaftodo.h | sed 's/.*LIST_V = //g;s/\;//g')
 CONF_V=$(grep ' CONF_V = ' src/noaftodo.h | sed 's/.*CONF_V = //g;s/\;//g')
 MINOR_V=$(grep ' MINOR_V = ' src/noaftodo.h | sed 's/.*MINOR_V = //g;s/\;//g')
 
-echo -e ".TH NOAFTODO 1 \"July 2020\" \"$LIST_V.$CONF_V.$MINOR_V\" \"NOAFtodo man page\"
+printf ".TH NOAFTODO 1 \"July 2020\" \"$LIST_V.$CONF_V.$MINOR_V\" \"NOAFtodo man page\"
 .SH NAME
 NOAFtodo
 A TODO manager No-One-Asked-For.
