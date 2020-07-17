@@ -321,7 +321,7 @@ void cmd_init() {
 
 		if (args.at(0) != to_string(CONF_V)) {
 			log("Config version mismatch (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + "). "
-				"Consult \"Troubleshooting\" section of help (\"noaftodo -h\").", LP_ERROR);
+				"Consult \"TROUBLESHOOTING\" manpage section (\"noaftodo -h\").", LP_ERROR);
 			errors |= ERR_CONF_V;
 			li_autosave = false;
 		}

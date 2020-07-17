@@ -288,7 +288,7 @@ void li_load(const bool& load_workspace) {
 			t_list = t_list_copy;
 			t_tags = t_tags_copy;
 		} else log("List version mismatch. "
-			"Consult \"Troubleshooting\" section of help (\"noaftodo -h\"). ", LP_ERROR);
+			"Consult \"TROUBLESHOOTING\" manpage section (\"noaftodo -h\"). ", LP_ERROR);
 	}
 
 	li_autosave = (errors == 0) && (!safemode) && (run_mode != PM_DAEMON); // don't allow daemon to save stuff
