@@ -1,11 +1,11 @@
 #!/bin/sh
 
-echo -e "Command mode commands:\n$(grep -i 'command \"' src/noaftodo_cmd.cpp | sort | sed 's/.*\/\/ command \"/\t:/g' | sed 's/\".*- /\n\t\t/g')" | sed 's/\*/\\\*/g' > doc/cmd.doc.gen
-echo -e "Command-line arguments:\n$(grep -i 'argument \"' src/noaftodo.cpp | sort | sed 's/.*\/\/ argument \"/\t/g' | sed 's/\".*- /\n\t\t/g')" | sed 's/\*/\\\*/g' > doc/arg.doc.gen
+echo -e "Command mode commands:\n$(grep -i 'command \"' src/noaftodo_cmd.cpp | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > doc/cmd.doc.gen
+echo -e "Command-line arguments:\n$(grep -i 'argument \"' src/noaftodo.cpp | sort | sed 's/.*\/\/ argument \"/\t/g;s/\".*- /\n\t\t/g')" > doc/arg.doc.gen
 
 echo "#include <string>
 std::string HELP = \"$(sed 's/\\/\\\\/g' doc/arg.doc.gen | sed 's/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')\";
-std::string CMDS_HELP = \"$(sed 's/\\/\\\\/g' doc/cmd.doc.gen | sed 's/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')\";
+std::string CMDS_HELP = \"$(sed 's/\*/\\\*/g' doc/cmd.doc.gen | sed 's/\\/\\\\/g' | sed 's/\t/\\t/g' | sed '0~2s/^/**/g;0~2s/$/**/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')\";
 std::string TCONF = \"$(sed 's/\\/\\\\/g' noaftodo.conf.template | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')\";" > src/noaftodo_embed.cpp
 
 LIST_V=$(grep ' LIST_V = ' src/noaftodo.h | sed 's/.*LIST_V = //g;s/\;//g')
