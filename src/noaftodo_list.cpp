@@ -440,9 +440,14 @@ void li_prepare(vector<noaftodo_entry>& list) {
 	// sort entries
 	std::sort(list.begin(), list.end(), less_than_noaftodo_entry());
 
+	int max_tag = t_tags.size() - 1;
+	for (const auto& e : t_list) if (e.tag > max_tag) max_tag = e.tag;
+	while (max_tag >= (int)t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
+
 	// clean useless tags
 	for (int i = t_tags.size() - 1; i >= 0; i--) {
-		if (t_tags.at(i) != to_string(i)) break;
+		if (t_tags.at(i) != to_string(i)) return;
+		for (const auto& e : t_list) if (e.tag == i) return;
 		t_tags.erase(t_tags.begin() + i);
 	}
 }
