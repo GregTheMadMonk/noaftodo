@@ -1,7 +1,10 @@
 #!/bin/sh
 
 # update manpage on wiki
-printf "\`\`\`
+printf "
+> * [Home page](https://github.com/GregTheMadMonk/noaftodo/wiki)
+> * [Guide](https://github.com/GregTheMadMonk/noaftodo/wiki/Manual) (**manpage**)
+\`\`\`
 %s
 \`\`\`" \
 "$(roff2text doc/noaftodo.man)" | sed 's/.//g' > ../noaftodo.wiki/NOAFtodo-manpage.md
