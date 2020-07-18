@@ -295,6 +295,7 @@ void li_load(const bool& load_workspace) {
 
 	li_upd_stat();
 
+	li_prepare(t_list);
 	li_sort();
 }
 
