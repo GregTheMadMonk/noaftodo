@@ -79,6 +79,7 @@ void cui_init() {
 
 	// initialize columns
 	cui_columns = {
+		// NORMAL column "t" - shows task title
 		{ 't',	{
 				"Title",
 				[](const int& w, const int& free, const int& cols) {
@@ -89,6 +90,7 @@ void cui_init() {
 				}
 			}
 		},
+		// NORMAL column "f" - shows task flags
 		{ 'f',	{
 				"Flags",
 				[](const int& w, const int& free, const int& cols) {
@@ -105,6 +107,7 @@ void cui_init() {
 				}
 			}
 		},
+		// NORMAL column "l" - shows what list the task is attached to
 		{ 'l',	{
 				"List",
 				[](const int& w, const int& free, const int& cols) {
@@ -120,6 +123,7 @@ void cui_init() {
 				}
 			}
 		},
+		// NORMAL column "d" - shows task due
 		{ 'd',	{
 				"Due",
 				[](const int& w, const int& free, const int& cols) {
@@ -132,6 +136,7 @@ void cui_init() {
 				}
 			}
 		},
+		// NORMAL column "D" - shows task description
 		{ 'D',	{
 				"Description",
 				[](const int& w, const int& free, const int& cols) {
@@ -142,6 +147,7 @@ void cui_init() {
 				}
 			}
 		},
+		// NORMAL column "i" - shows task ID (as referred by UI, don't confuse with task unique ID)
 		{ 'i',	{
 				"ID",
 				[](const int& w, const int& free, const int& cols) {
@@ -156,6 +162,7 @@ void cui_init() {
 	
 	// initialize listview columns
 	cui_lview_columns = {
+		// LISTVIEW column "i" - shows list number (aka ID)
 		{ 'i',	{
 				"ID",
 				[](const int& w, const int& free, const int& cols) {
@@ -168,6 +175,7 @@ void cui_init() {
 				}
 			}
 		},
+		// LISTVIEW column "f" - shows list flags
 		{ 'f',	{
 				"Flags",
 				[] (const int& w, const int& free, const int& cols) {
@@ -181,6 +189,7 @@ void cui_init() {
 				}
 			}
 		},
+		// LISTVIEW column "t" - shows list title
 		{ 't',	{
 				"Title",
 				[](const int& w, const int& free, const int& cols) {
@@ -193,6 +202,7 @@ void cui_init() {
 				}
 			}
 		},
+		// LISTVIEW column "e" - shows the amount of entries attached to the list
 		{ 'e',	{
 				"Entries",
 				[](const int& w, const int& free, const int& cols) {
@@ -209,6 +219,7 @@ void cui_init() {
 				}
 			}
 		},
+		// LISTVIEW column "p" - shows the precentge of completed entries on the list
 		{ 'p',	{
 				"%",
 				[](const int& w, const int& free, const int& cols) {
@@ -234,16 +245,19 @@ void cui_init() {
 
 	// initialize status fields
 	cui_status_fields = {
+		// status field "s" - shows cui_status value (output of commands)
 		{ 's',	[] () {
 				return cui_status;
 			}
 		},
+		// status field "l" - shows current list name
 		{ 'l',	[] () {
 				if (cui_tag_filter == CUI_TAG_ALL) return string("All lists");
 
 				return "List " + to_string(cui_tag_filter) + (((cui_tag_filter < t_tags.size()) && (t_tags.at(cui_tag_filter) != to_string(cui_tag_filter))) ? (": " + t_tags.at(cui_tag_filter)) : "");
 			}
 		},
+		// status field "m" - shows current mode (NORMAL|LISTVIEW|DETAILS|HELP)
 		{ 'm',	[] () {
 				switch (cui_mode) {
 					case CUI_MODE_NORMAL:
@@ -263,6 +277,7 @@ void cui_init() {
 				}
 			}
 		},
+		// status field "f" - shows filters
 		{ 'f',	[] () {
 				return string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
 					string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
@@ -274,6 +289,7 @@ void cui_init() {
 					((cui_listview_regex_filter == "") ? "" : (" [l " + cui_listview_regex_filter + "]"));
 			}
 		},
+		// status field "i" - shows selected task ID and a total amount of entries
 		{ 'i',	[] () {
 				bool has_visible = false;
 
@@ -284,6 +300,7 @@ void cui_init() {
 				return to_string(cui_s_line) + "/" + to_string(t_list.size() - 1);
 			}
 		},
+		// status field "p" - shows the percentage of completed entries on a current list
 		{ 'p',	[] () {
 				int total = 0;
 				int comp = 0;
@@ -299,6 +316,7 @@ void cui_init() {
 				return to_string((int)(100.0 * comp / total)) + "%";
 			}
 		},
+		// status field "P" - shows the amount of completed entries on the list against the total amount of attached entries
 		{ 'P', [] () {
 				int total = 0;
 				int comp = 0;
