@@ -88,6 +88,25 @@ void cmd_init() {
 			}
 		},
 
+		// command "!!<command>" - execute shell command, don't track output (for lauching programs that have a TUI or something
+		{ "!!", [] (const vector<string>& args) {
+				string cmdline = "";
+				
+				for (const auto& arg : args) cmdline += arg + " ";
+
+				const bool wcui = cui_active;
+
+				if (wcui) cui_destroy();
+
+				log("Executing shell command: '" + cmdline + "'...");
+				system(cmdline.c_str());
+
+				if (wcui) cui_construct();
+
+				return 0;
+			}
+		},
+
 		// command "alias <command>" - create an alias for command.
 		{ "alias", [] (const vector<string>& args) {
 				if (args.size() < 1) return CMD_ERR_ARG_COUNT;
@@ -807,7 +826,14 @@ void cmd_run(string command) {
 	for (int i = 0; i < command.length(); i++) {
 		const char c = command.at(i);
 
-		if ((i == start) && (c == '!'))	{ // "!" - shell command
+		if ((i == start) && (c == '!'))	{ // "!" or "!!" - shell command
+			if (i < command.length() - 1) if (command.at(i + 1) == '!') {
+				put("!!");
+				i++;
+				shellcmd = true;
+				continue;
+			}
+
 			put("!");
 
 			shellcmd = true;
