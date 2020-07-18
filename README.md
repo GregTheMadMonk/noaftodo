@@ -7,7 +7,7 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 <img src="workflow.gif" width="576" height="324" alt="NOAFtodo workflow"></img>
 
 ### Current and future features (see [NOAFtodo roadmap](https://github.com/GregTheMadMonk/noaftodo/projects/1) to prepare for non-backwards-compatible changes in command interpreter)
-### This README is kinda... not very informative. If you want to know more about building and using the program, there is a [manual](https://github.com/GregTheMadMonk/noaftodo/wiki/Manual) being created on the Wiki. After it is finished, the README will also be re-written.
+### This README is kinda... not very informative. If you want to know more about building and using the program, there is a [manual](https://github.com/GregTheMadMonk/noaftodo/wiki/Guide) being created on the Wiki. After it is finished, the README will also be re-written.
 *If you have any problems with the program, please open an issue here. It's much faster than waiting for me to notice a mistake, and I try to fix things as soon as possible.*
 - [x] minimalisic interface written with ncurses
 - [x] multiple lists between which tasks can be moved
@@ -27,7 +27,7 @@ Also running without creating a config is supported with `noaftodo -c default`, 
 #### AUR
 Program is available in **AUR** as **noaftodo-git**.
 
-### Building [[more](https://github.com/GregTheMadMonk/noaftodo/wiki/Manual#building)]
+### Building [[more](https://github.com/GregTheMadMonk/noaftodo/wiki/Guide#building)]
 Run `make` (`gmake` on Solaris 11).
 
 #### Dependencies
@@ -38,4 +38,4 @@ Run `make` (`gmake` on Solaris 11).
 See **noaftodo.conf.template** if you want an example configuration.
 
 ### Adding tasks, and just using NOAFtodo
-See [the manual](https://github.com/GregTheMadMonk/noaftodo/wiki/Manual).
+See [the manual](https://github.com/GregTheMadMonk/noaftodo/wiki/Guide).
