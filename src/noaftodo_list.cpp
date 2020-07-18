@@ -54,14 +54,14 @@ bool noaftodo_entry::operator!=(const noaftodo_entry& comp) const {
 }
 
 bool noaftodo_entry::sim(const noaftodo_entry& e2) const {
-	return (this->due == e2.due) && 
-		(this->title == e2.title) && 
+	return (this->due == e2.due) &&
+		(this->title == e2.title) &&
 		(this->description == e2.description) &&
 		(this->tag == e2.tag);
 }
 
 bool noaftodo_entry::sim(const noaftodo_entry& e2) {
-	return const_cast<const noaftodo_entry*>(this)->sim(e2); 
+	return const_cast<const noaftodo_entry*>(this)->sim(e2);
 }
 
 string noaftodo_entry::meta_str() const {
@@ -235,9 +235,9 @@ void li_load(const bool& load_workspace) {
 										default:
 											// metadata
 											if (metaname == "") metaname = temp;
-											else 
-											{ 
-												li_entry.meta[metaname] = temp; 
+											else
+											{
+												li_entry.meta[metaname] = temp;
 												log("Meta prop: " + metaname + " <=> " + temp);
 												metaname = "";
 											}
@@ -329,14 +329,14 @@ int li_save(const string& filename) {
 
 	ofile << endl << "[list]" << endl;
 	for (const auto& entry : t_list_copy) {
-		ofile << "\"" << (entry.completed ? 'v' : '-') 
-			<< "\"\\\"" << entry.due 
+		ofile << "\"" << (entry.completed ? 'v' : '-')
+			<< "\"\\\"" << entry.due
 			<< "\"\\\"" << replace_special(entry.title)
 			<< "\"\\\"" << replace_special(entry.description)
 			<< "\"\\\"" << entry.tag << "\"";
 
 		for (auto it = entry.meta.begin(); it != entry.meta.end(); it++) {
-			ofile << "\\\"" << replace_special(it->first) 
+			ofile << "\\\"" << replace_special(it->first)
 				<< "\"\\\"" << replace_special(it->second) << "\"";
 		}
 
@@ -380,8 +380,8 @@ void li_upd_stat() {
 bool li_has_changed() {
 	struct stat new_stat;
 
-	if (stat(li_filename.c_str(), &new_stat) != 0) 
-	{ 
+	if (stat(li_filename.c_str(), &new_stat) != 0)
+	{
 		log("Can't stat(...) file", LP_ERROR);
 		return false;
 	}

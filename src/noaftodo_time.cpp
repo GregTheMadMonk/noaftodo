@@ -7,8 +7,8 @@ string ti_log_time() {
 	const time_t t = system_clock::to_time_t(system_clock::now());
 	tm l_ti = *localtime(&t);
 
-	return ((l_ti.tm_hour < 10) ? "0" : "") + to_string(l_ti.tm_hour) + 
-		":" + ((l_ti.tm_min < 10) ? "0" : "") + to_string(l_ti.tm_min) + 
+	return ((l_ti.tm_hour < 10) ? "0" : "") + to_string(l_ti.tm_hour) +
+		":" + ((l_ti.tm_min < 10) ? "0" : "") + to_string(l_ti.tm_min) +
 		":" + ((l_ti.tm_sec < 10) ? "0" : "") + to_string(l_ti.tm_sec);
 }
 

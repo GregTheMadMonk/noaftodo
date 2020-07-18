@@ -184,7 +184,7 @@ void da_upd_cache(const bool& is_first_load) {
 
 		noaftodo_entry li_e = t_list_copy.at(i);
 
-		if (cached_id == -1) 
+		if (cached_id == -1)
 		{	// add to cache
 			da_cache.push_back(li_e);
 

@@ -78,238 +78,242 @@ void cui_init() {
 	using namespace vargs::cols;
 
 	// initialize columns
-	cui_columns['t'] = 
-	{ 
-		"Title", 
-		[](const int& w, const int& free, const int& cols) {
-			return free / 4;
+	cui_columns = {
+		{ 't',	{
+				"Title",
+				[](const int& w, const int& free, const int& cols) {
+					return free / 4;
+				},
+				[](const varg& args) {
+					return get<normal>(args).e.title;
+				}
+			}
 		},
-		[](const varg& args) { 
-			return get<normal>(args).e.title;
-		} 
-	};
-	cui_columns['f'] = 
-	{ 
-		"Flags", 
-		[](const int& w, const int& free, const int& cols) {
-			return 5;
+		{ 'f',	{
+				"Flags",
+				[](const int& w, const int& free, const int& cols) {
+					return 5;
+				},
+				[](const varg& args) {
+					string ret = "";
+					const auto& e = get<normal>(args).e;
+					if (e.completed) ret += "V";	// a completed entry
+					if (e.is_failed()) ret += "F";	// a failed entry
+					if (e.is_coming()) ret += "C";	// an upcoming entry
+					if (e.get_meta("nodue") == "true") ret += "N";	// a "nodue" entry
+					return ret;
+				}
+			}
 		},
-		[](const varg& args) { 
-			string ret = "";
-			const auto& e = get<normal>(args).e;
-			if (e.completed) ret += "V";	// a completed entry
-			if (e.is_failed()) ret += "F";	// a failed entry
-			if (e.is_coming()) ret += "C";	// an upcoming entry
-			if (e.get_meta("nodue") == "true") ret += "N";	// a "nodue" entry
-			return ret; 
-		} 
-	};
-	cui_columns['l'] = 
-	{ 
-		"List", 
-		[](const int& w, const int& free, const int& cols) {
-			return free / 10;
-		},
-		[](const varg& args) {
-			const auto& e = get<normal>(args).e;
-			if (e.tag < t_tags.size())
-			       if (t_tags.at(e.tag) != to_string(e.tag))
-				       return to_string(e.tag) + ": " + t_tags.at(e.tag);
+		{ 'l',	{
+				"List",
+				[](const int& w, const int& free, const int& cols) {
+					return free / 10;
+				},
+				[](const varg& args) {
+					const auto& e = get<normal>(args).e;
+					if (e.tag < t_tags.size())
+					       if (t_tags.at(e.tag) != to_string(e.tag))
+						       return to_string(e.tag) + ": " + t_tags.at(e.tag);
 
-			return to_string(e.tag);
-		} 
-	};
-	cui_columns['d'] = 
-	{ 
-		"Due", 
-		[](const int& w, const int& free, const int& cols) {
-			return 16;
+					return to_string(e.tag);
+				}
+			}
 		},
-		[](const varg& args) {
-			const auto& e = get<normal>(args).e;
-			if (e.get_meta("nodue") == "true") return string("----------------");
-			else return ti_f_str(e.due); 
-		} 
-	};
-	cui_columns['D'] = 
-	{ 
-		"Description", 
-		[](const int& w, const int& free, const int& cols) {
-			return free;
+		{ 'd',	{
+				"Due",
+				[](const int& w, const int& free, const int& cols) {
+					return 16;
+				},
+				[](const varg& args) {
+					const auto& e = get<normal>(args).e;
+					if (e.get_meta("nodue") == "true") return string("----------------");
+					else return ti_f_str(e.due);
+				}
+			}
 		},
-		[](const varg& args) { 
-			return get<normal>(args).e.description; 
-		} 
-	};
-	cui_columns['i'] = 
-	{ 
-		"ID", 
-		[](const int& w, const int& free, const int& cols) {
-			return 3;
+		{ 'D',	{
+				"Description",
+				[](const int& w, const int& free, const int& cols) {
+					return free;
+				},
+				[](const varg& args) {
+					return get<normal>(args).e.description;
+				}
+			}
 		},
-		[](const varg& args) {
-			return to_string(get<normal>(args).id); 
-		} 
+		{ 'i',	{
+				"ID",
+				[](const int& w, const int& free, const int& cols) {
+					return 3;
+				},
+				[](const varg& args) {
+					return to_string(get<normal>(args).id);
+				}
+			}
+		}
 	};
 	
 	// initialize listview columns
-	cui_lview_columns['i'] = 
-	{ 
-		"ID", 
-		[](const int& w, const int& free, const int& cols) {
-			return 3;
-		},
-		[](const varg& args) {
-			const auto& list_id = get<lview>(args).l_id;
-			if (list_id == -1) return string(" ");
-			return to_string(list_id);
-		} 
-	};
-
-	cui_lview_columns['f'] =
-	{
-		"Flags",
-		[] (const int& w, const int& free, const int& cols) {
-			return 5;
-		},
-		[] (const varg& args) {
-			const auto& list_id = get<lview>(args).l_id;
-			return string(li_tag_completed(list_id) ? "V" : "") +
-				string(li_tag_coming(list_id) ? "C" : "") +
-				string(li_tag_failed(list_id) ? "F" : "");
-		}
-	};
-	
-	cui_lview_columns['t'] = 
-	{ 
-		"Title", 
-		[](const int& w, const int& free, const int& cols) {
-			return free / 4;
-		},
-		[](const varg& args) {
-			const auto& list_id = get<lview>(args).l_id;
-			if (list_id == CUI_TAG_ALL) return string("All lists");
-			return t_tags.at(list_id);
-		} 
-	};
-
-	cui_lview_columns['e'] = {
-		"Entries",
-		[](const int& w, const int& free, const int& cols) {
-			return 7;
-		},
-		[](const varg& args) {
-			const auto& list_id = get<lview>(args).l_id;
-			if (list_id == CUI_TAG_ALL) return to_string(t_list.size());
-
-			int ret = 0;
-			for (auto e : t_list) if (e.tag == list_id) ret++;
-
-			return to_string(ret);
-		}
-	};	
-	
-	cui_lview_columns['p'] = 
-	{ 
-		"%", 
-		[](const int& w, const int& free, const int& cols) {
-			return 4;
-		},
-		[](const varg& args) {
-			const auto& list_id = get<lview>(args).l_id;
-			int ret = 0;
-			int tot = 0;
-
-			for (auto e : t_list)
-				if ((e.tag == list_id) || (CUI_TAG_ALL == list_id)) {
-					if (e.completed) ret++;
-					tot++;
+	cui_lview_columns = {
+		{ 'i',	{
+				"ID",
+				[](const int& w, const int& free, const int& cols) {
+					return 3;
+				},
+				[](const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					if (list_id == -1) return string(" ");
+					return to_string(list_id);
 				}
+			}
+		},
+		{ 'f',	{
+				"Flags",
+				[] (const int& w, const int& free, const int& cols) {
+					return 5;
+				},
+				[] (const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					return string(li_tag_completed(list_id) ? "V" : "") +
+						string(li_tag_coming(list_id) ? "C" : "") +
+						string(li_tag_failed(list_id) ? "F" : "");
+				}
+			}
+		},
+		{ 't',	{
+				"Title",
+				[](const int& w, const int& free, const int& cols) {
+					return free / 4;
+				},
+				[](const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					if (list_id == CUI_TAG_ALL) return string("All lists");
+					return t_tags.at(list_id);
+				}
+			}
+		},
+		{ 'e',	{
+				"Entries",
+				[](const int& w, const int& free, const int& cols) {
+					return 7;
+				},
+				[](const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					if (list_id == CUI_TAG_ALL) return to_string(t_list.size());
 
-			if (tot == 0) return string("0%");
-			return to_string(100 * ret / tot) + "%";
-		} 
+					int ret = 0;
+					for (auto e : t_list) if (e.tag == list_id) ret++;
+
+					return to_string(ret);
+				}
+			}
+		},
+		{ 'p',	{
+				"%",
+				[](const int& w, const int& free, const int& cols) {
+					return 4;
+				},
+				[](const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					int ret = 0;
+					int tot = 0;
+
+					for (auto e : t_list)
+						if ((e.tag == list_id) || (CUI_TAG_ALL == list_id)) {
+							if (e.completed) ret++;
+							tot++;
+						}
+
+					if (tot == 0) return string("0%");
+					return to_string(100 * ret / tot) + "%";
+				}
+			}
+		}
 	};
 
 	// initialize status fields
-	cui_status_fields['s'] = [] () {
-		return cui_status;
-	};
+	cui_status_fields = {
+		{ 's',	[] () {
+				return cui_status;
+			}
+		},
+		{ 'l',	[] () {
+				if (cui_tag_filter == CUI_TAG_ALL) return string("All lists");
 
-	cui_status_fields['l'] = [] () {
-		if (cui_tag_filter == CUI_TAG_ALL) return string("All lists");
+				return "List " + to_string(cui_tag_filter) + (((cui_tag_filter < t_tags.size()) && (t_tags.at(cui_tag_filter) != to_string(cui_tag_filter))) ? (": " + t_tags.at(cui_tag_filter)) : "");
+			}
+		},
+		{ 'm',	[] () {
+				switch (cui_mode) {
+					case CUI_MODE_NORMAL:
+						return string("NORMAL");
+						break;
+					case CUI_MODE_LISTVIEW:
+						return string("LISTVIEW");
+						break;
+					case CUI_MODE_DETAILS:
+						return string("DETAILS");
+						break;
+					case CUI_MODE_HELP:
+						return string("HELP");
+						break;
+					default:
+						return string("");
+				}
+			}
+		},
+		{ 'f',	[] () {
+				return string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
+					string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
+					string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") +
+					string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
+					string((cui_filter & CUI_FILTER_NODUE) ? "N" : "_") +
+					string((cui_filter & CUI_FILTER_EMPTY) ? "0" : "_") +
+					((cui_normal_regex_filter == "") ? "" : (" [e " + cui_normal_regex_filter + "]")) +
+					((cui_listview_regex_filter == "") ? "" : (" [l " + cui_listview_regex_filter + "]"));
+			}
+		},
+		{ 'i',	[] () {
+				bool has_visible = false;
 
-		return "List " + to_string(cui_tag_filter) + (((cui_tag_filter < t_tags.size()) && (t_tags.at(cui_tag_filter) != to_string(cui_tag_filter))) ? (": " + t_tags.at(cui_tag_filter)) : "");
-	};
+				for (int i = 0; i < t_list.size(); i++) has_visible |= cui_is_visible(i);
 
-	cui_status_fields['m'] = [] () {
-		switch (cui_mode) {
-			case CUI_MODE_NORMAL:
-				return string("NORMAL");
-				break;
-			case CUI_MODE_LISTVIEW:
-				return string("LISTVIEW");
-				break;
-			case CUI_MODE_DETAILS:
-				return string("DETAILS");
-				break;
-			case CUI_MODE_HELP:
-				return string("HELP");
-				break;
-			default:
-				return string("");
+				if (!has_visible) return string("");
+
+				return to_string(cui_s_line) + "/" + to_string(t_list.size() - 1);
+			}
+		},
+		{ 'p',	[] () {
+				int total = 0;
+				int comp = 0;
+
+				for (int i = 0; i < t_list.size(); i++)
+					if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag)) {
+						total++;
+						if (t_list.at(i).completed) comp++;
+					}
+
+				if (total == 0) return string("");
+
+				return to_string((int)(100.0 * comp / total)) + "%";
+			}
+		},
+		{ 'P', [] () {
+				int total = 0;
+				int comp = 0;
+
+				for (int i = 0; i < t_list.size(); i++)
+					if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag)) {
+						total++;
+						if (t_list.at(i).completed) comp++;
+					}
+
+				if (total == 0) return string("");
+
+				return to_string(comp) + "/" + to_string(total) + " COMP";
+			}
 		}
-	};
-
-	cui_status_fields['f'] = [] () {
-		return string((cui_filter & CUI_FILTER_UNCAT) ? "U" : "_") +
-			string((cui_filter & CUI_FILTER_COMPLETE) ? "V" : "_") +
-			string((cui_filter & CUI_FILTER_COMING) ? "C" : "_") + 
-			string((cui_filter & CUI_FILTER_FAILED) ? "F" : "_") +
-			string((cui_filter & CUI_FILTER_NODUE) ? "N" : "_") + 
-			string((cui_filter & CUI_FILTER_EMPTY) ? "0" : "_") +
-			((cui_normal_regex_filter == "") ? "" : (" [e " + cui_normal_regex_filter + "]")) +
-			((cui_listview_regex_filter == "") ? "" : (" [l " + cui_listview_regex_filter + "]"));
-	};
-
-	cui_status_fields['i'] = [] () {
-		bool has_visible = false;
-
-		for (int i = 0; i < t_list.size(); i++) has_visible |= cui_is_visible(i);
-
-		if (!has_visible) return string("");
-
-		return to_string(cui_s_line) + "/" + to_string(t_list.size() - 1);
-	};
-
-	cui_status_fields['p'] = [] () {
-		int total = 0;
-		int comp = 0;
-
-		for (int i = 0; i < t_list.size(); i++)
-			if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag)) {
-				total++;
-				if (t_list.at(i).completed) comp++;
-			}
-
-		if (total == 0) return string("");
-
-		return to_string((int)(100.0 * comp / total)) + "%";
-	};
-
-	cui_status_fields['P'] = [] () {
-		int total = 0;
-		int comp = 0;
-
-		for (int i = 0; i < t_list.size(); i++)
-			if ((cui_tag_filter == CUI_TAG_ALL) || (cui_tag_filter == t_list.at(i).tag)) {
-				total++;
-				if (t_list.at(i).completed) comp++;
-			}
-
-		if (total == 0) return string("");
-
-		return to_string(comp) + "/" + to_string(total) + " COMP";
 	};
 	
 	// construct UI

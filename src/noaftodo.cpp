@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
 		else if (strcmp(argv[i], "-r") * strcmp(argv[i], "--refire") == 0) {
 			da_send("N");
 			noaftodo_exit();
-		} 
+		}
 		// argument "-c, --config" - specify config file
 		else if (strcmp(argv[i], "-c") * strcmp(argv[i], "--config") == 0) {
 			if (i < argc - 1) {
@@ -162,10 +162,10 @@ int main(int argc, char* argv[]) {
 					cui_run();
 					break;
 			}
-		else 
-		{ 
+		else
+		{
 			da_send("S");
-			cui_run(); 
+			cui_run();
 		}
 	}
 

@@ -90,10 +90,10 @@ public:
 };
 
 // special characters
-const std::vector<std::string> SPECIAL = 
-{ 
+const std::vector<std::string> SPECIAL =
+{
 	"\\",
-	"\"", 
+	"\"",
 	";",
 	" "
 };

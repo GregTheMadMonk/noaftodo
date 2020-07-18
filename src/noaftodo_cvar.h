@@ -12,7 +12,7 @@ constexpr int CVAR_FLAG_RO = 0b1;
 constexpr int CVAR_FLAG_WS_IGNORE = 0b10;
 constexpr int CVAR_FLAG_NO_PREDEF = 0b100;
 
-struct cvar_base_s {	// a base structure for cvars 
+struct cvar_base_s {	// a base structure for cvars
 	int flags = 0;
 
 	virtual ~cvar_base_s() = default;
