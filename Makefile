@@ -15,7 +15,7 @@ endif
 endif
 
 
-CXXFLAGS += -DNCURSES_WIDECHAR -fpermissive
+CXXFLAGS += -DNCURSES_WIDECHAR -fpermissive -std=c++17
 LDFLAGS += -lncursesw
 
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)

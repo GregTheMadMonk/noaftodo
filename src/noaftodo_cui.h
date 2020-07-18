@@ -5,6 +5,7 @@
 #include <map>
 #include <stack>
 #include <string>
+#include <variant>
 #include <vector>
 
 #ifdef __sun
@@ -23,22 +24,23 @@ struct cui_bind_s {
 	bool autoexec;
 };
 
+namespace vargs {
+	namespace cols {
+		typedef struct { const noaftodo_entry& e; const int& id; } normal;
+		typedef struct { const int& l_id; } lview;
+		typedef std::variant<normal, lview> varg;
+	}
+}
+
 struct cui_col_s {
 	std::string title;
 
 	std::function<int(const int& w, const int& free, const int& col_n)> width;
-	std::function<std::string(const noaftodo_entry& entry, const int& id)> contents;
-};
-
-struct cui_lview_col_s {
-	std::string title;
-
-	std::function<int(const int& w, const int& free, const int& col_n)> width;
-	std::function<std::string(const int& list_id)> contents;
+	std::function<std::string(const vargs::cols::varg& args)> contents;
 };
 
 // columns
-extern std::map<char, cui_lview_col_s> cui_lview_columns;
+extern std::map<char, cui_col_s> cui_lview_columns;
 extern std::map<char, cui_col_s> cui_columns;
 
 // status fields

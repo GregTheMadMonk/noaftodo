@@ -10,7 +10,7 @@
 
 using namespace std;
 
-map<char, cui_lview_col_s> cui_lview_columns;
+map<char, cui_col_s> cui_lview_columns;
 map<char, cui_col_s> cui_columns;
 map<char, function<string()>> cui_status_fields;
 
@@ -75,6 +75,8 @@ extern string CMDS_HELP;
 void cui_init() {
 	log("Initializing console UI...");
 
+	using namespace vargs::cols;
+
 	// initialize columns
 	cui_columns['t'] = 
 	{ 
@@ -82,9 +84,8 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return free / 4;
 		},
-		[](const noaftodo_entry& e, const int& id) 
-		{ 
-			return e.title; 
+		[](const varg& args) { 
+			return get<normal>(args).e.title;
 		} 
 	};
 	cui_columns['f'] = 
@@ -93,9 +94,9 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return 5;
 		},
-		[](const noaftodo_entry& e, const int& id) 
-		{ 
+		[](const varg& args) { 
 			string ret = "";
+			const auto& e = get<normal>(args).e;
 			if (e.completed) ret += "V";	// a completed entry
 			if (e.is_failed()) ret += "F";	// a failed entry
 			if (e.is_coming()) ret += "C";	// an upcoming entry
@@ -109,8 +110,8 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return free / 10;
 		},
-		[](const noaftodo_entry& e, const int& id) 
-		{ 
+		[](const varg& args) {
+			const auto& e = get<normal>(args).e;
 			if (e.tag < t_tags.size())
 			       if (t_tags.at(e.tag) != to_string(e.tag))
 				       return to_string(e.tag) + ": " + t_tags.at(e.tag);
@@ -124,8 +125,8 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return 16;
 		},
-		[](const noaftodo_entry& e, const int& id) 
-		{ 
+		[](const varg& args) {
+			const auto& e = get<normal>(args).e;
 			if (e.get_meta("nodue") == "true") return string("----------------");
 			else return ti_f_str(e.due); 
 		} 
@@ -136,9 +137,8 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return free;
 		},
-		[](const noaftodo_entry& e, const int& id) 
-		{ 
-			return e.description; 
+		[](const varg& args) { 
+			return get<normal>(args).e.description; 
 		} 
 	};
 	cui_columns['i'] = 
@@ -147,9 +147,8 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return 3;
 		},
-		[](const noaftodo_entry& e, const int& id) 
-		{ 
-			return to_string(id); 
+		[](const varg& args) {
+			return to_string(get<normal>(args).id); 
 		} 
 	};
 	
@@ -160,8 +159,8 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return 3;
 		},
-		[](const int& list_id) 
-		{ 
+		[](const varg& args) {
+			const auto& list_id = get<lview>(args).l_id;
 			if (list_id == -1) return string(" ");
 			return to_string(list_id);
 		} 
@@ -173,7 +172,8 @@ void cui_init() {
 		[] (const int& w, const int& free, const int& cols) {
 			return 5;
 		},
-		[] (const int& list_id) {
+		[] (const varg& args) {
+			const auto& list_id = get<lview>(args).l_id;
 			return string(li_tag_completed(list_id) ? "V" : "") +
 				string(li_tag_coming(list_id) ? "C" : "") +
 				string(li_tag_failed(list_id) ? "F" : "");
@@ -186,8 +186,8 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return free / 4;
 		},
-		[](const int& list_id) 
-		{ 
+		[](const varg& args) {
+			const auto& list_id = get<lview>(args).l_id;
 			if (list_id == CUI_TAG_ALL) return string("All lists");
 			return t_tags.at(list_id);
 		} 
@@ -198,7 +198,8 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return 7;
 		},
-		[](const int& list_id) {
+		[](const varg& args) {
+			const auto& list_id = get<lview>(args).l_id;
 			if (list_id == CUI_TAG_ALL) return to_string(t_list.size());
 
 			int ret = 0;
@@ -214,8 +215,8 @@ void cui_init() {
 		[](const int& w, const int& free, const int& cols) {
 			return 4;
 		},
-		[](const int& list_id) 
-		{ 
+		[](const varg& args) {
+			const auto& list_id = get<lview>(args).l_id;
 			int ret = 0;
 			int tot = 0;
 
@@ -609,7 +610,7 @@ void cui_listview_paint() {
 						if (x >= cui_w) break;
 						move(l - list_offset + 1, x);
 						const int w = cui_lview_columns.at(col).width(cui_w, cui_w - x, cui_listview_cols.length());
-						addstr((cui_lview_columns.at(col).contents(v_list.at(l))).c_str());
+						addstr((cui_lview_columns.at(col).contents(vargs::cols::lview { v_list.at(l) })).c_str());
 
 						if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w) {
 							move(l - list_offset + 1, x + w);
@@ -705,7 +706,7 @@ void cui_normal_paint() {
 						if (x >= cui_w) break;
 						move(l - list_offset + 1, x);
 						const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
-						cui_text_box(x, l - list_offset + 1, w, 1, cui_columns.at(col).contents(entry, v_list.at(l)));
+						cui_text_box(x, l - list_offset + 1, w, 1, cui_columns.at(col).contents(vargs::cols::normal { entry, v_list.at(l) }));
 
 						if (coln < cols.length() - 1) if (x + w < cui_w) {
 							move(l - list_offset + 1, x + w);
@@ -758,7 +759,7 @@ void cui_details_paint() {
 		try {
 			const char& col = cui_details_cols.at(coln);
 
-			info_str += cui_columns.at(col).contents(entry, cui_s_line);
+			info_str += cui_columns.at(col).contents(vargs::cols::normal { entry, cui_s_line });
 			if (coln < cui_details_cols.length() - 1) info_str += " " + cui_separators.s_get(CHAR_DET_SEP) + " ";
 		} catch (const out_of_range& e) {}
 	}
