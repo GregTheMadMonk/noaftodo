@@ -543,93 +543,24 @@ bool cui_l_is_visible(const int& list_id) {
 }
 
 void cui_listview_paint() {
-	// draw table title
-	move(0, 0);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-	for (int i = 0; i < cui_w; i++) addch(' ');
+	const int last_string = cui_draw_table(0, 0, cui_w, cui_h - 2,
+			[] (const int& item) {
+				return vargs::cols::varg(vargs::cols::lview { item });
+			},
+			cui_l_is_visible,
+			[] (const int& item) {
+				return ((item >= -1) && (item < (int)t_tags.size()));
+			},
+			[] (const int& item) -> int {
+				if (li_tag_completed(item)) return COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD;
+				if (li_tag_failed(item)) return COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD;
+				if (li_tag_coming(item)) return COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD;
 
-	int x = 0;
-	for (int coln = 0; coln < cui_listview_cols.length(); coln++) {
-		try {
-			const char& col = cui_listview_cols.at(coln);
-			if (x >= cui_w) break;
-			move(0, x);
-			const int w = cui_lview_columns.at(col).width(cui_w, cui_w - x, cui_listview_cols.length());
-			addstr(cui_lview_columns.at(col).title.c_str());
-
-			if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w) {
-				move(0, x + w);
-				addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
-			}
-			x += w + 3;
-			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
-		} catch (const out_of_range& e) {}
-	}
-	attrset(A_NORMAL);
-
-	vector<int> v_list;
-	v_list.push_back(-1);
-	int cui_v_line = -2;
-	for (int l = 0; l < t_tags.size(); l++)
-		if (cui_l_is_visible(l))  {
-			v_list.push_back(l);
-			if (l == cui_tag_filter) cui_v_line = v_list.size() - 1;
-		}
-
-	if (v_list.size() != 0)  {
-		while (!cui_l_is_visible(cui_tag_filter) && (cui_tag_filter < t_tags.size())) 
-			cui_tag_filter++; 
-		if (cui_tag_filter == t_tags.size()) cui_tag_filter = CUI_TAG_ALL;
-		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == cui_tag_filter) cui_v_line = i;
-	}
-
-	int list_offset = 0;
-	if (cui_v_line - list_offset >= cui_h - 2) list_offset = cui_v_line - cui_h + 3;
-	if (cui_v_line - list_offset < 0) list_offset = cui_v_line;
-
-	int last_string = 1;
-	if (v_list.size() == 0) cui_tag_filter = CUI_TAG_ALL;
-	else {
-		for (int l = 0; l < v_list.size(); l++) {
-			cui_separators.drop();
-			cui_separators.shift_at(CHAR_ROW_SEP, cui_row_separator_offset * (l + 1));
-			if (l - list_offset >= cui_h - 2) break;
-			if (l >= list_offset)     {
-				if (l == cui_v_line) attron(A_STANDOUT);
-				if (li_tag_completed(v_list.at(l))) attron(COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD);	// list consists of completed entries
-				else if (li_tag_failed(v_list.at(l))) attron(COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD);	// list contains a failed entry
-				else if (li_tag_coming(v_list.at(l))) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// list contains an upcoming entry
-
-				x = 0;
-				move(l - list_offset + 1, x);
-				for (int i = 0; i < cui_w; i++) addch(' ');
-
-				for (int coln = 0; coln < cui_listview_cols.length(); coln++) {
-					try {
-						const char& col = cui_listview_cols.at(coln);
-						if (x >= cui_w) break;
-						move(l - list_offset + 1, x);
-						const int w = cui_lview_columns.at(col).width(cui_w, cui_w - x, cui_listview_cols.length());
-						addstr((cui_lview_columns.at(col).contents(vargs::cols::lview { v_list.at(l) })).c_str());
-
-						if (coln < cui_listview_cols.length() - 1) if (x + w < cui_w) {
-							move(l - list_offset + 1, x + w);
-							addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
-						}
-						x += w + 3;
-
-						for (int x1 = x; x1 < cui_w; x1++) addch(' ');
-					} catch (const out_of_range& e) {}
-				}
-
-				move(l - list_offset + 1, cui_w - 1);
-				addstr(" ");
-
-				attrset(A_NORMAL);
-				last_string = l - list_offset + 2;
-			}
-		}
-	}
+				return 0;
+			},
+			-1, cui_tag_filter,
+			"math %tag_filter% + 1 tag_fitler",
+			cui_listview_cols, cui_lview_columns);
 
 	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
 
@@ -639,93 +570,32 @@ void cui_listview_paint() {
 void cui_listview_input(const wchar_t& key) { }
 
 void cui_normal_paint() {
-	// draw table title
-	move(0, 0);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
-	for (int i = 0; i < cui_w; i++) addch(' ');
+	const int last_string =
+		cui_draw_table(0, 0, cui_w, cui_h - 2,
+				[] (const int& item) {
+					return vargs::cols::varg(vargs::cols::normal {
+							t_list.at(item),
+							item
+							});
+				},
+				cui_is_visible,
+				[] (const int& item) {
+					return ((item >= 0) && (item < t_list.size()));
+				},
+				[] (const int& item) -> int {
+					const auto& e = t_list.at(item);
 
-	int x = 0;
-	const string cols = (cui_tag_filter == CUI_TAG_ALL) ? cui_normal_all_cols : cui_normal_cols;
-	for (int coln = 0; coln < cols.length(); coln++) {
-		try {
-			const char& col = cols.at(coln);
-			if (x >= cui_w) break;
-			move(0, x);
-			const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
-			addstr(cui_columns.at(col).title.c_str());
+					if (e.completed) return COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD;
+					if (e.is_failed()) return COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD;
+					if (e.is_coming()) return COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD;
 
-			if (coln < cols.length() - 1) if (x + w < cui_w) {
-				move(0, x + w);
-				addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
-			}
-			x += w + 3;
-			for (int x1 = x; x1 < cui_w; x1++) addch(' ');
-		} catch (const out_of_range& e) {}
-	}
-	attrset(A_NORMAL);
+					return 0;	
+				},
+				0, cui_s_line,
+				"math %id% + 1 id",
+				(cui_tag_filter == CUI_TAG_ALL) ? cui_normal_all_cols : cui_normal_cols,
+				cui_columns);
 
-	vector<int> v_list;
-	int cui_v_line = -1;
-	for (int l = 0; l < t_list.size(); l++)
-		if (cui_is_visible(l))  {
-			v_list.push_back(l);
-			if (l == cui_s_line) cui_v_line = v_list.size() - 1;
-		}
-
-	if (v_list.size() != 0)  {
-		while (!cui_is_visible(cui_s_line)) cmd_exec("math %id% + 1 id"); // sorry, it just includes all precautions I don't want to write again
-		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == cui_s_line) cui_v_line = i;
-	}
-
-	int list_offset = 0;
-	if (cui_v_line - list_offset >= cui_h - 2) list_offset = cui_v_line - cui_h + 3;
-	if (cui_v_line - list_offset < 0) list_offset = cui_v_line;
-
-	int last_string = 1;
-	if (v_list.size() == 0) cui_s_line = -1;
-	else {
-		for (int l = 0; l < v_list.size(); l++) {
-			cui_separators.drop();
-			cui_separators.shift_at(CHAR_ROW_SEP, cui_row_separator_offset * (l + 1));
-			if (l - list_offset >= cui_h - 2) break;
-			if (l >= list_offset)     {
-				const noaftodo_entry& entry = t_list.at(v_list.at(l));
-				
-				if (l == cui_v_line) attron(A_STANDOUT);
-				if (entry.completed) attron(COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD);	// a completed entry
-				else if (entry.is_failed()) attron(COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD);	// a failed entry
-				else if (entry.is_coming()) attron(COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD);	// an upcoming entry
-
-				x = 0;
-				move(l - list_offset + 1, x);
-				for (int i = 0; i < cui_w; i++) addch(' ');
-
-				for (int coln = 0; coln < cols.length(); coln++) {
-					try {
-						const char& col = cols.at(coln);
-						if (x >= cui_w) break;
-						move(l - list_offset + 1, x);
-						const int w = cui_columns.at(col).width(cui_w, cui_w - x, cols.length());
-						cui_text_box(x, l - list_offset + 1, w, 1, cui_columns.at(col).contents(vargs::cols::normal { entry, v_list.at(l) }));
-
-						if (coln < cols.length() - 1) if (x + w < cui_w) {
-							move(l - list_offset + 1, x + w);
-							addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
-						}
-						x += w + 3;
-
-						for (int x1 = x; x1 < cui_w; x1++) addch(' ');
-					} catch (const out_of_range& e) {}
-				}
-
-				move(l - list_offset + 1, cui_w - 1);
-				addstr(" ");
-
-				attrset(A_NORMAL);
-				last_string = l - list_offset + 2;
-			}
-		}
-	}
 
 	for (int s = last_string; s < cui_h; s++) { move(s, 0); clrtoeol(); }
 
@@ -1024,6 +894,104 @@ wchar_t cui_key_from_str(const string& str) {
 	if (str == "tab")	return 9;
 
 	return 0;
+}
+
+int cui_draw_table(const int& x, const int& y,
+		const int& w, const int& h,
+		const std::function<vargs::cols::varg(const int& item)>& colarg_f,
+		const std::function<bool(const int& item)>& vis_f,
+		const std::function<bool(const int& item)>& cont_f,
+		const std::function<int(const int& item)>& attrs_f,
+		const int& start, int& sel,
+		const std::string& down_cmd,
+		const std::string& cols, const std::map<char, cui_col_s>& colmap) {
+	int t_x = x;
+	int t_y = y;
+
+	// draw table title
+	move(t_y, t_x);
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
+	for (int i = 0; i < w; i++) addch(' ');
+
+	for (int coln = 0; coln < cols.length(); coln++) {
+		try {
+			const char& col = cols.at(coln);
+			if (t_x >= x + w) break;
+			const int& cw = colmap.at(col).width(w, x + w - t_x, cols.length());
+			cui_text_box(t_x, t_y, cw, 1, colmap.at(col).title);
+
+			if ((coln < cols.length() - 1) && (t_x + cw < x + w)) {
+				move(t_y, t_x + cw);
+				addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
+			}
+
+			t_x += cw + 3;
+		} catch (const out_of_range& e) { }
+	}
+	attrset(A_NORMAL);
+
+	// form a list of displayed elements
+	vector<int> v_list;
+	int v_sel = -1;
+
+	for (int l = start; cont_f(l); l++)
+		if (vis_f(l)) {
+			v_list.push_back(l);
+			if (l == sel) v_sel = v_list.size() - 1;
+		}
+
+	if (v_list.size() != 0) {
+		while (!vis_f(sel)) cmd_exec(down_cmd);
+		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == sel) { v_sel = i; break; }
+	}
+
+	// calculate list offset
+	int l_offset = 0;
+	if (v_sel - l_offset >= h) l_offset = v_sel - h + 3;
+	if (v_sel - l_offset < 0) l_offset = v_sel;
+
+	if (v_list.size() == 0) {
+		sel = -1;
+		return t_y + 1;
+	}
+
+	// draw list
+	for (int l = 0; l < v_list.size(); l++) {
+		cui_separators.drop();
+		cui_separators.shift_at(CHAR_ROW_SEP, cui_row_separator_offset * (l + 1));
+		if (l - l_offset >= h - 2) break;
+		if (l < l_offset) continue;
+
+		attrset(attrs_f(v_list.at(l)) | ((l == v_sel) ? A_STANDOUT : 0));
+		t_x = x;
+		t_y++;
+
+		move(t_y, t_x);
+		for (int i = 0; i < w; i++) addch(' ');
+
+		for (int coln = 0; coln < cols.length(); coln++) {
+			try {
+				const char& col = cols.at(coln);
+				if (t_x >= x + w) break;
+				const int cw = colmap.at(col).width(w, x + w - t_x, cols.length());
+				cui_text_box(t_x, t_y, cw, 1, colmap.at(col).contents(colarg_f(v_list.at(l))));
+
+				if ((coln < cols.length() - 1) && (t_x + cw < x + w)) {
+					move(t_y, t_x + cw);
+					addstr((" " + cui_separators.s_get(CHAR_ROW_SEP) + " ").c_str());
+				}
+
+				t_x += cw + 3;
+			} catch (const out_of_range& e) { }
+		}
+
+		move(t_y, x + w - 1);
+		addstr(" ");
+
+		attrset(A_NORMAL);
+	}
+
+	return t_y + 1;
 }
 
 void cui_draw_status(const string& fields) {

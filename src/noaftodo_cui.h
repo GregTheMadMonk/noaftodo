@@ -197,6 +197,16 @@ void cui_filter_history();
 wchar_t cui_key_from_str(const std::string& str);
 
 // drawer functions
+int cui_draw_table(const int& x, const int& y,
+		const int& w, const int& h,
+		const std::function<vargs::cols::varg(const int& item)>& colarg_f,
+		const std::function<bool(const int& item)>& vis_f,
+		const std::function<bool(const int& item)>& cont_f,
+		const std::function<int(const int& item)>& attrs_f,
+		const int& start, int& sel,
+		const std::string& down_cmd,
+		const std::string& cols, const std::map<char, cui_col_s>& colmap);
+
 void cui_draw_status(const std::string& fields);
 
 void cui_clear_box(const int& x, const int& y, const int& w, const int& h);
