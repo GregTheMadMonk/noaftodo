@@ -120,7 +120,19 @@ void cvar_wrap_multistr(const string& name, multistr_c& var, const int& length, 
 	cvars[name]->getter = [&var] () { return w_converter.to_bytes(var.str()); };
 	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
 	else cvars[name]->setter = [name, &var, length] (const string& val) {
-		var = multistr_c(val, length);
+		int element_length = 1;
+		if (val.length() > 0) if (val.at(0) == '{') {
+			string buffer = "";
+			for (int i = 1; i < val.length(); i++) {
+				if (val.at(i) == '}') break;
+				buffer += val.at(i);
+			}
+
+			try {
+				element_length = stoi(buffer);
+			} catch (const out_of_range& e) { }
+		}
+		var = multistr_c(val, element_length, length);
 	};
 
 	cvars[name]->flags = flags | CVAR_FLAG_WS_IGNORE; // otherwise it breaks a cvar
@@ -131,10 +143,32 @@ void cvar_wrap_multistr_element(const std::string& name, multistr_c& var, const 
 	cvars[name]->getter = [&var, index] () { return w_converter.to_bytes(var.at(index)); };
 	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
 	else cvars[name]->setter = [&var, index] (const string& val) {
-		vector<wchar_t> newval;
+		int element_length = 1;
+		int start_from = 0;
+		if (val.length() > 0) if (val.at(0) == '{') {
+			string buffer = "";
+			for (int i = 1; i < val.length(); i++) {
+				if (val.at(i) == '}') { start_from = i + 1; break; }
+				buffer += val.at(i);
+			}
 
-		for (wchar_t c : w_converter.from_bytes(val))
-			newval.push_back(c);
+			try {
+				element_length = stoi(buffer);
+			} catch (const invalid_argument& e) { }
+		}
+
+		vector<wstring> newval;
+
+		wstring buffer = L"";
+		wstring wval = w_converter.from_bytes(val.substr(start_from));
+		for (int i = 0; i < wval.length(); i++) {
+			buffer += wval.at(i);
+
+			if (i % element_length == element_length - 1) {
+				newval.push_back(buffer);
+				buffer = L"";
+			}
+		}
 
 		var.v_at(index) = newval;
 	};

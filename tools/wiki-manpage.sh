@@ -3,7 +3,7 @@
 # update manpage on wiki
 printf "
 > * [Home page](https://github.com/GregTheMadMonk/noaftodo/wiki)
-> * [Guide](https://github.com/GregTheMadMonk/noaftodo/wiki/Manual) (**manpage**)
+> * [Guide](https://github.com/GregTheMadMonk/noaftodo/wiki/Guide) (**manpage**)
 \`\`\`
 %s
 \`\`\`" \

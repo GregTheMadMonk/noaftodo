@@ -60,25 +60,25 @@ class multistr_c {
 	 * 	l j g d
 	 */
 
-	std::vector<std::vector<wchar_t>> 	data;
+	std::vector<std::vector<std::wstring>> 	data;
 	std::vector<int>		shifts;
 
 	int offset;
 
-	void init(const std::wstring& istr, int len);
+	void init(const std::wstring& istr, const int& elen, int len);
 public:
-	multistr_c(const std::string& str, const int& len = -1);
-	multistr_c(const std::wstring& str, const int& len = -1);
+	multistr_c(const std::string& str, const int& elen = 1, const int& len = -1);
+	multistr_c(const std::wstring& str, const int& elen = 1, const int& len = -1);
 
 	void drop();	// shifts = 0
 	void reset();	// shifts = 0 & offset = 0
 
 	int pos(const int& i);
 
-	wchar_t at(const int& i);
-	wchar_t get(const int& i = 0); // default argument = 0 for old char variables
+	std::wstring at(const int& i);
+	std::wstring get(const int& i = 0); // default argument = 0 for old char variables
 	std::string s_get(const int& i = 0);
-	std::vector<wchar_t>& v_at(const int& i);
+	std::vector<std::wstring>& v_at(const int& i);
 	std::wstring str();
 
 	void shift(const int& steps = 1);
@@ -86,7 +86,7 @@ public:
 
 	int length();
 
-	void append(const std::vector<wchar_t>& app);
+	void append(const std::vector<std::wstring>& app);
 };
 
 // special characters

@@ -1100,6 +1100,7 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 				}
 				return;
 		}
+
 		if (t_x >= x + w) {
 			t_x = x;
 			t_y++;

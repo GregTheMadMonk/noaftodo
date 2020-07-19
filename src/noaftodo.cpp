@@ -255,23 +255,33 @@ string replace_special(string str) {
 }
 
 // multistr_c functions
-multistr_c::multistr_c(const string& str, const int& len) {
+multistr_c::multistr_c(const string& str, const int& elen, const int& len) {
 	wstring wstr = w_converter.from_bytes(str);
-	this->init(wstr, len);
+	this->init(wstr, elen, len);
 }
 
-multistr_c::multistr_c(const wstring& str, const int& len) {
-	this->init(str, len);
+multistr_c::multistr_c(const wstring& str, const int& elen, const int& len) {
+	this->init(str, elen, len);
 }
 
-void multistr_c::init(const wstring& istr, int len) {
+void multistr_c::init(const wstring& istr, const int& elen, int len) {
 	if (len == -1) len = istr.length();
 			
-	this->data = vector<vector<wchar_t>>(len, vector<wchar_t>());
+	this->data = vector<vector<wstring>>(len, vector<wstring>());
 	this->shifts = vector<int>(len, 0);
 
-	for (int i = 0; i < istr.length(); i++)
-		this->data.at(i % len).push_back(istr.at(i));
+	wstring buffer = L"";
+	int iterator = 0;
+
+	for (int i = 0; i < istr.length(); i++) {
+		buffer += istr.at(i);
+
+		if (buffer.length() == elen) {
+			this->data.at(iterator % len).push_back(buffer);
+			buffer = L"";
+			iterator++;
+		}
+	}
 }
 
 void multistr_c::drop() {
@@ -287,12 +297,12 @@ int multistr_c::pos(const int& i) {
 	return (this->offset + this->shifts.at(i)) % this->data.at(i).size();
 }
 
-wchar_t multistr_c::at(const int& i) {
+wstring multistr_c::at(const int& i) {
 	return this->data.at(i).at(this->pos(i));
 }
 
-wchar_t multistr_c::get(const int& i) {
-	wchar_t ret = this->at(i);
+wstring multistr_c::get(const int& i) {
+	wstring ret = this->at(i);
 	this->shift_at(i);
 
 	return ret;
@@ -302,7 +312,7 @@ string multistr_c::s_get(const int& i) {
 	return w_converter.to_bytes(this->get(i));
 }
 
-vector<wchar_t>& multistr_c::v_at(const int& i) {
+vector<wstring>& multistr_c::v_at(const int& i) {
 	return this->data.at(i);
 }
 
@@ -322,7 +332,7 @@ void multistr_c::shift_at(const int& index, const int& steps) {
 
 int multistr_c::length() { return this->data.size(); }
 
-void multistr_c::append(const vector<wchar_t>& app) {
+void multistr_c::append(const vector<wstring>& app) {
 	this->data.push_back(app);
 	this->shifts.push_back(0);
 }
