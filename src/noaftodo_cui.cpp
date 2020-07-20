@@ -913,6 +913,45 @@ wchar_t cui_key_from_str(const string& str) {
 	return 0;
 }
 
+int cui_pair_from_str(const string& str) {
+	int fg = -1;
+	int bg = -1;
+
+	bool last = false; // false -> fg, true -> bg
+
+	string buffer = "";
+
+	for (const auto& c : (str + (char)0))
+		switch (c) {
+			case ';': case 0:
+				try {
+					const int& val = stoi(buffer);
+					buffer = "";
+					switch (val / 10) {
+						case 3:
+							fg = val % 10;
+							last = false;
+							break;
+						case 4:
+							bg = val % 10;
+							last = true;
+							break;
+						case 0:
+							if (val == 1) {
+								if (last) { if (bg >= 0) bg += 8; }
+								else { if (fg >= 0) fg += 8; }
+							}
+							break;
+					}
+				} catch (const invalid_argument& e) { }
+				break;
+			default:
+				buffer += c;
+		}
+
+	return fg + 1 + (bg + 1) * 17;
+}
+
 int cui_draw_table(const int& x, const int& y,
 		const int& w, const int& h,
 		const std::function<vargs::cols::varg(const int& item)>& colarg_f,
@@ -1110,7 +1149,7 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 				c033 = false;
 
 				try {
-					pair = stoi(buffer);
+					pair = cui_pair_from_str(w_converter.to_bytes(buffer));
 					attrset(attrs | COLOR_PAIR(pair));
 				} catch (const invalid_argument& e) { }
 

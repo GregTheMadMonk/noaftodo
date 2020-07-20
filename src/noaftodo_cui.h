@@ -185,6 +185,7 @@ std::string cui_prompt(const std::string& message = ">");
 void cui_filter_history();
 
 wchar_t cui_key_from_str(const std::string& str);
+int cui_pair_from_str(const std::string& str);
 
 // drawer functions
 int cui_draw_table(const int& x, const int& y,
