@@ -27,7 +27,6 @@ bool cui_status_standout;
 
 bool cui_shift_multivars = false;
 
-int cui_color_bg;
 int cui_color_title;
 int cui_color_status;
 int cui_color_complete;
@@ -345,11 +344,12 @@ void cui_construct() {
 	start_color();
 	use_default_colors();
 
-	init_pair(CUI_CP_TITLE, cui_color_title, cui_color_bg);
-	init_pair(CUI_CP_GREEN_ENTRY, cui_color_complete, cui_color_bg);
-	init_pair(CUI_CP_YELLOW_ENTRY, cui_color_coming, cui_color_bg);
-	init_pair(CUI_CP_RED_ENTRY, cui_color_failed, cui_color_bg);
-	init_pair(CUI_CP_STATUS, cui_color_status, cui_color_bg);
+	log("Max color pairs: " + to_string(COLOR_PAIRS), LP_IMPORTANT);
+	// initialize color pairs
+	for (short f = -1; f < 16; f++)
+		for (short b = -1; b < 16; b++) {
+			init_pair(f + 1 + (b + 1) * 17, f, b);
+		}
 
 	if (cui_halfdelay_time == 0) cbreak();
 	else halfdelay(cui_halfdelay_time);
@@ -574,9 +574,9 @@ void cui_listview_paint() {
 				return ((item >= -1) && (item < (int)t_tags.size()));
 			},
 			[] (const int& item) -> int {
-				if (li_tag_completed(item)) return COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD;
-				if (li_tag_failed(item)) return COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD;
-				if (li_tag_coming(item)) return COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD;
+				if (li_tag_completed(item)) return COLOR_PAIR(cui_color_complete) | A_BOLD;
+				if (li_tag_failed(item)) return COLOR_PAIR(cui_color_failed) | A_BOLD;
+				if (li_tag_coming(item)) return COLOR_PAIR(cui_color_coming) | A_BOLD;
 
 				return 0;
 			},
@@ -607,9 +607,9 @@ void cui_normal_paint() {
 				[] (const int& item) -> int {
 					const auto& e = t_list.at(item);
 
-					if (e.completed) return COLOR_PAIR(CUI_CP_GREEN_ENTRY) | A_BOLD;
-					if (e.is_failed()) return COLOR_PAIR(CUI_CP_RED_ENTRY) | A_BOLD;
-					if (e.is_coming()) return COLOR_PAIR(CUI_CP_YELLOW_ENTRY) | A_BOLD;
+					if (e.completed) return COLOR_PAIR(cui_color_complete) | A_BOLD;
+					if (e.is_failed()) return COLOR_PAIR(cui_color_failed) | A_BOLD;
+					if (e.is_coming()) return COLOR_PAIR(cui_color_coming) | A_BOLD;
 
 					return 0;	
 				},
@@ -703,7 +703,7 @@ void cui_command_paint() {
 
 	move(cui_h - 1, 0);
 	if (cui_status_standout) attron(A_STANDOUT);
-	attron(COLOR_PAIR(CUI_CP_STATUS));
+	attron(COLOR_PAIR(cui_color_status));
 	for (int x = 0; x < cui_w; x++) addch(' ');
 	move(cui_h - 1, 0);
 	int offset = cui_command_cursor - cui_w + 3;
@@ -883,7 +883,7 @@ string cui_prompt(const string& message) {
 
 		move(cui_h - 1, 0);
 		if (cui_status_standout) attron(A_STANDOUT);
-		attron(COLOR_PAIR(CUI_CP_STATUS));
+		attron(COLOR_PAIR(cui_color_status));
 		for (int x = 0; x < cui_w; x++) addch(' ');
 		move(cui_h - 1, 0);
 		int offset = cui_command_cursor - cui_w + 3;
@@ -932,7 +932,7 @@ int cui_draw_table(const int& x, const int& y,
 
 	// draw table title
 	move(t_y, t_x);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(CUI_CP_TITLE));
+	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(cui_color_title));
 	for (int i = 0; i < w; i++) addch(' ');
 
 	for (int coln = 0; coln < cols.length(); coln++) {
@@ -1030,7 +1030,7 @@ void cui_draw_status(const string& fields) {
 	}
 
 	if (cui_status_standout) attron(A_STANDOUT);
-	attron(COLOR_PAIR(CUI_CP_STATUS));
+	attron(COLOR_PAIR(cui_color_status));
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
 	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());

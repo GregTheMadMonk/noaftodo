@@ -146,14 +146,11 @@ set "charset.separators" "│||"
 set "charset.separators.row.offset" "0"
 
 # COLORSCHEME
-set "colors.bg" "-1"
-set "colors.title" "12"
-set "colors.status" "-1"
-set "colors.entry_completed" "2"
-set "colors.entry_coming" "3"
-set "colors.entry_failed" "1"
-
-set "colors.status_standout" "false"
+set "colors.title" "5"
+set "colors.status" "222"
+set "colors.entry_completed" "3"
+set "colors.entry_coming" "4"
+set "colors.entry_failed" "2"
 
 # DAEMON ACTIONS
 set "on_daemon_launch_action" 		"!notify-send \"NOAFtodo v.%VER%\" \"Daemon is up and running\" &"

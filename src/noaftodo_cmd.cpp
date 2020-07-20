@@ -641,14 +641,11 @@ void cmd_init() {
 	cvar_wrap_int("charset.separators.row.offset", cui_row_separator_offset);
 
 	// COLORSCHEME
-	cvar_wrap_int("colors.bg", cui_color_bg);
 	cvar_wrap_int("colors.title", cui_color_title);
 	cvar_wrap_int("colors.status", cui_color_status);
 	cvar_wrap_int("colors.entry_completed", cui_color_complete);
 	cvar_wrap_int("colors.entry_coming", cui_color_coming);
 	cvar_wrap_int("colors.entry_failed", cui_color_failed);
-
-	cvar_wrap_bool("colors.status_standout", cui_status_standout);
 
 	// DAEMON ACTIONS
 	cvar_wrap_string("on_daemon_launch_action", da_launch_action);

@@ -46,13 +46,6 @@ extern std::map<char, cui_col_s> cui_columns;
 // status fields
 extern std::map<char, std::function<std::string()>> cui_status_fields;
 
-// color pair indexes
-constexpr int CUI_CP_TITLE = 1;
-constexpr int CUI_CP_GREEN_ENTRY = 2;
-constexpr int CUI_CP_YELLOW_ENTRY = 3;
-constexpr int CUI_CP_RED_ENTRY = 4;
-constexpr int CUI_CP_STATUS = 5;
-
 // modes
 constexpr int CUI_MODE_EXIT = 0;
 constexpr int CUI_MODE_ALL = 0b11111111;
@@ -88,11 +81,8 @@ extern std::string cui_listview_regex_filter;
 extern std::string cui_contexec_regex_filter;
 
 // colors / appearance
-extern bool cui_status_standout;
-
 extern bool cui_shift_multivars;
 
-extern int cui_color_bg;
 extern int cui_color_title;
 extern int cui_color_status;
 extern int cui_color_complete;
