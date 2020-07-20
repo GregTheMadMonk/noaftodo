@@ -202,5 +202,6 @@ void cui_draw_status(const std::string& fields);
 
 void cui_clear_box(const int& x, const int& y, const int& w, const int& h);
 void cui_draw_border(const int& x, const int& y, const int& w, const int& h, multistr_c& chars);
-void cui_text_box(const int& x, const int& y, const int& w, const int& h, const std::string& str, const bool& show_md = true, const int& line_offset = 0);
+typedef struct { int w; int h; } box_dim;
+box_dim cui_text_box(const int& x, const int& y, const int& w, const int& h, const std::string& str, const bool& show_md = true, const int& line_offset = 0, const bool& nullout = false);
 #endif

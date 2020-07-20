@@ -914,8 +914,8 @@ wchar_t cui_key_from_str(const string& str) {
 }
 
 int cui_pair_from_str(const string& str) {
-	int fg = -1;
-	int bg = -1;
+	short fg = -1;
+	short bg = -1;
 
 	bool last = false; // false -> fg, true -> bg
 
@@ -1066,7 +1066,8 @@ void cui_draw_status(const string& fields) {
 	attron(COLOR_PAIR(cui_color_status));
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
-	cui_text_box(cui_w - 1 - w_converter.from_bytes(cui_status_l).length(), cui_h - 1, cui_w, 1, cui_status_l);
+	const auto len = cui_text_box(cui_w - 1 - w_converter.from_bytes(cui_status_l).length(), cui_h - 1, cui_w, 1, cui_status_l, true, 0, true).w;
+	cui_text_box(cui_w - 1 - len, cui_h - 1, cui_w, 1, cui_status_l);
 	attrset(A_NORMAL);
 }
 
@@ -1114,7 +1115,7 @@ void cui_draw_border(const int& x, const int& y, const int& w, const int& h, mul
 	}
 }
 
-void cui_text_box(const int& x, const int& y, const int& w, const int& h, const string& str, const bool& show_md, const int& line_offset) {
+box_dim cui_text_box(const int& x, const int& y, const int& w, const int& h, const string& str, const bool& show_md, const int& line_offset, const bool& nullout) {
 	int t_x = x;
 	int t_y = y - line_offset;
 
@@ -1125,7 +1126,10 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 	int attrs = 0;
 	int pair = 0;
 
-	auto putwch = [&t_x, &t_y, &w, &h, &x, &y, &line_offset, &c033, &buffer, &attrs, &pair] (const wchar_t& wch) {
+	int rw = 0;
+	int rh = 0;
+
+	auto putwch = [&t_x, &t_y, &w, &h, &x, &y, &line_offset, &nullout, &c033, &buffer, &attrs, &pair, &rh, &rw] (const wchar_t& wch) {
 		switch (wch) {
 			case L'\n':
 				t_x = x;
@@ -1165,10 +1169,14 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 		}
 		if (t_y >= y + h) return;
 
-		if (t_y >= y) {
+		if ((t_y >= y) && !nullout) {
 			move(t_y, t_x);
 			addstr(w_converter.to_bytes(wch).c_str());
 		}
+
+		if (t_x - x > rw) rw = t_x - x;
+		if (t_y - y > rh) rh = t_y - y;
+
 		t_x++;
 	};
 
@@ -1176,9 +1184,9 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 	if (!show_md) {
 		for (const auto& wch : wstr) {
 			putwch(wch);
-			if (t_y >= y + h) return;
+			if (t_y >= y + h) break;
 		}
-		return;
+		return { rw, rh };
 	}
 
 	int text_attrs = A_NORMAL;
@@ -1209,4 +1217,7 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 	}
 
 	attrset(text_attrs);
+
+	text_box_ret:
+	return { rw, rh };
 }
