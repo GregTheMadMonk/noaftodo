@@ -445,7 +445,7 @@ void cui_run() {
 		}
 
 		if (errors != 0) {
-			attrset(A_NORMAL);
+			attrset_ext(A_NORMAL);
 			int old_cx, old_cy;
 			getyx(stdscr, old_cy, old_cx);
 			cui_safemode_box();
@@ -570,12 +570,12 @@ void cui_listview_paint() {
 			[] (const int& item) {
 				return ((item >= -1) && (item < (int)t_tags.size()));
 			},
-			[] (const int& item) -> int {
-				if (li_tag_completed(item)) return COLOR_PAIR(cui_color_complete) | A_BOLD;
-				if (li_tag_failed(item)) return COLOR_PAIR(cui_color_failed) | A_BOLD;
-				if (li_tag_coming(item)) return COLOR_PAIR(cui_color_coming) | A_BOLD;
+			[] (const int& item) -> cui_attrs {
+				if (li_tag_completed(item)) return { A_BOLD, cui_color_complete };
+				if (li_tag_failed(item)) return { A_BOLD, cui_color_failed };
+				if (li_tag_coming(item)) return { A_BOLD, cui_color_coming };
 
-				return 0;
+				return { A_NORMAL, 0 };
 			},
 			-1, cui_tag_filter,
 			"math %tag_filter% + 1 tag_fitler",
@@ -601,14 +601,14 @@ void cui_normal_paint() {
 				[] (const int& item) {
 					return ((item >= 0) && (item < t_list.size()));
 				},
-				[] (const int& item) -> int {
+				[] (const int& item) -> cui_attrs {
 					const auto& e = t_list.at(item);
 
-					if (e.completed) return COLOR_PAIR(cui_color_complete) | A_BOLD;
-					if (e.is_failed()) return COLOR_PAIR(cui_color_failed) | A_BOLD;
-					if (e.is_coming()) return COLOR_PAIR(cui_color_coming) | A_BOLD;
+					if (e.completed) return { A_BOLD, cui_color_complete };
+					if (e.is_failed()) return { A_BOLD, cui_color_failed };
+					if (e.is_coming()) return { A_BOLD, cui_color_coming };
 
-					return 0;	
+					return { A_NORMAL, 0 };
 				},
 				0, cui_s_line,
 				"math %id% + 1 id",
@@ -699,7 +699,7 @@ void cui_command_paint() {
 	}
 
 	move(cui_h - 1, 0);
-	attron(COLOR_PAIR(cui_color_status));
+	attron_ext(0, cui_color_status);
 	for (int x = 0; x < cui_w; x++) addch(' ');
 	move(cui_h - 1, 0);
 	int offset = cui_command_cursor - cui_w + 3;
@@ -878,7 +878,7 @@ string cui_prompt(const string& message) {
 		}
 
 		move(cui_h - 1, 0);
-		attron(COLOR_PAIR(cui_color_status));
+		attron_ext(0, cui_color_status);
 		for (int x = 0; x < cui_w; x++) addch(' ');
 		move(cui_h - 1, 0);
 		int offset = cui_command_cursor - cui_w + 3;
@@ -957,7 +957,7 @@ int cui_draw_table(const int& x, const int& y,
 		const std::function<vargs::cols::varg(const int& item)>& colarg_f,
 		const std::function<bool(const int& item)>& vis_f,
 		const std::function<bool(const int& item)>& cont_f,
-		const std::function<int(const int& item)>& attrs_f,
+		const std::function<cui_attrs(const int& item)>& attrs_f,
 		const int& start, int& sel,
 		const std::string& down_cmd,
 		const std::string& cols, const std::map<char, cui_col_s>& colmap) {
@@ -966,7 +966,7 @@ int cui_draw_table(const int& x, const int& y,
 
 	// draw table title
 	move(t_y, t_x);
-	attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(cui_color_title));
+	attrset_ext(A_STANDOUT | A_BOLD, cui_color_title);
 	for (int i = 0; i < w; i++) addch(' ');
 
 	for (int coln = 0; coln < cols.length(); coln++) {
@@ -984,7 +984,7 @@ int cui_draw_table(const int& x, const int& y,
 			t_x += cw + 3;
 		} catch (const out_of_range& e) { }
 	}
-	attrset(A_NORMAL);
+	attrset_ext(A_NORMAL);
 
 	// form a list of displayed elements
 	vector<int> v_list;
@@ -1018,7 +1018,8 @@ int cui_draw_table(const int& x, const int& y,
 		if (l - l_offset >= h - 2) break;
 		if (l < l_offset) continue;
 
-		attrset(attrs_f(v_list.at(l)) | ((l == v_sel) ? A_STANDOUT : 0));
+		const auto a_f = attrs_f(v_list.at(l));
+		attrset_ext(a_f.attrs | ((l == v_sel) ? A_STANDOUT : 0), a_f.pair);
 		t_x = x;
 		t_y++;
 
@@ -1044,7 +1045,7 @@ int cui_draw_table(const int& x, const int& y,
 		move(t_y, x + w - 1);
 		addstr(" ");
 
-		attrset(A_NORMAL);
+		attrset_ext(A_NORMAL);
 	}
 
 	return t_y + 1;
@@ -1057,18 +1058,20 @@ void cui_draw_status(const string& fields) {
 		try {
 			const string field = (cui_status_fields.at(c))();
 			if (field != "") {
-				if (cui_status_l != "") cui_status_l = " " + cui_separators.s_get(CHAR_STA_SEP) + " " + cui_status_l;
-		       		cui_status_l = field + cui_status_l;
+				if (cui_status_l != "") cui_status_l += " " + cui_separators.s_get(CHAR_STA_SEP) + " ";
+		       		cui_status_l += field;
 			}
 		} catch (const out_of_range& e) {}
 	}
 
-	attron(COLOR_PAIR(cui_color_status));
+	cui_status_l += " ";
+
+	attron_ext(0, cui_color_status);
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
 	const auto len = cui_text_box(cui_w - 1 - w_converter.from_bytes(cui_status_l).length(), cui_h - 1, cui_w, 1, cui_status_l, true, 0, true).w;
 	cui_text_box(cui_w - 1 - len, cui_h - 1, cui_w, 1, cui_status_l);
-	attrset(A_NORMAL);
+	attrset_ext(A_NORMAL);
 }
 
 void cui_clear_box(const int& x, const int& y, const int& w, const int& h) {
@@ -1154,7 +1157,7 @@ box_dim cui_text_box(const int& x, const int& y, const int& w, const int& h, con
 
 				try {
 					pair = cui_pair_from_str(w_converter.to_bytes(buffer));
-					attrset(attrs | COLOR_PAIR(pair));
+					attrset_ext(attrs, pair);
 				} catch (const invalid_argument& e) { }
 
 				buffer = L"";
@@ -1190,8 +1193,10 @@ box_dim cui_text_box(const int& x, const int& y, const int& w, const int& h, con
 	}
 
 	int text_attrs = A_NORMAL;
-	attr_get(&text_attrs, &pair, NULL);
-	attrs = text_attrs & ~COLOR_PAIR(pair);
+	int text_pair;
+	attr_get(&text_attrs, &text_pair, NULL);
+	attrs = text_attrs & ~COLOR_PAIR(text_pair);
+	pair = text_pair;
 
 	int i = 0;
 	bool skip_special = false;
@@ -1206,7 +1211,7 @@ box_dim cui_text_box(const int& x, const int& y, const int& w, const int& h, con
 			if (wstr.substr(i, sw.second.length()) == sw.second) {
 				attrs ^= sw.first;
 				i += sw.second.length() - 1;
-				attrset(attrs | COLOR_PAIR(pair));
+				attrset_ext(attrs, pair);
 				goto skip_putwch;
 			}
 
@@ -1216,7 +1221,7 @@ box_dim cui_text_box(const int& x, const int& y, const int& w, const int& h, con
 		skip_putwch:;
 	}
 
-	attrset(text_attrs);
+	attrset_ext(text_attrs, text_pair);
 
 	text_box_ret:
 	return { rw, rh };

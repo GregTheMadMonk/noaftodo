@@ -132,8 +132,8 @@ set "norm.cols"		"ifdtD"
 set "livi.cols"		"iftep"
 set "det.cols"		"dl"
 
-set "norm.status_fields" "piflms"
-set "livi.status_fields" "fms"
+set "norm.status_fields" "smlfip"
+set "livi.status_fields" "smf"
 
 set "sort_by" "dltD"
 
