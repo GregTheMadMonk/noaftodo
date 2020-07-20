@@ -23,8 +23,6 @@ string cui_listview_regex_filter;
 
 string cui_contexec_regex_filter;
 
-bool cui_status_standout;
-
 bool cui_shift_multivars = false;
 
 int cui_color_title;
@@ -344,7 +342,6 @@ void cui_construct() {
 	start_color();
 	use_default_colors();
 
-	log("Max color pairs: " + to_string(COLOR_PAIRS), LP_IMPORTANT);
 	// initialize color pairs
 	for (short f = -1; f < 16; f++)
 		for (short b = -1; b < 16; b++) {
@@ -702,7 +699,6 @@ void cui_command_paint() {
 	}
 
 	move(cui_h - 1, 0);
-	if (cui_status_standout) attron(A_STANDOUT);
 	attron(COLOR_PAIR(cui_color_status));
 	for (int x = 0; x < cui_w; x++) addch(' ');
 	move(cui_h - 1, 0);
@@ -882,7 +878,6 @@ string cui_prompt(const string& message) {
 		}
 
 		move(cui_h - 1, 0);
-		if (cui_status_standout) attron(A_STANDOUT);
 		attron(COLOR_PAIR(cui_color_status));
 		for (int x = 0; x < cui_w; x++) addch(' ');
 		move(cui_h - 1, 0);
@@ -1029,11 +1024,9 @@ void cui_draw_status(const string& fields) {
 		} catch (const out_of_range& e) {}
 	}
 
-	if (cui_status_standout) attron(A_STANDOUT);
 	attron(COLOR_PAIR(cui_color_status));
 	move(cui_h - 1, 0);
 	for (int x = 0; x < cui_w; x++) addch(' ');
-	move(cui_h - 1, cui_w - 1 - w_converter.from_bytes(cui_status_l).length());
 	cui_text_box(cui_w - 1 - w_converter.from_bytes(cui_status_l).length(), cui_h - 1, cui_w, 1, cui_status_l);
 	attrset(A_NORMAL);
 }
@@ -1086,7 +1079,14 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 	int t_x = x;
 	int t_y = y - line_offset;
 
-	auto putwch = [&t_x, &t_y, &w, &h, &x, &y, &line_offset] (const wchar_t& wch) {
+	bool c033 = false;
+
+	wstring buffer = L"";
+
+	int attrs = 0;
+	int pair = 0;
+
+	auto putwch = [&t_x, &t_y, &w, &h, &x, &y, &line_offset, &c033, &buffer, &attrs, &pair] (const wchar_t& wch) {
 		switch (wch) {
 			case L'\n':
 				t_x = x;
@@ -1099,7 +1099,26 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 					t_y++;
 				}
 				return;
+			case L'\033':
+				c033 = true;
+				return;
+			case L'[':
+				if (c033) return;
+			case L'm':
+				if (!c033) break;
+
+				c033 = false;
+
+				try {
+					pair = stoi(buffer);
+					attrset(attrs | COLOR_PAIR(pair));
+				} catch (const invalid_argument& e) { }
+
+				buffer = L"";
+				return;
 		}
+
+		if (c033) { buffer += wch; return; }
 
 		if (t_x >= x + w) {
 			t_x = x;
@@ -1124,10 +1143,9 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 	}
 
 	int text_attrs = A_NORMAL;
-	int pair = 0;
 	attr_get(&text_attrs, &pair, NULL);
+	attrs = text_attrs & ~COLOR_PAIR(pair);
 
-	int attrs = 0;
 	int i = 0;
 	bool skip_special = false;
 	for (; i < wstr.length(); i++) {
@@ -1141,7 +1159,7 @@ void cui_text_box(const int& x, const int& y, const int& w, const int& h, const 
 			if (wstr.substr(i, sw.second.length()) == sw.second) {
 				attrs ^= sw.first;
 				i += sw.second.length() - 1;
-				attrset(attrs | text_attrs);
+				attrset(attrs | COLOR_PAIR(pair));
 				goto skip_putwch;
 			}
 
