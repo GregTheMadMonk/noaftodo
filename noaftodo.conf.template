@@ -92,19 +92,25 @@ bind "9" "numpress 9" 17 true
 
 bind "g" "math \%numbuffer\% = -1;
 		if \%ret\% \"set numbuffer \\%first_v_id\\%;
-		echo g\" \"set id \\%numbuffer\\%;
-		set numbuffer -1\";
-		set ret" 1 true
+			echo g\"
+			\"set id \\%numbuffer\\%;
+			set numbuffer -1;
+			set ret\";
+		" 1 true
 bind "l" "math \%numbuffer\% = -1;
 		if \%ret\% \"set numbuffer -2;
-		echo l\" \"ll;
-		set numbuffer -1\";
-		set ret" 1 true
+			echo l\"
+			\"ll;
+			set numbuffer -1;
+			set ret\";
+		" 1 true
 bind "g" "math \%numbuffer\% = -1;
 		if \%ret\% \"set numbuffer \\%first_v_list\\%;
-			echo g\" \"set tag_filter \\%numbuffer\\%;
-			set numbuffer -1\";
-		set ret" 16 true
+				echo g\"
+				\"set tag_filter \\%numbuffer\\%;
+				set numbuffer -1;
+				set ret\";
+		" 16 true
 
 bind "s" "math \%numbuffer\% = -1; if \%ret\% \"set sort_by\"; sort 1 d; sort 2 l; sort 3 t; sort 4 D; echo \%sort_by\%" 1 true
 

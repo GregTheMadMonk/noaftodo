@@ -383,8 +383,8 @@ void cmd_init() {
 				string message = "";
 				for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
 
-				if (cui_active) cmd_retval = message;
-				else log((pure ? "" : "echo :: ") + message, LP_IMPORTANT);
+				cmd_retval = message;
+				if (!cui_active) log((pure ? "" : "echo :: ") + message, LP_IMPORTANT);
 				return 0;
 			}
 		}
