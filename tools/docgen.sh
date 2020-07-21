@@ -63,3 +63,5 @@ Apology for bad english and probably not very useful manpage.
 "$(sed 's/\t//g;s/-/\\-/g;1~2s/^/.HP\n.B\n/g;1~2s/$/\n.IP/g' doc/cols.lview.doc.gen)" \
 "$(sed 's/\t//g;s/-/\\-/g;1~2s/^/.HP\n.B\n/g;1~2s/$/\n.IP/g' doc/fields.status.doc.gen)" \
 "$(sed '1d;s/\t//g;2s/.*/\.SS CONFIG VERSION MISMATCH/g;4s/.*/\.SS LIST VERSION MISMATCH/g' doc/troubleshooting.doc)" > doc/noaftodo.man
+
+gzip -f doc/noaftodo.man

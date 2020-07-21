@@ -53,7 +53,12 @@ ifneq (,$(V_SUFFIX))
 	CXXFLAGS += -DV_SUFFIX="$(V_SUFFIX)"
 endif
 
+ifeq (,$(PKGNAME))
+	PKGNAME = noaftodo
+endif
+
 all: embeds obj_dir $(OBJ_FILES) 
+	@echo Building $(PKGNAME) binary $(BINARY)
 	@echo Source files: $(CPP_FILES)
 	@echo Header files: $(H_FILES)
 	@echo Object files: $(OBJ_FILES)
@@ -88,6 +93,10 @@ clean:
 
 install:
 	install -Dm755 $(BINARY) $(PKGROOT)/usr/bin/$(BINARY)
+	install -Dm644 LICENSE "$(PKGROOT)/ust/share/licenses/$(PKGNAME)/LICENSE"
+	install -Dm644 noaftodo.conf.template -t "$(PKGROOT)/etc/$(PKGNAME)"
+	install -Dm644 scripts/* -t "$(PKGROOT)/etc/$(PKGNAME)/scripts"
+	install -Dm644 doc/noaftodo.man.gz "$(PKGROOT)/usr/share/man/man1/noaftodo.1.gz"
 
 uninstall:
 	rm $(PKGROOT)/usr/bin/$(BINARY)
