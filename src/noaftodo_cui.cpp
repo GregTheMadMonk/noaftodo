@@ -1054,12 +1054,13 @@ int cui_draw_table(const int& x, const int& y,
 void cui_draw_status(const string& fields) {
 	string cui_status_l = "";
 
-	for (const char& c : fields) {
+	for (int i = fields.length() - 1; i >= 0; i--) {
+		const char& c = fields.at(i);
 		try {
 			const string field = (cui_status_fields.at(c))();
 			if (field != "") {
-				if (cui_status_l != "") cui_status_l += " " + cui_separators.s_get(CHAR_STA_SEP) + " ";
-		       		cui_status_l += field;
+				if (cui_status_l != "") cui_status_l = " " + cui_separators.s_get(CHAR_STA_SEP) + " " + cui_status_l;
+		       		cui_status_l = field + cui_status_l;
 			}
 		} catch (const out_of_range& e) {}
 	}
