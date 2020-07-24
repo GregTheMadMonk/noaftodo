@@ -2,9 +2,9 @@
 
 printf "Command mode commands:\n%s" "$(grep -i 'command \"' src/noaftodo_def.cpp | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > doc/cmd.doc.gen
 printf "Command-line arguments:\n%s" "$(grep -i 'argument \"' src/noaftodo.cpp | sort | sed 's/.*\/\/ argument \"/\t/g;s/\".*- /\n\t\t/g')" > doc/arg.doc.gen
-printf "%s" "$(grep -i 'LISTVIEW column \"' src/noaftodo_cui.cpp | sort | sed 's/.*\/\/ LISTVIEW column \"/\t/g;s/\".*- /\n\t\t/g')" > doc/cols.lview.doc.gen
-printf "%s" "$(grep -i 'NORMAL column \"' src/noaftodo_cui.cpp | sort | sed 's/.*\/\/ NORMAL column \"/\t/g;s/\".*- /\n\t\t/g')" > doc/cols.norm.doc.gen
-printf "%s" "$(grep -i 'status field \"' src/noaftodo_cui.cpp | sort | sed 's/.*\/\/ status field \"/\t/g;s/\".*- /\n\t\t/g')" > doc/fields.status.doc.gen
+printf "%s" "$(grep -i 'LISTVIEW column \"' src/noaftodo_def.cpp | sort | sed 's/.*\/\/ LISTVIEW column \"/\t/g;s/\".*- /\n\t\t/g')" > doc/cols.lview.doc.gen
+printf "%s" "$(grep -i 'NORMAL column \"' src/noaftodo_def.cpp | sort | sed 's/.*\/\/ NORMAL column \"/\t/g;s/\".*- /\n\t\t/g')" > doc/cols.norm.doc.gen
+printf "%s" "$(grep -i 'status field \"' src/noaftodo_def.cpp | sort | sed 's/.*\/\/ status field \"/\t/g;s/\".*- /\n\t\t/g')" > doc/fields.status.doc.gen
 
 printf "#include <string>
 std::string HELP = \"%s\";

@@ -9,6 +9,10 @@
 
 using namespace std;
 
+using cui::s_line;
+using cui::tag_filter;
+
+// CMD DEFINITIONS
 namespace cmd {
 	// initialize commands
 	map<string, function<int(const vector<string>& args)>> cmds = {
@@ -32,8 +36,8 @@ namespace cmd {
 
 				for (const auto& arg : args) cmdline += arg + " ";
 
-				const bool wcui = cui_active;
-				if (wcui) cui_destroy();
+				const bool wcui = cui::active;
+				if (wcui) cui::destroy();
 
 				char buffer[128];
 				string result = "";
@@ -53,7 +57,7 @@ namespace cmd {
 					return ERR_EXTERNAL;
 				}
 
-				if (wcui) cui_construct();
+				if (wcui) cui::construct();
 
 				pclose(pipe);
 
@@ -70,14 +74,14 @@ namespace cmd {
 				
 				for (const auto& arg : args) cmdline += arg + " ";
 
-				const bool wcui = cui_active;
+				const bool wcui = cui::active;
 
-				if (wcui) cui_destroy();
+				if (wcui) cui::destroy();
 
 				log("Executing shell command: '" + cmdline + "'...");
 				system(cmdline.c_str());
 
-				if (wcui) cui_construct();
+				if (wcui) cui::construct();
 
 				return 0;
 			}
@@ -110,8 +114,8 @@ namespace cmd {
 		{ "d", [] (const vector<string>& args) {
 				if (t_list.size() == 0) return ERR_EXTERNAL;
 
-				li_rem(cui_s_line);
-				if (t_list.size() != 0) if (cui_s_line >= t_list.size()) exec("math %id% - 1 id");
+				li_rem(s_line);
+				if (t_list.size() != 0) if (s_line >= t_list.size()) exec("math %id% - 1 id");
 
 				return 0;
 			}
@@ -133,7 +137,7 @@ namespace cmd {
 					new_entry.title = args.at(1);
 					new_entry.description = args.at(2);
 
-					new_entry.tag = (cui_tag_filter == CUI_TAG_ALL) ? 0 : cui_tag_filter;
+					new_entry.tag = (tag_filter == cui::TAG_ALL) ? 0 : tag_filter;
 					
 					if (args.size() < 4) li_add(new_entry);
 					else {
@@ -151,7 +155,7 @@ namespace cmd {
 
 					// go to created task
 					for (int i = 0; i < t_list.size(); i++)
-						if (t_list.at(i) == new_entry) cui_s_line = i;
+						if (t_list.at(i) == new_entry) s_line = i;
 
 					return 0;
 				} catch (const invalid_argument& e) {
@@ -162,20 +166,20 @@ namespace cmd {
 
 		// command "setmeta[ <name1> <value1>[ <name2> <value2>[ ...]]]" - set task meta. If no arguments are specified, clear task meta. To add properties to meta, use "setmeta %meta% <name1> <value1>...". "setmeta <name>" will erase only <name> meta property
 		{ "setmeta", [] (const vector<string>& args) {
-				if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return ERR_EXTERNAL;
+				if ((s_line < 0) || (s_line >= t_list.size())) return ERR_EXTERNAL;
 
 				if (args.size() == 1) {
 					if (args.at(0) == "eid") return ERR_EXTERNAL;
-					t_list[cui_s_line].meta.erase(args.at(0));
+					t_list[s_line].meta.erase(args.at(0));
 					return 0;
 				}
 
-				const string eid = t_list[cui_s_line].get_meta("eid");
-				t_list[cui_s_line].meta.clear();
-				t_list[cui_s_line].meta["eid"] = eid;
+				const string eid = t_list[s_line].get_meta("eid");
+				t_list[s_line].meta.clear();
+				t_list[s_line].meta["eid"] = eid;
 
 				for (int i = 0; i + 1 < args.size(); i += 2)
-					t_list[cui_s_line].meta[args.at(i)] = args.at(i + 1);
+					t_list[s_line].meta[args.at(i)] = args.at(i + 1);
 
 				if (li_autosave) li_save();
 
@@ -185,17 +189,17 @@ namespace cmd {
 
 		// command "lclear" - clear list.
 		{ "lclear", [] (const vector<string>& args) {
-				if (cui_tag_filter == CUI_TAG_ALL) return ERR_EXTERNAL;
+				if (tag_filter == cui::TAG_ALL) return ERR_EXTERNAL;
 
 				for (int i = 0; i < t_list.size(); )
-					if (t_list.at(i).tag == cui_tag_filter) li_rem(i);
+					if (t_list.at(i).tag == tag_filter) li_rem(i);
 					else i++;
 
 				return 0;
 			}
 		},
 
-		// command "bind <key> <command> <mode> <autoexec>" - bind <key> to <command>. <mode> speciifes, which modes use this bind (mask, see noaftodo_cui.h for CUI_MODE_* values). If <autoexec> is "true", execute command on key hit, otherwise just go into command mode with it. Running as just "bind <key>" removes a bind.
+		// command "bind <key> <command> <mode> <autoexec>" - bind <key> to <command>. <mode> speciifes, which modes use this bind (mask, see noaftodo_cui.h for MODE_* values). If <autoexec> is "true", execute command on key hit, otherwise just go into command mode with it. Running as just "bind <key>" removes a bind.
 		{ "bind", [] (const vector<string>& args) {
 				if (args.size() < 1) return ERR_ARG_COUNT;
 
@@ -207,7 +211,7 @@ namespace cmd {
 
 					log("Binding " + skey + " to \"" + scomm + "\"");
 
-					cui_bind(cui_key_from_str(skey), scomm, smode, sauto);
+					cui::bind(cui::key_from_str(skey), scomm, smode, sauto);
 
 					return 0;
 				} catch (const invalid_argument& e) {
@@ -220,9 +224,9 @@ namespace cmd {
 
 				bool removed = false;
 
-				for (int i = 0; i < binds.size(); i++)
-					if (cui_key_from_str(args.at(0)) == binds.at(i).key) {
-						binds.erase(binds.begin() + i);
+				for (int i = 0; i < cui::binds.size(); i++)
+					if (cui::key_from_str(args.at(0)) == cui::binds.at(i).key) {
+						cui::binds.erase(cui::binds.begin() + i);
 						i--;
 						removed = true;
 					}
@@ -360,7 +364,7 @@ namespace cmd {
 				for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
 
 				retval = message;
-				if (!cui_active) log((pure ? "" : "echo :: ") + message, LP_IMPORTANT);
+				if (!cui::active) log((pure ? "" : "echo :: ") + message, LP_IMPORTANT);
 				return 0;
 			}
 		}
@@ -369,4 +373,317 @@ namespace cmd {
 	map<string, string> aliases = {
 	/*	{ alias_name, alias_command },	*/
 	};
+}
+
+// CUI DEFINITIONS
+namespace cui {
+
+using namespace vargs::cols;
+
+map<char, col_s> columns = {
+	/*	{ symbol, { title, width_func, content_func } }	*/
+		// NORMAL column "t" - shows task title
+		{ 't',	{
+				"Title",
+				[](const int& w, const int& free, const int& cols) {
+					return free / 4;
+				},
+				[](const varg& args) {
+					return get<normal>(args).e.title;
+				}
+			}
+		},
+		// NORMAL column "f" - shows task flags
+		{ 'f',	{
+				"Flags",
+				[](const int& w, const int& free, const int& cols) {
+					return 5;
+				},
+				[](const varg& args) {
+					string ret = "";
+					const auto& e = get<normal>(args).e;
+					if (e.completed) ret += "V";	// a completed entry
+					if (e.is_failed()) ret += "F";	// a failed entry
+					if (e.is_coming()) ret += "C";	// an upcoming entry
+					if (e.get_meta("nodue") == "true") ret += "N";	// a "nodue" entry
+					return ret;
+				}
+			}
+		},
+		// NORMAL column "l" - shows what list the task is attached to
+		{ 'l',	{
+				"List",
+				[](const int& w, const int& free, const int& cols) {
+					return free / 10;
+				},
+				[](const varg& args) {
+					const auto& e = get<normal>(args).e;
+					if (e.tag < t_tags.size())
+					       if (t_tags.at(e.tag) != to_string(e.tag))
+						       return to_string(e.tag) + ": " + t_tags.at(e.tag);
+
+					return to_string(e.tag);
+				}
+			}
+		},
+		// NORMAL column "d" - shows task due
+		{ 'd',	{
+				"Due",
+				[](const int& w, const int& free, const int& cols) {
+					return 16;
+				},
+				[](const varg& args) {
+					const auto& e = get<normal>(args).e;
+					if (e.get_meta("nodue") == "true") return string("----------------");
+					else return ti_f_str(e.due);
+				}
+			}
+		},
+		// NORMAL column "D" - shows task description
+		{ 'D',	{
+				"Description",
+				[](const int& w, const int& free, const int& cols) {
+					return free;
+				},
+				[](const varg& args) {
+					return get<normal>(args).e.description;
+				}
+			}
+		},
+		// NORMAL column "i" - shows task ID (as referred by UI, don't confuse with task unique ID)
+		{ 'i',	{
+				"ID",
+				[](const int& w, const int& free, const int& cols) {
+					return 3;
+				},
+				[](const varg& args) {
+					return to_string(get<normal>(args).id);
+				}
+			}
+		}
+	};
+
+map<char, col_s> lview_columns = {
+		// LISTVIEW column "i" - shows list number (aka ID)
+		{ 'i',	{
+				"ID",
+				[](const int& w, const int& free, const int& cols) {
+					return 3;
+				},
+				[](const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					if (list_id == -1) return string(" ");
+					return to_string(list_id);
+				}
+			}
+		},
+		// LISTVIEW column "f" - shows list flags
+		{ 'f',	{
+				"Flags",
+				[] (const int& w, const int& free, const int& cols) {
+					return 5;
+				},
+				[] (const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					return string(li_tag_completed(list_id) ? "V" : "") +
+						string(li_tag_coming(list_id) ? "C" : "") +
+						string(li_tag_failed(list_id) ? "F" : "");
+				}
+			}
+		},
+		// LISTVIEW column "t" - shows list title
+		{ 't',	{
+				"Title",
+				[](const int& w, const int& free, const int& cols) {
+					return free / 4;
+				},
+				[](const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					if (list_id == TAG_ALL) return string("All lists");
+					return t_tags.at(list_id);
+				}
+			}
+		},
+		// LISTVIEW column "e" - shows the amount of entries attached to the list
+		{ 'e',	{
+				"Entries",
+				[](const int& w, const int& free, const int& cols) {
+					return 7;
+				},
+				[](const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					if (list_id == TAG_ALL) return to_string(t_list.size());
+
+					int ret = 0;
+					for (auto e : t_list) if (e.tag == list_id) ret++;
+
+					return to_string(ret);
+				}
+			}
+		},
+		// LISTVIEW column "p" - shows the precentge of completed entries on the list
+		{ 'p',	{
+				"%",
+				[](const int& w, const int& free, const int& cols) {
+					return 4;
+				},
+				[](const varg& args) {
+					const auto& list_id = get<lview>(args).l_id;
+					int ret = 0;
+					int tot = 0;
+
+					for (auto e : t_list)
+						if ((e.tag == list_id) || (TAG_ALL == list_id)) {
+							if (e.completed) ret++;
+							tot++;
+						}
+
+					if (tot == 0) return string("0%");
+					return to_string(100 * ret / tot) + "%";
+				}
+			}
+		}
+	};
+map<char, function<string()>> status_fields = {
+		// status field "s" - shows status value (output of commands)
+		{ 's',	[] () {
+				return status;
+			}
+		},
+		// status field "l" - shows current list name
+		{ 'l',	[] () {
+				if (tag_filter == TAG_ALL) return string("All lists");
+
+				return "List " + to_string(tag_filter) + (((tag_filter < t_tags.size()) && (t_tags.at(tag_filter) != to_string(tag_filter))) ? (": " + t_tags.at(tag_filter)) : "");
+			}
+		},
+		// status field "m" - shows current mode (NORMAL|LISTVIEW|DETAILS|HELP)
+		{ 'm',	[] () {
+				switch (mode) {
+					case MODE_NORMAL:
+						return string("NORMAL");
+						break;
+					case MODE_LISTVIEW:
+						return string("LISTVIEW");
+						break;
+					case MODE_DETAILS:
+						return string("DETAILS");
+						break;
+					case MODE_HELP:
+						return string("HELP");
+						break;
+					default:
+						return string("");
+				}
+			}
+		},
+		// status field "f" - shows filters
+		{ 'f',	[] () {
+				return string((filter & FILTER_UNCAT) ? "U" : "_") +
+					string((filter & FILTER_COMPLETE) ? "V" : "_") +
+					string((filter & FILTER_COMING) ? "C" : "_") +
+					string((filter & FILTER_FAILED) ? "F" : "_") +
+					string((filter & FILTER_NODUE) ? "N" : "_") +
+					string((filter & FILTER_EMPTY) ? "0" : "_") +
+					((normal_regex_filter == "") ? "" : (" [e " + normal_regex_filter + "]")) +
+					((listview_regex_filter == "") ? "" : (" [l " + listview_regex_filter + "]"));
+			}
+		},
+		// status field "i" - shows selected task ID and a total amount of entries
+		{ 'i',	[] () {
+				bool has_visible = false;
+
+				for (int i = 0; i < t_list.size(); i++) has_visible |= is_visible(i);
+
+				if (!has_visible) return string("");
+
+				return to_string(s_line) + "/" + to_string(t_list.size() - 1);
+			}
+		},
+		// status field "p" - shows the percentage of completed entries on a current list
+		{ 'p',	[] () {
+				int total = 0;
+				int comp = 0;
+
+				for (int i = 0; i < t_list.size(); i++)
+					if ((tag_filter == TAG_ALL) || (tag_filter == t_list.at(i).tag)) {
+						total++;
+						if (t_list.at(i).completed) comp++;
+					}
+
+				if (total == 0) return string("");
+
+				return to_string((int)(100.0 * comp / total)) + "%";
+			}
+		},
+		// status field "P" - shows the amount of completed entries on the list against the total amount of attached entries
+		{ 'P', [] () {
+				int total = 0;
+				int comp = 0;
+
+				for (int i = 0; i < t_list.size(); i++)
+					if ((tag_filter == TAG_ALL) || (tag_filter == t_list.at(i).tag)) {
+						total++;
+						if (t_list.at(i).completed) comp++;
+					}
+
+				if (total == 0) return string("");
+
+				return to_string(comp) + "/" + to_string(total) + " COMP";
+			}
+		}
+	};
+
+int halfdelay_time = 2;
+
+int filter;
+int tag_filter;
+string normal_regex_filter;
+string listview_regex_filter;
+
+string contexec_regex_filter;
+
+bool shift_multivars = false;
+
+int color_title;
+int color_status;
+int color_complete;
+int color_coming;
+int color_failed;
+
+int row_separator_offset = 0;
+multistr_c separators("|||");	// row, status, details separators
+multistr_c box_strong("|-++++");	// vertical and horisontal line;
+					// 1st, 2nd, 3rd, 4th corner;
+					// more later
+multistr_c box_light("|-++++");
+
+string normal_all_cols;
+string normal_cols;
+string details_cols;
+string listview_cols;
+
+string normal_status_fields;
+string listview_status_fields;
+
+int mode;
+stack<int> prev_modes;
+
+vector<bind_s> binds;
+
+int w, h;
+
+string status = "Welcome to " + string(TITLE) + "!";
+
+int s_line;
+int delta;
+int numbuffer = -1;
+
+vector<wstring> command_history;
+wstring command;
+wstring command_t;
+int command_cursor = 0;
+int command_index = 0;
+
+bool active = false;
 }

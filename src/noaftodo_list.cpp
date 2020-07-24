@@ -462,21 +462,21 @@ int li_find(const string& eid) {
 
 bool li_tag_completed(const int& tagID) {
 	for (const auto& e : t_list)
-		if (((tagID == CUI_TAG_ALL) || (e.tag == tagID)) && (!e.completed)) return false;
+		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (!e.completed)) return false;
 
 	return true;
 }
 
 bool li_tag_coming(const int& tagID) {
 	for (const auto& e : t_list)
-		if (((tagID == CUI_TAG_ALL) || (e.tag == tagID)) && (e.is_coming())) return true;
+		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (e.is_coming())) return true;
 
 	return false;
 }
 
 bool li_tag_failed(const int& tagID) {
 	for (const auto& e : t_list)
-		if (((tagID == CUI_TAG_ALL) || (e.tag == tagID)) && (e.is_failed())) return true;
+		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (e.is_failed())) return true;
 
 	return false;
 }

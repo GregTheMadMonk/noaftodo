@@ -21,6 +21,7 @@
 using namespace std;
 
 using cmd::exec;
+using cui::s_line;
 
 bool da_fork_autostart = true;
 
@@ -175,7 +176,7 @@ void da_upd_cache(const bool& is_first_load) {
 	const auto t_list_copy = t_list;
 
 	for (int i = 0; i < t_list_copy.size(); i++) {
-		cui_s_line = i;
+		s_line = i;
 		int cached_id = -1;
 
 		for (int j = 0; j < da_cache.size(); j++)
@@ -246,7 +247,7 @@ void da_upd_cache(const bool& is_first_load) {
 		// we don't care yet lol
 	}
 
-	cui_s_line = -1;
+	s_line = -1;
 
 	// clear cache from deleted tasks
 	for (int i = 0; i < da_cache.size();) {
@@ -271,22 +272,22 @@ void da_check_dues(const bool& renotify) {
 	const auto t_list_copy = t_list;
 	// da_check_dues supposes that the cache is up to date with the list
 	// and da_cache and t_list contain the same entries
-	for (cui_s_line = 0; cui_s_line < t_list.size(); cui_s_line++)	 {
-		if ((t_list.at(cui_s_line).is_failed()) && (renotify || (t_list.at(cui_s_line).due > da_cached_time))) {
-			if (t_list.at(cui_s_line).get_meta("ignore_global_on_failed") != "true")
-				exec(format_str(da_task_failed_action, &t_list.at(cui_s_line), renotify));
+	for (s_line = 0; s_line < t_list.size(); s_line++)	 {
+		if ((t_list.at(s_line).is_failed()) && (renotify || (t_list.at(s_line).due > da_cached_time))) {
+			if (t_list.at(s_line).get_meta("ignore_global_on_failed") != "true")
+				exec(format_str(da_task_failed_action, &t_list.at(s_line), renotify));
 			if (!renotify)
-				exec(format_str(t_list.at(cui_s_line).get_meta("on_failed"), &t_list.at(cui_s_line)));
+				exec(format_str(t_list.at(s_line).get_meta("on_failed"), &t_list.at(s_line)));
 		}
-		else if ((t_list.at(cui_s_line).is_coming()) && (renotify || (t_list.at(cui_s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a" + t_list.at(cui_s_line).get_meta("warn_time", "1d"))))) {
-			if (t_list.at(cui_s_line).get_meta("ignore_global_on_coming") != "true")
-				exec(format_str(da_task_coming_action, &t_list.at(cui_s_line), renotify));
+		else if ((t_list.at(s_line).is_coming()) && (renotify || (t_list.at(s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a" + t_list.at(s_line).get_meta("warn_time", "1d"))))) {
+			if (t_list.at(s_line).get_meta("ignore_global_on_coming") != "true")
+				exec(format_str(da_task_coming_action, &t_list.at(s_line), renotify));
 			if (!renotify)
-				exec(format_str(t_list.at(cui_s_line).get_meta("on_coming"), &t_list.at(cui_s_line)));
+				exec(format_str(t_list.at(s_line).get_meta("on_coming"), &t_list.at(s_line)));
 		}
 	}
 
-	cui_s_line = -1;
+	s_line = -1;
 
 	if (t_list != t_list_copy)  {
 		li_save();

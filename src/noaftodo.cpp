@@ -159,13 +159,13 @@ int main(int argc, char* argv[]) {
 					da_clients = 1; // care about clients, shut down when there's none
 					break;
 				default:
-					cui_run();
+					cui::run();
 					break;
 			}
 		else
 		{
 			da_send("S");
-			cui_run();
+			cui::run();
 		}
 	}
 
@@ -189,10 +189,10 @@ void log(const string& message, const char& prefix, const int& sleep_sec)
 {	
 	if (!enable_log) return;
 
-	const bool wcui = cui_active;
+	const bool wcui = cui::active;
 
 	if ((prefix != LP_DEFAULT) || verbose) {
-		if (wcui) cui_destroy();
+		if (wcui) cui::destroy();
 
 		if (!pure) {
 			cout << "[" << ti_log_time() << "][" << prefix << "] ";
@@ -203,7 +203,7 @@ void log(const string& message, const char& prefix, const int& sleep_sec)
 
 		if (sleep_sec != 0) sleep(sleep_sec);
 
-		if (wcui) cui_construct();
+		if (wcui) cui::construct();
 	}
 }
 
@@ -213,7 +213,7 @@ void noaftodo_exit(const int& val) {
 	// if UI or daemon were not started yet, just exit
 	// otherwise, notify components: they have to finish
 	// their job first
-	if (cui_active) { cui_mode = CUI_MODE_EXIT; exit_value = val; }
+	if (cui::active) { cui::mode = cui::MODE_EXIT; exit_value = val; }
 	else if ((run_mode == PM_DAEMON) && da_running) { da_running = false; exit_value = val; }
 	else exit(val);
 }
@@ -224,7 +224,7 @@ string format_str(string str, noaftodo_entry* const li_entry, const bool& renoti
 	int index = -1;
 
 	// fire all prompts
-	while ((index = str.find("%prompt%")) 	!= string::npos) str.replace(index, 8, cui_active ? cui_prompt() : [] () {
+	while ((index = str.find("%prompt%")) 	!= string::npos) str.replace(index, 8, cui::active ? cui::prompt() : [] () {
 		string input;
 		if (!pure) cout << "prompt :: ";
 		getline(cin, input);
