@@ -1,6 +1,6 @@
 #!/bin/sh
 
-printf "Command mode commands:\n%s" "$(grep -i 'command \"' src/noaftodo_cmd.cpp | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > doc/cmd.doc.gen
+printf "Command mode commands:\n%s" "$(grep -i 'command \"' src/noaftodo_def.cpp | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > doc/cmd.doc.gen
 printf "Command-line arguments:\n%s" "$(grep -i 'argument \"' src/noaftodo.cpp | sort | sed 's/.*\/\/ argument \"/\t/g;s/\".*- /\n\t\t/g')" > doc/arg.doc.gen
 printf "%s" "$(grep -i 'LISTVIEW column \"' src/noaftodo_cui.cpp | sort | sed 's/.*\/\/ LISTVIEW column \"/\t/g;s/\".*- /\n\t\t/g')" > doc/cols.lview.doc.gen
 printf "%s" "$(grep -i 'NORMAL column \"' src/noaftodo_cui.cpp | sort | sed 's/.*\/\/ NORMAL column \"/\t/g;s/\".*- /\n\t\t/g')" > doc/cols.norm.doc.gen
@@ -64,4 +64,4 @@ Apology for bad english and probably not very useful manpage.
 "$(sed 's/\t//g;s/-/\\-/g;1~2s/^/.HP\n.B\n/g;1~2s/$/\n.IP/g' doc/fields.status.doc.gen)" \
 "$(sed '1d;s/\t//g;2s/.*/\.SS CONFIG VERSION MISMATCH/g;4s/.*/\.SS LIST VERSION MISMATCH/g' doc/troubleshooting.doc)" > doc/noaftodo.man
 
-gzip -f doc/noaftodo.man
+gzip -c doc/noaftodo.man > doc/noaftodo.man.gz

@@ -23,372 +23,15 @@
 
 using namespace std;
 
-map<string, function<int(const vector<string>& args)>> cmd_cmds;
-map<string, string> cmd_aliases;
+namespace cmd {
 
-string cmd_retval = "";
-string cmd_buffer;
+string retval = "";
+string buffer;
 
-noaftodo_entry* cmd_sel_entry = nullptr;
+noaftodo_entry* sel_entry = nullptr;
 
-void cmd_init() {
-	cmd_buffer = "";
-	cmd_aliases.clear();
-	cmd_cmds.clear();
-
-	cmd_cmds = {
-		// command "q" - exit the program.
-		{ "q", [] (const vector<string>& args) {
-				try {
-					noaftodo_exit(stoi(args.at(0)));
-					return 0;
-				} catch (const invalid_argument& e) {
-				} catch (const out_of_range& e) { }
-
-				noaftodo_exit();
-				return 0;
-			}
-		},
-
-		// command "!<command>" - execute shell command
-		{ "!", [] (const vector<string>& args) {
-				string cmdline = "";
-
-				for (const auto& arg : args) cmdline += arg + " ";
-
-				const bool wcui = cui_active;
-				if (wcui) cui_destroy();
-
-				char buffer[128];
-				string result = "";
-				FILE* pipe = popen(cmdline.c_str(), "r");
-				if (!pipe) {
-					log("popen() failed", LP_ERROR);
-					return CMD_ERR_EXTERNAL;
-				}
-
-				try {
-					while (fgets(buffer, sizeof buffer, pipe) != NULL) {
-						cout << buffer;
-						result += buffer;
-					}
-				} catch (...) {
-					pclose(pipe);
-					return CMD_ERR_EXTERNAL;
-				}
-
-				if (wcui) cui_construct();
-
-				pclose(pipe);
-
-				result.erase(remove(result.begin(), result.end(), '\n'), result.end());
-				cmd_retval = result;
-
-				return 0;
-			}
-		},
-
-		// command "!!<command>" - execute shell command, don't track output (for lauching programs that have a TUI or something
-		{ "!!", [] (const vector<string>& args) {
-				string cmdline = "";
-				
-				for (const auto& arg : args) cmdline += arg + " ";
-
-				const bool wcui = cui_active;
-
-				if (wcui) cui_destroy();
-
-				log("Executing shell command: '" + cmdline + "'...");
-				system(cmdline.c_str());
-
-				if (wcui) cui_construct();
-
-				return 0;
-			}
-		},
-
-		// command "alias <command>" - create an alias for command.
-		{ "alias", [] (const vector<string>& args) {
-				if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-				if (args.size() == 1) {
-					cmd_aliases.erase(args.at(0));
-					return 0;
-				}
-
-				string alargs;
-				for (int i = 1; i < args.size(); i++)  {
-					if (alargs != "") alargs += " ";
-					alargs += args.at(i);
-				}
-
-				log("Alias " + args.at(0) + " => " + alargs);
-
-				cmd_aliases[args.at(0)] = alargs;
-
-				return 0;
-			}
-		},
-
-		// command "d" - remove selected task.
-		{ "d", [] (const vector<string>& args) {
-				if (t_list.size() == 0) return CMD_ERR_EXTERNAL;
-
-				li_rem(cui_s_line);
-				if (t_list.size() != 0) if (cui_s_line >= t_list.size()) cmd_exec("math %id% - 1 id");
-
-				return 0;
-			}
-		},
-
-		// command "a <due> <title> <description>[ <id>]" - add or override a task. If <id> is not specified, a new task is created. If not, a task with <id> will be overriden.
-		{ "a", [] (const vector<string>& args) {
-				if (args.size() < 3) return CMD_ERR_ARG_COUNT;
-
-				try {
-					noaftodo_entry new_entry;
-					new_entry.completed = false;
-
-					if (args.at(0) == "-") {
-						new_entry.due = ti_to_long("a10000y");
-						new_entry.meta["nodue"] = "true";
-					}
-					else new_entry.due = ti_to_long(args.at(0));
-					new_entry.title = args.at(1);
-					new_entry.description = args.at(2);
-
-					new_entry.tag = (cui_tag_filter == CUI_TAG_ALL) ? 0 : cui_tag_filter;
-					
-					if (args.size() < 4) li_add(new_entry);
-					else {
-						const int id = stoi(args.at(3));
-
-						if ((id >= 0) && (id < t_list.size()))  {
-							new_entry.meta = t_list.at(id).meta;
-							new_entry.tag = t_list.at(id).tag;
-							t_list[id] = new_entry;
-
-							if (li_autosave) li_save();
-						}
-						else return CMD_ERR_EXTERNAL;
-					}
-
-					// go to created task
-					for (int i = 0; i < t_list.size(); i++)
-						if (t_list.at(i) == new_entry) cui_s_line = i;
-
-					return 0;
-				} catch (const invalid_argument& e) {
-					return CMD_ERR_ARG_TYPE;
-				}
-			}
-		},
-
-		// command "setmeta[ <name1> <value1>[ <name2> <value2>[ ...]]]" - set task meta. If no arguments are specified, clear task meta. To add properties to meta, use "setmeta %meta% <name1> <value1>...". "setmeta <name>" will erase only <name> meta property
-		{ "setmeta", [] (const vector<string>& args) {
-				if ((cui_s_line < 0) || (cui_s_line >= t_list.size())) return CMD_ERR_EXTERNAL;
-
-				if (args.size() == 1) {
-					if (args.at(0) == "eid") return CMD_ERR_EXTERNAL;
-					t_list[cui_s_line].meta.erase(args.at(0));
-					return 0;
-				}
-
-				const string eid = t_list[cui_s_line].get_meta("eid");
-				t_list[cui_s_line].meta.clear();
-				t_list[cui_s_line].meta["eid"] = eid;
-
-				for (int i = 0; i + 1 < args.size(); i += 2)
-					t_list[cui_s_line].meta[args.at(i)] = args.at(i + 1);
-
-				if (li_autosave) li_save();
-
-				return 0;
-			}
-		},
-
-		// command "lclear" - clear list.
-		{ "lclear", [] (const vector<string>& args) {
-				if (cui_tag_filter == CUI_TAG_ALL) return CMD_ERR_EXTERNAL;
-
-				for (int i = 0; i < t_list.size(); )
-					if (t_list.at(i).tag == cui_tag_filter) li_rem(i);
-					else i++;
-
-				return 0;
-			}
-		},
-
-		// command "bind <key> <command> <mode> <autoexec>" - bind <key> to <command>. <mode> speciifes, which modes use this bind (mask, see noaftodo_cui.h for CUI_MODE_* values). If <autoexec> is "true", execute command on key hit, otherwise just go into command mode with it. Running as just "bind <key>" removes a bind.
-		{ "bind", [] (const vector<string>& args) {
-				if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-				if (args.size() >= 4) try {
-					const string skey = args.at(0);
-					const string scomm = args.at(1);
-					const int smode = stoi(args.at(2));
-					const bool sauto = (args.at(3) == "true");
-
-					log("Binding " + skey + " to \"" + scomm + "\"");
-
-					cui_bind(cui_key_from_str(skey), scomm, smode, sauto);
-
-					return 0;
-				} catch (const invalid_argument& e) {
-					return CMD_ERR_ARG_TYPE;
-				}
-
-				if (args.size() > 1) return CMD_ERR_ARG_COUNT;
-
-				log("Unbinding " + args.at(0));
-
-				bool removed = false;
-
-				for (int i = 0; i < binds.size(); i++)
-					if (cui_key_from_str(args.at(0)) == binds.at(i).key) {
-						binds.erase(binds.begin() + i);
-						i--;
-						removed = true;
-					}
-
-				return removed ? 0 : CMD_ERR_EXTERNAL;
-			}
-		},
-
-		// command "math <num1> <op> <num2>[ <name>]" - calculate math expression (+,-,/,*,=,<,>,min,max) and write to cvar <name>. If <name> is not specifed, just print the result out
-		{ "math", [] (const vector<string>& args) {
-				if (args.size() < 3) return CMD_ERR_ARG_COUNT;
-
-				try {
-					const double a = stod(args.at(0));
-					const double b = stod(args.at(2));
-
-					double result = 0;
-
-					switch (args.at(1).at(0)) {
-						case '+':
-							result = a + b;
-							break;
-						case '-':
-							result = a - b;
-							break;
-						case '*':
-							result = a * b;
-							break;
-						case '/':
-							if (b == 0) return CMD_ERR_ARG_TYPE;
-							result = a / b;
-							break;
-						case 'm':
-							if (args.at(1) == "max") result = (a >= b) ? a : b;
-							else if (args.at(1) == "min") result = (a < b) ? a : b;
-							break;
-						case '=':
-							if (args.size() < 4) cmd_retval = (a == b) ? "true" : "false";
-							else cvar(args.at(3)).setter((a == b) ? "true" : "false");
-							return 0;
-						case '<':
-							if (args.size() < 4) cmd_retval = (a < b) ? "true" : "false";
-							else cvar(args.at(3)).setter((a < b) ? "true" : "false");
-							return 0;
-						case '>':
-							if (args.size() > 4) cmd_retval = (a > b) ? "true" : "false";
-							else cvar(args.at(3)).setter((a > b) ? "true" : "false");
-							return 0;
-					}
-
-					if (args.size() < 4) cmd_retval = to_string(result);
-					else cvar(args.at(3)).setter(to_string(result));
-				} catch (const invalid_argument& e) { return CMD_ERR_ARG_TYPE; }
-
-				return 0;
-			}
-		},
-
-		// command "if <true|false> <do-if-true>[ <do-if-false>]" - simple if expression
-		{ "if", [] (const vector<string>& args) {
-				if (args.size() < 2) return CMD_ERR_ARG_COUNT;
-				
-				if (args.at(0) == "true") cmd_exec(args.at(1));
-				else if (args.size() > 2) cmd_exec(args.at(2));
-
-				return 0;
-			}
-		},
-
-		// command "set <name>[ <value>]" - set cvar value. If <value> is not specified, reset cvar to default value.
-		{ "set", [] (const vector<string>& args) {
-				if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-				if (args.size() < 2) {
-					cvar_reset(args.at(0));
-
-					return 0;
-				}
-
-				cvar(args.at(0)) = args.at(1);
-				return 0;
-			}
-		},
-
-		// command "exec <filename>[ script]" - execute a config file. Execute default config with "exec default". With "script" cvars from config are not set as default
-		{ "exec", [] (const vector<string>& args) {
-				if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-				bool predef_cvars = true;
-
-				for (int i = 1; i < args.size(); i++) {
-					if (args.at(i) == "script") predef_cvars = false;
-				}
-
-				conf_load(args.at(0), predef_cvars);
-
-				return 0;
-			}
-		},
-
-		// command "ver <VERSION>" - is used to specify config version to notify about possible outdated config files.
-		{ "ver", [] (const vector<string>& args) {
-				if (args.size() < 1) return CMD_ERR_ARG_COUNT;
-
-				if (args.at(0) != to_string(CONF_V)) {
-					log("Config version mismatch (CONF_V " + args.at(0) + " != " + to_string(CONF_V) + "). "
-						"Consult \"TROUBLESHOOTING\" manpage section (\"noaftodo -h\").", LP_ERROR);
-					errors |= ERR_CONF_V;
-					li_autosave = false;
-				}
-
-				return 0;
-			}
-		},
-
-		// command "save[ <filename>]" - force the list save. If <filename> is not specified, override opened file.
-		{ "save", [] (const vector<string>& args) {
-				if (args.size() < 1) return li_save();
-				else return li_save(args.at(0));
-				return 0;
-			}
-		},
-
-		// command "load <filename>" - load the list file
-		{ "load", [] (const vector<string>& args) {
-				if (args.size() < 1) li_load(true);
-				else li_load(args.at(0), true);
-				return 0;
-			}
-		},
-
-		// command "echo[ args...]" - print the following in status.
-		{ "echo", [] (const vector<string>& args) {
-				string message = "";
-				for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
-
-				cmd_retval = message;
-				if (!cui_active) log((pure ? "" : "echo :: ") + message, LP_IMPORTANT);
-				return 0;
-			}
-		}
-	};
+void init() {
+	buffer = "";
 
 	// "fake" cvars
 	// CORE CVARS
@@ -402,7 +45,7 @@ void cmd_init() {
 		try {
 			cui_set_mode(stoi(val));
 			return 0;
-		} catch (const invalid_argument& e) { return CMD_ERR_ARG_TYPE; }
+		} catch (const invalid_argument& e) { return ERR_ARG_TYPE; }
 	};
 	cvars["mode"]->predefine("-1");
 
@@ -435,56 +78,56 @@ void cmd_init() {
 
 	cvars["title"] = make_unique<cvar_base_s>();
 	cvars["title"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string("");
-		return cmd_sel_entry->title;
+		if (sel_entry == nullptr)  return string("");
+		return sel_entry->title;
 	};
 	cvars["title"]->setter = [] (const string& val) {
-		if (cmd_sel_entry == nullptr) return;
-		cmd_sel_entry->title = val;
+		if (sel_entry == nullptr) return;
+		sel_entry->title = val;
 		if (li_autosave) li_save();
 	};
 	cvars["title"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["desc"] = make_unique<cvar_base_s>();
 	cvars["desc"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string("");
-		return cmd_sel_entry->description;
+		if (sel_entry == nullptr)  return string("");
+		return sel_entry->description;
 	};
 	cvars["desc"]->setter = [] (const string& val) {
-		if (cmd_sel_entry == nullptr) return;
-		cmd_sel_entry->description = val;
+		if (sel_entry == nullptr) return;
+		sel_entry->description = val;
 		if (li_autosave) li_save();
 	};
 	cvars["desc"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["due"] = make_unique<cvar_base_s>();
 	cvars["due"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string("");
-		return ti_cmd_str(cmd_sel_entry->due);
+		if (sel_entry == nullptr)  return string("");
+		return ti_cmd_str(sel_entry->due);
 	};
 	cvars["due"]->setter = [] (const string& val) {
-		if (cmd_sel_entry == nullptr) return;
-		cmd_sel_entry->due = ti_to_long(val);
+		if (sel_entry == nullptr) return;
+		sel_entry->due = ti_to_long(val);
 		if (li_autosave) li_save();
 	};
 	cvars["due"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["meta"] = make_unique<cvar_base_s>();
 	cvars["meta"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string("");
-		return cmd_sel_entry->meta_str();
+		if (sel_entry == nullptr)  return string("");
+		return sel_entry->meta_str();
 	};
 	cvars["meta"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	cvars["comp"] = make_unique<cvar_base_s>();
 	cvars["comp"]->getter = [] ()  {
-		return (cmd_sel_entry == nullptr) ? "false" : (cmd_sel_entry->completed ? "true" : "false" );
+		return (sel_entry == nullptr) ? "false" : (sel_entry->completed ? "true" : "false" );
 	};
 	cvars["comp"]->setter = [] (const string& val) {
-		if (cmd_sel_entry == nullptr) return;
+		if (sel_entry == nullptr) return;
 
-		if ((cmd_sel_entry->completed && (val != "true")) ||
-			(!cmd_sel_entry->completed && (val == "true")))
+		if ((sel_entry->completed && (val != "true")) ||
+			(!sel_entry->completed && (val == "true")))
 				li_comp(cui_s_line);
 	};
 	cvars["comp"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
@@ -492,13 +135,13 @@ void cmd_init() {
 
 	cvars["parent"] = make_unique<cvar_base_s>();
 	cvars["parent"]->getter = [] () {
-		if (cmd_sel_entry == nullptr)  return string("");
-		return to_string(cmd_sel_entry->tag);
+		if (sel_entry == nullptr)  return string("");
+		return to_string(sel_entry->tag);
 	};
 	cvars["parent"]->setter = [] (const string& val) {
-		if (cmd_sel_entry == nullptr) return;
+		if (sel_entry == nullptr) return;
 		try {
-			cmd_sel_entry->tag = stoi(val);
+			sel_entry->tag = stoi(val);
 			if (li_autosave) li_save();
 		} catch (const invalid_argument& e) { }
 	};
@@ -699,14 +342,14 @@ void cmd_init() {
 	cvar_wrap_int("numbuffer", cui_numbuffer, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
 	cvars["numbuffer"]->predefine("-1");
 
-	cvar_wrap_string("ret", cmd_retval, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
+	cvar_wrap_string("ret", retval, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
 
 	cvars["VER"] = make_unique<cvar_base_s>();
 	cvars["VER"]->getter = [] () { return VERSION; };
 	cvars["VER"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 }
 
-vector<string> cmd_break(const string& cmdline) {
+vector<string> cmdbreak(const string& cmdline) {
 	vector<string> cmdqueue;
 	string temp = "";
 
@@ -742,7 +385,7 @@ vector<string> cmd_break(const string& cmdline) {
 	}
 
 	if (inquotes || skip_special) { // unterminated command (unterminated quotes or ends with '\')
-		cmd_buffer = cmdline;
+		buffer = cmdline;
 		return vector<string>();
 	}
 
@@ -751,7 +394,7 @@ vector<string> cmd_break(const string& cmdline) {
 	return cmdqueue;
 }
 
-void cmd_run(string command) {
+void run(string command) {
 	log_offset++;
 	// replace variables
 	if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
@@ -788,7 +431,7 @@ void cmd_run(string command) {
 				command.replace(index, 2, getenv("HOME") + string("/"));
 	}
 
-	vector<string> new_commands = cmd_break(command);
+	vector<string> new_commands = cmdbreak(command);
 
 	if (new_commands.size() == 0) { log_offset--; return; } // basiacally, an empty string, or just ';'s
 
@@ -796,7 +439,7 @@ void cmd_run(string command) {
 		// more than one command in a string. Each can contain some more after
 		// variables are replaced with their values
 		log("Breaking " + command);
-		for (const auto& cmd : new_commands) cmd_run(cmd);
+		for (const auto& cmd : new_commands) run(cmd);
 		log_offset--;
 		return;
 	}
@@ -869,15 +512,15 @@ void cmd_run(string command) {
 		}
 	}
 
-	cmd_buffer = ""; // if we have reached this far, a command is at least properly terminated
+	buffer = ""; // if we have reached this far, a command is at least properly terminated
 
 	if (word != "") put(word);
 
 	if (name == "") { log_offset--; return; } // null command
 
 	try
-	{	// search for cmd_aliases, prioritize
-		string alstr = cmd_aliases.at(name);
+	{	// search for aliases, prioritize
+		string alstr = aliases.at(name);
 
 		// insert alias arguments. Add unused ones to command line
 		for (int j = 0; j < args.size(); j++) {
@@ -893,47 +536,49 @@ void cmd_run(string command) {
 			if (!replaced) alstr += " \"" + replace_special(args.at(j)) + "\"";
 		}
 
-		cmd_exec(alstr); // try to run
+		exec(alstr); // try to run
 	} catch (const out_of_range& e) { // no such alias
 		try {
-			const int ret = (cmd_cmds.at(name))(args); // try to run command
+			const int ret = (cmds.at(name))(args); // try to run command
 
 			if (ret != 0) switch (ret) { // handle error return values
-				case CMD_ERR_ARG_COUNT:
-					cmd_retval = "Wrong argument count!";
+				case ERR_ARG_COUNT:
+					retval = "Wrong argument count!";
 					break;
-				case CMD_ERR_ARG_TYPE:
-					cmd_retval = "Wrog argument type!";
+				case ERR_ARG_TYPE:
+					retval = "Wrog argument type!";
 					break;
-				case CMD_ERR_EXTERNAL:
-					cmd_retval = "Cannot execute command!";
+				case ERR_EXTERNAL:
+					retval = "Cannot execute command!";
 					break;
 				default:
-					cmd_retval = "Unknown execution error!";
+					retval = "Unknown execution error!";
 			}
 		} catch (const out_of_range& e) { // command not found
 			log("Command not found! (" + command + ")", LP_ERROR);
-			cmd_retval = "Command not found!";
+			retval = "Command not found!";
 		}
 	}
 
-	cui_status = cmd_retval;
+	cui_status = retval;
 
 	log_offset--;
 }
 
-void cmd_exec(const string& command) {
+void exec(const string& command) {
 	log ("Attempting execution: " + command);
-	vector<string> cmdq = cmd_break(cmd_buffer + command);
+	vector<string> cmdq = cmdbreak(buffer + command);
 
-	for (const auto& cmd : cmdq) cmd_run(cmd);
+	for (const auto& cmd : cmdq) run(cmd);
 }
 
-void cmd_terminate() {
-	if (cmd_buffer == "") return;
+void terminate() {
+	if (buffer == "") return;
 
 	cui_status = "Unterminated command";
 	log("Unterminated command at the end of execution. Skipping...", LP_ERROR);
 
-	cmd_buffer = "";
+	buffer = "";
+}
+
 }

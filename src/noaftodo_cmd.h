@@ -8,27 +8,31 @@
 
 #include "noaftodo_list.h"
 
-constexpr int CMD_ERR_ARG_COUNT 	= 2;
-constexpr int CMD_ERR_ARG_TYPE 		= 3;
-constexpr int CMD_ERR_EXTERNAL		= 1;
+namespace cmd {
 
-extern std::map<std::string, std::function<int(const std::vector<std::string>& args)>> cmd_cmds;
-extern std::map<std::string, std::string> cmd_aliases;
+constexpr int ERR_EXTERNAL	= 1;
+constexpr int ERR_ARG_COUNT 	= 2;
+constexpr int ERR_ARG_TYPE 	= 3;
 
-extern std::string cmd_retval;
-extern std::string cmd_buffer;
+extern std::map<std::string, std::function<int(const std::vector<std::string>& args)>> cmds;
+extern std::map<std::string, std::string> aliases;
 
-extern noaftodo_entry* cmd_sel_entry;
+extern std::string retval;
+extern std::string buffer;
 
-void cmd_init();
-std::vector<std::string> cmd_break(const std::string& cmdline); // breaks the line into single commands
+extern noaftodo_entry* sel_entry;
+
+void init();
+std::vector<std::string> cmdbreak(const std::string& cmdline); // breaks the line into single commands
 								// respecting quotes and '\'
 
-void cmd_run(std::string command);	// if string consists of only one command, executes it,
-					// otherwise calls inself on each element of cmd_break output
+void run(std::string command);	// if string consists of only one command, executes it,
+				// otherwise calls inself on each element of cmd_break output
 
-void cmd_exec(const std::string& command);	// initializes and starts execution of a command.
-						// respects non-null cmd_buffer
-void cmd_terminate();
+void exec(const std::string& command);	// initializes and starts execution of a command.
+					// respects non-null cmd_buffer
+void terminate();
+
+}
 
 #endif

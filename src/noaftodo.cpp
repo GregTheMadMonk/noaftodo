@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 	conf_filename = string((xdg_conf == nullptr) ? ((home == nullptr) ? "." : home) : xdg_conf) + "/noaftodo.conf";
 
 	// init the command-line interpreter
-	cmd_init();
+	cmd::init();
 
 	// parse arguments
 	for (int i = 1; i < argc; i++) {
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 		// argument "-C, --command" - execute a command
 		else if (strcmp(argv[i], "-C") * strcmp(argv[i], "--command") == 0) {
 			if (i < argc - 1) {
-				cmd_exec(string(argv[i + 1]));
+				cmd::exec(string(argv[i + 1]));
 				i++;
 			} else {
 				log("No command specified!", LP_ERROR);
@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 	// interpreter starts without preloading anything
 	if (run_mode == PM_INTERP) {
 		string line;
-		while (getline(cin, line)) cmd_exec(line);
+		while (getline(cin, line)) cmd::exec(line);
 	}
 
 	// load the config
@@ -219,7 +219,7 @@ void noaftodo_exit(const int& val) {
 }
 
 string format_str(string str, noaftodo_entry* const li_entry, const bool& renotify) {
-	cmd_sel_entry = li_entry;
+	cmd::sel_entry = li_entry;
 
 	int index = -1;
 

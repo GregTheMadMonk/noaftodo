@@ -14,6 +14,8 @@
 
 using namespace std;
 
+using cmd::exec;
+
 string conf_filename = "noaftodo.conf";
 
 extern string TCONF;
@@ -29,11 +31,11 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 		string entry = "";
 		for (char c : TCONF) {
 			if (c == '\n') {
-				cmd_exec(entry);
+				exec(entry);
 				entry = "";
 			} else entry += c;
 		}
-		cmd_exec(entry);
+		exec(entry);
 	} else {
 		log("Loading config from " + conf_file + "...");
 
@@ -61,10 +63,10 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 
 		string entry;
 		while (getline(iconf, entry))
-			cmd_exec(entry);
+			exec(entry);
 	}
 
-	cmd_terminate();
+	cmd::terminate();
 
 	if (!predefine_cvars) return;
 

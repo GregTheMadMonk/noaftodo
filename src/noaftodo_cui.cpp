@@ -380,7 +380,7 @@ void cui_run() {
 			bool bind_fired = false;
 			for (const auto& bind : binds)
 				if ((bind.mode & cui_mode) && (bind.key == c)) {
-					if (bind.autoexec) cmd_exec(bind.command);
+					if (bind.autoexec) cmd::exec(bind.command);
 					else  {
 						if ((cui_s_line >= 0) && (cui_s_line < t_list.size()))
 							cui_command = w_converter.from_bytes(format_str(bind.command, &t_list.at(cui_s_line)));
@@ -712,10 +712,10 @@ void cui_command_input(const wchar_t& key) {
 	switch (key) {
 		case 10:
 			if (cui_command != L"") {
-				cmd_exec(w_converter.to_bytes(cui_command));
+				cmd::exec(w_converter.to_bytes(cui_command));
 				cui_command_history.push_back(cui_command);
 				cui_command_index = cui_command_history.size();
-				cmd_terminate();
+				cmd::terminate();
 			}
 		case 27:
 			cui_command = L"";
@@ -787,7 +787,7 @@ void cui_command_input(const wchar_t& key) {
 				regex ce_regex(cui_contexec_regex_filter);
 
 				if (regex_search(w_converter.to_bytes(cui_command), ce_regex))
-					cmd_exec(w_converter.to_bytes(cui_command));
+					cmd::exec(w_converter.to_bytes(cui_command));
 			}
 	}
 }
@@ -997,7 +997,7 @@ int cui_draw_table(const int& x, const int& y,
 		}
 
 	if (v_list.size() != 0) {
-		while (!vis_f(sel)) cmd_exec(down_cmd);
+		while (!vis_f(sel)) cmd::exec(down_cmd);
 		for (int i = 0; i < v_list.size(); i++) if (v_list.at(i) == sel) { v_sel = i; break; }
 	}
 
