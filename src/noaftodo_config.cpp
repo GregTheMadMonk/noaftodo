@@ -16,16 +16,16 @@ using namespace std;
 
 using cmd::exec;
 
-string conf_filename = "noaftodo.conf";
-
 extern string TCONF;
 
-void conf_load(const bool& predefine_cvars, const bool& create_template) {
-	conf_load(conf_filename, predefine_cvars, create_template);
+namespace conf {
+
+void load(const bool& predefine_cvars, const bool& create_template) {
+	load(filename, predefine_cvars, create_template);
 }
 
-void conf_load(const string& conf_file, const bool& predefine_cvars, const bool& create_template) {
-	if (conf_file == "default") {
+void load(const string& file, const bool& predefine_cvars, const bool& create_template) {
+	if (file == "default") {
 		log("Loading default config...");
 
 		string entry = "";
@@ -37,16 +37,16 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 		}
 		exec(entry);
 	} else {
-		log("Loading config from " + conf_file + "...");
+		log("Loading config from " + file + "...");
 
-		ifstream iconf(conf_file);
+		ifstream iconf(file);
 		if (!iconf.good())
 		{	// create a new config from a template
-			log("Config file does not exist (" + conf_file + ")!", LP_ERROR);
+			log("Config file does not exist (" + file + ")!", LP_ERROR);
 			if (!create_template) return;
 			log("Creating a new one from template...");
 
-			ofstream oconf(conf_file);
+			ofstream oconf(file);
 			// there must be a smarter way to do this
 			oconf << "# " << TITLE << " v." << VERSION << " auto-generated config file" << endl;
 
@@ -55,7 +55,7 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 			for (char c : TCONF) oconf << c;
 		}
 
-		iconf = ifstream(conf_file);
+		iconf = ifstream(file);
 		if (!iconf.good()) {
 			log("Something went wrong!", LP_ERROR);
 			return;
@@ -73,4 +73,6 @@ void conf_load(const string& conf_file, const bool& predefine_cvars, const bool&
 	for (auto it = cvars.begin(); it != cvars.end(); it++)
 		if ((cvar(it->first).flags & CVAR_FLAG_NO_PREDEF) == 0)
 			cvar(it->first).predefine();
+}
+
 }

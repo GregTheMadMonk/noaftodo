@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 	const char* xdg_conf = getenv("XDG_CONFIG_HOME");
 
 	li::filename = string((home == nullptr) ? "." : home) + "/.noaftodo-list";
-	conf_filename = string((xdg_conf == nullptr) ? ((home == nullptr) ? "." : home) : xdg_conf) + "/noaftodo.conf";
+	conf::filename = string((xdg_conf == nullptr) ? ((home == nullptr) ? "." : home) : xdg_conf) + "/noaftodo.conf";
 
 	// init the command-line interpreter
 	cmd::init();
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 		// argument "-c, --config" - specify config file
 		else if (strcmp(argv[i], "-c") * strcmp(argv[i], "--config") == 0) {
 			if (i < argc - 1) {
-				conf_filename = string(argv[i + 1]);
+				conf::filename = string(argv[i + 1]);
 				i++;
 			} else {
 				log("Config not specified after " + string(argv[i]), LP_ERROR);
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// load the config
-	conf_load(true, true);
+	conf::load(true, true);
 
 #ifndef NO_ROOT_CHECK
 	if ((geteuid() == 0) && !allow_root) {

@@ -325,7 +325,7 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 				if (args.at(i) == "script") predef_cvars = false;
 			}
 
-			conf_load(args.at(0), predef_cvars);
+			conf::load(args.at(0), predef_cvars);
 
 			return 0;
 		}
@@ -707,5 +707,11 @@ string filename = ".noaftodo-list";
 bool autosave = true;
 
 string sort_order = "ldtD";
+
+}
+
+namespace conf {
+
+	string filename = "noaftodo.conf";
 
 }
