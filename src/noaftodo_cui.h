@@ -28,7 +28,7 @@ struct bind_s {
 
 namespace vargs {
 	namespace cols {
-		typedef struct { const noaftodo_entry& e; const int& id; } normal;
+		typedef struct { const li::entry& e; const int& id; } normal;
 		typedef struct { const int& l_id; } lview;
 		typedef std::variant<normal, lview> varg;
 	}

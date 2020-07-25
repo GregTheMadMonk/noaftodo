@@ -14,57 +14,55 @@
 
 using namespace std;
 
-vector<noaftodo_entry> t_list;
+namespace li {
+
+vector<entry> t_list;
 vector<string> t_tags;
-string li_filename = ".noaftodo-list";
-bool li_autosave = true;
 
-string li_sort_order = "ldtD";
+struct stat file_stat;
 
-struct stat li_file_stat;
-
-string noaftodo_entry::get_meta(const string& str, const string& def) const {
+string entry::get_meta(const string& str, const string& def) const {
 	try  {
 		return (this->meta.at(str) == "") ? def : this->meta.at(str);
 	} catch (const out_of_range& e) { return def; }
 }
 
-string noaftodo_entry::get_meta(const string& str, const string& def) {
-	return const_cast<const noaftodo_entry*>(this)->get_meta(str, def);
+string entry::get_meta(const string& str, const string& def) {
+	return const_cast<const entry*>(this)->get_meta(str, def);
 }
 
-bool noaftodo_entry::operator==(const noaftodo_entry& comp) {
+bool entry::operator==(const entry& comp) {
 	return this->sim(comp) &&
 		(this->completed == comp.completed) &&
 		(this->meta == comp.meta);
 }
 
-bool noaftodo_entry::operator==(const noaftodo_entry& comp) const {
+bool entry::operator==(const entry& comp) const {
 	return this->sim(comp) &&
 		(this->completed == comp.completed) &&
 		(this->meta == comp.meta);
 }
 
-bool noaftodo_entry::operator!=(const noaftodo_entry& comp) {
+bool entry::operator!=(const entry& comp) {
 	return !(*this == comp);
 }
 
-bool noaftodo_entry::operator!=(const noaftodo_entry& comp) const {
+bool entry::operator!=(const entry& comp) const {
 	return !(*this == comp);
 }
 
-bool noaftodo_entry::sim(const noaftodo_entry& e2) const {
+bool entry::sim(const entry& e2) const {
 	return (this->due == e2.due) &&
 		(this->title == e2.title) &&
 		(this->description == e2.description) &&
 		(this->tag == e2.tag);
 }
 
-bool noaftodo_entry::sim(const noaftodo_entry& e2) {
-	return const_cast<const noaftodo_entry*>(this)->sim(e2);
+bool entry::sim(const entry& e2) {
+	return const_cast<const entry*>(this)->sim(e2);
 }
 
-string noaftodo_entry::meta_str() const {
+string entry::meta_str() const {
 	string meta = "";
 
 	for (auto it = this->meta.begin(); it != this->meta.end(); it++) {
@@ -75,38 +73,38 @@ string noaftodo_entry::meta_str() const {
 	return meta;
 }
 
-string noaftodo_entry::meta_str() {
-	return const_cast<const noaftodo_entry*>(this)->meta_str();
+string entry::meta_str() {
+	return const_cast<const entry*>(this)->meta_str();
 }
 
-bool noaftodo_entry::is_failed() const {
+bool entry::is_failed() const {
 	return !this->completed && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a0d"));
 }
 
-bool noaftodo_entry::is_failed() {
-	return const_cast<const noaftodo_entry*>(this)->is_failed();
+bool entry::is_failed() {
+	return const_cast<const entry*>(this)->is_failed();
 }
 
-bool noaftodo_entry::is_coming() const {
+bool entry::is_coming() const {
 	return !this->completed && !this->is_failed() && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a" + this->get_meta("warn_time", "1d")));
 }
 
-bool noaftodo_entry::is_coming() {
-	return const_cast<const noaftodo_entry*>(this)->is_coming();
+bool entry::is_coming() {
+	return const_cast<const entry*>(this)->is_coming();
 }
 
-bool noaftodo_entry::is_uncat() const {
+bool entry::is_uncat() const {
 	return !this->completed &&
 		!this->is_failed() &&
 		!this->is_coming() &&
 		(this->get_meta("nodue") != "true");
 }
 
-bool noaftodo_entry::is_uncat() {
-	return const_cast<const noaftodo_entry*>(this)->is_uncat();
+bool entry::is_uncat() {
+	return const_cast<const entry*>(this)->is_uncat();
 }
 
-void noaftodo_entry::name() {
+void entry::name() {
 	if (this->get_meta("eid") == "")
 		for (int i = 0; ; i++) {
 			bool found = false;
@@ -119,9 +117,9 @@ void noaftodo_entry::name() {
 		}
 }
 
-void li_load(const bool& load_workspace) {
+void load(const bool& load_workspace) {
 	log("=====================================================");
-	log("Loading list file " + li_filename);
+	log("Loading list file " + filename);
 	log("=====================================================");
 
 	bool safemode = true;
@@ -149,12 +147,12 @@ void li_load(const bool& load_workspace) {
 	t_tags.clear();
 
 	// check if file exists
-	ifstream ifile(li_filename);
+	ifstream ifile(filename);
 	if (!ifile.good()) {
 		// create list file
 		log("File does not exist!", LP_ERROR);
 		log("Creating...");
-		ofstream ofile(li_filename);
+		ofstream ofile(filename);
 		ofile << "# noaftodo list file" << endl << "[ver]" << endl << LIST_V << endl;
 		safemode = false;
 		if (ofile.good()) log("Created");
@@ -162,43 +160,43 @@ void li_load(const bool& load_workspace) {
 		ofile.close();
 	} else {
 		// load the list
-		string entry;
+		string line;
 		int mode = 0; 	// -1 - nothing
 				// 0 - list tags read
 				// 1 - lists read
 				// 2 - workspace read
 				// 3 - list version read
 
-		while (getline(ifile, entry)) {
+		while (getline(ifile, line)) {
+			if (line == "") continue; // only non-empty lines
+
+			// trim string
+			while ((line.at(0) == ' ') || (line.at(0) == '\t')) {
+				line = line.substr(1);
+				if (line == "") break;
+			}
+
+			if (line == "") 	continue; // same precautions
+			if (line.at(0) == '#') 	continue; // comment?
+
+			log(line);
+
 			int token = 0;
-			noaftodo_entry li_entry;
+			entry e;
 			string temp = "";
 			string metaname = "";
 
-			if (entry == "") continue; // only non-empty lines
-
-			// trim string
-			while ((entry.at(0) == ' ') || (entry.at(0) == '\t')) {
-				entry = entry.substr(1);
-				if (entry == "") break;
-			}
-
-			if (entry == "") 	continue; // same precautions
-			if (entry.at(0) == '#') continue; // comment?
-
-			log(entry);
-
-			if (entry.at(0) == '[') {
-				if (entry == "[tags]") 		mode = 0;
-				if (entry == "[list]") 		mode = 1;
-				if (entry == "[workspace]") 	mode = 2;
-				if (entry == "[ver]") 		mode = 3;
+			if (line.at(0) == '[') {
+				if (line == "[tags]") 		mode = 0;
+				if (line == "[list]") 		mode = 1;
+				if (line == "[workspace]") 	mode = 2;
+				if (line == "[ver]") 		mode = 3;
 
 				if (mode != 2) cmd::terminate();
 			} else switch (mode) {
 				case 0: // tags
-					log("Added tag \"" + entry + "\" with index " + to_string(t_tags.size()));
-					t_tags.push_back(entry);
+					log("Added tag \"" + line + "\" with index " + to_string(t_tags.size()));
+					t_tags.push_back(line);
 					break;
 
 				case 1: // list
@@ -206,8 +204,8 @@ void li_load(const bool& load_workspace) {
 					bool inquotes = false;
 					bool skip_special = false;
 
-					for (int i = 0; i < entry.length(); i++) {
-						const char c = entry.at(i);
+					for (int i = 0; i < line.length(); i++) {
+						const char c = line.at(i);
 
 						if (skip_special) { temp += c; skip_special = false; }
 						else switch (c)  {
@@ -217,27 +215,27 @@ void li_load(const bool& load_workspace) {
 								} else {
 									switch (token) {
 										case 0:
-											li_entry.completed = (temp == "v");
+											e.completed = (temp == "v");
 											break;
 										case 1:
-											li_entry.due = stol(temp);
+											e.due = stol(temp);
 											break;
 										case 2:
-											li_entry.title = temp;
-											log("Entry: " + li_entry.title);
+											e.title = temp;
+											log("Entry: " + e.title);
 											break;
 										case 3:
-											li_entry.description = temp;
+											e.description = temp;
 											break;
 										case 4:
-											li_entry.tag = stoi(temp);
+											e.tag = stoi(temp);
 											break;
 										default:
 											// metadata
 											if (metaname == "") metaname = temp;
 											else
 											{
-												li_entry.meta[metaname] = temp;
+												e.meta[metaname] = temp;
 												log("Meta prop: " + metaname + " <=> " + temp);
 												metaname = "";
 											}
@@ -258,24 +256,24 @@ void li_load(const bool& load_workspace) {
 						}
 					}
 
-					t_list.push_back(li_entry);
+					t_list.push_back(e);
 					}
 					break;
 				
 				case 2: // workspace
 					if (load_workspace) {
-						while (entry.at(0) == ' ') {
-							entry = entry.substr(1);
-							if (entry == "") break;
+						while (line.at(0) == ' ') {
+							line = line.substr(1);
+							if (line == "") break;
 						}
 
-						if (entry != "") if (entry.at(0) != '#')
-							cmd::exec(entry);
+						if (line != "") if (line.at(0) != '#')
+							cmd::exec(line);
 					}
 					break;
 
 				case 3: // list version verification
-					safemode &= (entry != to_string(LIST_V));
+					safemode &= (line != to_string(LIST_V));
 					break;
 			}
 		}
@@ -291,35 +289,35 @@ void li_load(const bool& load_workspace) {
 			"Consult \"TROUBLESHOOTING\" manpage section (\"noaftodo -h\"). ", LP_ERROR);
 	}
 
-	li_autosave = (errors == 0) && (!safemode) && (run_mode != PM_DAEMON); // don't allow daemon to save stuff
+	autosave = (errors == 0) && (!safemode) && (run_mode != PM_DAEMON); // don't allow daemon to save stuff
 
-	li_upd_stat();
+	upd_stat();
 
-	li_prepare(t_list);
-	li_sort();
+	prepare(t_list);
+	sort();
 }
 
-void li_load(const string& filename, const bool& load_workspace) {
-	li_filename = filename;
-	li_load(load_workspace);
+void load(const string& load_filename, const bool& load_workspace) {
+	filename = load_filename;
+	load(load_workspace);
 }
 
-int li_save(const string& filename) {
-	if ((filename == li_filename) && li_has_changed()) {
+int save(const string& save_filename) {
+	if ((filename == save_filename) && has_changed()) {
 		log("File was modified since its last recorded change. Skipping save!", LP_ERROR);
 		return 1;
 	}
 
-	li_filename = filename;
+	filename = save_filename;
 
 	log("Saving...");
 
-	li_identify_all();
+	identify_all();
 	auto t_list_copy = t_list;
-	li_prepare(t_list_copy);
+	prepare(t_list_copy);
 
 	ofstream ofile;
-	ofile.open(li_filename, ios::out | ios::trunc);
+	ofile.open(filename, ios::out | ios::trunc);
 
 	ofile << "# naftodo list file" << endl;
 
@@ -357,89 +355,89 @@ int li_save(const string& filename) {
 
 	ofile.close();
 
-	li_upd_stat();
+	upd_stat();
 
-	log("Changes written to file " + li_filename);
+	log("Changes written to file " + filename);
 
 	return 0;
 }
 
-int li_save() {
+int save() {
 	if (errors != 0) {
-		log("Aborting li_save() in safe mode: saving in safe mode is prohibited without an explicit path specifition", LP_ERROR);
+		log("Aborting save() in safe mode: saving in safe mode is prohibited without an explicit path specifition", LP_ERROR);
 		return 1;
 	}
-	return li_save(li_filename);
+	return save(filename);
 }
 
-void li_upd_stat() {
-	if (stat(li_filename.c_str(), &li_file_stat) != 0)
+void upd_stat() {
+	if (stat(filename.c_str(), &file_stat) != 0)
 		log("Can't stat(...) file", LP_ERROR);
 }
 
-bool li_has_changed() {
+bool has_changed() {
 	struct stat new_stat;
 
-	if (stat(li_filename.c_str(), &new_stat) != 0)
+	if (stat(filename.c_str(), &new_stat) != 0)
 	{
 		log("Can't stat(...) file", LP_ERROR);
 		return false;
 	}
 
-	return (new_stat.st_mtime != li_file_stat.st_mtime) || (new_stat.st_mtim.tv_nsec != li_file_stat.st_mtim.tv_nsec);
+	return (new_stat.st_mtime != file_stat.st_mtime) || (new_stat.st_mtim.tv_nsec != file_stat.st_mtim.tv_nsec);
 }
 
-void li_add(const noaftodo_entry& li_entry) {
-	log("Adding " + li_entry.title + "...");
-	t_list.push_back(li_entry);
+void add(const entry& entry) {
+	log("Adding " + entry.title + "...");
+	t_list.push_back(entry);
 	t_list[t_list.size() - 1].name();
 
-	li_sort();
-	if (li_autosave) li_save();
+	sort();
+	if (autosave) save();
 
 	da_send("A");
 }
 
-void li_comp(const int& entryID) {
+void comp(const int& entryID) {
 	if ((entryID < 0) || (entryID >= t_list.size())) {
-		log("li_comp: entry ID out of list bounds. Operation aborted", LP_ERROR);
+		log("comp: entry ID out of list bounds. Operation aborted", LP_ERROR);
 		return;
 	}
 
 	t_list.at(entryID).completed = !t_list.at(entryID).completed;
 
-	if (li_autosave) li_save();
+	if (autosave) save();
 
 	da_send("C");
 }
 
-void li_rem(const int& entryID) {
+void rem(const int& entryID) {
 	if ((entryID < 0) || (entryID >= t_list.size())) {
-		log("li_rem: entry ID out of list bounds. Operation aborted", LP_ERROR);
+		log("rem: entry ID out of list bounds. Operation aborted", LP_ERROR);
 		return;
 	}
 
 	log("Removing " + t_list.at(entryID).title + "...");
 	t_list.erase(t_list.begin() + entryID);
 
-	if (li_autosave) li_save();
+	if (autosave) save();
 
 	da_send("R");
 }
 
-void li_sort() {
-	std::sort(t_list.begin(), t_list.end(), less_than_noaftodo_entry_order());
+void sort() {
+	std::sort(t_list.begin(), t_list.end(), less_than_entry_order());
 }
 
-void li_identify_all() {
+void identify_all() {
 	// identify entries
 	for (auto& entry : t_list)
 		if (entry.get_meta("eid") == "") entry.name();
 }
 
-void li_prepare(vector<noaftodo_entry>& list) {
+void prepare(vector<entry>& list) {
 	// sort entries
-	std::sort(list.begin(), list.end(), less_than_noaftodo_entry());
+	std::sort(list.begin(), list.end(), less_than_entry());
 
 	int max_tag = t_tags.size() - 1;
 	for (const auto& e : t_list) if (e.tag > max_tag) max_tag = e.tag;
@@ -453,30 +451,32 @@ void li_prepare(vector<noaftodo_entry>& list) {
 	}
 }
 
-int li_find(const string& eid) {
+int find(const string& eid) {
 	for (int i = 0; i < t_list.size(); i++)
 		if (t_list.at(i).get_meta("eid") == eid) return i;
 
 	return -1;
 }
 
-bool li_tag_completed(const int& tagID) {
+bool tag_completed(const int& tagID) {
 	for (const auto& e : t_list)
 		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (!e.completed)) return false;
 
 	return true;
 }
 
-bool li_tag_coming(const int& tagID) {
+bool tag_coming(const int& tagID) {
 	for (const auto& e : t_list)
 		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (e.is_coming())) return true;
 
 	return false;
 }
 
-bool li_tag_failed(const int& tagID) {
+bool tag_failed(const int& tagID) {
 	for (const auto& e : t_list)
 		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (e.is_failed())) return true;
 
 	return false;
+}
+
 }

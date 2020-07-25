@@ -22,6 +22,10 @@
 #include "noaftodo_time.h"
 
 using namespace std;
+
+using li::t_list;
+using li::t_tags;
+
 using cui::status;
 using cui::s_line;
 
@@ -30,7 +34,7 @@ namespace cmd {
 string retval = "";
 string buffer;
 
-noaftodo_entry* sel_entry = nullptr;
+li::entry* sel_entry = nullptr;
 
 void init() {
 	buffer = "";
@@ -86,7 +90,7 @@ void init() {
 	cvars["title"]->setter = [] (const string& val) {
 		if (sel_entry == nullptr) return;
 		sel_entry->title = val;
-		if (li_autosave) li_save();
+		if (li::autosave) li::save();
 	};
 	cvars["title"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
@@ -98,7 +102,7 @@ void init() {
 	cvars["desc"]->setter = [] (const string& val) {
 		if (sel_entry == nullptr) return;
 		sel_entry->description = val;
-		if (li_autosave) li_save();
+		if (li::autosave) li::save();
 	};
 	cvars["desc"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
@@ -110,7 +114,7 @@ void init() {
 	cvars["due"]->setter = [] (const string& val) {
 		if (sel_entry == nullptr) return;
 		sel_entry->due = ti_to_long(val);
-		if (li_autosave) li_save();
+		if (li::autosave) li::save();
 	};
 	cvars["due"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
@@ -130,7 +134,7 @@ void init() {
 
 		if ((sel_entry->completed && (val != "true")) ||
 			(!sel_entry->completed && (val == "true")))
-				li_comp(s_line);
+				li::comp(s_line);
 	};
 	cvars["comp"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 	cvars["comp"]->predefine("false");
@@ -144,7 +148,7 @@ void init() {
 		if (sel_entry == nullptr) return;
 		try {
 			sel_entry->tag = stoi(val);
-			if (li_autosave) li_save();
+			if (li::autosave) li::save();
 		} catch (const invalid_argument& e) { }
 	};
 	cvars["parent"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
@@ -164,7 +168,7 @@ void init() {
 
 		t_tags[cui::tag_filter] = val;
 
-		if (li_autosave) li_save();
+		if (li::autosave) li::save();
 	};
 	cvars["pname"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
@@ -226,16 +230,16 @@ void init() {
 
 	cvar_wrap_int("filter", cui::filter);
 
-	cvar_wrap_string("sort_by", li_sort_order);
+	cvar_wrap_string("sort_by", li::sort_order);
 	cvars["sort_by"]->setter = [] (const string& val) {
-		li_sort_order = "";
+		li::sort_order = "";
 
 		for (const char& c : val)
-			if (li_sort_order.find(c) == string::npos) li_sort_order += c;
+			if (li::sort_order.find(c) == string::npos) li::sort_order += c;
 
-		//li_sort_order = string(li_sort_order.begin(), unique(li_sort_order.begin(), li_sort_order.end()));
-		if (li_sort_order.length() > 4) li_sort_order = li_sort_order.substr(0, 4);
-		li_sort();
+		//li::sort_order = string(li::sort_order.begin(), unique(li::sort_order.begin(), li::sort_order.end()));
+		if (li::sort_order.length() > 4) li::sort_order = li::sort_order.substr(0, 4);
+		li::sort();
 	};
 
 	// FILTER BITS

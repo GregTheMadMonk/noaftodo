@@ -20,7 +20,7 @@ extern std::map<std::string, std::string> aliases;
 extern std::string retval;
 extern std::string buffer;
 
-extern noaftodo_entry* sel_entry;
+extern li::entry* sel_entry;
 
 void init();
 std::vector<std::string> cmdbreak(const std::string& cmdline); // breaks the line into single commands

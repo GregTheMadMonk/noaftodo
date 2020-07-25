@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 	const char* home = getenv("HOME");
 	const char* xdg_conf = getenv("XDG_CONFIG_HOME");
 
-	li_filename = string((home == nullptr) ? "." : home) + "/.noaftodo-list";
+	li::filename = string((home == nullptr) ? "." : home) + "/.noaftodo-list";
 	conf_filename = string((xdg_conf == nullptr) ? ((home == nullptr) ? "." : home) : xdg_conf) + "/noaftodo.conf";
 
 	// init the command-line interpreter
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 		// argument "-l, --list" - specify list file
 		else if (strcmp(argv[i], "-l") * strcmp(argv[i], "--list") == 0) {
 			if (i < argc - 1) {
-				li_filename = string(argv[i + 1]);
+				li::filename = string(argv[i + 1]);
 				i++;
 			} else {
 				log("List file not specified after " + string(argv[i]), LP_ERROR);
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
 #endif
 
 	// load the list
-	li_load();
+	li::load();
 
 	if (run_mode == PM_DEFAULT)	 {
 		// if this option is enabled, start daemon in the forked process
@@ -218,8 +218,8 @@ void noaftodo_exit(const int& val) {
 	else exit(val);
 }
 
-string format_str(string str, noaftodo_entry* const li_entry, const bool& renotify) {
-	cmd::sel_entry = li_entry;
+string format_str(string str, li::entry* const list_entry, const bool& renotify) {
+	cmd::sel_entry = list_entry;
 
 	int index = -1;
 

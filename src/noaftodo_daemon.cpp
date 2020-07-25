@@ -20,7 +20,11 @@
 
 using namespace std;
 
+using li::t_list;
+using li::t_tags;
+
 using cmd::exec;
+
 using cui::s_line;
 
 bool da_fork_autostart = true;
@@ -40,7 +44,7 @@ int da_clients = -1; // -1 if we don't care. Other numbers indicate
 
 int da_interval = 1;
 
-vector<noaftodo_entry> da_cache;
+vector<li::entry> da_cache;
 long da_cached_time = 0;
 
 void da_run() {
@@ -78,7 +82,7 @@ void da_run() {
 	da_cached_time = ti_to_long("a0d");
 
 	while (da_running) {
-		if (li_has_changed()) da_upd_cache();
+		if (li::has_changed()) da_upd_cache();
 
 		da_check_dues();
 
@@ -171,7 +175,7 @@ void da_run() {
 
 void da_upd_cache(const bool& is_first_load) {
 	log("Updating daemon cache...", LP_IMPORTANT);
-	li_load();
+	li::load();
 
 	const auto t_list_copy = t_list;
 
@@ -185,7 +189,7 @@ void da_upd_cache(const bool& is_first_load) {
 				break;
 			}
 
-		noaftodo_entry li_e = t_list_copy.at(i);
+		li::entry li_e = t_list_copy.at(i);
 
 		if (cached_id == -1)
 		{	// add to cache
@@ -207,7 +211,7 @@ void da_upd_cache(const bool& is_first_load) {
 			continue;
 		}
 
-		const noaftodo_entry ca_e = da_cache.at(cached_id);
+		const li::entry ca_e = da_cache.at(cached_id);
 		da_cache[cached_id] = li_e;
 
 		if (ca_e == li_e) continue; // skip the unchanged entries
@@ -263,7 +267,7 @@ void da_upd_cache(const bool& is_first_load) {
 	}
 
 	if (t_list != t_list_copy)  {
-		li_save();
+		li::save();
 		da_upd_cache(); // I'm sorry
 	}
 }
@@ -290,7 +294,7 @@ void da_check_dues(const bool& renotify) {
 	s_line = -1;
 
 	if (t_list != t_list_copy)  {
-		li_save();
+		li::save();
 		da_upd_cache(); // I'm sorry
 	}
 }

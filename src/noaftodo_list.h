@@ -9,7 +9,9 @@
 #include <sys/types.h>
 #include <vector>
 
-struct noaftodo_entry {
+namespace li {
+
+struct entry {
 	bool completed;
 	long due;
 	std::string title;
@@ -20,12 +22,12 @@ struct noaftodo_entry {
 	std::string get_meta(const std::string& str, const std::string& def = "");
 	std::string get_meta(const std::string& str, const std::string& def = "") const;
 
-	bool sim(const noaftodo_entry& e2);
-	bool sim(const noaftodo_entry& e2) const;
-	bool operator==(const noaftodo_entry& comp);
-	bool operator==(const noaftodo_entry& comp) const;
-	bool operator!=(const noaftodo_entry& comp);
-	bool operator!=(const noaftodo_entry& comp) const;
+	bool sim(const entry& e2);
+	bool sim(const entry& e2) const;
+	bool operator==(const entry& comp);
+	bool operator==(const entry& comp) const;
+	bool operator!=(const entry& comp);
+	bool operator!=(const entry& comp) const;
 
 	std::string meta_str();
 	std::string meta_str() const;
@@ -42,10 +44,10 @@ struct noaftodo_entry {
 	void name();
 };
 
-extern std::string li_sort_order;
+extern std::string sort_order;
 
-struct less_than_noaftodo_entry_order {
-	inline int comp_due(const noaftodo_entry& e1, const noaftodo_entry& e2) {
+struct less_than_entry_order {
+	inline int comp_due(const entry& e1, const entry& e2) {
 		if ((e1.get_meta("nodue") == "true") && (e2.get_meta("nodue") == "true")) return 0;
 		if ((e1.get_meta("nodue") == "true") && (e2.get_meta("nodue") != "true")) return -1;
 		if ((e2.get_meta("nodue") == "true") && (e1.get_meta("nodue") != "true")) return 1;
@@ -53,13 +55,13 @@ struct less_than_noaftodo_entry_order {
 		return (e1.due < e2.due) ? 1 : -1;
 	}
 
-	inline int comp_tag(const noaftodo_entry& e1, const noaftodo_entry& e2) {
+	inline int comp_tag(const entry& e1, const entry& e2) {
 		if (e1.tag == e2.tag) return 0;
 
 		return (e1.tag < e2.tag) ? 1 : -1;
 	}
 
-	inline int comp_title(const noaftodo_entry& e1, const noaftodo_entry& e2) {
+	inline int comp_title(const entry& e1, const entry& e2) {
 		try { // sort by number in title
 			const double d1 = stod(e1.title);
 			const double d2 = stod(e2.title);
@@ -76,7 +78,7 @@ struct less_than_noaftodo_entry_order {
 		return 0;
 	}
 
-	inline int comp_desc(const noaftodo_entry& e1, const noaftodo_entry& e2) {
+	inline int comp_desc(const entry& e1, const entry& e2) {
 		try { // sort by number in description
 			const double d1 = stod(e1.description);
 			const double d2 = stod(e2.description);
@@ -93,12 +95,12 @@ struct less_than_noaftodo_entry_order {
 		return 0;
 	}
 
-	inline bool operator() (const noaftodo_entry& e1, const noaftodo_entry& e2) {
+	inline bool operator() (const entry& e1, const entry& e2) {
 		float comparator = 0.0;
-		for (int i = 0; i < li_sort_order.length(); i++) {
+		for (int i = 0; i < sort_order.length(); i++) {
 			int field_comp = 0;
 
-			switch (li_sort_order.at(i)) {
+			switch (sort_order.at(i)) {
 				case 'd':
 					field_comp = comp_due(e1, e2);
 					break;
@@ -120,8 +122,8 @@ struct less_than_noaftodo_entry_order {
 	}
 };
 
-struct less_than_noaftodo_entry {
-	inline bool operator() (const noaftodo_entry& e1, const noaftodo_entry& e2) {
+struct less_than_entry {
+	inline bool operator() (const entry& e1, const entry& e2) {
 		if (e1.get_meta("eid") == "") return true;
 		if (e2.get_meta("eid") == "") return false;
 
@@ -134,36 +136,38 @@ struct less_than_noaftodo_entry {
 	}
 };
 
-extern std::vector<noaftodo_entry> t_list;	// the list itself
+extern std::vector<entry> t_list;	// the list itself
 extern std::vector<std::string> t_tags;		// list tags
-extern std::string li_filename;		// the list filename
-extern bool li_autosave;
+extern std::string filename;		// the list filename
+extern bool autosave;
 
-extern struct stat li_file_stat;
+extern struct stat file_stat;
 
-void li_load(const bool& load_workspace = true);
-void li_load(const std::string& filename, const bool& load_workspace = true);
+void load(const bool& load_workspace = true);
+void load(const std::string& load_filename, const bool& load_workspace = true);
 
-int li_save();
-int li_save(const std::string& filename);
+int save();
+int save(const std::string& save_filename);
 
-void li_upd_stat();
-bool li_has_changed();
+void upd_stat();
+bool has_changed();
 
-void li_add(const noaftodo_entry& li_entry);
-void li_comp(const std::string& eid);
-void li_comp(const int& entryID);
-void li_rem(const std::string& eid);
-void li_rem(const int& entryID);
+void add(const entry& entry);
+void comp(const std::string& eid);
+void comp(const int& entryID);
+void rem(const std::string& eid);
+void rem(const int& entryID);
 
-void li_sort();
-void li_identify_all();
-void li_prepare(std::vector<noaftodo_entry>& list);
+void sort();
+void identify_all();
+void prepare(std::vector<entry>& list);
 
-int li_find(const std::string& eid);
+int find(const std::string& eid);
 
-bool li_tag_completed(const int& tagID);
-bool li_tag_coming(const int& tagID);
-bool li_tag_failed(const int& tagID);
+bool tag_completed(const int& tagID);
+bool tag_coming(const int& tagID);
+bool tag_failed(const int& tagID);
+
+}
 
 #endif

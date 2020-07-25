@@ -10,6 +10,9 @@
 
 using namespace std;
 
+using li::t_list;
+using li::t_tags;
+
 extern string CMDS_HELP;
 
 namespace cui {
@@ -57,7 +60,7 @@ void run() {
 	set_mode(MODE_NORMAL);
 
 	for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0)) {
-		if (li_has_changed()) li_load(false); // load only list contents, not the workspace
+		if (li::has_changed()) li::load(false); // load only list contents, not the workspace
 		else if ((c == 0) && (!shift_multivars)) continue;
 
 		if (c > 0) {
@@ -141,7 +144,7 @@ void run() {
 		if (mode == MODE_EXIT) break;
 	}
 
-	if (li_autosave) li_save();
+	if (li::autosave) li::save();
 
 	destroy();
 
@@ -257,9 +260,9 @@ void listview_paint() {
 				return ((item >= -1) && (item < (int)t_tags.size()));
 			},
 			[] (const int& item) -> attrs {
-				if (li_tag_completed(item)) return { A_BOLD, color_complete };
-				if (li_tag_failed(item)) return { A_BOLD, color_failed };
-				if (li_tag_coming(item)) return { A_BOLD, color_coming };
+				if (li::tag_completed(item)) return { A_BOLD, color_complete };
+				if (li::tag_failed(item)) return { A_BOLD, color_failed };
+				if (li::tag_coming(item)) return { A_BOLD, color_coming };
 
 				return { A_NORMAL, 0 };
 			},
@@ -316,7 +319,7 @@ void details_paint() {
 	clear_box(4, 3, w - 8, h - 6);
 	// fill the box with details
 	// Title
-	const noaftodo_entry& entry = t_list.at(s_line);
+	const li::entry& entry = t_list.at(s_line);
 	text_box(5, 4, w - 10, 1, entry.title);
 
 	for (int i = 4; i < w - 4; i++) {

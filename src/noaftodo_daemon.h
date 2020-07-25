@@ -46,7 +46,7 @@ extern bool da_running;
 extern int da_clients;
 
 // cache
-extern std::vector<noaftodo_entry> da_cache;
+extern std::vector<li::entry> da_cache;
 extern long da_cached_time;
 
 // check interval
