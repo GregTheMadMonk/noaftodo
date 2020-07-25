@@ -5,7 +5,7 @@
 
 using namespace std;
 
-map<string, unique_ptr<cvar_base_s>> cvars;
+map<string, unique_ptr<cvar_base_s>> cvar_base_s::cvars;
 
 cvar_base_s& cvar_base_s::operator=(const string& rval) {
 	this->setter(rval);
@@ -79,7 +79,7 @@ cvar_s::cvar_s(const string& def_val) {
 	this->setter = [this] (const string& val) { this->value = val; };
 }
 
-cvar_base_s& cvar(const string& name) {
+cvar_base_s& cvar_base_s::cvar(const string& name) {
 	try {
 		return *cvars.at(name);
 	} catch (const out_of_range& e) {
@@ -88,24 +88,24 @@ cvar_base_s& cvar(const string& name) {
 	}
 }
 
-void cvar_reset(const string& name) {
+void cvar_base_s::reset(const string& name) {
 	try { cvars.at(name); } catch (const out_of_range& e) { return; }
 
 	if (cvar(name).predef_val != "") cvar(name).reset();
-	else cvar_erase(name);
+	else erase(name);
 }
 
-void cvar_erase(const string& name) {
-	if (cvar_is_deletable(name)) cvars.erase(name);
+void cvar_base_s::erase(const string& name) {
+	if (is_deletable(name)) cvars.erase(name);
 	else cvar(name) = "";
 }
 
-bool cvar_is_deletable(const string& name) { // allow deleting only cvar_s cvars
+bool cvar_base_s::is_deletable(const string& name) { // allow deleting only cvar_s cvars
 	try { cvars.at(name); } catch (const out_of_range& e) { return false; }
 	return (dynamic_cast<cvar_s*>(cvars.at(name).get()) != 0);
 }
 
-void cvar_wrap_string(const string& name, string& var, const int& flags) {
+void cvar_base_s::wrap_string(const string& name, string& var, const int& flags) {
 	cvars[name] = make_unique<cvar_base_s>();
 	cvars[name]->getter = [&var] () { return var; };
 
@@ -115,7 +115,7 @@ void cvar_wrap_string(const string& name, string& var, const int& flags) {
 	cvars[name]->flags = flags;
 }
 
-void cvar_wrap_multistr(const string& name, multistr_c& var, const int& length, const int& flags) {
+void cvar_base_s::wrap_multistr(const string& name, multistr_c& var, const int& length, const int& flags) {
 	cvars[name] = make_unique<cvar_base_s>();
 	cvars[name]->getter = [&var] () { return w_converter.to_bytes(var.str()); };
 	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
@@ -138,7 +138,7 @@ void cvar_wrap_multistr(const string& name, multistr_c& var, const int& length, 
 	cvars[name]->flags = flags | CVAR_FLAG_WS_IGNORE; // otherwise it breaks a cvar
 }
 
-void cvar_wrap_multistr_element(const std::string& name, multistr_c& var, const int& index, const int& flags) {
+void cvar_base_s::wrap_multistr_element(const std::string& name, multistr_c& var, const int& index, const int& flags) {
 	cvars[name] = make_unique<cvar_base_s>();
 	cvars[name]->getter = [&var, index] () { return w_converter.to_bytes(var.at(index)); };
 	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
@@ -176,7 +176,7 @@ void cvar_wrap_multistr_element(const std::string& name, multistr_c& var, const 
 	cvars[name]->flags = flags | CVAR_FLAG_WS_IGNORE; // predefined multistr_c's are broken :)
 }
 
-void cvar_wrap_int(const string& name, int& var, const int& flags) {
+void cvar_base_s::wrap_int(const string& name, int& var, const int& flags) {
 	cvars[name] = make_unique<cvar_base_s>();
 	cvars[name]->getter = [&var] () { return to_string(var); };
 
@@ -188,7 +188,7 @@ void cvar_wrap_int(const string& name, int& var, const int& flags) {
 	cvars[name]->flags = flags;
 }
 
-void cvar_wrap_bool(const string& name, bool& var, const int& flags) {
+void cvar_base_s::wrap_bool(const string& name, bool& var, const int& flags) {
 	cvars[name] = make_unique<cvar_base_s>();
 	cvars[name]->getter = [&var] () { return var ? "true" : "false"; };
 
@@ -201,7 +201,7 @@ void cvar_wrap_bool(const string& name, bool& var, const int& flags) {
 	cvars[name]->flags = flags;
 }
 
-void cvar_wrap_maskflag(const string& name, int& mask, const int& flag, const int& flags) {
+void cvar_base_s::wrap_maskflag(const string& name, int& mask, const int& flag, const int& flags) {
 	cvars[name] = make_unique<cvar_base_s>();
 	cvars[name]->getter = [&mask, flag] () { return (mask & flag) ? "true" : "false"; };
 

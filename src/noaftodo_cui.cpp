@@ -165,15 +165,15 @@ void set_mode(const int& new_mode) {
 
 	switch (mode) {
 		case MODE_NORMAL:
-			if (cvar("tag_filter_copy") != "") {
-				tag_filter = cvar("tag_filter_copy");
-				cvar_erase("tag_filter_copy");
+			if (cvar_base_s::cvar("tag_filter_copy") != "") {
+				tag_filter = cvar_base_s::cvar("tag_filter_copy");
+				cvar_base_s::erase("tag_filter_copy");
 			}
 			curs_set(0);
 			break;
 		case MODE_LISTVIEW:
 			curs_set(0);
-			cvar("tag_filter_copy") = tag_filter;
+			cvar_base_s::cvar("tag_filter_copy") = tag_filter;
 			break;
 		case MODE_DETAILS:
 			if ((s_line < 0) || (s_line >= t_list.size())) {

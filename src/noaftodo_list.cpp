@@ -125,20 +125,20 @@ void load(const bool& load_workspace) {
 	bool safemode = true;
 
 	if (load_workspace) // clear cvars
-		for (int offset = 0; offset < cvars.size(); offset++) {
-			auto it = cvars.begin();
+		for (int offset = 0; offset < cvar_base_s::cvars.size(); offset++) {
+			auto it = cvar_base_s::cvars.begin();
 			for (int i = 0; i < offset; i++) it++;
 
-			if (cvar(it->first).flags & CVAR_FLAG_WS_IGNORE) continue;
+			if (cvar_base_s::cvar(it->first).flags & CVAR_FLAG_WS_IGNORE) continue;
 
-			log("Resetting cvar " + it->first + " from value " + cvar(it->first).getter());
+			log("Resetting cvar " + it->first + " from value " + cvar_base_s::cvar(it->first).getter());
 
-			if (cvar(it->first).predef_val == "") {
-				cvar_erase(it->first);
-				if (cvar_is_deletable(it->first)) offset--;
-			} else cvar(it->first).reset();
+			if (cvar_base_s::cvar(it->first).predef_val == "") {
+				cvar_base_s::erase(it->first);
+				if (cvar_base_s::is_deletable(it->first)) offset--;
+			} else cvar_base_s::cvar(it->first).reset();
 
-			log("to value " + cvar(it->first).getter());
+			log("to value " + cvar_base_s::cvar(it->first).getter());
 		}
 
 	auto t_list_copy = t_list;
@@ -343,11 +343,11 @@ int save(const string& save_filename) {
 
 	ofile << endl << "[workspace]" << endl;
 	ofile << "ver " << CONF_V << endl;
-	for (auto cvar_i = cvars.begin(); cvar_i != cvars.end(); cvar_i++) {
+	for (auto cvar_i = cvar_base_s::cvars.begin(); cvar_i != cvar_base_s::cvars.end(); cvar_i++) {
 		const string key = cvar_i->first;
-		if ((cvar(key).flags & CVAR_FLAG_WS_IGNORE) == 0) if (cvar(key).changed()) {
-			log("Setting workspace var " + key + " (" + to_string(cvar(key).flags) + " | " + to_string(cvar(key).flags & CVAR_FLAG_WS_IGNORE) + ")");
-			ofile << "set \"" << key << "\" \"" << cvar(key).getter() << "\"" << endl;
+		if ((cvar_base_s::cvar(key).flags & CVAR_FLAG_WS_IGNORE) == 0) if (cvar_base_s::cvar(key).changed()) {
+			log("Setting workspace var " + key + " (" + to_string(cvar_base_s::cvar(key).flags) + " | " + to_string(cvar_base_s::cvar(key).flags & CVAR_FLAG_WS_IGNORE) + ")");
+			ofile << "set \"" << key << "\" \"" << cvar_base_s::cvar(key).getter() << "\"" << endl;
 		}
 	}
 

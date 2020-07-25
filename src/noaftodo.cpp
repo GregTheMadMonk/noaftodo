@@ -235,7 +235,7 @@ string format_str(string str, li::entry* const list_entry, const bool& renotify)
 	while ((index = str.find("%N%")) 	!= string::npos) str.replace(index, 3, renotify ? "false" : "true");
 
 	// replace %cvars% with their values
-	for (auto it = cvars.begin(); it != cvars.end(); it++) {
+	for (auto it = cvar_base_s::cvars.begin(); it != cvar_base_s::cvars.end(); it++) {
 		while ((index = str.find("%%" + it->first + "%%")) != string::npos)
 			str.replace(index, 4 + it->first.length(), replace_special(*it->second));
 		while ((index = str.find("%" + it->first + "%")) != string::npos)

@@ -39,25 +39,25 @@ li::entry* sel_entry = nullptr;
 void init() {
 	buffer = "";
 
-	// "fake" cvars
+	// "fake" cvar_base_s::cvars
 	// CORE CVARS
-	cvar_wrap_bool("allow_root", allow_root);
-	cvar_wrap_bool("autorun_daemon", da_fork_autostart);
+	cvar_base_s::wrap_bool("allow_root", allow_root);
+	cvar_base_s::wrap_bool("autorun_daemon", da_fork_autostart);
 
-	cvar_wrap_string("cmd.contexec", cui::contexec_regex_filter);
+	cvar_base_s::wrap_string("cmd.contexec", cui::contexec_regex_filter);
 
-	cvar_wrap_int("mode", cui::mode, CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE);
-	cvars["mode"]->setter = [] (const string& val) {
+	cvar_base_s::wrap_int("mode", cui::mode, CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE);
+	cvar_base_s::cvars["mode"]->setter = [] (const string& val) {
 		try {
 			cui::set_mode(stoi(val));
 			return 0;
 		} catch (const invalid_argument& e) { return ERR_ARG_TYPE; }
 	};
-	cvars["mode"]->predefine("-1");
+	cvar_base_s::cvars["mode"]->predefine("-1");
 
 	// ENTRY FIELDS
-	cvar_wrap_int("id", s_line, CVAR_FLAG_NO_PREDEF);
-	cvars["id"]->setter = [] (const string& val) {
+	cvar_base_s::wrap_int("id", s_line, CVAR_FLAG_NO_PREDEF);
+	cvar_base_s::cvars["id"]->setter = [] (const string& val) {
 		bool is_visible = false;
 		for (int i = 0; i < t_list.size(); i++) is_visible |= cui::is_visible(i);
 		if (!is_visible) return; // don't try to set the ID when there's nothing on the screen
@@ -80,88 +80,88 @@ void init() {
 			}
 		} catch (const invalid_argument& e) {}
 	};
-	cvars["id"]->predefine("0");
+	cvar_base_s::cvars["id"]->predefine("0");
 
-	cvars["title"] = make_unique<cvar_base_s>();
-	cvars["title"]->getter = [] () {
+	cvar_base_s::cvars["title"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["title"]->getter = [] () {
 		if (sel_entry == nullptr)  return string("");
 		return sel_entry->title;
 	};
-	cvars["title"]->setter = [] (const string& val) {
+	cvar_base_s::cvars["title"]->setter = [] (const string& val) {
 		if (sel_entry == nullptr) return;
 		sel_entry->title = val;
 		if (li::autosave) li::save();
 	};
-	cvars["title"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvar_base_s::cvars["title"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
-	cvars["desc"] = make_unique<cvar_base_s>();
-	cvars["desc"]->getter = [] () {
+	cvar_base_s::cvars["desc"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["desc"]->getter = [] () {
 		if (sel_entry == nullptr)  return string("");
 		return sel_entry->description;
 	};
-	cvars["desc"]->setter = [] (const string& val) {
+	cvar_base_s::cvars["desc"]->setter = [] (const string& val) {
 		if (sel_entry == nullptr) return;
 		sel_entry->description = val;
 		if (li::autosave) li::save();
 	};
-	cvars["desc"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvar_base_s::cvars["desc"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
-	cvars["due"] = make_unique<cvar_base_s>();
-	cvars["due"]->getter = [] () {
+	cvar_base_s::cvars["due"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["due"]->getter = [] () {
 		if (sel_entry == nullptr)  return string("");
 		return ti_cmd_str(sel_entry->due);
 	};
-	cvars["due"]->setter = [] (const string& val) {
+	cvar_base_s::cvars["due"]->setter = [] (const string& val) {
 		if (sel_entry == nullptr) return;
 		sel_entry->due = ti_to_long(val);
 		if (li::autosave) li::save();
 	};
-	cvars["due"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvar_base_s::cvars["due"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
-	cvars["meta"] = make_unique<cvar_base_s>();
-	cvars["meta"]->getter = [] () {
+	cvar_base_s::cvars["meta"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["meta"]->getter = [] () {
 		if (sel_entry == nullptr)  return string("");
 		return sel_entry->meta_str();
 	};
-	cvars["meta"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvar_base_s::cvars["meta"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
-	cvars["comp"] = make_unique<cvar_base_s>();
-	cvars["comp"]->getter = [] ()  {
+	cvar_base_s::cvars["comp"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["comp"]->getter = [] ()  {
 		return (sel_entry == nullptr) ? "false" : (sel_entry->completed ? "true" : "false" );
 	};
-	cvars["comp"]->setter = [] (const string& val) {
+	cvar_base_s::cvars["comp"]->setter = [] (const string& val) {
 		if (sel_entry == nullptr) return;
 
 		if ((sel_entry->completed && (val != "true")) ||
 			(!sel_entry->completed && (val == "true")))
 				li::comp(s_line);
 	};
-	cvars["comp"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
-	cvars["comp"]->predefine("false");
+	cvar_base_s::cvars["comp"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvar_base_s::cvars["comp"]->predefine("false");
 
-	cvars["parent"] = make_unique<cvar_base_s>();
-	cvars["parent"]->getter = [] () {
+	cvar_base_s::cvars["parent"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["parent"]->getter = [] () {
 		if (sel_entry == nullptr)  return string("");
 		return to_string(sel_entry->tag);
 	};
-	cvars["parent"]->setter = [] (const string& val) {
+	cvar_base_s::cvars["parent"]->setter = [] (const string& val) {
 		if (sel_entry == nullptr) return;
 		try {
 			sel_entry->tag = stoi(val);
 			if (li::autosave) li::save();
 		} catch (const invalid_argument& e) { }
 	};
-	cvars["parent"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvar_base_s::cvars["parent"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
-	cvars["pname"] = make_unique<cvar_base_s>(); // parent [list] name
-	cvars["pname"]->getter = [] ()  {
+	cvar_base_s::cvars["pname"] = make_unique<cvar_base_s>(); // parent [list] name
+	cvar_base_s::cvars["pname"]->getter = [] ()  {
 		if (cui::tag_filter == cui::TAG_ALL) return string("All lists");
 
 		if (cui::tag_filter < t_tags.size()) return t_tags.at(cui::tag_filter);
 
 		return to_string(cui::tag_filter);
 	};
-	cvars["pname"]->setter = [] (const string& val) {
+	cvar_base_s::cvars["pname"]->setter = [] (const string& val) {
 		if (cui::tag_filter < 0) return;
 
 		while (cui::tag_filter >= t_tags.size()) t_tags.push_back(to_string(t_tags.size()));
@@ -170,14 +170,14 @@ void init() {
 
 		if (li::autosave) li::save();
 	};
-	cvars["pname"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvar_base_s::cvars["pname"]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
 
 	// FILTERS
-	cvar_wrap_string("norm.regex_filter", cui::normal_regex_filter);
-	cvar_wrap_string("livi.regex_filter", cui::listview_regex_filter);
+	cvar_base_s::wrap_string("norm.regex_filter", cui::normal_regex_filter);
+	cvar_base_s::wrap_string("livi.regex_filter", cui::listview_regex_filter);
 
-	cvar_wrap_int("tag_filter", cui::tag_filter);
-	cvars["tag_filter"]->setter = [] (const string& val) {
+	cvar_base_s::wrap_int("tag_filter", cui::tag_filter);
+	cvar_base_s::cvars["tag_filter"]->setter = [] (const string& val) {
 		try {
 			if (val == "all")  {
 				cui::tag_filter = cui::TAG_ALL;
@@ -189,14 +189,14 @@ void init() {
 			if (new_filter == cui::tag_filter) cui::tag_filter = cui::TAG_ALL;
 			else cui::tag_filter = new_filter;
 
-			cvars["pname"]->predefine(to_string(cui::tag_filter));
+			cvar_base_s::cvars["pname"]->predefine(to_string(cui::tag_filter));
 		} catch (const invalid_argument& e) {}
 	};
-	cvars["tag_filter"]->flags |= CVAR_FLAG_NO_PREDEF;
-	cvars["tag_filter"]->predefine("all");
+	cvar_base_s::cvars["tag_filter"]->flags |= CVAR_FLAG_NO_PREDEF;
+	cvar_base_s::cvars["tag_filter"]->predefine("all");
 
-	cvar_wrap_int("tag_filter_v", cui::tag_filter);
-	cvars["tag_filter_v"]->setter = [] (const string& val) {
+	cvar_base_s::wrap_int("tag_filter_v", cui::tag_filter);
+	cvar_base_s::cvars["tag_filter_v"]->setter = [] (const string& val) {
 		if (val == "all") {
 			cui::tag_filter = cui::TAG_ALL;
 			return;
@@ -222,16 +222,16 @@ void init() {
 					cui::tag_filter = t_tags.size() - 1;
 			}
 
-			cvars["pname"]->predefine(to_string(cui::tag_filter));
+			cvar_base_s::cvars["pname"]->predefine(to_string(cui::tag_filter));
 		} catch (const invalid_argument& e) {}
 	};
-	cvars["tag_filter_v"]->flags |= CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
-	cvars["tag_filter_v"]->predefine("-1");
+	cvar_base_s::cvars["tag_filter_v"]->flags |= CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+	cvar_base_s::cvars["tag_filter_v"]->predefine("-1");
 
-	cvar_wrap_int("filter", cui::filter);
+	cvar_base_s::wrap_int("filter", cui::filter);
 
-	cvar_wrap_string("sort_by", li::sort_order);
-	cvars["sort_by"]->setter = [] (const string& val) {
+	cvar_base_s::wrap_string("sort_by", li::sort_order);
+	cvar_base_s::cvars["sort_by"]->setter = [] (const string& val) {
 		li::sort_order = "";
 
 		for (const char& c : val)
@@ -243,116 +243,116 @@ void init() {
 	};
 
 	// FILTER BITS
-	cvar_wrap_maskflag("filter.uncat", cui::filter, cui::FILTER_UNCAT, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("filter.complete", cui::filter, cui::FILTER_COMPLETE, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("filter.coming", cui::filter, cui::FILTER_COMING, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("filter.failed", cui::filter, cui::FILTER_FAILED, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("filter.nodue", cui::filter, cui::FILTER_NODUE, CVAR_FLAG_WS_IGNORE);
-	cvar_wrap_maskflag("filter.empty", cui::filter, cui::FILTER_EMPTY);
+	cvar_base_s::wrap_maskflag("filter.uncat", cui::filter, cui::FILTER_UNCAT, CVAR_FLAG_WS_IGNORE);
+	cvar_base_s::wrap_maskflag("filter.complete", cui::filter, cui::FILTER_COMPLETE, CVAR_FLAG_WS_IGNORE);
+	cvar_base_s::wrap_maskflag("filter.coming", cui::filter, cui::FILTER_COMING, CVAR_FLAG_WS_IGNORE);
+	cvar_base_s::wrap_maskflag("filter.failed", cui::filter, cui::FILTER_FAILED, CVAR_FLAG_WS_IGNORE);
+	cvar_base_s::wrap_maskflag("filter.nodue", cui::filter, cui::FILTER_NODUE, CVAR_FLAG_WS_IGNORE);
+	cvar_base_s::wrap_maskflag("filter.empty", cui::filter, cui::FILTER_EMPTY);
 
 	// UI SETUP
-	cvar_wrap_int("halfdelay_time", cui::halfdelay_time);
+	cvar_base_s::wrap_int("halfdelay_time", cui::halfdelay_time);
 
-	cvar_wrap_bool("frameshift_multistr", cui::shift_multivars);
+	cvar_base_s::wrap_bool("frameshift_multistr", cui::shift_multivars);
 
-	cvar_wrap_string("norm.cols.all", cui::normal_all_cols);
-	cvar_wrap_string("norm.cols", cui::normal_cols);
-	cvar_wrap_string("livi.cols", cui::listview_cols);
-	cvar_wrap_string("det.cols", cui::details_cols);
+	cvar_base_s::wrap_string("norm.cols.all", cui::normal_all_cols);
+	cvar_base_s::wrap_string("norm.cols", cui::normal_cols);
+	cvar_base_s::wrap_string("livi.cols", cui::listview_cols);
+	cvar_base_s::wrap_string("det.cols", cui::details_cols);
 
-	cvar_wrap_string("norm.status_fields", cui::normal_status_fields);
-	cvar_wrap_string("livi.status_fields", cui::listview_status_fields);
+	cvar_base_s::wrap_string("norm.status_fields", cui::normal_status_fields);
+	cvar_base_s::wrap_string("livi.status_fields", cui::listview_status_fields);
 
 	// CHARACTER SET
-	cvar_wrap_multistr("charset.separators", cui::separators, 3);
-	cvar_wrap_multistr("charset.box_strong", cui::box_strong, 6);
-	cvar_wrap_multistr("charset.box_light", cui::box_light, 6);
+	cvar_base_s::wrap_multistr("charset.separators", cui::separators, 3);
+	cvar_base_s::wrap_multistr("charset.box_strong", cui::box_strong, 6);
+	cvar_base_s::wrap_multistr("charset.box_light", cui::box_light, 6);
 
 	// SINGLE CHARACTER WRAPPERS
-	cvar_wrap_multistr_element("charset.separators.row", cui::separators, cui::CHAR_ROW_SEP);
-	cvar_wrap_multistr_element("charset.separators.status", cui::separators, cui::CHAR_STA_SEP);
-	cvar_wrap_multistr_element("charset.separators.details", cui::separators, cui::CHAR_DET_SEP);
+	cvar_base_s::wrap_multistr_element("charset.separators.row", cui::separators, cui::CHAR_ROW_SEP);
+	cvar_base_s::wrap_multistr_element("charset.separators.status", cui::separators, cui::CHAR_STA_SEP);
+	cvar_base_s::wrap_multistr_element("charset.separators.details", cui::separators, cui::CHAR_DET_SEP);
 
-	cvar_wrap_multistr_element("charset.box_strong.v", cui::box_strong, cui::CHAR_VLINE);
-	cvar_wrap_multistr_element("charset.box_strong.h", cui::box_strong, cui::CHAR_HLINE);
-	cvar_wrap_multistr_element("charset.box_strong.corn1", cui::box_strong, cui::CHAR_CORN1);
-	cvar_wrap_multistr_element("charset.box_strong.corn2", cui::box_strong, cui::CHAR_CORN2);
-	cvar_wrap_multistr_element("charset.box_strong.corn3", cui::box_strong, cui::CHAR_CORN3);
-	cvar_wrap_multistr_element("charset.box_strong.corn4", cui::box_strong, cui::CHAR_CORN4);
-	cvar_wrap_multistr_element("charset.box_light.v", cui::box_light, cui::CHAR_VLINE);
-	cvar_wrap_multistr_element("charset.box_light.h", cui::box_light, cui::CHAR_HLINE);
-	cvar_wrap_multistr_element("charset.box_light.corn1", cui::box_light, cui::CHAR_CORN1);
-	cvar_wrap_multistr_element("charset.box_light.corn2", cui::box_light, cui::CHAR_CORN2);
-	cvar_wrap_multistr_element("charset.box_light.corn3", cui::box_light, cui::CHAR_CORN3);
-	cvar_wrap_multistr_element("charset.box_light.corn4", cui::box_light, cui::CHAR_CORN4);
+	cvar_base_s::wrap_multistr_element("charset.box_strong.v", cui::box_strong, cui::CHAR_VLINE);
+	cvar_base_s::wrap_multistr_element("charset.box_strong.h", cui::box_strong, cui::CHAR_HLINE);
+	cvar_base_s::wrap_multistr_element("charset.box_strong.corn1", cui::box_strong, cui::CHAR_CORN1);
+	cvar_base_s::wrap_multistr_element("charset.box_strong.corn2", cui::box_strong, cui::CHAR_CORN2);
+	cvar_base_s::wrap_multistr_element("charset.box_strong.corn3", cui::box_strong, cui::CHAR_CORN3);
+	cvar_base_s::wrap_multistr_element("charset.box_strong.corn4", cui::box_strong, cui::CHAR_CORN4);
+	cvar_base_s::wrap_multistr_element("charset.box_light.v", cui::box_light, cui::CHAR_VLINE);
+	cvar_base_s::wrap_multistr_element("charset.box_light.h", cui::box_light, cui::CHAR_HLINE);
+	cvar_base_s::wrap_multistr_element("charset.box_light.corn1", cui::box_light, cui::CHAR_CORN1);
+	cvar_base_s::wrap_multistr_element("charset.box_light.corn2", cui::box_light, cui::CHAR_CORN2);
+	cvar_base_s::wrap_multistr_element("charset.box_light.corn3", cui::box_light, cui::CHAR_CORN3);
+	cvar_base_s::wrap_multistr_element("charset.box_light.corn4", cui::box_light, cui::CHAR_CORN4);
 
 	// CHARACTER SET: MISC
-	cvar_wrap_int("charset.separators.row.offset", cui::row_separator_offset);
+	cvar_base_s::wrap_int("charset.separators.row.offset", cui::row_separator_offset);
 
 	// COLORSCHEME
-	cvar_wrap_int("colors.title", cui::color_title);
-	cvar_wrap_int("colors.status", cui::color_status);
-	cvar_wrap_int("colors.entry_completed", cui::color_complete);
-	cvar_wrap_int("colors.entry_coming", cui::color_coming);
-	cvar_wrap_int("colors.entry_failed", cui::color_failed);
+	cvar_base_s::wrap_int("colors.title", cui::color_title);
+	cvar_base_s::wrap_int("colors.status", cui::color_status);
+	cvar_base_s::wrap_int("colors.entry_completed", cui::color_complete);
+	cvar_base_s::wrap_int("colors.entry_coming", cui::color_coming);
+	cvar_base_s::wrap_int("colors.entry_failed", cui::color_failed);
 
 	// DAEMON ACTIONS
-	cvar_wrap_string("on_daemon_launch_action", da_launch_action);
-	cvar_wrap_string("on_task_failed_action", da_task_failed_action);
-	cvar_wrap_string("on_task_coming_action", da_task_coming_action);
-	cvar_wrap_string("on_task_completed_action", da_task_completed_action);
-	cvar_wrap_string("on_task_uncompleted_action", da_task_uncompleted_action);
-	cvar_wrap_string("on_task_new_action", da_task_new_action);
-	cvar_wrap_string("on_task_edited_action", da_task_edited_action);
-	cvar_wrap_string("on_task_removed_action", da_task_removed_action);
+	cvar_base_s::wrap_string("on_daemon_launch_action", da_launch_action);
+	cvar_base_s::wrap_string("on_task_failed_action", da_task_failed_action);
+	cvar_base_s::wrap_string("on_task_coming_action", da_task_coming_action);
+	cvar_base_s::wrap_string("on_task_completed_action", da_task_completed_action);
+	cvar_base_s::wrap_string("on_task_uncompleted_action", da_task_uncompleted_action);
+	cvar_base_s::wrap_string("on_task_new_action", da_task_new_action);
+	cvar_base_s::wrap_string("on_task_edited_action", da_task_edited_action);
+	cvar_base_s::wrap_string("on_task_removed_action", da_task_removed_action);
 
 	// HELPER CVARS
-	cvars["last_v_id"] = make_unique<cvar_base_s>();
-	cvars["last_v_id"]->getter = [] ()  {
+	cvar_base_s::cvars["last_v_id"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["last_v_id"]->getter = [] ()  {
 		int ret = -1;
 		for (int i = 0; i < t_list.size(); i++)
 			if (cui::is_visible(i)) ret = i;
 
 		return to_string(ret);
 	};
-	cvars["last_v_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	cvar_base_s::cvars["last_v_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
-	cvars["first_v_id"] = make_unique<cvar_base_s>();
-	cvars["first_v_id"]->getter = [] ()  {
+	cvar_base_s::cvars["first_v_id"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["first_v_id"]->getter = [] ()  {
 		for (int i = 0; i < t_list.size(); i++)
 			if (cui::is_visible(i)) return to_string(i);
 
 		return string("-1");
 	};
-	cvars["first_v_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	cvar_base_s::cvars["first_v_id"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
-	cvars["last_v_list"] = make_unique<cvar_base_s>();
-	cvars["last_v_list"]->getter = [] ()  {
+	cvar_base_s::cvars["last_v_list"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["last_v_list"]->getter = [] ()  {
 		int ret = -1;
 		for (int i = 0; i < t_tags.size(); i++)
 			if (cui::l_is_visible(i)) ret = i;
 
 		return to_string(ret);
 	};
-	cvars["last_v_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	cvar_base_s::cvars["last_v_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
-	cvars["first_v_list"] = make_unique<cvar_base_s>();
-	cvars["first_v_list"]->getter = [] ()  {
+	cvar_base_s::cvars["first_v_list"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["first_v_list"]->getter = [] ()  {
 		for (int i = 0; i < t_tags.size(); i++)
 			if (cui::l_is_visible(i)) return to_string(i);
 
 		return string("-1");
 	};
-	cvars["first_v_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	cvar_base_s::cvars["first_v_list"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 
-	cvar_wrap_int("numbuffer", cui::numbuffer, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
-	cvars["numbuffer"]->predefine("-1");
+	cvar_base_s::wrap_int("numbuffer", cui::numbuffer, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
+	cvar_base_s::cvars["numbuffer"]->predefine("-1");
 
-	cvar_wrap_string("ret", retval, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
+	cvar_base_s::wrap_string("ret", retval, CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF);
 
-	cvars["VER"] = make_unique<cvar_base_s>();
-	cvars["VER"]->getter = [] () { return VERSION; };
-	cvars["VER"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
+	cvar_base_s::cvars["VER"] = make_unique<cvar_base_s>();
+	cvar_base_s::cvars["VER"]->getter = [] () { return VERSION; };
+	cvar_base_s::cvars["VER"]->flags = CVAR_FLAG_RO | CVAR_FLAG_WS_IGNORE | CVAR_FLAG_NO_PREDEF;
 }
 
 vector<string> cmdbreak(const string& cmdline) {
