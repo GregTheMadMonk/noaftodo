@@ -122,7 +122,9 @@ void noaftodo_exit(const int& val = 0);
 
 void log(const std::string& message, const char& prefix = LP_DEFAULT, const int& sleep_sec = 0);
 
-std::string format_str(std::string str, li::entry* const li_entry, const bool& renotify = false);
+void select_entry(li::entry* const list_entry);
+
+std::string format_str(std::string str, li::entry* const list_entry, const bool& renotify = false);
 
 std::string replace_special(std::string str);
 

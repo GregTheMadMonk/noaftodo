@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <pwd.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -218,8 +219,39 @@ void noaftodo_exit(const int& val) {
 	else exit(val);
 }
 
-string format_str(string str, li::entry* const list_entry, const bool& renotify) {
+void select_entry(li::entry* const list_entry) {
+	for (auto it = cvar_base_s::cvars.begin(); it != cvar_base_s::cvars.end(); )
+	{
+		log(it->first);
+		if (it->first.find("meta.") == 0) // clean up old %meta.prop_name% cvars
+		{
+			log("*");
+			it = cvar_base_s::cvars.erase(it);
+		}
+		else it++;
+	}
+
 	cmd::sel_entry = list_entry;
+
+	// and populate new
+	if (cmd::sel_entry != nullptr)
+		for (auto it = cmd::sel_entry->meta.begin(); it != cmd::sel_entry->meta.end(); it++) {
+			const string name = it->first;
+			log(name);
+			cvar_base_s::cvars["meta." + name] = make_unique<cvar_base_s>();
+			cvar_base_s::cvars["meta." + name]->getter = [name] () {
+				return cmd::sel_entry->get_meta(name);
+			};
+			cvar_base_s::cvars["meta." + name]->setter = [name] (const string& val) {
+				cmd::sel_entry->meta[name] = val;
+			};
+			cvar_base_s::cvars["meta." + name]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+		}
+}
+
+string format_str(string str, li::entry* const list_entry, const bool& renotify) {
+	if (list_entry != cmd::sel_entry)
+		select_entry(list_entry);
 
 	int index = -1;
 
