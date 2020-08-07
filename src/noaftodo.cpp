@@ -242,6 +242,15 @@ string format_str(string str, li::entry* const list_entry, const bool& renotify)
 			str.replace(index, 2 + it->first.length(), *it->second);
 	}
 
+	// replace %meta.property% for selected entry with value
+	if (cmd::sel_entry != nullptr)
+		for (auto it = cmd::sel_entry->meta.begin(); it != cmd::sel_entry->meta.end(); it++) {
+			while ((index = str.find("%%meta." + it->first + "%%")) != string::npos)
+				str.replace(index, 9 + it->first.length(), replace_special(it->second));
+			while ((index = str.find("%meta." + it->first + "%")) != string::npos)
+				str.replace(index, 7 + it->first.length(), it->second);
+		}
+
 	return str;
 }
 
