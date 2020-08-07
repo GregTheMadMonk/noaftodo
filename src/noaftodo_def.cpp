@@ -310,7 +310,11 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 				return 0;
 			}
 
-			cvar(args.at(0)) = args.at(1);
+			if (args.at(0).find("meta.") == 0) {
+				sel_entry->meta[args.at(0).substr(5)] = args.at(1);
+				select_entry(sel_entry); // will regenerate meta variables
+			} else cvar(args.at(0)) = args.at(1);
+
 			return 0;
 		}
 	},
