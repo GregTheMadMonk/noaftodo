@@ -221,15 +221,9 @@ void noaftodo_exit(const int& val) {
 
 void select_entry(li::entry* const list_entry) {
 	for (auto it = cvar_base_s::cvars.begin(); it != cvar_base_s::cvars.end(); )
-	{
-		log(it->first);
 		if (it->first.find("meta.") == 0) // clean up old %meta.prop_name% cvars
-		{
-			log("*");
 			it = cvar_base_s::cvars.erase(it);
-		}
 		else it++;
-	}
 
 	cmd::sel_entry = list_entry;
 
@@ -237,7 +231,6 @@ void select_entry(li::entry* const list_entry) {
 	if (cmd::sel_entry != nullptr)
 		for (auto it = cmd::sel_entry->meta.begin(); it != cmd::sel_entry->meta.end(); it++) {
 			const string name = it->first;
-			log(name);
 			cvar_base_s::cvars["meta." + name] = make_unique<cvar_base_s>();
 			cvar_base_s::cvars["meta." + name]->getter = [name] () {
 				return cmd::sel_entry->get_meta(name);
@@ -273,15 +266,6 @@ string format_str(string str, li::entry* const list_entry, const bool& renotify)
 		while ((index = str.find("%" + it->first + "%")) != string::npos)
 			str.replace(index, 2 + it->first.length(), *it->second);
 	}
-
-	// replace %meta.property% for selected entry with value
-	if (cmd::sel_entry != nullptr)
-		for (auto it = cmd::sel_entry->meta.begin(); it != cmd::sel_entry->meta.end(); it++) {
-			while ((index = str.find("%%meta." + it->first + "%%")) != string::npos)
-				str.replace(index, 9 + it->first.length(), replace_special(it->second));
-			while ((index = str.find("%meta." + it->first + "%")) != string::npos)
-				str.replace(index, 7 + it->first.length(), it->second);
-		}
 
 	return str;
 }
