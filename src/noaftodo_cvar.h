@@ -45,7 +45,6 @@ struct cvar_base_s {	// a base structure for cvars
 	// static members
 	static std::map<std::string, std::unique_ptr<cvar_base_s>> cvars;
 
-	static cvar_base_s& cvar(const std::string& name);
 	static void reset(const std::string& name);
 	static void erase(const std::string& name);
 
@@ -64,5 +63,7 @@ struct cvar_s : public cvar_base_s { // a regular cvar
 
 	cvar_s(const std::string& def_val = "");
 };
+
+cvar_base_s& cvar(const std::string& name);
 
 #endif

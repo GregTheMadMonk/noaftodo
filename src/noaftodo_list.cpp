@@ -129,16 +129,16 @@ void load(const bool& load_workspace) {
 			auto it = cvar_base_s::cvars.begin();
 			for (int i = 0; i < offset; i++) it++;
 
-			if (cvar_base_s::cvar(it->first).flags & CVAR_FLAG_WS_IGNORE) continue;
+			if (cvar(it->first).flags & CVAR_FLAG_WS_IGNORE) continue;
 
-			log("Resetting cvar " + it->first + " from value " + cvar_base_s::cvar(it->first).getter());
+			log("Resetting cvar " + it->first + " from value " + cvar(it->first).getter());
 
-			if (cvar_base_s::cvar(it->first).predef_val == "") {
+			if (cvar(it->first).predef_val == "") {
 				cvar_base_s::erase(it->first);
 				if (cvar_base_s::is_deletable(it->first)) offset--;
-			} else cvar_base_s::cvar(it->first).reset();
+			} else cvar(it->first).reset();
 
-			log("to value " + cvar_base_s::cvar(it->first).getter());
+			log("to value " + cvar(it->first).getter());
 		}
 
 	auto t_list_copy = t_list;
@@ -345,9 +345,9 @@ int save(const string& save_filename) {
 	ofile << "ver " << CONF_V << endl;
 	for (auto cvar_i = cvar_base_s::cvars.begin(); cvar_i != cvar_base_s::cvars.end(); cvar_i++) {
 		const string key = cvar_i->first;
-		if ((cvar_base_s::cvar(key).flags & CVAR_FLAG_WS_IGNORE) == 0) if (cvar_base_s::cvar(key).changed()) {
-			log("Setting workspace var " + key + " (" + to_string(cvar_base_s::cvar(key).flags) + " | " + to_string(cvar_base_s::cvar(key).flags & CVAR_FLAG_WS_IGNORE) + ")");
-			ofile << "set \"" << key << "\" \"" << cvar_base_s::cvar(key).getter() << "\"" << endl;
+		if ((cvar(key).flags & CVAR_FLAG_WS_IGNORE) == 0) if (cvar(key).changed()) {
+			log("Setting workspace var " + key + " (" + to_string(cvar(key).flags) + " | " + to_string(cvar(key).flags & CVAR_FLAG_WS_IGNORE) + ")");
+			ofile << "set \"" << key << "\" \"" << cvar(key).getter() << "\"" << endl;
 		}
 	}
 

@@ -269,20 +269,20 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 						break;
 					case '=':
 						if (args.size() < 4) retval = (a == b) ? "true" : "false";
-						else cvar_base_s::cvar(args.at(3)).setter((a == b) ? "true" : "false");
+						else cvar(args.at(3)).setter((a == b) ? "true" : "false");
 						return 0;
 					case '<':
 						if (args.size() < 4) retval = (a < b) ? "true" : "false";
-						else cvar_base_s::cvar(args.at(3)).setter((a < b) ? "true" : "false");
+						else cvar(args.at(3)).setter((a < b) ? "true" : "false");
 						return 0;
 					case '>':
 						if (args.size() > 4) retval = (a > b) ? "true" : "false";
-						else cvar_base_s::cvar(args.at(3)).setter((a > b) ? "true" : "false");
+						else cvar(args.at(3)).setter((a > b) ? "true" : "false");
 						return 0;
 				}
 
 				if (args.size() < 4) retval = to_string(result);
-				else cvar_base_s::cvar(args.at(3)).setter(to_string(result));
+				else cvar(args.at(3)).setter(to_string(result));
 			} catch (const invalid_argument& e) { return ERR_ARG_TYPE; }
 
 			return 0;
@@ -310,7 +310,7 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 				return 0;
 			}
 
-			cvar_base_s::cvar(args.at(0)) = args.at(1);
+			cvar(args.at(0)) = args.at(1);
 			return 0;
 		}
 	},

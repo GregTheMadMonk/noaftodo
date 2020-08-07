@@ -71,8 +71,8 @@ void load(const string& file, const bool& predefine_cvars, const bool& create_te
 	if (!predefine_cvars) return;
 
 	for (auto it = cvar_base_s::cvars.begin(); it != cvar_base_s::cvars.end(); it++)
-		if ((cvar_base_s::cvar(it->first).flags & CVAR_FLAG_NO_PREDEF) == 0)
-			cvar_base_s::cvar(it->first).predefine();
+		if ((cvar(it->first).flags & CVAR_FLAG_NO_PREDEF) == 0)
+			cvar(it->first).predefine();
 }
 
 }

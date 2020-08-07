@@ -79,11 +79,11 @@ cvar_s::cvar_s(const string& def_val) {
 	this->setter = [this] (const string& val) { this->value = val; };
 }
 
-cvar_base_s& cvar_base_s::cvar(const string& name) {
+cvar_base_s& cvar(const string& name) {
 	try {
-		return *cvars.at(name);
+		return *cvar_base_s::cvars.at(name);
 	} catch (const out_of_range& e) {
-		return *(cvars[name] = make_unique<cvar_s>()); // otherwise cvars[name] would automatically create
+		return *(cvar_base_s::cvars[name] = make_unique<cvar_s>()); // otherwise cvars[name] would automatically create
 							// cvar_base_s, which is basically empty
 	}
 }
