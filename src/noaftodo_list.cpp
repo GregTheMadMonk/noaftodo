@@ -395,7 +395,7 @@ void add(const entry& entry) {
 	sort();
 	if (autosave) save();
 
-	da_send("A");
+	da::send("A");
 }
 
 void comp(const int& entryID) {
@@ -408,7 +408,7 @@ void comp(const int& entryID) {
 
 	if (autosave) save();
 
-	da_send("C");
+	da::send("C");
 }
 
 void rem(const int& entryID) {
@@ -422,7 +422,7 @@ void rem(const int& entryID) {
 
 	if (autosave) save();
 
-	da_send("R");
+	da::send("R");
 }
 
 void sort() {

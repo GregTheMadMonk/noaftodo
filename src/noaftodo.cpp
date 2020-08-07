@@ -82,12 +82,12 @@ int main(int argc, char* argv[]) {
 		}
 		// argument "-k, --kill-daemon" - kill daemon
 		else if (strcmp(argv[i], "-k") * strcmp(argv[i], "--kill-daemon") == 0) {
-			da_kill();
+			da::kill();
 			noaftodo_exit();
 		}
 		// argument "-r, --refire" - if daemon is running, re-fire startup events (like, notifications)
 		else if (strcmp(argv[i], "-r") * strcmp(argv[i], "--refire") == 0) {
-			da_send("N");
+			da::send("N");
 			noaftodo_exit();
 		}
 		// argument "-c, --config" - specify config file
@@ -148,7 +148,7 @@ int main(int argc, char* argv[]) {
 
 	if (run_mode == PM_DEFAULT)	 {
 		// if this option is enabled, start daemon in the forked process
-		if (da_fork_autostart && !da_check_lockfile())
+		if (da::fork_autostart && !da::check_lockfile())
 			switch (fork()) {
 				case -1:
 					log("Error creating fork for daemon", LP_ERROR);
@@ -156,7 +156,7 @@ int main(int argc, char* argv[]) {
 				case 0: // child - daemon
 					run_mode = PM_DAEMON;
 					enable_log = false;
-					da_clients = 1; // care about clients, shut down when there's none
+					da::clients = 1; // care about clients, shut down when there's none
 					break;
 				default:
 					cui::run();
@@ -164,12 +164,12 @@ int main(int argc, char* argv[]) {
 			}
 		else
 		{
-			da_send("S");
+			da::send("S");
 			cui::run();
 		}
 	}
 
-	if (run_mode == PM_DAEMON)	da_run();
+	if (run_mode == PM_DAEMON)	da::run();
 
 	return exit_value;
 }
@@ -214,7 +214,7 @@ void noaftodo_exit(const int& val) {
 	// otherwise, notify components: they have to finish
 	// their job first
 	if (cui::active) { cui::mode = cui::MODE_EXIT; exit_value = val; }
-	else if ((run_mode == PM_DAEMON) && da_running) { da_running = false; exit_value = val; }
+	else if ((run_mode == PM_DAEMON) && da::running) { da::running = false; exit_value = val; }
 	else exit(val);
 }
 

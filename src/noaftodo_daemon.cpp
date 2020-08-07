@@ -27,44 +27,35 @@ using cmd::exec;
 
 using cui::s_line;
 
-bool da_fork_autostart = true;
+namespace da {
 
-string da_launch_action;
-string da_task_failed_action;
-string da_task_coming_action;
-string da_task_completed_action;
-string da_task_uncompleted_action;
-string da_task_new_action;
-string da_task_edited_action;
-string da_task_removed_action;
-
-bool da_running = false;
-int da_clients = -1; // -1 if we don't care. Other numbers indicate
+bool running = false;
+int clients = -1; // -1 if we don't care. Other numbers indicate
 			// amount of active noaftodo clients
 
-int da_interval = 1;
+int interval = 1;
 
-vector<li::entry> da_cache;
-long da_cached_time = 0;
+vector<li::entry> cache;
+long cached_time = 0;
 
-void da_run() {
+void run() {
 	// init cache
-	if (da_check_lockfile()) {
-		log("Lockfile " + string(DA_LOCK_FILE) + " exists. If daemon is not running, you can delete it or run noaftodo -k.", LP_ERROR);
+	if (check_lockfile()) {
+		log("Lockfile " + string(LOCK_FILE) + " exists. If daemon is not running, you can delete it or run noaftodo -k.", LP_ERROR);
 		return;
 	} else {
-		da_lock();
+		lock();
 	}
 
-	da_cache.clear();
+	cache.clear();
 
 #ifndef NO_MQUEUE
 	log("Opening a message queue...");
 	mq_attr attr;
 	attr.mq_maxmsg = 10;
-	attr.mq_msgsize = DA_MSGSIZE;
+	attr.mq_msgsize = MSGSIZE;
 	attr.mq_flags = 0;
-	mqd_t mq = mq_open(DA_MQ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &attr);
+	mqd_t mq = mq_open(MQ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &attr);
 
 	if (mq == -1) {
 		log("Failed!", LP_ERROR);
@@ -73,26 +64,26 @@ void da_run() {
 	log("OK");
 #endif
 
-	exec(format_str(da_launch_action, nullptr, true));
+	exec(format_str(launch_action, nullptr, true));
 
-	da_running = true;
+	running = true;
 	timespec tout;
 
-	da_upd_cache(true);
-	da_cached_time = ti_to_long("a0d");
+	upd_cache(true);
+	cached_time = ti_to_long("a0d");
 
-	while (da_running) {
-		if (li::has_changed()) da_upd_cache();
+	while (running) {
+		if (li::has_changed()) upd_cache();
 
-		da_check_dues();
+		check_dues();
 
-		da_cached_time = ti_to_long("a0d");
+		cached_time = ti_to_long("a0d");
 
 #ifdef NO_MQUEUE
 		string msg;
 		vector<string> msgs;
 		auto getmsg = [&msgs] () {
-			ifstream q_in(DA_MQ_NAME);
+			ifstream q_in(MQ_NAME);
 
 			if (!q_in.good()) return;
 
@@ -102,17 +93,17 @@ void da_run() {
 
 			q_in.close();
 
-			remove(DA_MQ_NAME);
+			remove(MQ_NAME);
 		};
 
 		getmsg();
 #else
-		char msg[DA_MSGSIZE];
+		char msg[MSGSIZE];
 
 		clock_gettime(CLOCK_REALTIME, &tout);
-		tout.tv_sec += da_interval;
+		tout.tv_sec += interval;
 
-		int status = mq_timedreceive(mq, msg, DA_MSGSIZE, NULL, &tout);
+		int status = mq_timedreceive(mq, msg, MSGSIZE, NULL, &tout);
 
 		clock_gettime(CLOCK_REALTIME, &tout);
 #endif
@@ -130,21 +121,21 @@ void da_run() {
 
 			switch (msg[0]) {
 				case 'K':
-					da_running = false;
+					running = false;
 					break;
 				case 'N':
-					da_check_dues(true);
+					check_dues(true);
 					break;
 				case 'C':
-					da_upd_cache();
+					upd_cache();
 					break;
 				case 'S':
-					if (da_clients != -1) da_clients++;
+					if (clients != -1) clients++;
 					break;
 				case 'D':
-					if (da_clients != -1) {
-						da_clients--;
-						if (da_clients == 0) da_running = false;
+					if (clients != -1) {
+						clients--;
+						if (clients == 0) running = false;
 					}
 					break;
 			}
@@ -152,28 +143,28 @@ void da_run() {
 #ifdef NO_MQUEUE
 			getmsg();
 #else
-			status = mq_timedreceive(mq, msg, DA_MSGSIZE, NULL, &tout);
+			status = mq_timedreceive(mq, msg, MSGSIZE, NULL, &tout);
 #endif
 		}
 
 #ifdef NO_MQUEUE
-		sleep(da_interval);
+		sleep(interval);
 #endif
 	}
 
 #ifdef NO_MQUEUE
 	log("Removing queue file (NO_MQUEUE)...");
-	remove(DA_MQ_NAME);
+	remove(MQ_NAME);
 #else
 	log("Closing message queue...");
 	mq_close(mq);
-	mq_unlink(DA_MQ_NAME);
+	mq_unlink(MQ_NAME);
 #endif
 
-	da_unlock();
+	unlock();
 }
 
-void da_upd_cache(const bool& is_first_load) {
+void upd_cache(const bool& is_first_load) {
 	log("Updating daemon cache...", LP_IMPORTANT);
 	li::load();
 
@@ -183,8 +174,8 @@ void da_upd_cache(const bool& is_first_load) {
 		s_line = i;
 		int cached_id = -1;
 
-		for (int j = 0; j < da_cache.size(); j++)
-			if (da_cache.at(j).get_meta("eid") == t_list_copy.at(i).get_meta("eid")) {
+		for (int j = 0; j < cache.size(); j++)
+			if (cache.at(j).get_meta("eid") == t_list_copy.at(i).get_meta("eid")) {
 				cached_id  = j;
 				break;
 			}
@@ -193,26 +184,26 @@ void da_upd_cache(const bool& is_first_load) {
 
 		if (cached_id == -1)
 		{	// add to cache
-			da_cache.push_back(li_e);
+			cache.push_back(li_e);
 
 			if (li_e.completed) {
 				if (li_e.get_meta("ignore_global_on_completed") != "true")
-					exec(format_str(da_task_completed_action, &li_e, is_first_load));
+					exec(format_str(task_completed_action, &li_e, is_first_load));
 			} else if (li_e.is_failed()) {
 				if (li_e.get_meta("ignore_global_on_failed") != "true")
-					exec(format_str(da_task_failed_action, &li_e, is_first_load));
+					exec(format_str(task_failed_action, &li_e, is_first_load));
 			} else if (li_e.is_coming()) {
 				if (li_e.get_meta("ignore_global_on_coming") != "true")
-					exec(format_str(da_task_coming_action, &li_e, is_first_load));
+					exec(format_str(task_coming_action, &li_e, is_first_load));
 			} else if (!is_first_load) {
-					exec(format_str(da_task_new_action, &li_e, is_first_load));
+					exec(format_str(task_new_action, &li_e, is_first_load));
 			}
 
 			continue;
 		}
 
-		const li::entry ca_e = da_cache.at(cached_id);
-		da_cache[cached_id] = li_e;
+		const li::entry ca_e = cache.at(cached_id);
+		cache[cached_id] = li_e;
 
 		if (ca_e == li_e) continue; // skip the unchanged entries
 
@@ -220,17 +211,17 @@ void da_upd_cache(const bool& is_first_load) {
 		if (ca_e.completed != li_e.completed) {
 			if (li_e.completed) {
 				if (li_e.get_meta("ignore_global_on_completed") != "true")
-					exec(format_str(da_task_completed_action, &li_e, false));
+					exec(format_str(task_completed_action, &li_e, false));
 				exec(format_str(li_e.get_meta("on_completed"), &li_e, false));
 			} else if (li_e.is_failed()) {
 				if (li_e.get_meta("ignore_global_on_failed") != "true")
-					exec(format_str(da_task_failed_action, &li_e, true));
+					exec(format_str(task_failed_action, &li_e, true));
 			} else if (li_e.is_coming()) {
 				if (li_e.get_meta("ignore_global_on_coming") != "true")
-					exec(format_str(da_task_coming_action, &li_e, true));
+					exec(format_str(task_coming_action, &li_e, true));
 			} else {
 				if (li_e.get_meta("ignore_global_on_uncompleted") != "true")
-					exec(format_str(da_task_uncompleted_action, &li_e, true));
+					exec(format_str(task_uncompleted_action, &li_e, true));
 				exec(format_str(li_e.get_meta("on_uncompleted"), &li_e, true));
 			}
 		}
@@ -240,7 +231,7 @@ void da_upd_cache(const bool& is_first_load) {
 			       || (ca_e.title != li_e.title) || (ca_e.description != li_e.description))
 		{
 			if (li_e.get_meta("ignore_global_on_edited") != "true")
-				exec(format_str(da_task_edited_action, &li_e, true));
+				exec(format_str(task_edited_action, &li_e, true));
 			exec(format_str(li_e.get_meta("on_edited"), &li_e, true));
 		}
 
@@ -254,38 +245,38 @@ void da_upd_cache(const bool& is_first_load) {
 	s_line = -1;
 
 	// clear cache from deleted tasks
-	for (int i = 0; i < da_cache.size();) {
+	for (int i = 0; i < cache.size();) {
 		bool removed = true;
 		for (int j = 0; j < t_list.size(); j++)
-			removed &= !t_list.at(j).sim(da_cache.at(i));
+			removed &= !t_list.at(j).sim(cache.at(i));
 
 		if (removed) {
-			if (da_cache.at(i).get_meta("ignore_global_on_removed") != "true")
-				exec(format_str(da_task_removed_action, &da_cache.at(i)));
-			da_cache.erase(da_cache.begin() + i);
+			if (cache.at(i).get_meta("ignore_global_on_removed") != "true")
+				exec(format_str(task_removed_action, &cache.at(i)));
+			cache.erase(cache.begin() + i);
 		} else i++;
 	}
 
 	if (t_list != t_list_copy)  {
 		li::save();
-		da_upd_cache(); // I'm sorry
+		upd_cache(); // I'm sorry
 	}
 }
 
-void da_check_dues(const bool& renotify) {
+void check_dues(const bool& renotify) {
 	const auto t_list_copy = t_list;
-	// da_check_dues supposes that the cache is up to date with the list
-	// and da_cache and t_list contain the same entries
+	// check_dues supposes that the cache is up to date with the list
+	// and cache and t_list contain the same entries
 	for (s_line = 0; s_line < t_list.size(); s_line++)	 {
-		if ((t_list.at(s_line).is_failed()) && (renotify || (t_list.at(s_line).due > da_cached_time))) {
+		if ((t_list.at(s_line).is_failed()) && (renotify || (t_list.at(s_line).due > cached_time))) {
 			if (t_list.at(s_line).get_meta("ignore_global_on_failed") != "true")
-				exec(format_str(da_task_failed_action, &t_list.at(s_line), renotify));
+				exec(format_str(task_failed_action, &t_list.at(s_line), renotify));
 			if (!renotify)
 				exec(format_str(t_list.at(s_line).get_meta("on_failed"), &t_list.at(s_line)));
 		}
-		else if ((t_list.at(s_line).is_coming()) && (renotify || (t_list.at(s_line).due > ti_to_long(ti_cmd_str(da_cached_time) + "a" + t_list.at(s_line).get_meta("warn_time", "1d"))))) {
+		else if ((t_list.at(s_line).is_coming()) && (renotify || (t_list.at(s_line).due > ti_to_long(ti_cmd_str(cached_time) + "a" + t_list.at(s_line).get_meta("warn_time", "1d"))))) {
 			if (t_list.at(s_line).get_meta("ignore_global_on_coming") != "true")
-				exec(format_str(da_task_coming_action, &t_list.at(s_line), renotify));
+				exec(format_str(task_coming_action, &t_list.at(s_line), renotify));
 			if (!renotify)
 				exec(format_str(t_list.at(s_line).get_meta("on_coming"), &t_list.at(s_line)));
 		}
@@ -295,28 +286,28 @@ void da_check_dues(const bool& renotify) {
 
 	if (t_list != t_list_copy)  {
 		li::save();
-		da_upd_cache(); // I'm sorry
+		upd_cache(); // I'm sorry
 	}
 }
 
-void da_kill() {
+void kill() {
 	log("Killing the daemon...");
-	da_send("K");
-	da_unlock();
+	send("K");
+	unlock();
 #ifndef NO_MQUEUE
-	mq_unlink(DA_MQ_NAME);
+	mq_unlink(MQ_NAME);
 #endif
 }
 
-void da_send(const char message[]) {
-	if (!da_check_lockfile()) {
+void send(const char message[]) {
+	if (!check_lockfile()) {
 		log("Lock file not found. Run or restart the daemon. Message not sent!", LP_ERROR);
 		return;
 	}
 
 #ifdef NO_MQUEUE
 	log("Sending a message (NO_MQUEUE)...");
-	ofstream q_file(DA_MQ_NAME, std::ios_base::app);
+	ofstream q_file(MQ_NAME, std::ios_base::app);
 
 	q_file << message << endl;
 
@@ -328,9 +319,9 @@ void da_send(const char message[]) {
 	log("Opening a message queue...");
 	mq_attr attr;
 	attr.mq_maxmsg = 10;
-	attr.mq_msgsize = DA_MSGSIZE;
+	attr.mq_msgsize = MSGSIZE;
 	attr.mq_flags = 0;
-	mqd_t mq = mq_open(DA_MQ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &attr);
+	mqd_t mq = mq_open(MQ_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &attr);
 
 	if (mq == -1) {
 		log("Failed!", LP_ERROR);
@@ -339,7 +330,7 @@ void da_send(const char message[]) {
 	log("OK");
 
 	const timespec timeout = { .tv_sec = 1 };
-	int status = mq_timedsend(mq, message, DA_MSGSIZE, 1, &timeout);
+	int status = mq_timedsend(mq, message, MSGSIZE, 1, &timeout);
 
 	if (status == -1)
 		log("Uh oh no success :(", LP_ERROR);
@@ -349,9 +340,9 @@ void da_send(const char message[]) {
 #endif
 }
 
-void da_lock() {
+void lock() {
 	log("Creating lock file...");
-	ofstream l_file(DA_LOCK_FILE);
+	ofstream l_file(LOCK_FILE);
 
 	l_file << getpid() << endl;
 
@@ -361,12 +352,14 @@ void da_lock() {
 	l_file.close();
 }
 
-void da_unlock() {
+void unlock() {
 	log("Removing lock file...");
-	remove(DA_LOCK_FILE);
+	remove(LOCK_FILE);
 }
 
-bool da_check_lockfile() {
-	ifstream l_file(DA_LOCK_FILE);
+bool check_lockfile() {
+	ifstream l_file(LOCK_FILE);
 	return l_file.good();
+}
+
 }

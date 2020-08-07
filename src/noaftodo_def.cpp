@@ -379,6 +379,21 @@ map<string, string> aliases = {
 };
 }
 
+namespace da {
+
+bool fork_autostart = true;
+
+string launch_action;
+string task_failed_action;
+string task_coming_action;
+string task_completed_action;
+string task_uncompleted_action;
+string task_new_action;
+string task_edited_action;
+string task_removed_action;
+
+}
+
 // CUI DEFINITIONS
 namespace cui {
 

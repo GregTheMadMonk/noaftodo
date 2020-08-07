@@ -148,7 +148,7 @@ void run() {
 
 	destroy();
 
-	da_send("D");
+	da::send("D");
 }
 
 void set_mode(const int& new_mode) {

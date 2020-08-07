@@ -42,7 +42,7 @@ void init() {
 	// "fake" cvar_base_s::cvars
 	// CORE CVARS
 	cvar_base_s::wrap_bool("allow_root", allow_root);
-	cvar_base_s::wrap_bool("autorun_daemon", da_fork_autostart);
+	cvar_base_s::wrap_bool("autorun_daemon", da::fork_autostart);
 
 	cvar_base_s::wrap_string("cmd.contexec", cui::contexec_regex_filter);
 
@@ -297,14 +297,14 @@ void init() {
 	cvar_base_s::wrap_int("colors.entry_failed", cui::color_failed);
 
 	// DAEMON ACTIONS
-	cvar_base_s::wrap_string("on_daemon_launch_action", da_launch_action);
-	cvar_base_s::wrap_string("on_task_failed_action", da_task_failed_action);
-	cvar_base_s::wrap_string("on_task_coming_action", da_task_coming_action);
-	cvar_base_s::wrap_string("on_task_completed_action", da_task_completed_action);
-	cvar_base_s::wrap_string("on_task_uncompleted_action", da_task_uncompleted_action);
-	cvar_base_s::wrap_string("on_task_new_action", da_task_new_action);
-	cvar_base_s::wrap_string("on_task_edited_action", da_task_edited_action);
-	cvar_base_s::wrap_string("on_task_removed_action", da_task_removed_action);
+	cvar_base_s::wrap_string("on_daemon_launch_action", da::launch_action);
+	cvar_base_s::wrap_string("on_task_failed_action", da::task_failed_action);
+	cvar_base_s::wrap_string("on_task_coming_action", da::task_coming_action);
+	cvar_base_s::wrap_string("on_task_completed_action", da::task_completed_action);
+	cvar_base_s::wrap_string("on_task_uncompleted_action", da::task_uncompleted_action);
+	cvar_base_s::wrap_string("on_task_new_action", da::task_new_action);
+	cvar_base_s::wrap_string("on_task_edited_action", da::task_edited_action);
+	cvar_base_s::wrap_string("on_task_removed_action", da::task_removed_action);
 
 	// HELPER CVARS
 	cvar_base_s::cvars["last_v_id"] = make_unique<cvar_base_s>();
