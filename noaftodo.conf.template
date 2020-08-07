@@ -119,7 +119,7 @@ bind "s" "math \%numbuffer\% = -1; if \%ret\% \"set sort_by\"; sort 1 d; sort 2 
 set "allow_root" "false"
 set "autorun_daemon" "true"
 
-set "cmd.contexec" "^set regex_filter\ |^set list_regex_filter "
+set "cmd.contexec" "^set norm\\.regex_filter\ |^set livi\\.regex_filter "
 
 # FILTERS
 set "norm.regex_filter" ""
