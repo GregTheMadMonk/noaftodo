@@ -236,7 +236,10 @@ void select_entry(li::entry* const list_entry) {
 					return cmd::sel_entry->get_meta(name);
 				},
 				[name] (const string& val) {
-					cmd::sel_entry->meta[name] = val;
+					if (name != "eid") // eid is a read-only property
+						cmd::sel_entry->meta[name] = val;
+
+					li::save();
 				},
 				CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE
 				);

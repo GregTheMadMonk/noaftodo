@@ -314,8 +314,13 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 			}
 
 			if (args.at(0).find("meta.") == 0) {
-				sel_entry->meta[args.at(0).substr(5)] = args.at(1);
-				select_entry(sel_entry); // will regenerate meta variables
+				try {
+					cvar_base_s::cvars.at(args.at(0))->setter(args.at(1));
+				} catch (const out_of_range& e) {
+					sel_entry->meta[args.at(0).substr(5)] = args.at(1);
+					select_entry(sel_entry); // will regenerate meta variables
+					li::save();
+				}
 			} else cvar(args.at(0)) = args.at(1);
 
 			return 0;
