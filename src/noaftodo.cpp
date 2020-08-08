@@ -231,14 +231,15 @@ void select_entry(li::entry* const list_entry) {
 	if (cmd::sel_entry != nullptr)
 		for (auto it = cmd::sel_entry->meta.begin(); it != cmd::sel_entry->meta.end(); it++) {
 			const string name = it->first;
-			cvar_base_s::cvars["meta." + name] = make_unique<cvar_base_s>();
-			cvar_base_s::cvars["meta." + name]->getter = [name] () {
-				return cmd::sel_entry->get_meta(name);
-			};
-			cvar_base_s::cvars["meta." + name]->setter = [name] (const string& val) {
-				cmd::sel_entry->meta[name] = val;
-			};
-			cvar_base_s::cvars["meta." + name]->flags = CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE;
+			cvar_base_s::cvars["meta." + name] = make_unique<cvar_base_s>(
+				[name] () {
+					return cmd::sel_entry->get_meta(name);
+				},
+				[name] (const string& val) {
+					cmd::sel_entry->meta[name] = val;
+				},
+				CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE
+				);
 		}
 }
 

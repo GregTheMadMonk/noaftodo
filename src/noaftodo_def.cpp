@@ -98,6 +98,7 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 
 			if (args.size() == 1) {
 				aliases.erase(args.at(0));
+				upd_alias_cvars();
 				return 0;
 			}
 
@@ -111,6 +112,7 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 
 			aliases[args.at(0)] = alargs;
 
+			upd_alias_cvars();
 			return 0;
 		}
 	},

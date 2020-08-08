@@ -274,4 +274,22 @@ void terminate() {
 	buffer = "";
 }
 
+void upd_alias_cvars() {
+	for (auto it = cvar_base_s::cvars.begin(); it != cvar_base_s::cvars.end(); )
+		if (it->first.find("alias.") == 0)
+			it = cvar_base_s::cvars.erase(it);
+		else
+			it++;
+
+	for (auto it = aliases.begin(); it != aliases.end(); it++) {
+		const string name = it->first;
+
+		cvar_base_s::cvars["alias." + name] = make_unique<cvar_base_s>(
+				[name] () { return aliases[name]; },
+				[] (const string& val) {},
+				CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE
+				);
+	}
+}
+
 }
