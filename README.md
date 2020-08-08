@@ -1,6 +1,9 @@
 # NOAFtodo
 
-![GPL-3.0](https://img.shields.io/github/license/gregthemadmonk/noaftodo?style=flat-square)![Contributors](https://img.shields.io/github/contributors/gregthemadmonk/noaftodo?style=flat-square)![Commits since last release](https://img.shields.io/github/commits-since/gregthemadmonk/noaftodo/latest?style=flat-square)![Commit activity](https://img.shields.io/github/commit-activity/w/gregthemadmonk/noaftodo?style=flat-square)
+![GPL-3.0](https://img.shields.io/github/license/gregthemadmonk/noaftodo?style=flat-square)
+![Contributors](https://img.shields.io/github/contributors/gregthemadmonk/noaftodo?style=flat-square)
+![Commits since last release](https://img.shields.io/github/commits-since/gregthemadmonk/noaftodo/latest?style=flat-square)![Commit activity](https://img.shields.io/github/commit-activity/w/gregthemadmonk/noaftodo?style=flat-square)
+[![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/gregthemadmonk/noaftodo?style=flat-square)](https://www.codefactor.io/repository/github/gregthemadmonk/noaftodo)
 
 [![AUR version](https://img.shields.io/aur/version/noaftodo-git?style=for-the-badge)](https://aur.archlinux.org/packages/noaftodo-git/)[![AUR version](https://img.shields.io/aur/last-modified/noaftodo-git?style=for-the-badge)](https://aur.archlinux.org/packages/noaftodo-git/)
 
