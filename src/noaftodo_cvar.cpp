@@ -7,6 +7,14 @@ using namespace std;
 
 map<string, unique_ptr<cvar_base_s>> cvar_base_s::cvars;
 
+cvar_base_s::cvar_base_s(const cvar_getter& c_getter,
+			const cvar_setter& c_setter,
+			const int& c_flags,
+			const string& predefine_val) : getter(c_getter), setter(c_setter), flags(c_flags) {
+	if (predefine_val != "")
+		this->predefine(predefine_val);
+}
+
 cvar_base_s& cvar_base_s::operator=(const string& rval) {
 	this->setter(rval);
 	return *this;
@@ -105,111 +113,196 @@ bool cvar_base_s::is_deletable(const string& name) { // allow deleting only cvar
 	return (dynamic_cast<cvar_s*>(cvars.at(name).get()) != 0);
 }
 
-void cvar_base_s::wrap_string(const string& name, string& var, const int& flags) {
-	cvars[name] = make_unique<cvar_base_s>();
-	cvars[name]->getter = [&var] () { return var; };
+unique_ptr<cvar_base_s> cvar_base_s::wrap_string(string& var,
+							const int& flags,
+							const optional<cvar_getter>& getter_override,
+							const optional<cvar_setter>& setter_override,
+							const string& predefine_value) {
+	auto ret = make_unique<cvar_base_s>(
+			[&var] () { return var; },
 
-	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
-	else cvars[name]->setter = [&var] (const string& val) { var = val; };
+			(flags & CVAR_FLAG_RO) ? (
+				(cvar_setter) [] (const string& val) { }
+			) : (
+				(cvar_setter) [&var] (const string& val) { var = val; }
+			),
 
-	cvars[name]->flags = flags;
+			flags
+		);
+
+	if (getter_override != nullopt) ret->getter = getter_override.value();
+	if (setter_override != nullopt) ret->setter = setter_override.value();
+	if (predefine_value != "") ret->predefine(predefine_value);
+
+	return ret;
 }
 
-void cvar_base_s::wrap_multistr(const string& name, multistr_c& var, const int& length, const int& flags) {
-	cvars[name] = make_unique<cvar_base_s>();
-	cvars[name]->getter = [&var] () { return w_converter.to_bytes(var.str()); };
-	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
-	else cvars[name]->setter = [name, &var, length] (const string& val) {
-		int element_length = 1;
-		if (val.length() > 0) if (val.at(0) == '{') {
-			string buffer = "";
-			for (int i = 1; i < val.length(); i++) {
-				if (val.at(i) == '}') break;
-				buffer += val.at(i);
-			}
+unique_ptr<cvar_base_s> cvar_base_s::wrap_multistr(multistr_c& var, const int& length,
+							const int& flags,
+							const optional<cvar_getter>& getter_override,
+							const optional<cvar_setter>& setter_override,
+							const string& predefine_value) {
+	auto ret = make_unique<cvar_base_s>(
+			[&var] () { return w_converter.to_bytes(var.str()); },
 
-			try {
-				element_length = stoi(buffer);
-			} catch (const out_of_range& e) { }
-		}
-		var = multistr_c(val, element_length, length);
-	};
+			(flags & CVAR_FLAG_RO) ? (
+				(cvar_setter) [] (const string& val) { }
+			) : (
+				(cvar_setter) [&var, length] (const string& val) {
+					int element_length = 1;
+					if (val.length() > 0) if (val.at(0) == '{') {
+						string buffer = "";
+						for (int i = 1; i < val.length(); i++) {
+							if (val.at(i) == '}') break;
+							buffer += val.at(i);
+						}
 
-	cvars[name]->flags = flags | CVAR_FLAG_WS_IGNORE; // otherwise it breaks a cvar
+						try {
+							element_length = stoi(buffer);
+						} catch (const out_of_range& e) { }
+					}
+					var = multistr_c(val, element_length, length);
+				}
+			),
+
+			flags | CVAR_FLAG_WS_IGNORE // otherwise it breaks a cvar
+		);
+
+	if (getter_override != nullopt) ret->getter = getter_override.value();
+	if (setter_override != nullopt) ret->setter = setter_override.value();
+	if (predefine_value != "") ret->predefine(predefine_value);
+
+	return ret;
 }
 
-void cvar_base_s::wrap_multistr_element(const std::string& name, multistr_c& var, const int& index, const int& flags) {
-	cvars[name] = make_unique<cvar_base_s>();
-	cvars[name]->getter = [&var, index] () { return w_converter.to_bytes(var.at(index)); };
-	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
-	else cvars[name]->setter = [&var, index] (const string& val) {
-		int element_length = 1;
-		int start_from = 0;
-		if (val.length() > 0) if (val.at(0) == '{') {
-			string buffer = "";
-			for (int i = 1; i < val.length(); i++) {
-				if (val.at(i) == '}') { start_from = i + 1; break; }
-				buffer += val.at(i);
-			}
+unique_ptr<cvar_base_s> cvar_base_s::wrap_multistr_element(multistr_c& var, const int& index,
+							const int& flags,
+							const optional<cvar_getter>& getter_override,
+							const optional<cvar_setter>& setter_override,
+							const string& predefine_value) {
+	auto ret = make_unique<cvar_base_s>(
+			[&var, index] () { return w_converter.to_bytes(var.at(index)); },
 
-			try {
-				element_length = stoi(buffer);
-			} catch (const invalid_argument& e) { }
-		}
+			(flags & CVAR_FLAG_RO) ? (
+				(cvar_setter) [] (const string& val) { }
+			) : (
+				(cvar_setter) [&var, index] (const string& val) {
+					int element_length = 1;
+					int start_from = 0;
+					if (val.length() > 0) if (val.at(0) == '{') {
+						string buffer = "";
+						for (int i = 1; i < val.length(); i++) {
+							if (val.at(i) == '}') { start_from = i + 1; break; }
+							buffer += val.at(i);
+						}
 
-		vector<wstring> newval;
+						try {
+							element_length = stoi(buffer);
+						} catch (const invalid_argument& e) { }
+					}
 
-		wstring buffer = L"";
-		wstring wval = w_converter.from_bytes(val.substr(start_from));
-		for (int i = 0; i < wval.length(); i++) {
-			buffer += wval.at(i);
+					vector<wstring> newval;
 
-			if (i % element_length == element_length - 1) {
-				newval.push_back(buffer);
-				buffer = L"";
-			}
-		}
+					wstring buffer = L"";
+					wstring wval = w_converter.from_bytes(val.substr(start_from));
+					for (int i = 0; i < wval.length(); i++) {
+						buffer += wval.at(i);
 
-		var.v_at(index) = newval;
-	};
+						if (i % element_length == element_length - 1) {
+							newval.push_back(buffer);
+							buffer = L"";
+						}
+					}
 
-	cvars[name]->flags = flags | CVAR_FLAG_WS_IGNORE; // predefined multistr_c's are broken :)
+					var.v_at(index) = newval;
+				}
+			),
+
+			flags | CVAR_FLAG_WS_IGNORE // predefined multistr_c's are broken :)
+		);
+
+	if (getter_override != nullopt) ret->getter = getter_override.value();
+	if (setter_override != nullopt) ret->setter = setter_override.value();
+	if (predefine_value != "") ret->predefine(predefine_value);
+
+	return ret;
 }
 
-void cvar_base_s::wrap_int(const string& name, int& var, const int& flags) {
-	cvars[name] = make_unique<cvar_base_s>();
-	cvars[name]->getter = [&var] () { return to_string(var); };
+unique_ptr<cvar_base_s> cvar_base_s::wrap_int(int& var,
+							const int& flags,
+							const optional<cvar_getter>& getter_override,
+							const optional<cvar_setter>& setter_override,
+							const string& predefine_value) {
+	auto ret = make_unique<cvar_base_s>(
+			[&var] () { return to_string(var); },
 
-	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
-	else cvars[name]->setter = [&var] (const string& val) {
-			try { var = stoi(val); } catch (const invalid_argument& e) {}
-		};
+			(flags & CVAR_FLAG_RO) ? (
+				(cvar_setter) [] (const string& val) { }
+			) : (
+				(cvar_setter) [&var] (const string& val) {
+					try { var = stoi(val); } catch (const invalid_argument& e) {}
+				}
+			),
 
-	cvars[name]->flags = flags;
+			flags
+		);
+
+	if (getter_override != nullopt) ret->getter = getter_override.value();
+	if (setter_override != nullopt) ret->setter = setter_override.value();
+	if (predefine_value != "") ret->predefine(predefine_value);
+
+	return ret;
 }
 
-void cvar_base_s::wrap_bool(const string& name, bool& var, const int& flags) {
-	cvars[name] = make_unique<cvar_base_s>();
-	cvars[name]->getter = [&var] () { return var ? "true" : "false"; };
+unique_ptr<cvar_base_s> cvar_base_s::wrap_bool(bool& var,
+							const int& flags,
+							const optional<cvar_getter>& getter_override,
+							const optional<cvar_setter>& setter_override,
+							const string& predefine_value) {
+	auto ret = make_unique<cvar_base_s>(
+			[&var] () { return var ? "true" : "false"; },
+			(flags & CVAR_FLAG_RO) ? (
+				(cvar_setter) [] (const string& val) { }
+			) : (
+				(cvar_setter) [&var] (const string& val) {
+					if (((val == "true") && !var) || ((val == "false") && var))
+						var = !var;
+				}
+			),
 
-	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
-	else cvars[name]->setter = [&var] (const string& val) {
-		if (((val == "true") && !var) || ((val == "false") && var))
-			var = !var;
-	};
+			flags
+		);
 
-	cvars[name]->flags = flags;
+	if (getter_override != nullopt) ret->getter = getter_override.value();
+	if (setter_override != nullopt) ret->setter = setter_override.value();
+	if (predefine_value != "") ret->predefine(predefine_value);
+
+	return ret;
 }
 
-void cvar_base_s::wrap_maskflag(const string& name, int& mask, const int& flag, const int& flags) {
-	cvars[name] = make_unique<cvar_base_s>();
-	cvars[name]->getter = [&mask, flag] () { return (mask & flag) ? "true" : "false"; };
+unique_ptr<cvar_base_s> cvar_base_s::wrap_maskflag(int& mask, const int& flag,
+							const int& flags,
+							const optional<cvar_getter>& getter_override,
+							const optional<cvar_setter>& setter_override,
+							const string& predefine_value) {
+	auto ret = make_unique<cvar_base_s>(
+			[&mask, flag] () { return (mask & flag) ? "true" : "false"; },
+			
+			(flags & CVAR_FLAG_RO) ? (
+				(cvar_setter) [] (const string& val) { }
+			) : (
+				(cvar_setter) [&mask, flag] (const string& val) {
+					if (((val == "true") && (mask ^ flag)) || ((val != "true") && (mask & flag)))
+						mask ^= flag;
+				}
+			),
 
-	if (flags & CVAR_FLAG_RO) cvars[name]->setter = [] (const string& val) { };
-	else cvars[name]->setter = [&mask, flag] (const string& val) {
-			if (((val == "true") && (mask ^ flag)) || ((val != "true") && (mask & flag)))
-				mask ^= flag;
-		};
+			flags
+		);
 
-	cvars[name]->flags = flags;
+	if (getter_override != nullopt) ret->getter = getter_override.value();
+	if (setter_override != nullopt) ret->setter = setter_override.value();
+	if (predefine_value != "") ret->predefine(predefine_value);
+
+	return ret;
 }
