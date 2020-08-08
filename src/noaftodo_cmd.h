@@ -22,6 +22,10 @@ extern std::string buffer;
 
 extern li::entry* sel_entry;
 
+void init_cvars(); // initialize cvars
+		// defined in noaftodo_def.cpp, for easier
+		// customization
+
 void init();
 std::vector<std::string> cmdbreak(const std::string& cmdline); // breaks the line into single commands
 								// respecting quotes and '\'
