@@ -502,7 +502,7 @@ string prompt(const string& message) {
 			case 0:
 				break;
 			default:
-				command_input(c);
+				command_input(c, fire_bind(c));
 				break;
 		}
 
