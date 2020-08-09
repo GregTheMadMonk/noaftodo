@@ -161,24 +161,26 @@ void set_mode(const int& new_mode);
 void bind(const bind_s& bind);
 void bind(const wchar_t& key, const std::string& command, const int& mode, const bool& autoexec);
 
+bool fire_bind(const wchar_t& key);
+
 bool is_visible(const int& entryID);
 bool l_is_visible(const int& list_id);
 
 // mode-specific painters and input handlers
 void normal_paint();
-void normal_input(const wchar_t& key);
+void normal_input(const wchar_t& key, const bool& bind_fired = false);
 
 void listview_paint();
-void listview_input(const wchar_t& key);
+void listview_input(const wchar_t& key, const bool& bind_fired = false);
 
 void details_paint();
-void details_input(const wchar_t& key);
+void details_input(const wchar_t& key, const bool& bind_fired = false);
 
 void command_paint();
-void command_input(const wchar_t& key);
+void command_input(const wchar_t& key, const bool& bind_fired = false);
 
 void help_paint();
-void help_input(const wchar_t& key);
+void help_input(const wchar_t& key, const bool& bind_fired = false);
 
 void safemode_box();
 

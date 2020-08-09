@@ -66,37 +66,22 @@ void run() {
 		if (c > 0) {
 			const int old_numbuffer = numbuffer;
 			status = "";
-			bool bind_fired = false;
-			for (const auto& bind : binds)
-				if ((bind.mode & mode) && (bind.key == c)) {
-					if (bind.autoexec) cmd::exec(bind.command);
-					else  {
-						if ((s_line >= 0) && (s_line < t_list.size()))
-							command = w_converter.from_bytes(format_str(bind.command, &t_list.at(s_line)));
-						else
-							command = w_converter.from_bytes(bind.command);
-						set_mode(MODE_COMMAND);
-					}
 
-					bind_fired = true;
-					break;
-				}
-
-			if (!bind_fired) switch (mode) {
+			switch (mode) {
 				case MODE_NORMAL:
-					normal_input(c);
+					normal_input(c, fire_bind(c));
 					break;
 				case MODE_LISTVIEW:
-					listview_input(c);
+					listview_input(c, fire_bind(c));
 					break;
 				case MODE_DETAILS:
-					details_input(c);
+					details_input(c, fire_bind(c));
 					break;
 				case MODE_COMMAND:
-					command_input(c);
+					command_input(c, fire_bind(c));
 					break;
 				case MODE_HELP:
-					help_input(c);
+					help_input(c, fire_bind(c));
 			}
 
 			if (old_numbuffer == numbuffer) numbuffer = -1;
@@ -203,6 +188,26 @@ void bind(const wchar_t& key, const string& command, const int& mode, const bool
 	bind({ key, command, mode, autoexec });
 }
 
+bool fire_bind(const wchar_t& key) {
+	bool bind_fired = false;
+	for (const auto& bind : binds)
+		if ((bind.mode & mode) && (bind.key == key)) {
+			if (bind.autoexec) cmd::exec(bind.command);
+			else  {
+				if ((s_line >= 0) && (s_line < t_list.size()))
+					command = w_converter.from_bytes(format_str(bind.command, &t_list.at(s_line)));
+				else
+					command = w_converter.from_bytes(bind.command);
+				set_mode(MODE_COMMAND);
+			}
+
+			bind_fired = true;
+			break;
+		}
+
+	return bind_fired;
+}
+
 bool is_visible(const int& entryID) {
 	if (t_list.size() == 0) return false;
 	if ((entryID < 0) && (entryID >= t_list.size())) return false;
@@ -275,7 +280,7 @@ void listview_paint() {
 	draw_status(listview_status_fields);
 }
 
-void listview_input(const wchar_t& key) { }
+void listview_input(const wchar_t& key, const bool& bind_fired) { }
 
 void normal_paint() {
 	const int last_string =
@@ -310,7 +315,7 @@ void normal_paint() {
 	draw_status(normal_status_fields);
 }
 
-void normal_input(const wchar_t& key) { }
+void normal_input(const wchar_t& key, const bool& bind_fired) { }
 
 void details_paint() {
 	normal_paint();
@@ -355,7 +360,8 @@ void details_paint() {
 	text_box(5, 10, w - 10, h - 14, entry.description, true, delta);
 }
 
-void details_input(const wchar_t& key) {
+void details_input(const wchar_t& key, const bool& bind_fired) {
+	if (bind_fired) return;
 	switch (key) {
 		case KEY_LEFT:
 			if (delta > 0) delta--;
@@ -397,11 +403,13 @@ void command_paint() {
 	move(h - 1, 1 + command_cursor - offset);
 }
 
-void command_input(const wchar_t& key) {
-	command_index = command_history.size();
+void command_input(const wchar_t& key, const bool& bind_fired) {
+	if (!bind_fired) {
+		command_index = command_history.size();
 
-	command = command.substr(0, command_cursor) + key + command.substr(command_cursor, command.length() - command_cursor);
-	command_cursor++;
+		command = command.substr(0, command_cursor) + key + command.substr(command_cursor, command.length() - command_cursor);
+		command_cursor++;
+	}
 
 	// continious command execution
 	if (contexec_regex_filter != "") {
@@ -437,7 +445,8 @@ void help_paint() {
 	text_box(5, 8, w - 10, h - 12, help, true, delta);
 }
 
-void help_input(const wchar_t& key) {
+void help_input(const wchar_t& key, const bool& bind_fired) {
+	if (bind_fired) return;
 	switch (key) {
 		case KEY_LEFT:
 			if (delta > 0) delta--;
