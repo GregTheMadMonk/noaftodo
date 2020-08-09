@@ -383,7 +383,109 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 			if (!cui::active) log((pure ? "" : "echo :: ") + message, LP_IMPORTANT);
 			return 0;
 		}
-	}
+	},
+
+	// COMMAND MODE CURSOR CONTROLS
+	{ "cmd.curs.left", [] (const vector<string>& args) {
+			if (cui::command_cursor > 0) cui::command_cursor--;
+			return 0;
+		}
+	},
+
+	{ "cmd.curs.right", [] (const vector<string>& args) {
+			if (cui::command_cursor < cui::command.length()) cui::command_cursor++;
+			return 0;
+		}
+	},
+
+	{ "cmd.curs.home", [] (const vector<string>& args) {
+			cui::command_cursor = 0;
+			return 0;
+		}
+	},
+
+	{ "cmd.curs.end", [] (const vector<string>& args) {
+			cui::command_cursor = cui::command.length();
+			return 0;
+		}
+	},
+
+	{ "cmd.history.up", [] (const vector<string>& args) {
+			if (cui::command_index > 0) {
+				if (cui::command_index == cui::command_history.size())
+					cui::command_t = cui::command;
+
+				cui::command_index--;
+				cui::command = cui::command_history[cui::command_index];
+			}
+
+			if (cui::command_cursor > cui::command.length())
+				cui::command_cursor = cui::command.length();
+
+			return 0;
+		}
+	},
+
+	{ "cmd.history.down", [] (const vector<string>& args) {
+			if (cui::command_index < cui::command_history.size() - 1) {
+				cui::command_index++;
+				cui::command = cui::command_history[cui::command_index];
+			} else if (cui::command_index == cui::command_history.size() - 1) {
+				cui::command_index++;
+				cui::command = cui::command_t;
+			}
+
+			if (cui::command_cursor > cui::command.length())
+				cui::command_cursor = cui::command.length();
+
+			return 0;
+		}
+	},
+
+	{ "cmd.backspace", [] (const vector<string>& args) {
+			cui::command_index = cui::command_history.size();
+
+			if (cui::command_cursor > 0) {
+				cui::command = cui::command.substr(0, cui::command_cursor - 1) +
+					cui::command.substr(cui::command_cursor);
+
+				cui::command_cursor--;
+			}
+
+			return 0;
+		}
+	},
+
+	{ "cmd.delete", [] (const vector<string>& args) {
+			cui::command_index = cui::command_history.size();
+
+			if (cui::command_cursor < cui::command.length())
+				cui::command = cui::command.substr(0, cui::command_cursor) +
+					cui::command.substr(cui::command_cursor + 1);
+
+			return 0;
+		}
+	},
+
+	{ "cmd.send", [] (const vector<string>& args) {
+			if (cui::command != L"") {
+				exec(w_converter.to_bytes(cui::command));
+				cui::command_history.push_back(cui::command);
+				cui::command_index = cui::command_history.size();
+				terminate();
+			}
+
+			return 0;
+		}
+	},
+
+	{ "cmd.clear", [] (const vector<string>& args) {
+			cui::command = L"";
+			cui::filter_history();
+
+			return 0;
+		}
+	},
 };
 
 map<string, string> aliases = {

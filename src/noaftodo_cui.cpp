@@ -398,86 +398,17 @@ void command_paint() {
 }
 
 void command_input(const wchar_t& key) {
-	switch (key) {
-		case 10:
-			if (command != L"") {
-				cmd::exec(w_converter.to_bytes(command));
-				command_history.push_back(command);
-				command_index = command_history.size();
-				cmd::terminate();
-			}
-		case 27:
-			command = L"";
-			if (mode == MODE_COMMAND) set_mode(-1);
-			filter_history();
-			break;
-		case 127: case KEY_BACKSPACE: 	// 127 is for, e.g., xfce4-terminal
-						// KEY_BACKSPACE - e.g., alacritty
-			command_index = command_history.size();
+	command_index = command_history.size();
 
-			if (command_cursor > 0) {
-				command = command.substr(0, command_cursor - 1) + command.substr(command_cursor, command.length() - command_cursor);
-				command_cursor--;
-			}
+	command = command.substr(0, command_cursor) + key + command.substr(command_cursor, command.length() - command_cursor);
+	command_cursor++;
 
-			goto contexec;
-			break;
-		case KEY_DC:
-			command_index = command_history.size();
+	// continious command execution
+	if (contexec_regex_filter != "") {
+		regex ce_regex(contexec_regex_filter);
 
-			if (command_cursor < command.length())
-				command = command.substr(0, command_cursor) + command.substr(command_cursor + 1, command.length() - command_cursor - 1);
-
-			goto contexec;
-			break;
-		case KEY_LEFT:
-			if (command_cursor > 0) command_cursor--;
-			break;
-		case KEY_RIGHT:
-			if (command_cursor < command.length()) command_cursor++;
-			break;
-		case KEY_UP:
-			// go up the history
-			if (command_index > 0) {
-				if (command_index == command_history.size()) command_t = command;
-				command_index--;
-				command = command_history[command_index];
-			}
-
-			if (command_cursor > command.length()) command_cursor = command.length();
-			break;
-		case KEY_DOWN:
-			// go down the history
-			if (command_index < command_history.size() - 1) {
-				command_index++;
-				command = command_history[command_index];
-			} else if (command_index == command_history.size() - 1) {
-				command_index++;
-				command = command_t;
-			}
-
-			if (command_cursor > command.length()) command_cursor = command.length();
-			break;
-		case KEY_HOME:
-			command_cursor = 0;
-			break;
-		case KEY_END:
-			command_cursor = command.length();
-			break;
-		default:
-			command_index = command_history.size();
-
-			command = command.substr(0, command_cursor) + key + command.substr(command_cursor, command.length() - command_cursor);
-			command_cursor++;
-
-			// continious command execution
-			contexec:
-			if (contexec_regex_filter != "") {
-				regex ce_regex(contexec_regex_filter);
-
-				if (regex_search(w_converter.to_bytes(command), ce_regex))
-					cmd::exec(w_converter.to_bytes(command));
-			}
+		if (regex_search(w_converter.to_bytes(command), ce_regex))
+			cmd::exec(w_converter.to_bytes(command));
 	}
 }
 
@@ -598,6 +529,15 @@ wchar_t key_from_str(const string& str) {
 	if (str == "esc")	return 27;
 	if (str == "enter")	return 10;
 	if (str == "tab")	return 9;
+	if (str == "home")	return KEY_HOME;
+	if (str == "end")	return KEY_END;
+	if (str == "backspace")	return KEY_BACKSPACE;
+	if (str == "delete")	return KEY_DC;
+
+	if (str.find("code") == 0)
+		try {
+			return stoi(str.substr(4));
+		} catch (const invalid_argument& e) {}
 
 	return 0;
 }

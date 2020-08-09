@@ -114,6 +114,19 @@ bind "g" "math \%numbuffer\% = -1;
 
 bind "s" "math \%numbuffer\% = -1; if \%ret\% \"set sort_by\"; sort 1 d; sort 2 l; sort 3 t; sort 4 D; echo \%sort_by\%" 1 true
 
+# COMMAND MODE BINDINGS
+bind "left" "cmd.curs.left" 2 true
+bind "right" "cmd.curs.right" 2 true
+bind "home" "cmd.curs.home" 2 true
+bind "end" "cmd.curs.end" 2 true
+bind "up" "cmd.history.up" 2 true
+bind "down" "cmd.history.down" 2 true
+bind "delete" "cmd.delete" 2 true
+bind "code127" "cmd.backspace" 2 true
+bind "backspace" "cmd.backspace" 2 true
+bind "enter" "cmd.send; cmd.clear; back" 2 true
+bind "esc" "cmd.clear; back" 2 true
+
 # SETTINGS
 # CORE
 set "allow_root" "false"
