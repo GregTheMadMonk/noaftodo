@@ -174,7 +174,6 @@ void listview_paint();
 void listview_input(const wchar_t& key, const bool& bind_fired = false);
 
 void details_paint();
-void details_input(const wchar_t& key, const bool& bind_fired = false);
 
 void command_paint();
 void command_input(const wchar_t& key, const bool& bind_fired = false);

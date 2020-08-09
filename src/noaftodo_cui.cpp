@@ -75,7 +75,7 @@ void run() {
 					listview_input(c, fire_bind(c));
 					break;
 				case MODE_DETAILS:
-					details_input(c, fire_bind(c));
+					help_input(c, fire_bind(c));
 					break;
 				case MODE_COMMAND:
 					command_input(c, fire_bind(c));
@@ -358,23 +358,6 @@ void details_paint() {
 	// draw description
 	// we want text wrapping here
 	text_box(5, 10, w - 10, h - 14, entry.description, true, delta);
-}
-
-void details_input(const wchar_t& key, const bool& bind_fired) {
-	if (bind_fired) return;
-	switch (key) {
-		case KEY_LEFT:
-			if (delta > 0) delta--;
-			break;
-		case KEY_RIGHT:
-			delta++;
-			break;
-		case '=':
-			delta = 0;
-			break;
-		default:
-			break;
-	}
 }
 
 void command_paint() {
