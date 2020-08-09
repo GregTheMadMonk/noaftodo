@@ -410,6 +410,29 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 		}
 	},
 
+	{ "cmd.curs.word.home", [] (const vector<string>& args) {
+			while (cui::command_cursor > 0) {
+				cui::command_cursor--;
+				const auto c = cui::command.at(cui::command_cursor);
+				if (cui::wordbreakers.find(c) != wstring::npos) break;
+			}
+
+			return 0;
+		}
+	},
+
+	{ "cmd.curs.word.end", [] (const vector<string>& args) {
+			while (cui::command_cursor < cui::command.length()) {
+				cui::command_cursor++;
+				if (cui::command_cursor >= cui::command.length()) break;
+				const auto c = cui::command.at(cui::command_cursor);
+				if (cui::wordbreakers.find(c) != wstring::npos) break;
+			}
+
+			return 0;
+		}
+	},
+
 	{ "cmd.history.up", [] (const vector<string>& args) {
 			if (cui::command_index > 0) {
 				if (cui::command_index == cui::command_history.size())

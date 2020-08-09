@@ -510,28 +510,45 @@ void filter_history() {
 		}
 }
 
-wchar_t key_from_str(const string& str) {
-	if (str.length() == 1)
-		return str.at(0);
+wchar_t key_from_str(string str) {
+	int mod = 0; // 0b1 CTRL bit
 
-	if (str == "up")	return KEY_UP;
-	if (str == "down")	return KEY_DOWN;
-	if (str == "left")	return KEY_LEFT;
-	if (str == "right")	return KEY_RIGHT;
-	if (str == "esc")	return 27;
-	if (str == "enter")	return 10;
-	if (str == "tab")	return 9;
-	if (str == "home")	return KEY_HOME;
-	if (str == "end")	return KEY_END;
-	if (str == "backspace")	return KEY_BACKSPACE;
-	if (str == "delete")	return KEY_DC;
+	bool modfound = true;
+	while (modfound) {
+		modfound = false;
+		if (str.find("c^") == 0) {
+			mod |= 0b1;
+			modfound = true;
+			str = str.substr(2);
+		}
+	}
+
+	int ret = 0;
+
+	if (str.length() == 1)
+		ret = str.at(0);
+
+	if (str == "up")	ret = KEY_UP;
+	if (str == "down")	ret = KEY_DOWN;
+	if (str == "left")	ret = KEY_LEFT;
+	if (str == "right")	ret = KEY_RIGHT;
+	if (str == "esc")	ret = 27;
+	if (str == "enter")	ret = 10;
+	if (str == "tab")	ret = 9;
+	if (str == "home")	ret = KEY_HOME;
+	if (str == "end")	ret = KEY_END;
+	if (str == "backspace")	ret = KEY_BACKSPACE;
+	if (str == "delete")	ret = KEY_DC;
 
 	if (str.find("code") == 0)
 		try {
-			return stoi(str.substr(4));
+			ret = stoi(str.substr(4));
 		} catch (const invalid_argument& e) {}
 
-	return 0;
+	if (mod & 0b1 != 0)
+		ret &= 0x1f;
+
+	return ret;
 }
 
 int pair_from_str(const string& str) {

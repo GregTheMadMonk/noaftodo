@@ -129,6 +129,9 @@ const std::vector<std::pair<int, std::wstring>> md_switches = {
 	{ A_UNDERLINE,	L"~~"	}
 };
 
+// symbols that break words
+const std::wstring wordbreakers = L"!@#$%^&*()-+=`~\"';:,.<>/?\\|[]{} ";
+
 // interface size
 extern int w, h;
 
@@ -187,7 +190,7 @@ std::string prompt(const std::string& message = ">");
 
 void filter_history();
 
-wchar_t key_from_str(const std::string& str);
+wchar_t key_from_str(std::string str);
 int pair_from_str(const std::string& str);
 
 typedef struct { attr_t attrs; int pair; } attrs;

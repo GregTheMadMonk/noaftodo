@@ -117,6 +117,8 @@ bind "s" "math \%numbuffer\% = -1; if \%ret\% \"set sort_by\"; sort 1 d; sort 2 
 # COMMAND MODE BINDINGS
 bind "left" "cmd.curs.left" 2 true
 bind "right" "cmd.curs.right" 2 true
+bind "c^j" "cmd.curs.word.home" 2 true
+bind "c^k" "cmd.curs.word.end" 2 true
 bind "home" "cmd.curs.home" 2 true
 bind "end" "cmd.curs.end" 2 true
 bind "up" "cmd.history.up" 2 true
