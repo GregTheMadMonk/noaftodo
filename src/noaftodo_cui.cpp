@@ -539,6 +539,8 @@ wchar_t key_from_str(string str) {
 	if (str == "end")	ret = KEY_END;
 	if (str == "backspace")	ret = KEY_BACKSPACE;
 	if (str == "delete")	ret = KEY_DC;
+	if (str == "pgup")	ret = KEY_PPAGE;
+	if (str == "pgdn")	ret = KEY_NPAGE;
 
 	if (str.find("code") == 0)
 		try {
