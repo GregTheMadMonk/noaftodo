@@ -98,7 +98,7 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 
 			if (args.size() == 1) {
 				aliases.erase(args.at(0));
-				upd_alias_cvars();
+				upd_cvars();
 				return 0;
 			}
 
@@ -112,7 +112,7 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 
 			aliases[args.at(0)] = alargs;
 
-			upd_alias_cvars();
+			upd_cvars();
 			return 0;
 		}
 	},
@@ -320,6 +320,15 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 					sel_entry->meta[args.at(0).substr(5)] = args.at(1);
 					select_entry(sel_entry); // will regenerate meta variables
 					li::save();
+				}
+			} else if (args.at(0).find("fields.status.") == 0) {
+				try {
+					cvar_base_s::cvars.at(args.at(0))->setter(args.at(1));
+				} catch (const out_of_range& e) {
+					cui::status_fields[args.at(0).substr(14).at(0)] = [args] () {
+						return format_str(args.at(1), sel_entry);
+					};
+					upd_cvars();
 				}
 			} else cvar(args.at(0)) = args.at(1);
 
@@ -563,6 +572,8 @@ void init_cvars() {
 						if (s_line < 0) s_line = t_list.size() - 1;
 						else if (s_line >= t_list.size()) s_line = 0;
 					}
+
+					sel_entry = &t_list.at(s_line);
 				} catch (const invalid_argument& e) {}
 			},
 			"0");

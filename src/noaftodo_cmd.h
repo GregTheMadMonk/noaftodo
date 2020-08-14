@@ -37,7 +37,7 @@ void exec(const std::string& command);	// initializes and starts execution of a 
 					// respects non-null cmd_buffer
 void terminate();
 
-void upd_alias_cvars(); // update %alias.alias_name% cvar list
+void upd_cvars(); // update %alias.alias_name% and etc cvar list
 
 }
 

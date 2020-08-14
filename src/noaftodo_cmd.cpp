@@ -274,7 +274,7 @@ void terminate() {
 	buffer = "";
 }
 
-void upd_alias_cvars() {
+void upd_cvars() {
 	for (auto it = cvar_base_s::cvars.begin(); it != cvar_base_s::cvars.end(); )
 		if (it->first.find("alias.") == 0)
 			it = cvar_base_s::cvars.erase(it);
@@ -287,6 +287,26 @@ void upd_alias_cvars() {
 		cvar_base_s::cvars["alias." + name] = make_unique<cvar_base_s>(
 				[name] () { return aliases[name]; },
 				[] (const string& val) {},
+				CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE
+				);
+	}
+
+	for (auto it = cvar_base_s::cvars.begin(); it != cvar_base_s::cvars.end(); )
+		if (it->first.find("status_field.") == 0)
+			it = cvar_base_s::cvars.erase(it);
+		else
+			it++;
+
+	for (auto it = cui::status_fields.begin(); it != cui::status_fields.end(); it++) {
+		const char name = it->first;
+
+		cvar_base_s::cvars[string("fields.status.") + name] = make_unique<cvar_base_s>(
+				[name] () { return cui::status_fields[name](); },
+				[name] (const string& val) {
+					cui::status_fields[name] = [val] () {
+						return format_str(val, sel_entry);
+					};
+				},
 				CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE
 				);
 	}
