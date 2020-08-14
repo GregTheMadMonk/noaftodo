@@ -554,8 +554,12 @@ wchar_t key_from_str(string str) {
 }
 
 int pair_from_str(const string& str) {
-	short fg = -1;
-	short bg = -1;
+	int text_attrs = A_NORMAL;
+	int text_pair;
+	attr_get(&text_attrs, &text_pair, NULL);
+
+	short bg = text_pair / 17 - 1;
+	short fg = text_pair % 17 - 1;
 
 	bool last = false; // false -> fg, true -> bg
 
@@ -568,11 +572,11 @@ int pair_from_str(const string& str) {
 					const int& val = stoi(buffer);
 					buffer = "";
 					switch (val / 10) {
-						case 3:
+						case 3: case -3:
 							fg = val % 10;
 							last = false;
 							break;
-						case 4:
+						case 4: case -4:
 							bg = val % 10;
 							last = true;
 							break;
