@@ -162,6 +162,7 @@ set "sort_by" "dltD"
 set "charset.box_strong" "┃━┏┓┗┛"
 set "charset.box_light" "|-++++"
 set "charset.separators" "│||"
+set "charset.separators.status" "{3} | "
 
 # CHARACTER SET: MISC
 set "charset.separators.row.offset" "0"

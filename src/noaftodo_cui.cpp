@@ -703,7 +703,7 @@ void draw_status(const string& fields) {
 		try {
 			const string field = (status_fields.at(c))();
 			if (field != "") {
-				if (status_l != "") status_l = " " + separators.s_get(CHAR_STA_SEP) + " " + status_l;
+				if (status_l != "") status_l = separators.s_get(CHAR_STA_SEP) + status_l;
 		       		status_l = field + status_l;
 			}
 		} catch (const out_of_range& e) {}
