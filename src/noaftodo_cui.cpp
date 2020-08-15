@@ -67,21 +67,31 @@ void run() {
 			const int old_numbuffer = numbuffer;
 			status = "";
 
+			keystroke_s k = { (wchar_t)c, false };
+
+			if (c == 27) {
+				wint_t c2;
+				nodelay(stdscr, true);
+				if (get_wch(&c2) != ERR)
+					k = { (wchar_t)c2, true };
+				nodelay(stdscr, false);
+			}
+
 			switch (mode) {
 				case MODE_NORMAL:
-					normal_input(c, fire_bind(c));
+					normal_input(k, fire_bind(k));
 					break;
 				case MODE_LISTVIEW:
-					listview_input(c, fire_bind(c));
+					listview_input(k, fire_bind(k));
 					break;
 				case MODE_DETAILS:
-					help_input(c, fire_bind(c));
+					help_input(k, fire_bind(k));
 					break;
 				case MODE_COMMAND:
-					command_input(c, fire_bind(c));
+					command_input(k, fire_bind(k));
 					break;
 				case MODE_HELP:
-					help_input(c, fire_bind(c));
+					help_input(k, fire_bind(k));
 			}
 
 			if (old_numbuffer == numbuffer) numbuffer = -1;
@@ -184,11 +194,11 @@ void bind(const bind_s& bind) {
 	binds.push_back(bind);
 }
 
-void bind(const wchar_t& key, const string& command, const int& mode, const bool& autoexec) {
+void bind(const keystroke_s& key, const string& command, const int& mode, const bool& autoexec) {
 	bind({ key, command, mode, autoexec });
 }
 
-bool fire_bind(const wchar_t& key) {
+bool fire_bind(const keystroke_s& key) {
 	bool bind_fired = false;
 	for (const auto& bind : binds)
 		if ((bind.mode & mode) && (bind.key == key)) {
@@ -280,7 +290,7 @@ void listview_paint() {
 	draw_status(listview_status_fields);
 }
 
-void listview_input(const wchar_t& key, const bool& bind_fired) { }
+void listview_input(const keystroke_s& key, const bool& bind_fired) { }
 
 void normal_paint() {
 	const int last_string =
@@ -315,7 +325,7 @@ void normal_paint() {
 	draw_status(normal_status_fields);
 }
 
-void normal_input(const wchar_t& key, const bool& bind_fired) { }
+void normal_input(const keystroke_s& key, const bool& bind_fired) { }
 
 void details_paint() {
 	normal_paint();
@@ -386,11 +396,11 @@ void command_paint() {
 	move(h - 1, 1 + command_cursor - offset);
 }
 
-void command_input(const wchar_t& key, const bool& bind_fired) {
+void command_input(const keystroke_s& key, const bool& bind_fired) {
 	if (!bind_fired) {
 		command_index = command_history.size();
 
-		command = command.substr(0, command_cursor) + key + command.substr(command_cursor, command.length() - command_cursor);
+		command = command.substr(0, command_cursor) + key.key + command.substr(command_cursor, command.length() - command_cursor);
 		command_cursor++;
 	}
 
@@ -428,9 +438,9 @@ void help_paint() {
 	text_box(5, 8, w - 10, h - 12, help, true, delta);
 }
 
-void help_input(const wchar_t& key, const bool& bind_fired) {
+void help_input(const keystroke_s& key, const bool& bind_fired) {
 	if (bind_fired) return;
-	switch (key) {
+	switch (key.key) {
 		case KEY_LEFT:
 			if (delta > 0) delta--;
 			break;
@@ -475,17 +485,26 @@ string prompt(const string& message) {
 	command_cursor = command.length();
 
 	for (wint_t c = 0; ; get_wch(&c)) {
+		keystroke_s k = { (wchar_t)c, false };
+
 		switch (c) {
 			case 10:
 				return w_converter.to_bytes(command);
 				break;
 			case 27:
-				return "";
-				break;
+				wint_t c2;
+				nodelay(stdscr, true);
+				if (get_wch(&c2) != ERR) {
+					k = { (wchar_t)c2, true };
+					nodelay(stdscr, false);
+				} else {
+					nodelay(stdscr, false);
+					return "";
+				}
 			case 0:
 				break;
 			default:
-				command_input(c, fire_bind(c));
+				command_input(k, fire_bind(k));
 				break;
 		}
 
@@ -510,7 +529,7 @@ void filter_history() {
 		}
 }
 
-wchar_t key_from_str(string str) {
+keystroke_s key_from_str(string str) {
 	int mod = 0; // 0b1 CTRL bit
 
 	bool modfound = true;
@@ -518,6 +537,10 @@ wchar_t key_from_str(string str) {
 		modfound = false;
 		if (str.find("c^") == 0) {
 			mod |= 0b1;
+			modfound = true;
+			str = str.substr(2);
+		} else if (str.find("a^") == 0) {
+			mod |= 0b10;
 			modfound = true;
 			str = str.substr(2);
 		}
@@ -550,7 +573,7 @@ wchar_t key_from_str(string str) {
 	if (mod & 0b1 != 0)
 		ret &= 0x1f;
 
-	return ret;
+	return { ret, ((mod & 0b10) != 0) };
 }
 
 int pair_from_str(const string& str) {

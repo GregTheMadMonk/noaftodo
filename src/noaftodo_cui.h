@@ -19,8 +19,16 @@
 
 namespace cui {
 
-struct bind_s {
+struct keystroke_s {
 	wchar_t key;
+	bool mod_alt;
+
+	bool operator==(const keystroke_s& op) { return (this->key == op.key) && (this->mod_alt == op.mod_alt); }
+	bool operator==(const keystroke_s& op) const { return (this->key == op.key) && (this->mod_alt == op.mod_alt); }
+};
+
+struct bind_s {
+	keystroke_s key;
 	std::string command;
 	int mode;
 	bool autoexec;
@@ -162,27 +170,27 @@ void run();
 void set_mode(const int& new_mode);
 
 void bind(const bind_s& bind);
-void bind(const wchar_t& key, const std::string& command, const int& mode, const bool& autoexec);
+void bind(const keystroke_s& key, const std::string& command, const int& mode, const bool& autoexec);
 
-bool fire_bind(const wchar_t& key);
+bool fire_bind(const keystroke_s& key);
 
 bool is_visible(const int& entryID);
 bool l_is_visible(const int& list_id);
 
 // mode-specific painters and input handlers
 void normal_paint();
-void normal_input(const wchar_t& key, const bool& bind_fired = false);
+void normal_input(const keystroke_s& key, const bool& bind_fired = false);
 
 void listview_paint();
-void listview_input(const wchar_t& key, const bool& bind_fired = false);
+void listview_input(const keystroke_s& key, const bool& bind_fired = false);
 
 void details_paint();
 
 void command_paint();
-void command_input(const wchar_t& key, const bool& bind_fired = false);
+void command_input(const keystroke_s& key, const bool& bind_fired = false);
 
 void help_paint();
-void help_input(const wchar_t& key, const bool& bind_fired = false);
+void help_input(const keystroke_s& key, const bool& bind_fired = false);
 
 void safemode_box();
 
@@ -190,7 +198,7 @@ std::string prompt(const std::string& message = ">");
 
 void filter_history();
 
-wchar_t key_from_str(std::string str);
+keystroke_s key_from_str(std::string str);
 int pair_from_str(const std::string& str);
 
 typedef struct { attr_t attrs; int pair; } attrs;
