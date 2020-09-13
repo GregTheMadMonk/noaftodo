@@ -50,9 +50,7 @@ message("Executing documentation and embedded code generation...")
 execute_process(COMMAND ${PROJECT_SOURCE_DIR}/tools/docgen.sh "${PROJECT_SOURCE_DIR}")
 
 # Find source files
-file(GLOB_RECURSE _HEADERS src/*.h)
 file(GLOB_RECURSE _SOURCES src/*.cpp)
-file(GLOB_RECURSE _HEADERS_GEN ${CMAKE_CURRENT_BINARY_DIR}/gen/src/*.h)
 file(GLOB_RECURSE _SOURCES_GEN ${CMAKE_CURRENT_BINARY_DIR}/gen/src/*.cpp)
 
 add_executable(${CMAKE_PROJECT_NAME} ${_SOURCES} ${_SOURCES_GEN})
