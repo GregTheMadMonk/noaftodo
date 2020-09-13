@@ -33,7 +33,12 @@ Also running without creating a config is supported with `noaftodo -c default`, 
 Program is available in **AUR** as **noaftodo-git**.
 
 ### Building [[more](https://github.com/GregTheMadMonk/noaftodo/wiki/Guide#building)]
-Run `make` (`gmake` on Solaris 11).
+NOAFtodo is compiled using **cmake**:
+```shell
+$ cd path/to/noaftodo/repo
+$ mkdir build && cd build
+$ cmake .. && make
+```
 
 #### Dependencies
 * **ncurses** (on an Arch-based system: `sudo pacman -S ncurses`, on a Debian-based system: `sudo apt install libncurses5-dev`)
