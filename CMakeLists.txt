@@ -38,7 +38,7 @@ endif()
 # Platform-specific stuff
 message("Building for ${CMAKE_HOST_SYSTEM_NAME}")
 
-if (${CMAKE_HOST_SYSTEM_NAME} EQUAL "Haiku")
+if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Haiku")
 	message("mqueue is off due to platform")
 	set(_NO_MQUEUE 1)
 	message("root check is off due to platform")
