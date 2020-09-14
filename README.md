@@ -37,7 +37,7 @@ NOAFtodo is compiled using **cmake**:
 ```shell
 $ cd path/to/noaftodo/repo
 $ mkdir build && cd build
-$ cmake .. && make
+$ cmake .. && make   # replace "make" with "gmake" on Solaris 11 and maybe some other systems
 ```
 
 #### Dependencies
