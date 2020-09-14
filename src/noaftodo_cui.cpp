@@ -570,10 +570,10 @@ keystroke_s key_from_str(string str) {
 			ret = stoi(str.substr(4));
 		} catch (const invalid_argument& e) {}
 
-	if (mod & 0b1 != 0)
+	if ((mod & 0b1) != 0)
 		ret &= 0x1f;
 
-	return { ret, ((mod & 0b10) != 0) };
+	return { (wchar_t)ret, ((mod & 0b10) != 0) };
 }
 
 int pair_from_str(const string& str) {
