@@ -45,15 +45,25 @@ if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Haiku")
 	set(_NO_ROOT_CHECK 1)
 endif()
 
-# Generate embedded code
-message("Executing documentation and embedded code generation...")
-execute_process(COMMAND ${PROJECT_SOURCE_DIR}/tools/docgen.sh "${PROJECT_SOURCE_DIR}")
-
 # Find source files
 file(GLOB_RECURSE _SOURCES src/*.cpp)
-file(GLOB_RECURSE _SOURCES_GEN ${CMAKE_CURRENT_BINARY_DIR}/gen/src/*.cpp)
 
-add_executable(${CMAKE_PROJECT_NAME} ${_SOURCES} ${_SOURCES_GEN})
+# Generate embedded code
+add_custom_command(
+	OUTPUT
+	${CMAKE_CURRENT_BINARY_DIR}/gen/src/noaftodo_embed.cpp
+	${CMAKE_CURRENT_BINARY_DIR}/gen/doc/noaftodo.man.gz
+	COMMAND ${PROJECT_SOURCE_DIR}/tools/docgen.sh "${PROJECT_SOURCE_DIR}"
+	COMMENT "Executing documentation and embedded code generation..."
+	DEPENDS
+	noaftodo.conf.template
+	${_SOURCES})
+
+# Declare an executable
+add_executable(${CMAKE_PROJECT_NAME}
+	${_SOURCES}
+	${CMAKE_CURRENT_BINARY_DIR}/gen/src/noaftodo_embed.cpp)
+
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CURSES_LIBRARIES})
 
 # Add nessesary build flags
