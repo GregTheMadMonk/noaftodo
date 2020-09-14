@@ -20,11 +20,12 @@ pkgver() {
 }
 
 build() {
-	cd noaftodo
-	V_SUFFIX="AURr$(git rev-list --count HEAD).$(git rev-parse --short HEAD)" make
+	mkdir noaftodo/build
+	cd noaftodo/build
+	PKGNAME="$pkgname" PKGROOT="$pkgdir" V_SUFFIX="AURr$(git rev-list --count HEAD).$(git rev-parse --short HEAD)" cmake .. && make
 }
 
 package() {
-	cd noaftodo
-	PKGNAME="$pkgname" PKGROOT="$pkgdir" make install
+	cd noaftodo/build
+	make install
 }
