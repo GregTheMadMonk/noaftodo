@@ -28,7 +28,7 @@ std::string TCONF = \"%s\";" \
 
 LIST_V=$(grep ' LIST_V = ' $DIR/src/noaftodo.h | sed 's/.*LIST_V = //g;s/\;//g')
 CONF_V=$(grep ' CONF_V = ' $DIR/src/noaftodo.h | sed 's/.*CONF_V = //g;s/\;//g')
-MINOR_V=$(grep ' MINOR_V = ' $DIR/src/noaftodo.h | sed 's/.*MINOR_V = //g;s/\;//g')
+PATCH_V=$(grep ' PATCH_V = ' $DIR/src/noaftodo.h | sed 's/.*PATCH_V = //g;s/\;//g')
 
 printf ".TH NOAFTODO 1 \"July 2020\" \"%s.%s.%s\" \"NOAFtodo man page\"
 .SH NAME
@@ -67,7 +67,7 @@ Apology for bad english and probably not very useful manpage.
 <3 Y'all! Peace!" \
 "$LIST_V" \
 "$CONF_V" \
-"$MINOR_V" \
+"$PATCH_V" \
 "$(sed '1d;s/\t//g;s/-/\\-/g;0~2s/^/.HP\n/g;0~2s/$/\n.IP/g' gen/doc/arg.doc.gen)" \
 "$(sed '1d;s/\t//g;s/-/\\-/g;0~2s/^/.HP\n.B\n/g;0~2s/$/\n.IP/g' gen/doc/cmd.doc.gen)" \
 "$(sed 's/\t//g;s/-/\\-/g;1~2s/^/.HP\n.B\n/g;1~2s/$/\n.IP/g' gen/doc/cols.norm.doc.gen)" \

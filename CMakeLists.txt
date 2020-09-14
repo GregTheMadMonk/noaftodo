@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(noaftodo)
+project(noaftodo VERSION 1.4.4)
 
 # use C++ 17
 set(CXX_STANDART 17)
 set(CXX_STANDART_REQUIRED True)
 
-add_compile_options( -DNCURSES_WIDECHAR -fpermissive -std=c++17 )
+add_compile_options( -fpermissive -std=c++17 )
 
 # Link ncurses
 set(CURSES_NEED_WIDE True)
@@ -71,6 +71,14 @@ add_executable(${CMAKE_PROJECT_NAME}
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CURSES_LIBRARIES})
 
 # Add nessesary build flags
+# Explicitly set NCURSES_WIDECHAR
+add_definitions( -DNCURSES_WIDECHAR ) 
+
+# Set project version
+add_definitions( -DLIST_V=${PROJECT_VERSION_MAJOR} )
+add_definitions( -DCONF_V=${PROJECT_VERSION_MINOR} )
+add_definitions( -DPATCH_V=${PROJECT_VERSION_PATCH} )
+
 if (${_NO_MQUEUE})
 	add_definitions( -DNO_MQUEUE )
 else()

@@ -11,15 +11,12 @@
 // program title and version
 constexpr char TITLE[] = "NOAFtodo";
 
-constexpr int LIST_V = 1;
-constexpr int CONF_V = 4;
-constexpr int MINOR_V = 4;
 #ifndef V_SUFFIX
-#define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(MINOR_V)
+#define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(PATCH_V)
 #else
 #define XMSTR(s) MSTR(s)
 #define MSTR(s) #s
-#define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(MINOR_V) + " " + XMSTR(V_SUFFIX)
+#define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(PATCH_V) + " " + XMSTR(V_SUFFIX)
 #endif
 
 // program modes
