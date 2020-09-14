@@ -29,10 +29,14 @@ if ($ENV{DEBUG})
 	set(_DEBUG 1)
 endif()
 
-if ($ENV{PKGNAME})
-	set(_PKGNAME $ENV{PKGNAME})
+if ("$ENV{PKGNAME}" STREQUAL "")
+	set(_PKGNAME "${CMAKE_PROJECT_NAME}")
 else()
-	set(_PKGNAME noaftodo)
+	set(_PKGNAME "$ENV{PKGNAME}")
+endif()
+
+if (NOT ("$ENV{PKGROOT}" STREQUAL ""))
+	set(_PKGROOT "$ENV{PKGROOT}")
 endif()
 
 # Platform-specific stuff
@@ -81,6 +85,18 @@ if (${_DEBUG})
 	add_compile_options( -g3 )
 endif()
 
-if ($ENV{V_SUFFIX})
-	add_definitions( -DV_SUFFIX="${ENV{V_SUFFIX}" )
+if (NOT ("$ENV{V_SUFFIX}" STREQUAL ""))
+	add_definitions( -DV_SUFFIX="$ENV{V_SUFFIX}" )
 endif()
+
+# Declare installation targets
+# Install binary
+install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION "${_PKGROOT}/usr/bin/")
+# Install LICENSE
+install(FILES LICENSE DESTINATION "${_PKGROOT}/usr/share/licenses/${_PKGNAME}/")
+# Install default config
+install(FILES noaftodo.conf.template DESTINATION "${_PKGROOT}/etc/${_PKGNAME}/")
+# Install scripts
+install(DIRECTORY scripts DESTINATION "${_PKGROOT}/etc/${_PKGNAME}/")
+# Install manual
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/gen/doc/noaftodo.man.gz DESTINATION "${_PKGROOT}/usr/share/man/man1/" RENAME "noaftodo.1.gz")
