@@ -13,9 +13,37 @@ using namespace std;
 using li::t_list;
 using li::t_tags;
 
-extern string CMDS_HELP;
-
 namespace cui {
+
+map<string, mode_s>& modes::modes() {
+	static map<string, mode_s> modes_ {};
+	return modes_;
+}
+
+void modes::init_mode(const string& alias, const mode_s& mode) {
+	log("Initializing mode " + alias);
+	modes::modes()[alias] = mode;
+}
+
+mode_s modes::mode(const string& alias) {
+	for (auto it = modes::modes().begin();
+			it != modes::modes().end();
+			it++)
+		log("Mode found: " + it->first);
+	try {
+		return modes::modes().at(alias);
+	} catch (const out_of_range& e) {
+		return {
+			[&alias] () {
+				move(1, 1);
+				addstr(("Mode not found: \"" + alias + "\" :(").c_str());
+			},
+			[] (const keystroke_s& key, const bool& bind_fired) {
+				if (key.key == L'q') cmd::exec("exit");
+			}
+		};
+	}
+}
 
 void init() {
 	log("Initializing console UI...");
@@ -79,19 +107,19 @@ void run() {
 
 			switch (mode) {
 				case MODE_NORMAL:
-					normal_input(k, fire_bind(k));
+					modes::mode("normal").input(k, fire_bind(k));
 					break;
 				case MODE_LISTVIEW:
-					listview_input(k, fire_bind(k));
+					modes::mode("liview").input(k, fire_bind(k));
 					break;
 				case MODE_DETAILS:
-					help_input(k, fire_bind(k));
+					modes::mode("details").input(k, fire_bind(k));
 					break;
 				case MODE_COMMAND:
-					command_input(k, fire_bind(k));
+					modes::mode("command").input(k, fire_bind(k));
 					break;
 				case MODE_HELP:
-					help_input(k, fire_bind(k));
+					modes::mode("help").input(k, fire_bind(k));
 			}
 
 			if (old_numbuffer == numbuffer) numbuffer = -1;
@@ -112,19 +140,19 @@ void run() {
 
 		switch (mode) {
 			case MODE_NORMAL:
-				normal_paint();
+				modes::mode("normal").paint();
 				break;
 			case MODE_LISTVIEW:
-				listview_paint();
+				modes::mode("liview").paint();
 				break;
 			case MODE_DETAILS:
-				details_paint();
+				modes::mode("details").paint();
 				break;
 			case MODE_COMMAND:
-				command_paint();
+				modes::mode("command").paint();
 				break;
 			case MODE_HELP:
-				help_paint();
+				modes::mode("help").paint();
 				break;
 		}
 
@@ -265,194 +293,6 @@ bool l_is_visible(const int& list_id) {
 	return ret;
 }
 
-void listview_paint() {
-	const int last_string = draw_table(0, 0, w, h - 2,
-			[] (const int& item) {
-				return vargs::cols::varg(vargs::cols::lview { item });
-			},
-			l_is_visible,
-			[] (const int& item) {
-				return ((item >= -1) && (item < (int)t_tags.size()));
-			},
-			[] (const int& item) -> attrs {
-				if (li::tag_completed(item)) return { A_BOLD, color_complete };
-				if (li::tag_failed(item)) return { A_BOLD, color_failed };
-				if (li::tag_coming(item)) return { A_BOLD, color_coming };
-
-				return { A_NORMAL, 0 };
-			},
-			-1, tag_filter,
-			"math %tag_filter% + 1 tag_fitler",
-			listview_cols, lview_columns);
-
-	for (int s = last_string; s < h; s++) { move(s, 0); clrtoeol(); }
-
-	draw_status(listview_status_fields);
-}
-
-void listview_input(const keystroke_s& key, const bool& bind_fired) { }
-
-void normal_paint() {
-	const int last_string =
-		draw_table(0, 0, w, h - 2,
-				[] (const int& item) {
-					return vargs::cols::varg(vargs::cols::normal {
-							t_list.at(item),
-							item
-							});
-				},
-				is_visible,
-				[] (const int& item) {
-					return ((item >= 0) && (item < t_list.size()));
-				},
-				[] (const int& item) -> attrs {
-					const auto& e = t_list.at(item);
-
-					if (e.completed) return { A_BOLD, color_complete };
-					if (e.is_failed()) return { A_BOLD, color_failed };
-					if (e.is_coming()) return { A_BOLD, color_coming };
-
-					return { A_NORMAL, 0 };
-				},
-				0, s_line,
-				"math %id% + 1 id",
-				(tag_filter == TAG_ALL) ? normal_all_cols : normal_cols,
-				columns);
-
-
-	for (int s = last_string; s < h; s++) { move(s, 0); clrtoeol(); }
-
-	draw_status(normal_status_fields);
-}
-
-void normal_input(const keystroke_s& key, const bool& bind_fired) { }
-
-void details_paint() {
-	normal_paint();
-
-	draw_border(3, 2, w - 6, h - 4, box_strong);
-	clear_box(4, 3, w - 8, h - 6);
-	// fill the box with details
-	// Title
-	const li::entry& entry = t_list.at(s_line);
-	text_box(5, 4, w - 10, 1, entry.title);
-
-	for (int i = 4; i < w - 4; i++) {
-		move(6, i);
-		addstr(box_light.s_get(CHAR_HLINE).c_str());
-		box_light.drop();
-	}
-
-	string tag = "";
-	if (entry.tag < t_tags.size()) if (t_tags.at(entry.tag) != to_string(entry.tag))
-		tag = ": " + t_tags.at(entry.tag);
-
-	string info_str = "";
-	for (int coln = 0; coln < details_cols.length(); coln++) {
-		try {
-			const char& col = details_cols.at(coln);
-
-			info_str += columns.at(col).contents(vargs::cols::normal { entry, s_line });
-			if (coln < details_cols.length() - 1) info_str += " " + separators.s_get(CHAR_DET_SEP) + " ";
-		} catch (const out_of_range& e) {}
-	}
-
-	text_box(5, 7, w - 10, 1, info_str);
-
-	for (int i = 4; i < w - 4; i++) {
-		move(8, i);
-		addstr(box_light.s_get(CHAR_HLINE).c_str());
-		box_light.drop();
-	}
-
-	// draw description
-	// we want text wrapping here
-	text_box(5, 10, w - 10, h - 14, entry.description, true, delta);
-}
-
-void command_paint() {
-	switch (prev_modes.top()) {
-		case MODE_NORMAL:
-			normal_paint();
-			break;
-		case MODE_LISTVIEW:
-			listview_paint();
-			break;
-		case MODE_DETAILS:
-			details_paint();
-			break;
-		case MODE_HELP:
-			help_paint();
-			break;
-	}
-
-	move(h - 1, 0);
-	attron_ext(0, color_status);
-	for (int x = 0; x < w; x++) addch(' ');
-	move(h - 1, 0);
-	int offset = command_cursor - w + 3;
-	if (offset < 0) offset = 0;
-	addstr(w_converter.to_bytes(L":" + command.substr(offset)).c_str());
-	move(h - 1, 1 + command_cursor - offset);
-}
-
-void command_input(const keystroke_s& key, const bool& bind_fired) {
-	if (!bind_fired) {
-		command_index = command_history.size();
-
-		command = command.substr(0, command_cursor) + key.key + command.substr(command_cursor, command.length() - command_cursor);
-		command_cursor++;
-	}
-
-	// continious command execution
-	if (contexec_regex_filter != "") {
-		regex ce_regex(contexec_regex_filter);
-
-		if (regex_search(w_converter.to_bytes(command), ce_regex))
-			cmd::exec(w_converter.to_bytes(command));
-	}
-}
-
-void help_paint() {
-	normal_paint();
-
-	draw_border(3, 2, w - 6, h - 4, box_strong);
-	clear_box(4, 3, w - 8, h - 6);
-
-	// fill the box
-	move(4, 5);
-	addstr((string(TITLE) + " v." + VERSION).c_str());
-
-	for (int i = 4; i < w - 4; i++) {
-		move(6, i);
-		addstr(box_light.s_get(CHAR_HLINE).c_str());
-		box_light.drop();
-	}
-
-	// draw description
-	// we want text wrapping here
-	string help;
-	for (char c : CMDS_HELP)
-		help += string(1, c);
-
-	text_box(5, 8, w - 10, h - 12, help, true, delta);
-}
-
-void help_input(const keystroke_s& key, const bool& bind_fired) {
-	if (bind_fired) return;
-	switch (key.key) {
-		case KEY_LEFT:
-			if (delta > 0) delta--;
-			break;
-		case KEY_RIGHT:
-			delta++;
-			break;
-		case '=':
-			delta = 0;
-			break;
-	}
-}
-
 void safemode_box() {
 	box_strong.drop();
 
@@ -504,7 +344,7 @@ string prompt(const string& message) {
 			case 0:
 				break;
 			default:
-				command_input(k, fire_bind(k));
+				modes::mode("command").input(k, fire_bind(k));
 				break;
 		}
 

@@ -27,6 +27,14 @@ struct keystroke_s {
 	bool operator==(const keystroke_s& op) const { return (this->key == op.key) && (this->mod_alt == op.mod_alt); }
 };
 
+struct mode_s {
+	std::function<void()> paint_f;
+	std::function<void(const keystroke_s& key, const bool& bind_fired)> input_f;
+
+	inline void paint() { paint_f(); }
+	inline void input(const keystroke_s& key, const bool& bind_fired = false) { input_f(key, bind_fired); }
+};
+
 struct bind_s {
 	keystroke_s key;
 	std::string command;
@@ -48,6 +56,14 @@ struct col_s {
 	std::function<int(const int& w, const int& free, const int& col_n)> width;
 	std::function<std::string(const vargs::cols::varg& args)> contents;
 };
+
+namespace modes {
+	// modes
+	std::map<std::string, mode_s>& modes();
+
+	void init_mode(const std::string& alias, const mode_s& mode);
+	mode_s mode(const std::string& alias);
+}
 
 // columns
 extern std::map<char, col_s> lview_columns;
@@ -176,21 +192,6 @@ bool fire_bind(const keystroke_s& key);
 
 bool is_visible(const int& entryID);
 bool l_is_visible(const int& list_id);
-
-// mode-specific painters and input handlers
-void normal_paint();
-void normal_input(const keystroke_s& key, const bool& bind_fired = false);
-
-void listview_paint();
-void listview_input(const keystroke_s& key, const bool& bind_fired = false);
-
-void details_paint();
-
-void command_paint();
-void command_input(const keystroke_s& key, const bool& bind_fired = false);
-
-void help_paint();
-void help_input(const keystroke_s& key, const bool& bind_fired = false);
 
 void safemode_box();
 
