@@ -6,7 +6,7 @@ using li::t_tags;
 namespace cui::modes::LISTVIEW {
 
 void paint() {
-	const int last_string = draw_table(0, 0, w, h - 2,
+	const int last_string = draw_table(0, 0, w, h - 1,
 			[] (const int& item) {
 				return vargs::cols::varg(vargs::cols::lview { item });
 			},

@@ -6,7 +6,7 @@ namespace cui::modes::NORMAL {
 
 void paint() {
 	const int last_string =
-		draw_table(0, 0, w, h - 2,
+		draw_table(0, 0, w, h - 1,
 				[] (const int& item) {
 					return vargs::cols::varg(vargs::cols::normal {
 							t_list.at(item),

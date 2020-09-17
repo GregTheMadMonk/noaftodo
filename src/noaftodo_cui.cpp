@@ -510,7 +510,7 @@ int draw_table(const int& x, const int& y,
 
 	// calculate list offset
 	int l_offset = 0;
-	if (v_sel - l_offset >= h) l_offset = v_sel - h + 3;
+	if (v_sel - l_offset >= h - 2) l_offset = v_sel - h + 3;
 	if (v_sel - l_offset < 0) l_offset = v_sel;
 
 	if (v_list.size() == 0) {
@@ -522,7 +522,7 @@ int draw_table(const int& x, const int& y,
 	for (int l = 0; l < v_list.size(); l++) {
 		separators.drop();
 		separators.shift_at(CHAR_ROW_SEP, row_separator_offset * (l + 1));
-		if (l - l_offset >= h - 2) break;
+		if (l - l_offset >= h - 1) break;
 		if (l < l_offset) continue;
 
 		const auto a_f = attrs_f(v_list.at(l));
