@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ "$1" == "" ]; then
+if [ "$1" = "" ]; then
 	echo "Directory unspecified"
 	exit 1
 fi
