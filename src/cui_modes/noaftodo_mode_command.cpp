@@ -4,11 +4,11 @@
 
 #include "../noaftodo_cmd.h"
 
+NOAFTODO_START_MODE(command, paint, input)
+
 using namespace std;
 
 using li::t_list;
-
-namespace cui::modes::COMMAND {
 
 void paint() {
 	switch (prev_modes.top()) {
@@ -53,12 +53,4 @@ void input(const keystroke_s& key, const bool& bind_fired) {
 	}
 }
 
-nullptr_t creator = ([] () { init_mode("command", {
-		paint,
-		input
-		});
-		
-		return nullptr;
-		})();
-
-}
+NOAFTODO_END_MODE

@@ -2,11 +2,11 @@
 
 using namespace std;
 
-using li::t_list;
-
 extern string CMDS_HELP;
 
-namespace cui::modes::HELP {
+NOAFTODO_START_MODE(help, paint, input)
+
+using li::t_list;
 
 void paint() {
 	modes::mode("normal").paint();
@@ -48,12 +48,4 @@ void input(const keystroke_s& key, const bool& bind_fired) {
 	}
 }
 
-std::nullptr_t creator = ([] () { init_mode("help", {
-		paint,
-		input
-		});
-		
-		return nullptr;
-		})();
-
-}
+NOAFTODO_END_MODE

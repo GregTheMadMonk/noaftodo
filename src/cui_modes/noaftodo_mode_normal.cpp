@@ -1,8 +1,8 @@
 #include "../noaftodo_cui.h"
 
-using li::t_list;
+NOAFTODO_START_MODE(normal, paint, input)
 
-namespace cui::modes::NORMAL {
+using li::t_list;
 
 void paint() {
 	const int last_string =
@@ -37,12 +37,6 @@ void paint() {
 	draw_status(normal_status_fields);
 }
 
-std::nullptr_t creator = ([] () { init_mode("normal", {
-		paint,
-		[] (const keystroke_s& key, const bool& bind_fired) {}
-		});
-		
-		return nullptr;
-		})();
+void input(const keystroke_s& key, const bool& bind_fired) {}
 
-}
+NOAFTODO_END_MODE

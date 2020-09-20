@@ -1,11 +1,11 @@
 #include "../noaftodo_cui.h"
 
+NOAFTODO_START_MODE(details, paint, input)
+
 using namespace std;
 
 using li::t_list;
 using li::t_tags;
-
-namespace cui::modes::DETAILS {
 
 void paint() {
 	modes::mode("normal").paint();
@@ -50,12 +50,8 @@ void paint() {
 	text_box(5, 10, w - 10, h - 14, entry.description, true, delta);
 }
 
-std::nullptr_t creator = ([] () { init_mode("details", {
-		paint,
-		[] (const keystroke_s& key, const bool& bind_fired) { mode("help").input(key, bind_fired); }
-		});
-		
-		return nullptr;
-		})();
-
+void input(const keystroke_s& key, const bool& bind_fired) {
+	mode("help").input(key, bind_fired);
 }
+
+NOAFTODO_END_MODE

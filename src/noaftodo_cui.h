@@ -17,6 +17,20 @@
 #include "noaftodo.h"
 #include "noaftodo_list.h"
 
+// mode declaration macro
+#define NOAFTODO_START_MODE(name, painter_name, input_handler_name) namespace cui::modes::mode_##name {\
+	void painter_name();\
+	void input_handler_name(const keystroke_s& key, const bool& bind_fired);\
+	std::nullptr_t creator = ([] () { init_mode(#name, {\
+			painter_name,\
+			input_handler_name,\
+			});\
+		return nullptr;\
+	})();
+
+#define NOAFTODO_END_MODE }
+
+
 namespace cui {
 
 struct keystroke_s {

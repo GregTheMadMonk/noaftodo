@@ -1,9 +1,9 @@
 #include "../noaftodo_cui.h"
 
+NOAFTODO_START_MODE(liview, paint, input)
+
 using li::t_list;
 using li::t_tags;
-
-namespace cui::modes::LISTVIEW {
 
 void paint() {
 	const int last_string = draw_table(0, 0, w, h - 1,
@@ -30,12 +30,6 @@ void paint() {
 	draw_status(listview_status_fields);
 }
 
-std::nullptr_t creator = ([] () { init_mode("liview", {
-		paint,
-		[] (const keystroke_s& key, const bool& bind_fired) {}
-		});
-		
-		return nullptr;
-		})();
+void input(const keystroke_s& key, const bool& bind_fired) {}
 
-}
+NOAFTODO_END_MODE
