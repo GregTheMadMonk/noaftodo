@@ -394,6 +394,18 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 		}
 	},
 
+	// command "time" - temporary playground command for new time implementation testing
+	{ "time", [] (const vector<string>& args) {
+			auto t = time_s(args.at(0));
+
+			log("Creating from cmd string: " + args.at(0), LP_IMPORTANT);
+			log("UI format: " + t.fmt_ui(), LP_IMPORTANT);
+			log("Full cmd formatted string: " + t.fmt_cmd(), LP_IMPORTANT);
+			log("Log formatted string string: " + t.fmt_log(), LP_IMPORTANT);
+			return 0;
+		}
+	},
+
 	// COMMAND MODE CURSOR CONTROLS
 	{ "cmd.curs.left", [] (const vector<string>& args) {
 			if (cui::command_cursor > 0) cui::command_cursor--;
