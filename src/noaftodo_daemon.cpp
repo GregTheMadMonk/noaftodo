@@ -16,7 +16,6 @@
 #include "noaftodo_cui.h"
 #include "noaftodo_cvar.h"
 #include "noaftodo_config.h"
-#include "noaftodo_time.h"
 
 using namespace std;
 
@@ -36,7 +35,7 @@ int clients = -1; // -1 if we don't care. Other numbers indicate
 int interval = 1;
 
 vector<li::entry> cache;
-long cached_time = 0;
+time_s cached_time;
 
 void run() {
 	// init cache
@@ -70,14 +69,14 @@ void run() {
 	timespec tout;
 
 	upd_cache(true);
-	cached_time = ti_to_long("a0d");
+	cached_time = time_s();
 
 	while (running) {
 		if (li::has_changed()) upd_cache();
 
 		check_dues();
 
-		cached_time = ti_to_long("a0d");
+		cached_time = time_s();
 
 #ifdef NO_MQUEUE
 		string msg;
@@ -274,7 +273,7 @@ void check_dues(const bool& renotify) {
 			if (!renotify)
 				exec(format_str(t_list.at(s_line).get_meta("on_failed"), &t_list.at(s_line)));
 		}
-		else if ((t_list.at(s_line).is_coming()) && (renotify || (t_list.at(s_line).due > ti_to_long(ti_cmd_str(cached_time) + "a" + t_list.at(s_line).get_meta("warn_time", "1d"))))) {
+		else if ((t_list.at(s_line).is_coming()) && (renotify || (t_list.at(s_line).due > time_s(cached_time.fmt_cmd() + "a" + t_list.at(s_line).get_meta("warn_time", "1d"))))) {
 			if (t_list.at(s_line).get_meta("ignore_global_on_coming") != "true")
 				exec(format_str(task_coming_action, &t_list.at(s_line), renotify));
 			if (!renotify)

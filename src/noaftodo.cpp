@@ -196,7 +196,7 @@ void log(const string& message, const char& prefix, const int& sleep_sec)
 		if (wcui) cui::destroy();
 
 		if (!pure) {
-			cout << "[" << ti_log_time() << "][" << prefix << "] ";
+			cout << "[" << time_s().fmt_log() << "][" << prefix << "] ";
 			for (int i = 0; i < log_offset; i++) cout << "  ";
 		}
 

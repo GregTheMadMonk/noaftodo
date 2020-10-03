@@ -9,11 +9,13 @@
 #include <sys/types.h>
 #include <vector>
 
+#include "noaftodo_time.h"
+
 namespace li {
 
 struct entry {
 	bool completed;
-	long due;
+	time_s due;
 	std::string title;
 	std::string description;
 	int tag; // also tag = -1 indicates a null entry

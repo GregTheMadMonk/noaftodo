@@ -5,6 +5,8 @@
 #include <functional>
 #include <string>
 
+#include "noaftodo_macro.h"
+
 class time_s {
 	time_t time;
 public:
@@ -21,8 +23,8 @@ public:
 		l_ti.tm_min	= t_long % (long)1e2;
 		l_ti.tm_hour	= t_long % (long)1e4 / 1e2;
 		l_ti.tm_mday	= t_long % (long)1e6 / 1e4;
-		l_ti.tm_mon	= t_long % (long)1e8 / 1e6;
-		l_ti.tm_year	= t_long / (long)1e8;
+		l_ti.tm_mon	= t_long % (long)1e8 / 1e6 - 1;
+		l_ti.tm_year	= t_long / (long)1e8 - 1900;
 
 		this->time = mktime(&l_ti);
 	}
@@ -80,18 +82,20 @@ public:
 		ti.tm_mon -= 1;
 		ti.tm_year -= 1900;
 
+		ti.tm_sec = 0; // command-line time format doesm't include seconds
+
 		this->time = mktime(&ti);
 	}
 
 	// construct long value of format YYYYMMDDHHMM. To be deprecated in 2.0.0
-	long to_long() {
+	CONST_DPL(long to_long(), {
 		const tm l_ti = *localtime(&(this->time));
 		return l_ti.tm_min +
 			l_ti.tm_hour * 1e2 +
 			l_ti.tm_mday * 1e4 +
-			l_ti.tm_mon * 1e6 +
-			l_ti.tm_year * 1e8;
-	}
+			(l_ti.tm_mon + 1) * 1e6 +
+			(l_ti.tm_year + 1900) * 1e8;
+	})
 
 	// format function argument list
 	#define FMT_F_ARGS const unsigned& y, \
@@ -103,7 +107,7 @@ public:
 	// format function type
 	typedef std::function<std::string(FMT_F_ARGS)> fmt_f_t;
 	// format string
-	std::string fmt(const fmt_f_t& fmt_f) {
+	CONST_DPL(std::string fmt(const fmt_f_t& fmt_f), {
 		const tm l_ti = *localtime(&(this->time));
 
 		return fmt_f(l_ti.tm_year + 1900, // tm_year = current_year - 1900
@@ -112,11 +116,11 @@ public:
 			l_ti.tm_hour,
 			l_ti.tm_min,
 			l_ti.tm_sec);
-	}
+	})
 
 	// formatters
 	// to command interpreter date format
-	std::string fmt_cmd() {
+	CONST_DPL(std::string fmt_cmd(), {
 		return this->fmt([] (FMT_F_ARGS) {
 			return std::to_string(y) + "y" +
 				std::to_string(M) + "m" +
@@ -124,10 +128,10 @@ public:
 				std::to_string(h) + "h" +
 				std::to_string(m);
 		});
-	}
+	})
 
 	// to be printed on UI: (YYYY/MM/DD HH:MM)
-	std::string fmt_ui() {
+	CONST_DPL(std::string fmt_ui(), {
 		return this->fmt([] (FMT_F_ARGS) {
 			return std::to_string(y) + "/" +
 				((M < 10) ? "0" : "") + std::to_string(M) + "/" +
@@ -135,29 +139,24 @@ public:
 				((h < 10) ? "0" : "") + std::to_string(h) + ":" +
 				((m < 10) ? "0" : "") + std::to_string(m);
 		});
-	}
+	})
 
 	// to be printed in log
-	std::string fmt_log() {
+	CONST_DPL(std::string fmt_log(), {
 		return this->fmt([] (FMT_F_ARGS) {
 			return ((h < 10) ? "0" : "") + std::to_string(h) + ":" +
 				((m < 10) ? "0" : "") + std::to_string(m) + ":" +
 				((s < 10) ? "0" : "") + std::to_string(s);
 		});
-	}
+	})
+
+	// comparsement
+	CONST_DPL(bool operator<(const time_s& op2), { return this->time < op2.time; })
+	CONST_DPL(bool operator>(const time_s& op2), { return this->time > op2.time; })
+	CONST_DPL(bool operator<=(const time_s& op2), { return this->time <= op2.time; })
+	CONST_DPL(bool operator>=(const time_s& op2), { return this->time >= op2.time; })
+	CONST_DPL(bool operator==(const time_s& op2), { return this->time == op2.time; })
+	CONST_DPL(bool operator!=(const time_s& op2), { return this->time != op2.time; })
 };
-
-std::string ti_log_time();
-
-long ti_to_long(const tm& t_tm);
-long ti_to_long(const std::string& t_str);
-tm ti_to_tm(const std::string& t_str);
-tm ti_to_tm(const long& t_long);
-
-std::string ti_f_str(const tm& t_tm);
-std::string ti_f_str(const long& t_long);
-
-std::string ti_cmd_str(const tm& t_tm);
-std::string ti_cmd_str(const long& t_long);
 
 #endif

@@ -78,7 +78,7 @@ string entry::meta_str() {
 }
 
 bool entry::is_failed() const {
-	return !this->completed && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a0d"));
+	return !this->completed && (this->get_meta("nodue") != "true") && (this->due <= time_s());
 }
 
 bool entry::is_failed() {
@@ -86,7 +86,7 @@ bool entry::is_failed() {
 }
 
 bool entry::is_coming() const {
-	return !this->completed && !this->is_failed() && (this->get_meta("nodue") != "true") && (this->due <= ti_to_long("a" + this->get_meta("warn_time", "1d")));
+	return !this->completed && !this->is_failed() && (this->get_meta("nodue") != "true") && (this->due <= time_s("a" + this->get_meta("warn_time", "1d")));
 }
 
 bool entry::is_coming() {
@@ -218,7 +218,7 @@ void load(const bool& load_workspace) {
 											e.completed = (temp == "v");
 											break;
 										case 1:
-											e.due = stol(temp);
+											e.due = time_s(stol(temp));
 											break;
 										case 2:
 											e.title = temp;
@@ -328,7 +328,7 @@ int save(const string& save_filename) {
 	ofile << endl << "[list]" << endl;
 	for (const auto& entry : t_list_copy) {
 		ofile << "\"" << (entry.completed ? 'v' : '-')
-			<< "\"\\\"" << entry.due
+			<< "\"\\\"" << entry.due.to_long()
 			<< "\"\\\"" << replace_special(entry.title)
 			<< "\"\\\"" << replace_special(entry.description)
 			<< "\"\\\"" << entry.tag << "\"";

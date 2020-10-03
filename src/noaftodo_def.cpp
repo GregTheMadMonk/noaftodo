@@ -137,10 +137,10 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 				new_entry.completed = false;
 
 				if (args.at(0) == "-") {
-					new_entry.due = ti_to_long("a10000y");
+					new_entry.due = time_s("a10000y");
 					new_entry.meta["nodue"] = "true";
 				}
-				else new_entry.due = ti_to_long(args.at(0));
+				else new_entry.due = time_s(args.at(0));
 				new_entry.title = args.at(1);
 				new_entry.description = args.at(2);
 
@@ -394,18 +394,6 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 		}
 	},
 
-	// command "time" - temporary playground command for new time implementation testing
-	{ "time", [] (const vector<string>& args) {
-			auto t = time_s(args.at(0));
-
-			log("Creating from cmd string: " + args.at(0), LP_IMPORTANT);
-			log("UI format: " + t.fmt_ui(), LP_IMPORTANT);
-			log("Full cmd formatted string: " + t.fmt_cmd(), LP_IMPORTANT);
-			log("Log formatted string string: " + t.fmt_log(), LP_IMPORTANT);
-			return 0;
-		}
-	},
-
 	// COMMAND MODE CURSOR CONTROLS
 	{ "cmd.curs.left", [] (const vector<string>& args) {
 			if (cui::command_cursor > 0) cui::command_cursor--;
@@ -619,11 +607,11 @@ void init_cvars() {
 	cvar_base_s::cvars["due"] = make_unique<cvar_base_s>(
 		[] () {
 			if (sel_entry == nullptr)  return string("");
-			return ti_cmd_str(sel_entry->due);
+			return sel_entry->due.fmt_cmd();
 		},
 		[] (const string& val) {
 			if (sel_entry == nullptr) return;
-			sel_entry->due = ti_to_long(val);
+			sel_entry->due = time_s(val);
 			if (li::autosave) li::save();
 		},
 		CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE
@@ -964,7 +952,7 @@ map<char, col_s> columns = {
 				[](const varg& args) {
 					const auto& e = get<normal>(args).e;
 					if (e.get_meta("nodue") == "true") return string("----------------");
-					else return ti_f_str(e.due);
+					else return e.due.fmt_ui();
 				}
 			}
 		},

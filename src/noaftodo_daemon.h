@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "noaftodo_list.h"
+#include "noaftodo_time.h"
 
 namespace da {
 
@@ -49,7 +50,7 @@ extern int clients;
 
 // cache
 extern std::vector<li::entry> cache;
-extern long cached_time;
+extern time_s cached_time;
 
 // check interval
 extern int interval;

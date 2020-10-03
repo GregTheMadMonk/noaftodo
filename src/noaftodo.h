@@ -11,14 +11,6 @@
 // program title and version
 constexpr char TITLE[] = "NOAFtodo";
 
-#ifndef V_SUFFIX
-#define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(PATCH_V)
-#else
-#define XMSTR(s) MSTR(s)
-#define MSTR(s) #s
-#define VERSION to_string(LIST_V) + "." + to_string(CONF_V) + "." + to_string(PATCH_V) + " " + XMSTR(V_SUFFIX)
-#endif
-
 // program modes
 constexpr int PM_DEFAULT = 0;
 constexpr int PM_HELP = 1;
