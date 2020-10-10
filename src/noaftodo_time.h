@@ -97,6 +97,9 @@ public:
 			(l_ti.tm_year + 1900) * 1e8;
 	})
 
+	// return localtime tm struct
+	CONST_DPL(auto to_tm(), { return *localtime(&this->time); })
+
 	// format function argument list
 	#define FMT_F_ARGS const unsigned& y, \
 		const unsigned& M, \
@@ -122,31 +125,27 @@ public:
 	// to command interpreter date format
 	CONST_DPL(std::string fmt_cmd(), {
 		return this->fmt([] (FMT_F_ARGS) {
-			return std::to_string(y) + "y" +
-				std::to_string(M) + "m" +
-				std::to_string(d) + "d" +
-				std::to_string(h) + "h" +
-				std::to_string(m);
+			char buffer[16];
+			sprintf(buffer, "%dy%dm%dd%dh%d", y, M, d, h, m);
+			return std::string(buffer);
 		});
 	})
 
 	// to be printed on UI: (YYYY/MM/DD HH:MM)
 	CONST_DPL(std::string fmt_ui(), {
 		return this->fmt([] (FMT_F_ARGS) {
-			return std::to_string(y) + "/" +
-				((M < 10) ? "0" : "") + std::to_string(M) + "/" +
-				((d < 10) ? "0" : "") + std::to_string(d) + " " +
-				((h < 10) ? "0" : "") + std::to_string(h) + ":" +
-				((m < 10) ? "0" : "") + std::to_string(m);
+			char buffer[16];
+			sprintf(buffer, "%04d/%02d/%02d %02d:%02d", y, M, d, h, m);
+			return std::string(buffer);
 		});
 	})
 
 	// to be printed in log
 	CONST_DPL(std::string fmt_log(), {
 		return this->fmt([] (FMT_F_ARGS) {
-			return ((h < 10) ? "0" : "") + std::to_string(h) + ":" +
-				((m < 10) ? "0" : "") + std::to_string(m) + ":" +
-				((s < 10) ? "0" : "") + std::to_string(s);
+			char buffer[16];
+			sprintf(buffer, "%02d:%02d:%02d", h, m, s);
+			return std::string(buffer);
 		});
 	})
 
@@ -157,6 +156,57 @@ public:
 	CONST_DPL(bool operator>=(const time_s& op2), { return this->time >= op2.time; })
 	CONST_DPL(bool operator==(const time_s& op2), { return this->time == op2.time; })
 	CONST_DPL(bool operator!=(const time_s& op2), { return this->time != op2.time; })
+
+	// difference between two time marks
+	struct time_diff_s { tm diff; bool sign; /* sign = true - positive, false - negative */ };
+	CONST_DPL(time_diff_s operator-(const time_s& op), {
+			time_diff_s ret;
+
+			ret.sign = (this->time >= op.time);
+
+			const auto tm_to	= ret.sign ? this->to_tm() : op.to_tm();
+			const auto tm_from	= ret.sign ? op.to_tm() : this->to_tm();
+
+			// amount of days in a month
+			auto mdays = [] (const int& month, const int& year) {
+				if (month == 2) {
+					if ((year % 400 == 0) || ((year % 4 == 0) && (year % 100 != 0)))
+						return 29;
+					return 28;
+				}
+
+				// higher forces forgive me for this
+				for (const auto i : { 1, 3, 5, 7, 8, 10, 12 })
+					if (i == month) return 31;
+
+				return 30;
+			};
+
+			ret.diff.tm_year= tm_to.tm_year - tm_from.tm_year;
+			ret.diff.tm_mon	= tm_to.tm_mon - tm_from.tm_mon;
+			ret.diff.tm_mday= tm_to.tm_mday - tm_from.tm_mday;
+			ret.diff.tm_hour= tm_to.tm_hour - tm_from.tm_hour;
+			ret.diff.tm_min	= tm_to.tm_min - tm_from.tm_min;	
+
+			if (ret.diff.tm_min < 0) {
+				ret.diff.tm_hour--;
+				ret.diff.tm_min += 60;
+			}
+			if (ret.diff.tm_hour < 0) {
+				ret.diff.tm_mday--;
+				ret.diff.tm_hour += 24;
+			}
+			if (ret.diff.tm_mday < 0) {
+				ret.diff.tm_mon--;
+				ret.diff.tm_mday += mdays(tm_from.tm_mon + 1, tm_from.tm_year + 1900);
+			}
+			if (ret.diff.tm_mon < 0) {
+				ret.diff.tm_year--;
+				ret.diff.tm_mon += 12;
+			}
+
+			return ret;
+	});
 };
 
 #endif

@@ -952,9 +952,32 @@ map<char, col_s> columns = {
 				[](const varg& args) {
 					const auto& e = get<normal>(args).e;
 					if (e.get_meta("nodue") == "true") return string("----------------");
-					else return e.due.fmt_ui();
+					return e.due.fmt_ui();
 				}
 			}
+		},
+		// NORMAL column "r" - remaining time until task due
+		{ 'r', {
+			       "Due in",
+			       [](const int& w, const int& free, const int& cols) {
+				       return 18;
+			       },
+			       [](const varg& args) {
+					const auto& e = get<normal>(args).e;
+					if (e.get_meta("nodue") == "true") return string("------------------");
+
+					const auto diff = e.due - time_s();
+
+					char buffer[16];
+					sprintf(buffer, "%04d/%02d/%02d %02d:%02d",
+							diff.diff.tm_year,
+							diff.diff.tm_mon,
+							diff.diff.tm_mday,
+							diff.diff.tm_hour,
+							diff.diff.tm_min);
+				       return (diff.sign ? "- " : "+ ") + string(buffer);
+			       }
+		       }
 		},
 		// NORMAL column "D" - shows task description
 		{ 'D',	{
