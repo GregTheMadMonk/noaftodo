@@ -175,6 +175,8 @@ void run() {
 }
 
 void set_mode(const int& new_mode) {
+	if (mode == 0) return; // exit was requested, we don't want to go back to anything
+
 	if (new_mode == -1) {
 		if (prev_modes.size() == 0) return;
 		mode = prev_modes.top();

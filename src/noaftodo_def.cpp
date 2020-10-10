@@ -1187,7 +1187,7 @@ string listview_cols;
 string normal_status_fields;
 string listview_status_fields;
 
-int mode;
+int mode = MODE_NORMAL;
 stack<int> prev_modes;
 
 vector<bind_s> binds;
