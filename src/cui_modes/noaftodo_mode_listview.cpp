@@ -22,7 +22,7 @@ void paint() {
 				return { A_NORMAL, 0 };
 			},
 			-1, tag_filter,
-			"math %tag_filter% + 1 tag_fitler",
+			"math %tag_filter_v% + 1 tag_filter_v",
 			listview_cols, lview_columns);
 
 	for (int s = last_string; s < h; s++) { move(s, 0); clrtoeol(); }
