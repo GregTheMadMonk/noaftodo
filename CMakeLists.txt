@@ -13,15 +13,31 @@ set(CURSES_NEED_WIDE True)
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})
 
+# Platform-specific stuff
+message("Building for ${CMAKE_HOST_SYSTEM_NAME}")
+
+if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Haiku")
+	message("mqueue is off due to platform")
+	set(_NO_MQUEUE 1)
+	message("root check is off due to platform")
+	set(_NO_ROOT_CHECK 1)
+endif()
+
 # Environment arguments
 if ($ENV{NO_MQUEUE})
 	message("mqueue is off by build flag")
 	set(_NO_MQUEUE 1)
+elseif (NOT("$ENV{NO_MQUEUE}" STREQUAL ""))
+	message("mqueue is on by build flag")
+	set(_NO_MQUEUE 0)
 endif()
 
 if ($ENV{NO_ROOT_CHECK})
 	message("root check is off by build flag")
 	set(_NO_ROOT_CHECK 1)
+elseif (NOT("$ENV{NO_ROOT_CHECK}" STREQUAL ""))
+	message("root check is on by build flag")
+	set(_NO_ROOT_CHECK 0)
 endif()
 
 if ($ENV{DEBUG})
@@ -37,16 +53,6 @@ endif()
 
 if (NOT ("$ENV{PKGROOT}" STREQUAL ""))
 	set(_PKGROOT "$ENV{PKGROOT}")
-endif()
-
-# Platform-specific stuff
-message("Building for ${CMAKE_HOST_SYSTEM_NAME}")
-
-if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Haiku")
-	message("mqueue is off due to platform")
-	set(_NO_MQUEUE 1)
-	message("root check is off due to platform")
-	set(_NO_ROOT_CHECK 1)
 endif()
 
 # Find source files
