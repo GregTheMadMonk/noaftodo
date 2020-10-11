@@ -9,9 +9,19 @@
 #include <sys/types.h>
 #include <vector>
 
+#include "noaftodo_macro.h"
 #include "noaftodo_time.h"
 
 namespace li {
+
+struct entry;
+
+extern std::vector<entry> t_list;	// the list itself
+extern std::vector<std::string> t_tags;		// list tags
+extern std::string filename;		// the list filename
+extern bool autosave;
+
+extern struct stat file_stat;
 
 struct entry {
 	bool completed;
@@ -21,29 +31,66 @@ struct entry {
 	int tag; // also tag = -1 indicates a null entry
 
 	std::map<std::string, std::string> meta;
-	std::string get_meta(const std::string& str, const std::string& def = "");
-	std::string get_meta(const std::string& str, const std::string& def = "") const;
 
-	bool sim(const entry& e2);
-	bool sim(const entry& e2) const;
-	bool operator==(const entry& comp);
-	bool operator==(const entry& comp) const;
-	bool operator!=(const entry& comp);
-	bool operator!=(const entry& comp) const;
+	CONST_DPL(std::string get_meta(const std::string& str, const std::string& def = ""), {
+		try  {
+			return (this->meta.at(str) == "") ? def : this->meta.at(str);
+		} catch (const std::out_of_range& e) { return def; }
+	})
 
-	std::string meta_str();
-	std::string meta_str() const;
+	CONST_DPL(bool sim(const entry& e2), {
+		return (this->due == e2.due) &&
+			(this->title == e2.title) &&
+			(this->description == e2.description) &&
+			(this->tag == e2.tag);
+	})
+	CONST_DPL(bool operator==(const entry& comp), {
+		return this->sim(comp) &&
+			(this->completed == comp.completed) &&
+			(this->meta == comp.meta);
+	})
+	CONST_DPL(bool operator!=(const entry& comp), { return !(*this == comp); })
 
-	bool is_failed();
-	bool is_failed() const;
+	CONST_DPL(std::string meta_str(), {
+		std::string meta = "";
 
-	bool is_coming();
-	bool is_coming() const;
+		for (auto it = this->meta.begin(); it != this->meta.end(); it++) {
+			if (meta != "") meta += " ";
+			meta += "\"" + it->first + "\" \"" + it->second + "\"";
+		}
 
-	bool is_uncat();
-	bool is_uncat() const;
+		return meta;
+	})
 
-	void name();
+	CONST_DPL(bool is_failed(), {
+		return !this->completed && (this->get_meta("nodue") != "true") && (this->due <= time_s());
+	})
+
+	CONST_DPL(bool is_coming(), {
+		return !this->completed && (this->get_meta("nodue") != "true") &&
+			(this->due <= time_s("a" + this->get_meta("warn_time", "1d")));
+	})
+
+	CONST_DPL(bool is_uncat(), {
+		return !this->completed &&
+			!this->is_failed() &&
+			!this->is_coming() &&
+			(this->get_meta("nodue") != "true");
+	})
+
+	void name() {
+		if (this->get_meta("eid") == "") for (int i = 0; ; i++)
+			// if (!found)
+			if ( ([&i] () -> bool {
+				for (const auto& e : t_list) if (e.get_meta("eid") == "e" + std::to_string(i))
+					return false;
+
+				return true;
+			})() ) {
+				this->meta["eid"] = "e" + std::to_string(i);
+				break;
+			}
+	}
 };
 
 extern std::string sort_order;
@@ -137,13 +184,6 @@ struct less_than_entry {
 		} catch (const std::invalid_argument& e) { return false; }
 	}
 };
-
-extern std::vector<entry> t_list;	// the list itself
-extern std::vector<std::string> t_tags;		// list tags
-extern std::string filename;		// the list filename
-extern bool autosave;
-
-extern struct stat file_stat;
 
 void load(const bool& load_workspace = true);
 void load(const std::string& load_filename, const bool& load_workspace = true);
