@@ -16,6 +16,7 @@
 
 #include "noaftodo.h"
 #include "noaftodo_list.h"
+#include "noaftodo_time.h"
 
 // mode declaration macro
 #define NOAFTODO_START_MODE(name, painter_name, input_handler_name) namespace cui::modes::mode_##name {\
@@ -105,6 +106,9 @@ constexpr int FILTER_NODUE = 0b10000; 	// 16 - nodue
 constexpr int FILTER_EMPTY = 0b100000;	// 32 - empty lists
 
 constexpr int TAG_ALL = -1;
+
+// last screen updated time
+extern time_s last_scr_upd;
 
 // current mode
 extern int mode;

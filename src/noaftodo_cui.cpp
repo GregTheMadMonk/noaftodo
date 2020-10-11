@@ -6,7 +6,6 @@
 #include "noaftodo_config.h"
 #include "noaftodo_cvar.h"
 #include "noaftodo_daemon.h"
-#include "noaftodo_time.h"
 
 using namespace std;
 
@@ -14,6 +13,8 @@ using li::t_list;
 using li::t_tags;
 
 namespace cui {
+
+time_s last_scr_upd;
 
 map<string, mode_s>& modes::modes() {
 	static map<string, mode_s> modes_ {};
@@ -89,7 +90,18 @@ void run() {
 
 	for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0)) {
 		if (li::has_changed()) li::load(false); // load only list contents, not the workspace
-		else if ((c == 0) && (!shift_multivars)) continue;
+
+		// check for updates in task state
+		else if ( !([] () -> bool {
+				for (const auto& entry : t_list)
+					if ((entry.is_failed() && (entry.due > last_scr_upd)) ||
+					(entry.is_coming() && (entry.due > time_s(last_scr_upd.fmt_cmd() + "a" + entry.get_meta("warn_time", "1d")))))
+						return true;
+
+				return false;
+		})() && (c == 0) && (!shift_multivars) ) continue;
+
+		last_scr_upd = time_s();
 
 		if (c > 0) {
 			const int old_numbuffer = numbuffer;
