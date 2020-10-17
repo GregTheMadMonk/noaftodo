@@ -1,11 +1,13 @@
 #include "../noaftodo_cui.h"
 
-NOAFTODO_START_MODE(details, paint, input)
+NOAFTODO_START_MODE(details, init, paint, input)
 
 using namespace std;
 
 using li::t_list;
 using li::t_tags;
+
+void init() {}
 
 void paint() {
 	modes::mode("normal").paint();

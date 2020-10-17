@@ -1,8 +1,10 @@
 #include "../noaftodo_cui.h"
 
-NOAFTODO_START_MODE(normal, paint, input)
+NOAFTODO_START_MODE(normal, init, paint, input)
 
 using li::t_list;
+
+void init() {}
 
 void paint() {
 	const int last_string =

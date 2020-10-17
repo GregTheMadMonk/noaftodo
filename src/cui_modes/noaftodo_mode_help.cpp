@@ -4,9 +4,11 @@ using namespace std;
 
 extern string CMDS_HELP;
 
-NOAFTODO_START_MODE(help, paint, input)
+NOAFTODO_START_MODE(help, init, paint, input)
 
 using li::t_list;
+
+void init() {}
 
 void paint() {
 	modes::mode("normal").paint();

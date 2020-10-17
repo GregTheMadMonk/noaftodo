@@ -4,11 +4,13 @@
 
 #include "../noaftodo_cmd.h"
 
-NOAFTODO_START_MODE(command, paint, input)
+NOAFTODO_START_MODE(command, init, paint, input)
 
 using namespace std;
 
 using li::t_list;
+
+void init() {}
 
 void paint() {
 	switch (prev_modes.top()) {

@@ -1,9 +1,11 @@
 #include "../noaftodo_cui.h"
 
-NOAFTODO_START_MODE(liview, paint, input)
+NOAFTODO_START_MODE(liview, init, paint, input)
 
 using li::t_list;
 using li::t_tags;
+
+void init() {}
 
 void paint() {
 	const int last_string = draw_table(0, 0, w, h - 1,

@@ -1116,6 +1116,9 @@ map<char, function<string()>> status_fields = {
 					case MODE_HELP:
 						return string("HELP");
 						break;
+					case MODE_TIMELINE:
+						return string("TIMELINE");
+						break;
 					default:
 						return string("");
 				}

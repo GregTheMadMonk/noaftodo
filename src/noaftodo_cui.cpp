@@ -27,14 +27,11 @@ void modes::init_mode(const string& alias, const mode_s& mode) {
 }
 
 mode_s modes::mode(const string& alias) {
-	for (auto it = modes::modes().begin();
-			it != modes::modes().end();
-			it++)
-		log("Mode found: " + it->first);
 	try {
 		return modes::modes().at(alias);
 	} catch (const out_of_range& e) {
 		return {
+			[] () {},
 			[&alias] () {
 				move(1, 1);
 				addstr(("Mode not found: \"" + alias + "\" :(").c_str());
@@ -48,6 +45,13 @@ mode_s modes::mode(const string& alias) {
 
 void init() {
 	log("Initializing console UI...");
+
+	log("Running modes init() functions");
+
+	for (auto it = modes::modes().begin();
+			it != modes::modes().end();
+			it++)
+		it->second.init_f();
 
 	// construct UI
 	command_history.push_back(w_converter.from_bytes(""));
@@ -132,6 +136,10 @@ void run() {
 					break;
 				case MODE_HELP:
 					modes::mode("help").input(k, fire_bind(k));
+					break;
+				case MODE_TIMELINE:
+					modes::mode("timeline").input(k, fire_bind(k));
+					break;
 			}
 
 			if (old_numbuffer == numbuffer) numbuffer = -1;
@@ -165,6 +173,9 @@ void run() {
 				break;
 			case MODE_HELP:
 				modes::mode("help").paint();
+				break;
+			case MODE_TIMELINE:
+				modes::mode("timeline").paint();
 				break;
 		}
 
