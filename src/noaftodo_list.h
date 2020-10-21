@@ -67,7 +67,8 @@ struct entry {
 	})
 
 	CONST_DPL(bool is_coming(), {
-		return !this->completed && (this->get_meta("nodue") != "true") &&
+		return !this->completed && !this->is_failed() &&
+			(this->get_meta("nodue") != "true") &&
 			(this->due <= time_s("a" + this->get_meta("warn_time", "1d")));
 	})
 
