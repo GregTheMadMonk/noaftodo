@@ -40,8 +40,10 @@ public:
 		int buffer = 0;
 		bool input = false;
 		bool absolute = true;
+		bool negative = false;
 
-		const auto put_field = [&buffer, &input, &absolute] (int& to) {
+		const auto put_field = [&buffer, &input, &absolute, &negative] (int& to) {
+			if (negative) buffer = -buffer;
 			if (input) {
 				if (absolute) to = buffer;
 				else to += buffer;
@@ -49,6 +51,7 @@ public:
 
 			buffer = 0;
 			input = false;
+			negative = false;
 		};
 
 		for (int i = 0; i <= t_str.length(); i++) {
@@ -63,6 +66,9 @@ public:
 
 					// switch between absolute and relative modes
 					absolute = !absolute;
+					break;
+				case '-':
+					negative = !negative;
 					break;
 				case 'h':
 					put_field(ti.tm_hour);
