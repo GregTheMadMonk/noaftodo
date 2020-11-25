@@ -155,6 +155,15 @@ public:
 		});
 	})
 
+	// using a custom sprintf expression
+	CONST_DPL(std::string fmt_sprintf(const std::string& format), {
+		return this->fmt([&format] (FMT_F_ARGS) {
+			char buffer[64];
+			sprintf(buffer, format.c_str(), y, M, d, h, m, s);
+			return std::string(buffer);
+		});
+	})
+
 	// comparsement
 	CONST_DPL(bool operator<(const time_s& op2), { return this->time < op2.time; })
 	CONST_DPL(bool operator>(const time_s& op2), { return this->time > op2.time; })
