@@ -2,8 +2,9 @@
 #define NOAFTODO_LIST_H
 
 #include <cmath>
-#include <stdexcept>
+#include <functional>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -60,23 +61,6 @@ struct entry {
 		}
 
 		return meta;
-	})
-
-	CONST_DPL(bool is_failed(), {
-		return !this->completed && (this->get_meta("nodue") != "true") && (this->due <= time_s());
-	})
-
-	CONST_DPL(bool is_coming(), {
-		return !this->completed && !this->is_failed() &&
-			(this->get_meta("nodue") != "true") &&
-			(this->due <= time_s("a" + this->get_meta("warn_time", "1d")));
-	})
-
-	CONST_DPL(bool is_uncat(), {
-		return !this->completed &&
-			!this->is_failed() &&
-			!this->is_coming() &&
-			(this->get_meta("nodue") != "true");
 	})
 
 	void name() {

@@ -1,8 +1,11 @@
 #include "../noaftodo_cui.h"
 
+#include "../noaftodo_entry_flags.h"
+
 NOAFTODO_START_MODE(normal, init, paint, input)
 
 using li::t_list;
+using namespace li::entry_flags;
 
 void init() {}
 
@@ -23,8 +26,8 @@ void paint() {
 					const auto& e = t_list.at(item);
 
 					if (e.completed) return { A_BOLD, color_complete };
-					if (e.is_failed()) return { A_BOLD, color_failed };
-					if (e.is_coming()) return { A_BOLD, color_coming };
+					if (is_failed(e)) return { A_BOLD, color_failed };
+					if (is_coming(e)) return { A_BOLD, color_coming };
 
 					return { A_NORMAL, 0 };
 				},

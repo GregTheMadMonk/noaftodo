@@ -6,6 +6,7 @@
 #include "noaftodo_cui.h"
 #include "noaftodo_cvar.h"
 #include "noaftodo_daemon.h"
+#include "noaftodo_entry_flags.h"
 #include "noaftodo_time.h"
 
 using namespace std;
@@ -894,6 +895,8 @@ namespace cui {
 using li::t_list;
 using li::t_tags;
 
+using namespace li::entry_flags;
+
 using namespace vargs::cols;
 
 // NORMAL mode colums
@@ -920,8 +923,8 @@ map<char, col_s> columns = {
 					string ret = "";
 					const auto& e = get<normal>(args).e;
 					if (e.completed) ret += "V";	// a completed entry
-					if (e.is_failed()) ret += "F";	// a failed entry
-					if (e.is_coming()) ret += "C";	// an upcoming entry
+					if (is_failed(e)) ret += "F";	// a failed entry
+					if (is_coming(e)) ret += "C";	// an upcoming entry
 					if (e.get_meta("nodue") == "true") ret += "N";	// a "nodue" entry
 					return ret;
 				}

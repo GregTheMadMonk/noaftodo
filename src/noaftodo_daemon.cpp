@@ -16,11 +16,14 @@
 #include "noaftodo_cui.h"
 #include "noaftodo_cvar.h"
 #include "noaftodo_config.h"
+#include "noaftodo_entry_flags.h"
 
 using namespace std;
 
 using li::t_list;
 using li::t_tags;
+
+using namespace li::entry_flags;
 
 using cmd::exec;
 
@@ -188,10 +191,10 @@ void upd_cache(const bool& is_first_load) {
 			if (li_e.completed) {
 				if (li_e.get_meta("ignore_global_on_completed") != "true")
 					exec(format_str(task_completed_action, &li_e, is_first_load));
-			} else if (li_e.is_failed()) {
+			} else if (is_failed(li_e)) {
 				if (li_e.get_meta("ignore_global_on_failed") != "true")
 					exec(format_str(task_failed_action, &li_e, is_first_load));
-			} else if (li_e.is_coming()) {
+			} else if (is_coming(li_e)) {
 				if (li_e.get_meta("ignore_global_on_coming") != "true")
 					exec(format_str(task_coming_action, &li_e, is_first_load));
 			} else if (!is_first_load) {
@@ -212,10 +215,10 @@ void upd_cache(const bool& is_first_load) {
 				if (li_e.get_meta("ignore_global_on_completed") != "true")
 					exec(format_str(task_completed_action, &li_e, false));
 				exec(format_str(li_e.get_meta("on_completed"), &li_e, false));
-			} else if (li_e.is_failed()) {
+			} else if (is_failed(li_e)) {
 				if (li_e.get_meta("ignore_global_on_failed") != "true")
 					exec(format_str(task_failed_action, &li_e, true));
-			} else if (li_e.is_coming()) {
+			} else if (is_coming(li_e)) {
 				if (li_e.get_meta("ignore_global_on_coming") != "true")
 					exec(format_str(task_coming_action, &li_e, true));
 			} else {
@@ -267,13 +270,13 @@ void check_dues(const bool& renotify) {
 	// check_dues supposes that the cache is up to date with the list
 	// and cache and t_list contain the same entries
 	for (s_line = 0; s_line < t_list.size(); s_line++)	 {
-		if ((t_list.at(s_line).is_failed()) && (renotify || (t_list.at(s_line).due > cached_time))) {
+		if ((is_failed(t_list.at(s_line))) && (renotify || (t_list.at(s_line).due > cached_time))) {
 			if (t_list.at(s_line).get_meta("ignore_global_on_failed") != "true")
 				exec(format_str(task_failed_action, &t_list.at(s_line), renotify));
 			if (!renotify)
 				exec(format_str(t_list.at(s_line).get_meta("on_failed"), &t_list.at(s_line)));
 		}
-		else if ((t_list.at(s_line).is_coming()) && (renotify || (t_list.at(s_line).due > time_s(cached_time.fmt_cmd() + "a" + t_list.at(s_line).get_meta("warn_time", "1d"))))) {
+		else if ((is_coming(t_list.at(s_line))) && (renotify || (t_list.at(s_line).due > time_s(cached_time.fmt_cmd() + "a" + t_list.at(s_line).get_meta("warn_time", "1d"))))) {
 			if (t_list.at(s_line).get_meta("ignore_global_on_coming") != "true")
 				exec(format_str(task_coming_action, &t_list.at(s_line), renotify));
 			if (!renotify)

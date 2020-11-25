@@ -10,9 +10,12 @@
 #include "noaftodo_cvar.h"
 #include "noaftodo_cui.h"
 #include "noaftodo_daemon.h"
+#include "noaftodo_entry_flags.h"
 #include "noaftodo_time.h"
 
 using namespace std;
+
+using namespace li::entry_flags;
 
 namespace li {
 
@@ -371,14 +374,14 @@ bool tag_completed(const int& tagID) {
 
 bool tag_coming(const int& tagID) {
 	for (const auto& e : t_list)
-		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (e.is_coming())) return true;
+		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (is_coming(e))) return true;
 
 	return false;
 }
 
 bool tag_failed(const int& tagID) {
 	for (const auto& e : t_list)
-		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (e.is_failed())) return true;
+		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (is_failed(e))) return true;
 
 	return false;
 }

@@ -6,11 +6,14 @@
 #include "noaftodo_config.h"
 #include "noaftodo_cvar.h"
 #include "noaftodo_daemon.h"
+#include "noaftodo_entry_flags.h"
 
 using namespace std;
 
 using li::t_list;
 using li::t_tags;
+
+using namespace li::entry_flags;
 
 namespace cui {
 
@@ -92,14 +95,17 @@ void run() {
 	init();
 	set_mode(MODE_NORMAL);
 
+	for (auto it = entry_flag::flags().begin(); it != entry_flag::flags().end(); it++)
+		log("Flag! -> " + it->first, LP_IMPORTANT);
+
 	for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0)) {
 		if (li::has_changed()) li::load(false); // load only list contents, not the workspace
 
 		// check for updates in task state
 		else if ( !([] () -> bool {
 				for (const auto& entry : t_list)
-					if ((entry.is_failed() && (entry.due > last_scr_upd)) ||
-					(entry.is_coming() && (entry.due > time_s(last_scr_upd.fmt_cmd() + "a" + entry.get_meta("warn_time", "1d")))))
+					if ((is_failed(entry) && (entry.due > last_scr_upd)) ||
+					(is_coming(entry) && (entry.due > time_s(last_scr_upd.fmt_cmd() + "a" + entry.get_meta("warn_time", "1d")))))
 						return true;
 
 				return false;
@@ -280,12 +286,12 @@ bool is_visible(const int& entryID) {
 	bool ret = ((tag_filter == TAG_ALL) || (tag_filter == entry.tag) || (mode == MODE_LISTVIEW));
 
 	if (entry.completed) 	ret = ret && (filter & FILTER_COMPLETE);
-	if (entry.is_failed()) 	ret = ret && (filter & FILTER_FAILED);
-	if (entry.is_coming()) 	ret = ret && (filter & FILTER_COMING);
+	if (is_failed(entry)) 	ret = ret && (filter & FILTER_FAILED);
+	if (is_coming(entry)) 	ret = ret && (filter & FILTER_COMING);
 
 	if (entry.get_meta("nodue") == "true") ret = ret && (filter & FILTER_NODUE);
 
-	if (entry.is_uncat())	ret = ret && (filter & FILTER_UNCAT);
+	if (is_uncat(entry))	ret = ret && (filter & FILTER_UNCAT);
 
 	// fit regex
 	if (normal_regex_filter != "") {
