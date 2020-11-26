@@ -96,7 +96,7 @@ void run() {
 	set_mode(MODE_NORMAL);
 
 	for (auto it = entry_flag::flags().begin(); it != entry_flag::flags().end(); it++)
-		log("Flag! -> " + it->first, LP_IMPORTANT);
+		log("Flag! -> " + string(1, it->first), LP_IMPORTANT);
 
 	for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0)) {
 		if (li::has_changed()) li::load(false); // load only list contents, not the workspace

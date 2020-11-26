@@ -7,14 +7,14 @@ namespace li::entry_flags {
 
 class entry_flag {
 	typedef std::function<bool(const entry& e, const time_s& time)> checker_f;
-	std::string display;
+	char display;
 
 	public:
-	entry_flag(const std::string& d, const checker_f& ch) : display(d) {
+	entry_flag(const char& d, const checker_f& ch) : display(d) {
 		flags()[d] = ch;
 	}
 
-	static std::map<std::string, checker_f>& flags();
+	static std::map<char, checker_f>& flags();
 
 	CONST_DPL(bool operator()(const entry& e), {
 		return entry_flag::flags().at(this->display)(e, time_s());
