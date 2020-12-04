@@ -184,3 +184,6 @@ set "on_task_coming_action" 		"!notify-send \"You have an upcoming task!\" \"\%\
 set "on_task_new_action" 		"!notify-send \"You have a new task!\" \"\%\%title\%\%: \%\%desc\%\%\" -u low &"
 set "on_task_edited_action" 		"!notify-send \"A task was edited!\" \"\%\%title\%\%: \%\%desc\%\%\" &"
 set "on_task_removed_action" 		"!notify-send \"A task has been removed!\" \"\%\%title\%\%: \%\%desc\%\%\" -u critical &"
+
+# STARTUP ACTIONS
+!echo -e "\e]2;NOAFtodo\007"	# set window title
