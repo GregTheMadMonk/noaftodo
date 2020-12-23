@@ -82,6 +82,7 @@ extern std::string sort_order;
 
 struct less_than_entry_order {
 	inline int comp_due(const entry& e1, const entry& e2) {
+		// can't use is_nodue entry flag here because noaftodo_entry_flags.h includes this file
 		if ((e1.get_meta("nodue") == "true") && (e2.get_meta("nodue") == "true")) return 0;
 		if ((e1.get_meta("nodue") == "true") && (e2.get_meta("nodue") != "true")) return -1;
 		if ((e2.get_meta("nodue") == "true") && (e1.get_meta("nodue") != "true")) return 1;

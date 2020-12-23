@@ -922,10 +922,10 @@ map<char, col_s> columns = {
 				[](const varg& args) {
 					string ret = "";
 					const auto& e = get<normal>(args).e;
-					if (e.completed) ret += "V";	// a completed entry
-					if (is_failed(e)) ret += "F";	// a failed entry
-					if (is_coming(e)) ret += "C";	// an upcoming entry
-					if (e.get_meta("nodue") == "true") ret += "N";	// a "nodue" entry
+
+					for (auto it = entry_flag::flags().begin(); it != entry_flag::flags().end(); it++)
+						if (it->second(e, time_s())) ret += string(&it->first);
+
 					return ret;
 				}
 			}
@@ -954,7 +954,7 @@ map<char, col_s> columns = {
 				},
 				[](const varg& args) {
 					const auto& e = get<normal>(args).e;
-					if (e.get_meta("nodue") == "true") return string("----------------");
+					if (is_nodue(e)) return string("----------------");
 					return e.due.fmt_ui();
 				}
 			}
@@ -967,7 +967,7 @@ map<char, col_s> columns = {
 			       },
 			       [](const varg& args) {
 					const auto& e = get<normal>(args).e;
-					if (e.get_meta("nodue") == "true") return string("------------------");
+					if (is_nodue(e)) return string("------------------");
 
 					const auto diff = e.due - time_s();
 
@@ -1079,7 +1079,7 @@ map<char, col_s> lview_columns = {
 
 					for (auto e : t_list)
 						if ((e.tag == list_id) || (TAG_ALL == list_id)) {
-							if (e.completed) ret++;
+							if (is_completed(e)) ret++;
 							tot++;
 						}
 
@@ -1158,7 +1158,7 @@ map<char, function<string()>> status_fields = {
 				for (int i = 0; i < t_list.size(); i++)
 					if ((tag_filter == TAG_ALL) || (tag_filter == t_list.at(i).tag)) {
 						total++;
-						if (t_list.at(i).completed) comp++;
+						if (is_completed(t_list.at(i))) comp++;
 					}
 
 				if (total == 0) return string("");
@@ -1174,7 +1174,7 @@ map<char, function<string()>> status_fields = {
 				for (int i = 0; i < t_list.size(); i++)
 					if ((tag_filter == TAG_ALL) || (tag_filter == t_list.at(i).tag)) {
 						total++;
-						if (t_list.at(i).completed) comp++;
+						if (is_completed(t_list.at(i))) comp++;
 					}
 
 				if (total == 0) return string("");

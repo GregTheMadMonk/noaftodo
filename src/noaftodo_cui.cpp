@@ -285,13 +285,13 @@ bool is_visible(const int& entryID) {
 
 	bool ret = ((tag_filter == TAG_ALL) || (tag_filter == entry.tag) || (mode == MODE_LISTVIEW));
 
-	if (entry.completed) 	ret = ret && (filter & FILTER_COMPLETE);
-	if (is_failed(entry)) 	ret = ret && (filter & FILTER_FAILED);
-	if (is_coming(entry)) 	ret = ret && (filter & FILTER_COMING);
+	if (is_completed(entry))	ret = ret && (filter & FILTER_COMPLETE);
+	if (is_failed(entry)) 		ret = ret && (filter & FILTER_FAILED);
+	if (is_coming(entry)) 		ret = ret && (filter & FILTER_COMING);
 
-	if (entry.get_meta("nodue") == "true") ret = ret && (filter & FILTER_NODUE);
+	if (is_nodue(entry))		ret = ret && (filter & FILTER_NODUE);
 
-	if (is_uncat(entry))	ret = ret && (filter & FILTER_UNCAT);
+	if (is_uncat(entry))		ret = ret && (filter & FILTER_UNCAT);
 
 	// fit regex
 	if (normal_regex_filter != "") {

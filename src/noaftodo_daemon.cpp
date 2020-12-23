@@ -188,7 +188,7 @@ void upd_cache(const bool& is_first_load) {
 		{	// add to cache
 			cache.push_back(li_e);
 
-			if (li_e.completed) {
+			if (is_completed(li_e)) {
 				if (li_e.get_meta("ignore_global_on_completed") != "true")
 					exec(format_str(task_completed_action, &li_e, is_first_load));
 			} else if (is_failed(li_e)) {
@@ -210,8 +210,8 @@ void upd_cache(const bool& is_first_load) {
 		if (ca_e == li_e) continue; // skip the unchanged entries
 
 		// entry completion switched
-		if (ca_e.completed != li_e.completed) {
-			if (li_e.completed) {
+		if (is_completed(ca_e) != is_completed(li_e)) {
+			if (is_completed(li_e)) {
 				if (li_e.get_meta("ignore_global_on_completed") != "true")
 					exec(format_str(task_completed_action, &li_e, false));
 				exec(format_str(li_e.get_meta("on_completed"), &li_e, false));

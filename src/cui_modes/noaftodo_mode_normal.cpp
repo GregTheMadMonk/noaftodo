@@ -25,7 +25,7 @@ void paint() {
 				[] (const int& item) -> attrs {
 					const auto& e = t_list.at(item);
 
-					if (e.completed) return { A_BOLD, color_complete };
+					if (is_completed(e)) return { A_BOLD, color_complete };
 					if (is_failed(e)) return { A_BOLD, color_failed };
 					if (is_coming(e)) return { A_BOLD, color_coming };
 

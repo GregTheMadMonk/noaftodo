@@ -367,7 +367,7 @@ int find(const string& eid) {
 
 bool tag_completed(const int& tagID) {
 	for (const auto& e : t_list)
-		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (!e.completed)) return false;
+		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (!is_completed(e))) return false;
 
 	return true;
 }
