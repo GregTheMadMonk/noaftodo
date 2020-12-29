@@ -141,7 +141,14 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 					new_entry.due = time_s("a10000y");
 					new_entry.meta["nodue"] = "true";
 				}
-				else new_entry.due = time_s(args.at(0));
+				else {
+					const auto del = args.at(0).find("+");
+					if (del == string::npos) new_entry.due = time_s(args.at(0));
+					else {
+						new_entry.due = time_s(args.at(0).substr(0, del));
+						new_entry.meta["duration"] = args.at(0).substr(del + 1);
+					}
+				}
 				new_entry.title = args.at(1);
 				new_entry.description = args.at(2);
 
