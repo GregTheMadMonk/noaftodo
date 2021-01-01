@@ -1,8 +1,10 @@
 #include "../noaftodo_cui.h"
 #include "../noaftodo_cvar.h"
+#include "../noaftodo_entry_flags.h"
 #include "../noaftodo_time.h"
 
 using namespace std;
+using namespace li::entry_flags;
 
 NOAFTODO_START_MODE(timeline, init, paint, input)
 
@@ -77,6 +79,14 @@ void paint() {
 		if ((x >= w) || (x1 < 0)) continue;
 		if (x < 0) x = 0;
 		if (x1 >= w) x1 = w - 1;
+
+		const auto& e = t_list.at(i);
+
+		const int attr = (i == s_line) ? A_STANDOUT : A_NORMAL;
+		if (is_completed(e)) attrset_ext(attr | A_BOLD, color_complete);
+		else if (is_failed(e)) attrset_ext(attr | A_BOLD, color_failed);
+		else if (is_coming(e)) attrset_ext(attr | A_BOLD, color_coming);
+		else attrset_ext(attr);
 
 		draw_border(x, y1 - 2, x1 - x, 3, box_strong);
 		clear_box(x + 1, y1 - 1, x1 - x - 2, 1);
