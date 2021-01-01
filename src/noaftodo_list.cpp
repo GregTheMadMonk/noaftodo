@@ -125,6 +125,15 @@ void load(const bool& load_workspace) {
 											e.completed = (temp == "v");
 											break;
 										case 1:
+											if (temp != "") if (temp.at(temp.length() - 1) == 'e') {
+												// seconds since epoch (GMT)
+												e.due = time_s(temp);
+												break;
+											}
+											// load old time format that didn't handle timezones
+											// DEPRECATED no lits should save the time like this
+											// this is for loading only
+											// to-be REMOVED in 2.x.x
 											e.due = time_s(stol(temp));
 											break;
 										case 2:
@@ -235,7 +244,7 @@ int save(const string& save_filename) {
 	ofile << endl << "[list]" << endl;
 	for (const auto& entry : t_list_copy) {
 		ofile << "\"" << (entry.completed ? 'v' : '-')
-			<< "\"\\\"" << entry.due.to_long()
+			<< "\"\\\"" << to_string(entry.due.time) << "e"
 			<< "\"\\\"" << replace_special(entry.title)
 			<< "\"\\\"" << replace_special(entry.description)
 			<< "\"\\\"" << entry.tag << "\"";

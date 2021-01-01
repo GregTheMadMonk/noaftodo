@@ -7,9 +7,9 @@
 
 #include "noaftodo_macro.h"
 
-class time_s {
+struct time_s {
 	time_t time;
-public:
+
 	// default constructor initializes time structure with current time
 	time_s() {
 		this->time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -37,7 +37,7 @@ public:
 		ti.tm_mon += 1;
 		ti.tm_year += 1900;
 
-		int buffer = 0;
+		time_t buffer = 0;
 		bool input = false;
 		bool absolute = true;
 		bool negative = false;
@@ -81,6 +81,24 @@ public:
 					break;
 				case 'y':
 					put_field(ti.tm_year);
+					break;
+				case 'e':
+					// 'e' means that previous input should be interpreted
+					// as seconds since epoch began
+					time_t secs = mktime(&ti);
+					if (negative) buffer = -buffer;
+					if (input) {
+						if (absolute) secs = buffer;
+						else secs += buffer;
+					}
+
+					buffer = 0;
+					input = false;
+					negative = false;
+
+					ti = *localtime(&secs);
+					ti.tm_mon += 1;
+					ti.tm_year += 1900;
 					break;
 			}
 		}
