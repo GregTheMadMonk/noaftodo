@@ -55,10 +55,36 @@ void paint() {
 		addnstr(t.fmt_sprintf("%4$02d:%5$02d").c_str(), w - (uoffset + offset) * cpu - 1);
 	};
 
+	const auto time_coord = [] (const time_s& time) {
+		const time_t zero = (time_s().time / 60) * cpu / unit - (-position + uoffset) * cpu;
+		const time_t position = (time.time / 60) * cpu / unit;
+
+		return position - zero;
+	};
+
 	// draw vertical unit lines
 	for (int offset = 0; (uoffset - offset >= 0) || ((uoffset + offset) * cpu < w); offset++) {
 		if (uoffset - offset >= 0)		draw_vline_at(-offset);
 		if ((uoffset + offset) * cpu < w)	draw_vline_at(offset);
+	}
+
+	// draw tasks
+	int y1 = h - 5;
+	for (int i = 0; i < t_list.size(); i++) if (is_visible(i)) {
+		int x = time_coord(t_list.at(i).due);
+		int x1 = time_coord(time_s(t_list.at(i).due.fmt_cmd()
+					+ "a" + t_list.at(i).get_meta("duration", li::task_duration_default)));
+		if ((x >= w) || (x1 < 0)) continue;
+		if (x < 0) x = 0;
+		if (x1 >= w) x1 = w - 1;
+
+		draw_border(x, y1 - 2, x1 - x, 3, box_strong);
+		clear_box(x + 1, y1 - 1, x1 - x - 2, 1);
+		if (x1 - x > 2) {
+			move(y1 - 1, x + 1);
+			addnstr((t_list.at(i).title + " - " + t_list.at(i).description).c_str(), x1 - x - 2);
+		}
+		y1 -= 3;
 	}
 
 	draw_status(normal_status_fields);

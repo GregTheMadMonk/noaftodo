@@ -1251,6 +1251,8 @@ namespace li {
 string filename = ".noaftodo-list";
 bool autosave = true;
 
+string task_duration_default = "1h";
+
 string sort_order = "ldtD";
 
 }

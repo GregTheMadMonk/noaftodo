@@ -22,6 +22,9 @@ extern std::vector<std::string> t_tags;		// list tags
 extern std::string filename;		// the list filename
 extern bool autosave;
 
+extern std::string task_duration_default; // default value used for task durations
+					// (command-line format)
+
 extern struct stat file_stat;
 
 struct entry {
