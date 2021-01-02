@@ -17,9 +17,10 @@ void paint() {
 				return ((item >= -1) && (item < (int)t_tags.size()));
 			},
 			[] (const int& item) -> attrs {
-				if (li::tag_completed(item)) return { A_BOLD, color_complete };
-				if (li::tag_failed(item)) return { A_BOLD, color_failed };
-				if (li::tag_coming(item)) return { A_BOLD, color_coming };
+				if (li::tag_completed(item))	return { A_BOLD, color_complete };
+				if (li::tag_due(item))		return { A_BOLD, color_due };
+				if (li::tag_failed(item))	return { A_BOLD, color_failed };
+				if (li::tag_coming(item))	return { A_BOLD, color_coming };
 
 				return { A_NORMAL, 0 };
 			},

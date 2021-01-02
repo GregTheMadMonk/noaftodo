@@ -10,11 +10,15 @@ std::map<char, entry_flag::checker_f>& entry_flag::flags() {
 }
 
 entry_flag is_failed('F', [] (const entry& e, const time_s& t) {
-	return !is_completed(e, t) && !is_nodue(e, t) && (e.due <= t);
+	return !is_completed(e, t) && !is_nodue(e, t) && (time_s(e.due.fmt_cmd() + "a" + e.get_meta("duration", task_duration_default)) <= t);
+});
+
+entry_flag is_due('D', [] (const entry& e, const time_s& t) {
+	return !is_completed(e, t) && !is_nodue(e, t) && (e.due <= t) && !is_failed(e, t);
 });
 
 entry_flag is_coming('C', [] (const entry& e, const time_s& t) {
-	return !is_completed(e, t) && !is_failed(e, t) && !is_nodue(e, t) &&
+	return !is_completed(e, t) && !is_due(e, t) && !is_failed(e, t) && !is_nodue(e, t) &&
 		(e.due <= time_s(t.fmt_cmd() + "a" + e.get_meta("warn_time", "1d")));
 });
 
@@ -27,7 +31,7 @@ entry_flag is_completed('V', [] (const entry& e, const time_s& t) {
 });
 
 entry_flag is_uncat(' ', [] (const entry& e, const time_s& t) {
-	return !is_completed(e, t) && !is_failed(e, t) && !is_coming(e, t) && !is_nodue(e, t);
+	return !is_completed(e, t) && !is_failed(e, t) && !is_coming(e, t) && !is_nodue(e, t) && !is_due(e, t);
 });
 
 }

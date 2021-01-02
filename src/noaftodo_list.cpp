@@ -388,6 +388,13 @@ bool tag_coming(const int& tagID) {
 	return false;
 }
 
+bool tag_due(const int& tagID) {
+	for (const auto& e : t_list)
+		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (is_due(e))) return true;
+
+	return false;
+}
+
 bool tag_failed(const int& tagID) {
 	for (const auto& e : t_list)
 		if (((tagID == cui::TAG_ALL) || (e.tag == tagID)) && (is_failed(e))) return true;

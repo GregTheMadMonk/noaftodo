@@ -35,6 +35,7 @@ extern bool fork_autostart;
 // daemon actions
 extern std::string launch_action;
 extern std::string task_failed_action;
+extern std::string task_due_action;
 extern std::string task_coming_action;
 extern std::string task_completed_action;
 extern std::string task_uncompleted_action;

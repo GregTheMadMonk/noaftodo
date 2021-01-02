@@ -135,6 +135,7 @@ extern int color_title;
 extern int color_status;
 extern int color_complete;
 extern int color_coming;
+extern int color_due;
 extern int color_failed;
 
 // status fields

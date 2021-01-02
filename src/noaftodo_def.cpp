@@ -806,11 +806,13 @@ void init_cvars() {
 	cvar_base_s::cvars["colors.status"] = cvar_base_s::wrap_int(cui::color_status);
 	cvar_base_s::cvars["colors.entry_completed"] = cvar_base_s::wrap_int(cui::color_complete);
 	cvar_base_s::cvars["colors.entry_coming"] = cvar_base_s::wrap_int(cui::color_coming);
+	cvar_base_s::cvars["colors.entry_due"] = cvar_base_s::wrap_int(cui::color_due);
 	cvar_base_s::cvars["colors.entry_failed"] = cvar_base_s::wrap_int(cui::color_failed);
 
 	// DAEMON ACTIONS
 	cvar_base_s::cvars["on_daemon_launch_action"] = cvar_base_s::wrap_string(da::launch_action);
 	cvar_base_s::cvars["on_task_failed_action"] = cvar_base_s::wrap_string(da::task_failed_action);
+	cvar_base_s::cvars["on_task_due_action"] = cvar_base_s::wrap_string(da::task_due_action);
 	cvar_base_s::cvars["on_task_coming_action"] = cvar_base_s::wrap_string(da::task_coming_action);
 	cvar_base_s::cvars["on_task_completed_action"] = cvar_base_s::wrap_string(da::task_completed_action);
 	cvar_base_s::cvars["on_task_uncompleted_action"] = cvar_base_s::wrap_string(da::task_uncompleted_action);
@@ -887,6 +889,7 @@ bool fork_autostart = true;
 
 string launch_action;
 string task_failed_action;
+string task_due_action;
 string task_coming_action;
 string task_completed_action;
 string task_uncompleted_action;
@@ -1206,6 +1209,7 @@ int color_title;
 int color_status;
 int color_complete;
 int color_coming;
+int color_due;
 int color_failed;
 
 int row_separator_offset = 0;

@@ -590,6 +590,7 @@ int draw_table(const int& x, const int& y,
 }
 
 void draw_status(const string& fields) {
+	attrset_ext(A_NORMAL);
 	string status_l = "";
 
 	for (int i = fields.length() - 1; i >= 0; i--) {

@@ -197,6 +197,7 @@ int find(const std::string& eid);
 
 bool tag_completed(const int& tagID);
 bool tag_coming(const int& tagID);
+bool tag_due(const int& tagID);
 bool tag_failed(const int& tagID);
 
 }

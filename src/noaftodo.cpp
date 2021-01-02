@@ -195,6 +195,9 @@ void log(const string& message, const char& prefix, const int& sleep_sec)
 	if ((prefix != LP_DEFAULT) || verbose) {
 		if (wcui) cui::destroy();
 
+		// reset formatting (prevents colorful, but annoying mess in the terminal)
+		cout << "[0m";
+
 		if (!pure) {
 			cout << "[" << time_s().fmt_log() << "][" << prefix << "] ";
 			for (int i = 0; i < log_offset; i++) cout << "  ";

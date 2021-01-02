@@ -82,11 +82,11 @@ void paint() {
 
 		const auto& e = t_list.at(i);
 
-		const int attr = (i == s_line) ? A_STANDOUT : A_NORMAL;
-		if (is_completed(e)) attrset_ext(attr | A_BOLD, color_complete);
-		else if (is_failed(e)) attrset_ext(attr | A_BOLD, color_failed);
-		else if (is_coming(e)) attrset_ext(attr | A_BOLD, color_coming);
-		else attrset_ext(attr);
+		attrset_ext((i == s_line) ? A_STANDOUT : A_NORMAL);
+		if (is_completed(e)) attron_ext(A_BOLD, color_complete);
+		else if (is_failed(e)) attron_ext(A_BOLD, color_failed);
+		else if (is_due(e)) attron_ext(A_BOLD, color_due);
+		else if (is_coming(e)) attron_ext(A_BOLD, color_coming);
 
 		draw_border(x, y1 - 2, x1 - x, 3, box_strong);
 		clear_box(x + 1, y1 - 1, x1 - x - 2, 1);

@@ -25,6 +25,7 @@ class entry_flag {
 };
 
 extern entry_flag is_failed;
+extern entry_flag is_due;
 extern entry_flag is_coming;
 extern entry_flag is_completed;
 extern entry_flag is_nodue;
