@@ -164,6 +164,13 @@ set "charset.box_light" "|-++++"
 set "charset.separators" "│||"
 set "charset.separators.status" "{3} | "
 
+set "charset.timeline.line" "━"
+set "charset.timeline.vline" "│"
+set "charset.timeline.vline_now" "║"
+set "charset.timeline.marker" "┿"
+set "charset.timeline.marker_now" "╫"
+set "charset.timeline.rarrow" "▷▷"
+
 # CHARACTER SET: MISC
 set "charset.separators.row.offset" "0"
 

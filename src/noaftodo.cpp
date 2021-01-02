@@ -134,6 +134,11 @@ int main(int argc, char* argv[]) {
 		while (getline(cin, line)) cmd::exec(line);
 	}
 
+	// initialize CUI even if we are not going
+	// to launch it. Will create per-mode init
+	// functions and allow to set mode variables
+	cui::init();
+
 	// load the config
 	conf::load(true, true);
 
@@ -160,12 +165,14 @@ int main(int argc, char* argv[]) {
 					da::clients = 1; // care about clients, shut down when there's none
 					break;
 				default:
+					cui::construct();
 					cui::run();
 					break;
 			}
 		else
 		{
 			da::send("S");
+			cui::construct();
 			cui::run();
 		}
 	}

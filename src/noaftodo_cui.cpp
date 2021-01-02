@@ -58,8 +58,6 @@ void init() {
 
 	// construct UI
 	command_history.push_back(w_converter.from_bytes(""));
-
-	construct();
 }
 
 void construct() {
@@ -92,9 +90,6 @@ void destroy() {
 }
 
 void run() {
-	init();
-	set_mode(MODE_NORMAL);
-
 	for (auto it = entry_flag::flags().begin(); it != entry_flag::flags().end(); it++)
 		log("Entry flag! -> " + string(1, it->first));
 

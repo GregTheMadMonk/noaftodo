@@ -1,3 +1,4 @@
+#include "../noaftodo_cmd.h"
 #include "../noaftodo_cui.h"
 #include "../noaftodo_cvar.h"
 #include "../noaftodo_entry_flags.h"
@@ -16,16 +17,26 @@ int unit = 60; // minutes per timeline unit (basically, scale)
 
 std::string line	= "-";
 std::string vline	= "|";
+std::string vline_now	= "#";
 std::string marker	= "^";
+std::string marker_now	= "#";
 std::string rarrow	= "~~~>";
 
 void init() {
+	// timeline mode cvars
 	cvar_base_s::cvars["timeline.position"] = cvar_base_s::wrap_int(position);
 	cvar_base_s::cvars["timeline.unit"] = cvar_base_s::wrap_int(unit);
 	cvar_base_s::cvars["charset.timeline.marker"] = cvar_base_s::wrap_string(marker);
+	cvar_base_s::cvars["charset.timeline.marker_now"] = cvar_base_s::wrap_string(marker_now);
 	cvar_base_s::cvars["charset.timeline.line"] = cvar_base_s::wrap_string(line);
 	cvar_base_s::cvars["charset.timeline.vline"] = cvar_base_s::wrap_string(vline);
+	cvar_base_s::cvars["charset.timeline.vline_now"] = cvar_base_s::wrap_string(vline_now);
 	cvar_base_s::cvars["charset.timeline.rarrow"] = cvar_base_s::wrap_string(rarrow);
+	
+	cmd::cmds["timeline.focus"] = [] (const vector<string>& args) {
+		position = (t_list.at(s_line).due.time - time_s().time) / 60 / unit;
+		return 0;
+	};
 }
 
 void paint() {
@@ -46,11 +57,14 @@ void paint() {
 		// draws a vertical unit line
 		for (int y = 0; y < h - 1; y++) {
 			move(y, (uoffset + offset) * cpu);
-			addstr(vline.c_str());
+			addstr(((y == h - 4) ?
+				((offset + position == 0) ? marker_now : marker)
+				:
+				((offset + position == 0) ? vline_now : vline)).c_str());
 		}
 
 		// mark the line
-		const auto t = time_s("a" + to_string((position + offset) * unit - rounder));
+		const auto t = time_s("a" + to_string((position + offset) * unit));
 		move(h - 3, (uoffset + offset) * cpu + 1);
 		addnstr(t.fmt_sprintf("%1$04d/%2$02d/%3$02d").c_str(), w - (uoffset + offset) * cpu - 1);
 		move(h - 2, (uoffset + offset) * cpu + 1);
