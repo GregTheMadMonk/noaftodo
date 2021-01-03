@@ -23,6 +23,20 @@ std::string marker	= "^";
 std::string marker_now	= "#";
 std::string rarrow	= "~~~>";
 
+inline int closest_id(const time_s& t0) {
+	int dist = -1;
+	const auto dist_f = [&t0] (const time_s& t) { return abs(t0.time - t.time); };
+	int ret = s_line;
+	for (int i = 0; i < t_list.size(); i++) {
+		if (!is_visible(i)) continue;
+		if ((dist == -1) || (dist > dist_f(t_list.at(i).due))) { dist = dist_f(t_list.at(i).due); ret = i; }
+		const int d2 = dist_f(time_s(t_list.at(i).due.fmt_cmd() + "a" + t_list.at(i).get_meta("duration", li::task_duration_default)));
+		if ((dist == -1) || (dist > d2)) { dist = d2; ret = i; }
+	}
+
+	return ret;
+}
+
 inline void focus() {
 	position = (t_list.at(s_line).due.time - time_s().time) / 60 / unit;
 }
@@ -41,6 +55,14 @@ void init() {
 	// timeline mode commands
 	cmd::cmds["timeline.focus"] = [] (const vector<string>& args) {
 		focus();
+		return 0;
+	};
+
+	cmd::cmds["timeline.focus_closest"] = [] (const vector<string>& args) {
+		const auto t = time_s("a" + to_string(position * unit));
+		s_line = closest_id(t);
+		focus();
+
 		return 0;
 	};
 
