@@ -14,6 +14,7 @@ using li::t_list;
 int position = 0;
 
 int unit = 60; // minutes per timeline unit (basically, scale)
+constexpr int units[] = { 1, 2, 5, 10, 15, 20, 30 };
 
 std::string line	= "-";
 std::string vline	= "|";
@@ -37,10 +38,45 @@ void init() {
 		position = (t_list.at(s_line).due.time - time_s().time) / 60 / unit;
 		return 0;
 	};
+
+	cmd::cmds["timeline.scale_up"] = [] (const vector<string>& args) {
+		for (const auto& u : units) if (u > unit) {
+			unit = u;
+			return 0;
+		}
+
+		unit *= 2;
+		return 0;
+	};
+
+	cmd::cmds["timeline.scale_down"] = [] (const vector<string>& args) {
+		if (unit >= 60) {
+			unit /= 2;
+			return 0;
+		}
+
+		int n = unit;
+		for (const auto& u : units) if (u < unit)
+			n = u;
+
+		unit = n;
+		return 0;
+	};
 }
 
 void paint() {
 	clear();
+
+	// draw title
+	move(0, 0);
+	attrset_ext(A_STANDOUT | A_BOLD, color_title);
+	for (int i = 0; i < w; i++) addch(' ');
+
+	move(0, 1);
+	if (unit < 60) addstr(("Unit size: " + to_string(unit) + " minute(s).").c_str());
+	else addstr(("Unit size: " + to_string(unit / 60) + " hour(s).").c_str());
+
+	attrset_ext(A_NORMAL);
 
 	// draw the line
 	move(h - 4, 0);
@@ -55,7 +91,7 @@ void paint() {
 
 	const auto draw_vline_at = [&cpu, &uoffset, &rounder] (const int& offset) {
 		// draws a vertical unit line
-		for (int y = 0; y < h - 1; y++) {
+		for (int y = 1; y < h - 1; y++) {
 			move(y, (uoffset + offset) * cpu);
 			addstr(((y == h - 4) ?
 				((offset + position == 0) ? marker_now : marker)
@@ -105,8 +141,9 @@ void paint() {
 		draw_border(x, y1 - 2, x1 - x, 3, box_strong);
 		clear_box(x + 1, y1 - 1, x1 - x - 2, 1);
 		if (x1 - x > 2) {
-			move(y1 - 1, x + 1);
-			addnstr((t_list.at(i).title + " - " + t_list.at(i).description).c_str(), x1 - x - 2);
+			text_box(x + 2, y1 - 2, x1 - x - 4, 1, li::t_tags.at(t_list.at(i).tag));
+			text_box(x + 1, y1 - 1, x1 - x - 2, 1, t_list.at(i).title + " - " + t_list.at(i).description);
+			text_box(x + 2, y1, x1 - x - 4, 1, "#" + to_string(i));
 		}
 		y1 -= 3;
 	}
