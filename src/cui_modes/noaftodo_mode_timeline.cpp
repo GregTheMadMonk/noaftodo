@@ -23,6 +23,10 @@ std::string marker	= "^";
 std::string marker_now	= "#";
 std::string rarrow	= "~~~>";
 
+inline void focus() {
+	position = (t_list.at(s_line).due.time - time_s().time) / 60 / unit;
+}
+
 void init() {
 	// timeline mode cvars
 	cvar_base_s::cvars["timeline.position"] = cvar_base_s::wrap_int(position);
@@ -36,7 +40,7 @@ void init() {
 	
 	// timeline mode commands
 	cmd::cmds["timeline.focus"] = [] (const vector<string>& args) {
-		position = (t_list.at(s_line).due.time - time_s().time) / 60 / unit;
+		focus();
 		return 0;
 	};
 
@@ -66,6 +70,30 @@ void init() {
 
 		position = position * unit / n;
 		unit = n;
+		return 0;
+	};
+
+	cmd::cmds["timeline.next"] = [] (const vector<string>& args) {
+		int next_id = s_line;
+
+		for (int i = 0; i < t_list.size(); i++) {
+			if (is_visible(i) && ((t_list.at(i).due > t_list.at(s_line).due) || ((t_list.at(i).due == t_list.at(s_line).due) && (s_line < i))))
+				if ((next_id == s_line) || (t_list.at(i).due < t_list.at(next_id).due)) next_id = i;
+		}
+		s_line = next_id;
+
+		return 0;
+	};
+
+	cmd::cmds["timeline.prev"] = [] (const vector<string>& args) {
+		int next_id = s_line;
+
+		for (int i = t_list.size() - 1; i >= 0; i--) {
+			if (is_visible(i) && ((t_list.at(i).due < t_list.at(s_line).due) || ((t_list.at(i).due == t_list.at(s_line).due) && (s_line > i))))
+				if ((next_id == s_line) || (t_list.at(i).due > t_list.at(next_id).due)) next_id = i;
+		}
+		s_line = next_id;
+
 		return 0;
 	};
 }
