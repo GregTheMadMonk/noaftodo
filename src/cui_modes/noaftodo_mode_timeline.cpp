@@ -34,6 +34,7 @@ void init() {
 	cvar_base_s::cvars["charset.timeline.vline_now"] = cvar_base_s::wrap_string(vline_now);
 	cvar_base_s::cvars["charset.timeline.rarrow"] = cvar_base_s::wrap_string(rarrow);
 	
+	// timeline mode commands
 	cmd::cmds["timeline.focus"] = [] (const vector<string>& args) {
 		position = (t_list.at(s_line).due.time - time_s().time) / 60 / unit;
 		return 0;
@@ -41,17 +42,21 @@ void init() {
 
 	cmd::cmds["timeline.scale_up"] = [] (const vector<string>& args) {
 		for (const auto& u : units) if (u > unit) {
+			position = position * unit / u;
 			unit = u;
 			return 0;
 		}
 
 		unit *= 2;
+		position /= 2;
+
 		return 0;
 	};
 
 	cmd::cmds["timeline.scale_down"] = [] (const vector<string>& args) {
 		if (unit >= 60) {
 			unit /= 2;
+			position *= 2;
 			return 0;
 		}
 
@@ -59,6 +64,7 @@ void init() {
 		for (const auto& u : units) if (u < unit)
 			n = u;
 
+		position = position * unit / n;
 		unit = n;
 		return 0;
 	};
@@ -86,8 +92,8 @@ void paint() {
 
 	const int rounder = time_s().to_tm().tm_min % unit;
 
-	const int cpu = 12;	// characters per unit
-	const int uoffset = 1;	// unit painting offset
+	const int cpu = 12;		// characters per unit
+	const int uoffset = w / cpu / 2;// unit painting offset
 
 	const auto draw_vline_at = [&cpu, &uoffset, &rounder] (const int& offset) {
 		// draws a vertical unit line
@@ -107,7 +113,7 @@ void paint() {
 		addnstr(t.fmt_sprintf("%4$02d:%5$02d").c_str(), w - (uoffset + offset) * cpu - 1);
 	};
 
-	const auto time_coord = [] (const time_s& time) {
+	const auto time_coord = [&uoffset] (const time_s& time) {
 		const time_t zero = (time_s().time / 60) * cpu / unit - (-position + uoffset) * cpu;
 		const time_t position = (time.time / 60) * cpu / unit;
 
