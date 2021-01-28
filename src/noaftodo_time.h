@@ -149,7 +149,7 @@ struct time_s {
 	// to command interpreter date format
 	CONST_DPL(std::string fmt_cmd(), {
 		return this->fmt([] (FMT_F_ARGS) {
-			char buffer[16];
+			char buffer[64];
 			sprintf(buffer, "%dy%dm%dd%dh%d", y, M, d, h, m);
 			return std::string(buffer);
 		});
@@ -158,7 +158,7 @@ struct time_s {
 	// to be printed on UI: (YYYY/MM/DD HH:MM)
 	CONST_DPL(std::string fmt_ui(), {
 		return this->fmt([] (FMT_F_ARGS) {
-			char buffer[16];
+			char buffer[64];
 			sprintf(buffer, "%04d/%02d/%02d %02d:%02d", y, M, d, h, m);
 			return std::string(buffer);
 		});
@@ -167,7 +167,7 @@ struct time_s {
 	// to be printed in log
 	CONST_DPL(std::string fmt_log(), {
 		return this->fmt([] (FMT_F_ARGS) {
-			char buffer[16];
+			char buffer[64];
 			sprintf(buffer, "%02d:%02d:%02d", h, m, s);
 			return std::string(buffer);
 		});

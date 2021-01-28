@@ -166,7 +166,7 @@ void paint() {
 		move(h - 3, (uoffset + offset) * cpu + 1);
 		addnstr(t.fmt_sprintf("%1$04d/%2$02d/%3$02d").c_str(), w - (uoffset + offset) * cpu - 1);
 		move(h - 2, (uoffset + offset) * cpu + 1);
-		addnstr(t.fmt_sprintf("%4$02d:%5$02d").c_str(), w - (uoffset + offset) * cpu - 1);
+		addnstr(t.fmt([] (FMT_F_ARGS) { return ((h < 10) ? "0" : "") + to_string(h) + ":" + ((m < 10) ? "0" : "") + to_string(m); }).c_str(), w - (uoffset + offset) * cpu - 1);
 	};
 
 	const auto time_coord = [&uoffset] (const time_s& time) {
