@@ -46,13 +46,13 @@ alias sort "math \%numbuffer\% = %arg1%; if \%ret\% \"set sort_by %arg2%\%sort_b
 # KEY BINDINGS
 bind "esc" "math \%numbuffer\% = -1; if \%ret\% q" 1 true
 bind "q" "q" 1 true
-bind "q" "back" 28 true
+bind "q" "back" 60 true
 bind "esc" "math \%numbuffer\% = -1; if \%ret\% back" 28 true
-bind "enter" "details" 1 true
+bind "enter" "details" 33 true
 bind "enter" "set tag_filter_copy; back" 16 true
 bind "L" "listview" 1 true
 bind "L" "back" 16 true
-bind ":" ":" 29 true
+bind ":" ":" 61 true
 bind "tab" "math \%tag_filter_v\% + 1 tag_filter_v" 1 true
 bind "up" "math \%id\% - 1 id" 9 true
 bind "k" "math \%id\% - 1 id" 9 true
@@ -64,17 +64,17 @@ bind "down" "math \%tag_filter_v\% + 1 tag_filter_v" 16 true
 bind "j" "math \%tag_filter_v\% + 1 tag_filter_v" 16 true
 bind "G" "set id \%last_v_id\%" 1 true
 bind "G" "set tag_filter \%last_v_list\%" 16 true
-bind "a" "a a" 1 false
-bind "A" "a " 1 false
-bind " " "toggle comp" 1 true
+bind "a" "a a" 33 false
+bind "A" "a " 33 false
+bind " " "toggle comp" 33 true
 bind "d" "d" 1 false
-bind "?" "?" 57 true
-bind "F" "toggle filter.failed" 17 true
-bind "U" "toggle filter.uncat" 17 true
-bind "C" "toggle filter.coming" 17 true
-bind "V" "toggle filter.complete" 17 true
-bind ")" "toggle filter.empty" 17 true
-bind "N" "toggle filter.nodue" 1 true
+bind "?" "?" 89 true
+bind "F" "toggle filter.failed" 49 true
+bind "U" "toggle filter.uncat" 49 true
+bind "C" "toggle filter.coming" 49 true
+bind "V" "toggle filter.complete" 49 true
+bind ")" "toggle filter.empty" 49 true
+bind "N" "toggle filter.nodue" 49 true
 bind "/" "set norm.regex_filter " 1 false
 bind "/" "set livi.regex_filter " 16 false
 bind "e" "a \%due\% \"\%title\%\" \"\%desc\%\" \%id\%; setmeta \%meta\%" 1 false
@@ -113,6 +113,17 @@ bind "g" "math \%numbuffer\% = -1;
 		" 16 true
 
 bind "s" "math \%numbuffer\% = -1; if \%ret\% \"set sort_by\"; sort 1 d; sort 2 l; sort 3 t; sort 4 D; echo \%sort_by\%" 1 true
+
+# TIMELINE MODE BINDINGS
+bind "t" "set mode 32" 1 true
+bind "[" "timeline.scale_up" 32 true
+bind "]" "timeline.scale_down" 32 true
+bind "left" "math \%timeline.position\% - 1 timeline.position" 32 true
+bind "right" "math \%timeline.position\% + 1 timeline.position" 32 true
+bind "=" "set timeline.position 0" 32 true
+bind "down" "timeline.prev; timeline.focus" 32 true
+bind "up" "timeline.next; timeline.focus" 32 true
+bind "f" "timeline.focus_closest" 32 true
 
 # COMMAND MODE BINDINGS
 bind "left" "cmd.curs.left" 2 true
