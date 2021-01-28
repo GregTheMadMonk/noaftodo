@@ -11,7 +11,7 @@ echo "Generating docs and embedded code for $DIR"
 mkdir -p gen/doc
 mkdir -p gen/src
 
-printf "Command mode commands:\n%s" "$(grep -i 'command \"' $DIR/src/noaftodo_def.cpp | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > gen/doc/cmd.doc.gen
+printf "Command mode commands:\n%s" "$(grep -i 'command \"' $(find $DIR/src/*) | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > gen/doc/cmd.doc.gen
 printf "Command-line arguments:\n%s" "$(grep -i 'argument \"' $DIR/src/noaftodo.cpp | sort | sed 's/.*\/\/ argument \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/arg.doc.gen
 printf "%s" "$(grep -i 'LISTVIEW column \"' $DIR/src/noaftodo_def.cpp | sort | sed 's/.*\/\/ LISTVIEW column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.lview.doc.gen
 printf "%s" "$(grep -i 'NORMAL column \"' $DIR/src/noaftodo_def.cpp | sort | sed 's/.*\/\/ NORMAL column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.norm.doc.gen

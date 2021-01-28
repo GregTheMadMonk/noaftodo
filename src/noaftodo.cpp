@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 		}
 		// argument "-d, --daemon" - start daemon
 		else if (strcmp(argv[i], "-d") * strcmp(argv[i], "--daemon") == 0) run_mode = PM_DAEMON;
-		// argument "-I, --interpreter" - start in interpreter mode. Argument after it will be executed as a command
+		// argument "-I, --interpreter" - start in interpreter mode
 		else if (strcmp(argv[i], "-I") * strcmp(argv[i], "--interpreter") == 0) run_mode = PM_INTERP;
 		// argument "-C, --command" - execute a command
 		else if (strcmp(argv[i], "-C") * strcmp(argv[i], "--command") == 0) {

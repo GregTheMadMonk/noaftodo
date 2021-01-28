@@ -53,11 +53,13 @@ void init() {
 	cvar_base_s::cvars["charset.timeline.rarrow"] = cvar_base_s::wrap_string(rarrow);
 	
 	// timeline mode commands
+	// command "timeline.focus" - focus selected entry in TIMELINE mode
 	cmd::cmds["timeline.focus"] = [] (const vector<string>& args) {
 		focus();
 		return 0;
 	};
 
+	// command "timeline.focus_closest" - same as timeline.focus, but prior to it selects closest entry to current position on TIMELINE
 	cmd::cmds["timeline.focus_closest"] = [] (const vector<string>& args) {
 		const auto t = time_s("a" + to_string(position * unit));
 		s_line = closest_id(t);
@@ -66,6 +68,7 @@ void init() {
 		return 0;
 	};
 
+	// command "timeline.scale_up" - scale up timeline
 	cmd::cmds["timeline.scale_up"] = [] (const vector<string>& args) {
 		for (const auto& u : units) if (u > unit) {
 			position = position * unit / u;
@@ -79,6 +82,7 @@ void init() {
 		return 0;
 	};
 
+	// command "timeline.scale_down" - scale down timeline
 	cmd::cmds["timeline.scale_down"] = [] (const vector<string>& args) {
 		if (unit >= 60) {
 			unit /= 2;
@@ -95,6 +99,7 @@ void init() {
 		return 0;
 	};
 
+	// command "timeline.next" - select next entry on the timeline
 	cmd::cmds["timeline.next"] = [] (const vector<string>& args) {
 		int next_id = s_line;
 
@@ -107,6 +112,7 @@ void init() {
 		return 0;
 	};
 
+	// command "timeline.prev" - select previous entry on the timeline
 	cmd::cmds["timeline.prev"] = [] (const vector<string>& args) {
 		int next_id = s_line;
 
