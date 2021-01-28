@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(noaftodo VERSION 1.4.4)
+project(noaftodo VERSION 1.4.5)
 
 # use C++ 17
 set(CXX_STANDART 17)

@@ -26,11 +26,9 @@ std::string TCONF = \"%s\";" \
 "$(sed 's/\\/\\\\/g' $DIR/noaftodo.conf.template | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')" \
 > gen/src/noaftodo_embed.cpp
 
-LIST_V=$(grep ' LIST_V = ' $DIR/src/noaftodo.h | sed 's/.*LIST_V = //g;s/\;//g')
-CONF_V=$(grep ' CONF_V = ' $DIR/src/noaftodo.h | sed 's/.*CONF_V = //g;s/\;//g')
-PATCH_V=$(grep ' PATCH_V = ' $DIR/src/noaftodo.h | sed 's/.*PATCH_V = //g;s/\;//g')
+VERSION=$(grep "noaftodo VERSION" $DIR/CMakeLists.txt | sed 's/^.*VERSION //g;s/)$//g')
 
-printf ".TH NOAFTODO 1 \"July 2020\" \"%s.%s.%s\" \"NOAFtodo man page\"
+printf ".TH NOAFTODO 1 \"$(date +%B\ %Y)\" \"%s\" \"NOAFtodo man page\"
 .SH NAME
 NOAFtodo
 A TODO manager No-One-Asked-For.
@@ -65,9 +63,7 @@ Status fields are specified in \"norm.status_fields\" and \"livi.status_fields\"
 Apology for bad english and probably not very useful manpage.
 .I
 <3 Y'all! Peace!" \
-"$LIST_V" \
-"$CONF_V" \
-"$PATCH_V" \
+"$VERSION" \
 "$(sed '1d;s/\t//g;s/-/\\-/g;0~2s/^/.HP\n/g;0~2s/$/\n.IP/g' gen/doc/arg.doc.gen)" \
 "$(sed '1d;s/\t//g;s/-/\\-/g;0~2s/^/.HP\n.B\n/g;0~2s/$/\n.IP/g' gen/doc/cmd.doc.gen)" \
 "$(sed 's/\t//g;s/-/\\-/g;1~2s/^/.HP\n.B\n/g;1~2s/$/\n.IP/g' gen/doc/cols.norm.doc.gen)" \

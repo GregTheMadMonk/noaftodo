@@ -7,4 +7,4 @@ printf "
 \`\`\`
 %s
 \`\`\`" \
-"$(roff2text doc/noaftodo.man)" | sed 's/.//g' > ../noaftodo.wiki/NOAFtodo-manpage.md
+"$(roff2text $1/doc/noaftodo.man)" | sed 's/.//g' > ../noaftodo.wiki/NOAFtodo-manpage.md
