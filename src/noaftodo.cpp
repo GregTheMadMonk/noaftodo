@@ -58,18 +58,18 @@ int main(int argc, char* argv[]) {
 
 	// parse arguments
 	for (int i = 1; i < argc; i++) {
-		// argument "-h, --help" - print help message
+		// @argument "-h, --help" - print help message
 		if (strcmp(argv[i], "-h") * strcmp(argv[i], "--help") == 0) run_mode = PM_HELP;
-		// argument "-V, --version" - print program version
+		// @argument "-V, --version" - print program version
 		else if (strcmp(argv[i], "-V") * strcmp(argv[i], "--version") == 0) {
 			cout << TITLE << " v." << VERSION << endl;
 			noaftodo_exit();
 		}
-		// argument "-d, --daemon" - start daemon
+		// @argument "-d, --daemon" - start daemon
 		else if (strcmp(argv[i], "-d") * strcmp(argv[i], "--daemon") == 0) run_mode = PM_DAEMON;
-		// argument "-I, --interpreter" - start in interpreter mode
+		// @argument "-I, --interpreter" - start in interpreter mode
 		else if (strcmp(argv[i], "-I") * strcmp(argv[i], "--interpreter") == 0) run_mode = PM_INTERP;
-		// argument "-C, --command" - execute a command
+		// @argument "-C, --command" - execute a command
 		else if (strcmp(argv[i], "-C") * strcmp(argv[i], "--command") == 0) {
 			if (i < argc - 1) {
 				cmd::exec(string(argv[i + 1]));
@@ -79,17 +79,17 @@ int main(int argc, char* argv[]) {
 				noaftodo_exit(1);
 			}
 		}
-		// argument "-k, --kill-daemon" - kill daemon
+		// @argument "-k, --kill-daemon" - kill daemon
 		else if (strcmp(argv[i], "-k") * strcmp(argv[i], "--kill-daemon") == 0) {
 			da::kill();
 			noaftodo_exit();
 		}
-		// argument "-r, --refire" - if daemon is running, re-fire startup events (like, notifications)
+		// @argument "-r, --refire" - if daemon is running, re-fire startup events (like, notifications)
 		else if (strcmp(argv[i], "-r") * strcmp(argv[i], "--refire") == 0) {
 			da::send("N");
 			noaftodo_exit();
 		}
-		// argument "-c, --config" - specify config file
+		// @argument "-c, --config" - specify config file
 		else if (strcmp(argv[i], "-c") * strcmp(argv[i], "--config") == 0) {
 			if (i < argc - 1) {
 				conf::filename = string(argv[i + 1]);
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
 				noaftodo_exit(1);
 			}
 		}
-		// argument "-l, --list" - specify list file
+		// @argument "-l, --list" - specify list file
 		else if (strcmp(argv[i], "-l") * strcmp(argv[i], "--list") == 0) {
 			if (i < argc - 1) {
 				li::filename = string(argv[i + 1]);
@@ -109,11 +109,11 @@ int main(int argc, char* argv[]) {
 				noaftodo_exit(1);
 			}
 		}
-		// argument "-v, --verbose" - print all messages
+		// @argument "-v, --verbose" - print all messages
 		else if (strcmp(argv[i], "-v") * strcmp(argv[i], "--verbose") == 0) {
 			verbose = true;
 		}
-		// argument "-p, --pure" - use pure output. No intents, no time, just text
+		// @argument "-p, --pure" - use pure output. No intents, no time, just text
 		else if (strcmp(argv[i], "-p") * strcmp(argv[i], "--pure") == 0) {
 			pure = true;
 		} else log("Unrecognized parameter \"" + string(argv[i]), LP_ERROR);

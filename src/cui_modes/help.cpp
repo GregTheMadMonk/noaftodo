@@ -3,6 +3,7 @@
 using namespace std;
 
 extern string CMDS_HELP;
+extern string CVARS_HELP;
 
 NOAFTODO_START_MODE(help, init, paint, input)
 
@@ -28,9 +29,9 @@ void paint() {
 
 	// draw description
 	// we want text wrapping here
-	string help;
-	for (char c : CMDS_HELP)
-		help += string(1, c);
+	string help = "";
+	help += CMDS_HELP;
+	help += "\n" + CVARS_HELP;
 
 	text_box(5, 8, w - 10, h - 12, help, true, delta);
 }

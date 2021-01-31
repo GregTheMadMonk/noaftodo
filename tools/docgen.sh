@@ -11,18 +11,21 @@ echo "Generating docs and embedded code for $DIR"
 mkdir -p gen/doc
 mkdir -p gen/src
 
-printf "Command mode commands:\n%s" "$(grep -i 'command \"' $(find $DIR/src/*) | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > gen/doc/cmd.doc.gen
-printf "Command-line arguments:\n%s" "$(grep -i 'argument \"' $DIR/src/noaftodo.cpp | sort | sed 's/.*\/\/ argument \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/arg.doc.gen
-printf "%s" "$(grep -i 'LISTVIEW column \"' $DIR/src/def.cpp | sort | sed 's/.*\/\/ LISTVIEW column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.lview.doc.gen
-printf "%s" "$(grep -i 'NORMAL column \"' $DIR/src/def.cpp | sort | sed 's/.*\/\/ NORMAL column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.norm.doc.gen
-printf "%s" "$(grep -i 'status field \"' $DIR/src/def.cpp | sort | sed 's/.*\/\/ status field \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/fields.status.doc.gen
+printf "Command mode commands:\n%s" "$(grep -i '@command \"' $(find $DIR/src/*) | sort | sed 's/.*@command \"/\t:/g;s/\".*- /\n\t\t/g')" > gen/doc/cmd.doc.gen
+printf "Console variables:\n%s" "$(grep -i '@cvar \"' $(find $DIR/src/*) | sort | sed 's/.*@cvar \"/\t%/g;s/\".*- /%\n\t\t/g')" > gen/doc/cvar.doc.gen
+printf "Command-line arguments:\n%s" "$(grep -i '@argument \"' $DIR/src/noaftodo.cpp | sort | sed 's/.*argument \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/arg.doc.gen
+printf "%s" "$(grep -i '@LISTVIEW column \"' $DIR/src/def.cpp | sort | sed 's/.*@LISTVIEW column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.lview.doc.gen
+printf "%s" "$(grep -i '@NORMAL column \"' $DIR/src/def.cpp | sort | sed 's/.*@NORMAL column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.norm.doc.gen
+printf "%s" "$(grep -i '@status field \"' $DIR/src/def.cpp | sort | sed 's/.*@status field \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/fields.status.doc.gen
 
 printf "#include <string>
 std::string HELP = \"%s\";
 std::string CMDS_HELP = \"%s\";
+std::string CVARS_HELP = \"%s\";
 std::string TCONF = \"%s\";" \
 "$(sed 's/\\/\\\\/g' gen/doc/arg.doc.gen | sed 's/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')" \
 "$(sed 's/\*/\\\*/g' gen/doc/cmd.doc.gen | sed 's/\\/\\\\/g' | sed 's/\t/\\t/g' | sed '0~2s/^/**/g;0~2s/$/**/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')" \
+"$(sed 's/\*/\\\*/g' gen/doc/cvar.doc.gen | sed 's/\\/\\\\/g' | sed 's/\t/\\t/g' | sed '0~2s/^/**/g;0~2s/$/**/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')" \
 "$(sed 's/\\/\\\\/g' $DIR/noaftodo.conf.template | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')" \
 > gen/src/embed.cpp
 
@@ -47,6 +50,8 @@ NOAFtodo is a simple ncurses TODO-manager. Also includes a deamon for tracking t
 .SH COMMAND MODE
 .SS COMMANDS
 %s
+.SS CONSOLE VARIABLES
+%s
 .SH NORMAL MODE COLUMNS
 NORMAL mode columns are specified in \"norm.cols.all\" and \"norm.cols\" cvars (for when all lists/only one list is viewed correspondingly). You can also set some NORMAL mode columns to display their values with \"det.cols\".
 %s
@@ -66,6 +71,7 @@ Apology for bad english and probably not very useful manpage.
 "$VERSION" \
 "$(sed '1d;s/\t//g;s/-/\\-/g;0~2s/^/.HP\n/g;0~2s/$/\n.IP/g' gen/doc/arg.doc.gen)" \
 "$(sed '1d;s/\t//g;s/-/\\-/g;0~2s/^/.HP\n.B\n/g;0~2s/$/\n.IP/g' gen/doc/cmd.doc.gen)" \
+"$(sed '1d;s/\t//g;s/-/\\-/g;0~2s/^/.HP\n.B\n/g;0~2s/$/\n.IP/g' gen/doc/cvar.doc.gen)" \
 "$(sed 's/\t//g;s/-/\\-/g;1~2s/^/.HP\n.B\n/g;1~2s/$/\n.IP/g' gen/doc/cols.norm.doc.gen)" \
 "$(sed 's/\t//g;s/-/\\-/g;1~2s/^/.HP\n.B\n/g;1~2s/$/\n.IP/g' gen/doc/cols.lview.doc.gen)" \
 "$(sed 's/\t//g;s/-/\\-/g;1~2s/^/.HP\n.B\n/g;1~2s/$/\n.IP/g' gen/doc/fields.status.doc.gen)" \

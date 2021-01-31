@@ -43,23 +43,31 @@ inline void focus() {
 
 void init() {
 	// timeline mode cvars
+	// @cvar "timeline.position" - position (in units, relative to current time) of the timeline
 	cvar_base_s::cvars["timeline.position"] = cvar_base_s::wrap_int(position);
+	// @cvar "timeline.unit" - length (in minutes) of a TIMELINE mode unit
 	cvar_base_s::cvars["timeline.unit"] = cvar_base_s::wrap_int(unit);
+	// @cvar "charset.timeline.marker" - TIMELINE marker (displayed where a vertical line crosses horizontal)
 	cvar_base_s::cvars["charset.timeline.marker"] = cvar_base_s::wrap_string(marker);
+	// @cvar "charset.timeline.marker_now" - timeline marker at current time
 	cvar_base_s::cvars["charset.timeline.marker_now"] = cvar_base_s::wrap_string(marker_now);
+	// @cvar "charset.timeline.line" - character for horizontal line in TIMELINE mode
 	cvar_base_s::cvars["charset.timeline.line"] = cvar_base_s::wrap_string(line);
+	// @cvar "charset.timeline.vline" - character to draw vertical lines in TIMELINE mode with
 	cvar_base_s::cvars["charset.timeline.vline"] = cvar_base_s::wrap_string(vline);
+	// @cvar "charset.timeline.vline_now" - character to draw vertical line indicating current time in TIMELINE mode with
 	cvar_base_s::cvars["charset.timeline.vline_now"] = cvar_base_s::wrap_string(vline_now);
+	// @cvar "charset.timeline.rarrow" - cute right arrow at the end of horizontal line indicating the flow of time
 	cvar_base_s::cvars["charset.timeline.rarrow"] = cvar_base_s::wrap_string(rarrow);
 	
 	// timeline mode commands
-	// command "timeline.focus" - focus selected entry in TIMELINE mode
+	// @command "timeline.focus" - focus selected entry in TIMELINE mode
 	cmd::cmds["timeline.focus"] = [] (const vector<string>& args) {
 		focus();
 		return 0;
 	};
 
-	// command "timeline.focus_closest" - same as timeline.focus, but prior to it selects closest entry to current position on TIMELINE
+	// @command "timeline.focus_closest" - same as timeline.focus, but prior to it selects closest entry to current position on TIMELINE
 	cmd::cmds["timeline.focus_closest"] = [] (const vector<string>& args) {
 		const auto t = time_s("a" + to_string(position * unit));
 		s_line = closest_id(t);
@@ -68,7 +76,7 @@ void init() {
 		return 0;
 	};
 
-	// command "timeline.scale_up" - scale up timeline
+	// @command "timeline.scale_up" - scale up timeline
 	cmd::cmds["timeline.scale_up"] = [] (const vector<string>& args) {
 		for (const auto& u : units) if (u > unit) {
 			position = position * unit / u;
@@ -82,7 +90,7 @@ void init() {
 		return 0;
 	};
 
-	// command "timeline.scale_down" - scale down timeline
+	// @command "timeline.scale_down" - scale down timeline
 	cmd::cmds["timeline.scale_down"] = [] (const vector<string>& args) {
 		if (unit >= 60) {
 			unit /= 2;
@@ -99,7 +107,7 @@ void init() {
 		return 0;
 	};
 
-	// command "timeline.next" - select next entry on the timeline
+	// @command "timeline.next" - select next entry on the timeline
 	cmd::cmds["timeline.next"] = [] (const vector<string>& args) {
 		int next_id = s_line;
 
@@ -112,7 +120,7 @@ void init() {
 		return 0;
 	};
 
-	// command "timeline.prev" - select previous entry on the timeline
+	// @command "timeline.prev" - select previous entry on the timeline
 	cmd::cmds["timeline.prev"] = [] (const vector<string>& args) {
 		int next_id = s_line;
 
