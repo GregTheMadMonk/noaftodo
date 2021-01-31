@@ -174,11 +174,26 @@ struct time_s {
 	})
 
 	// using a custom sprintf expression
-	CONST_DPL(std::string fmt_sprintf(const std::string& format), {
+	CONST_DPL(std::string fmt_str(std::string format), {
 		return this->fmt([&format] (FMT_F_ARGS) {
-			char buffer[64];
-			sprintf(buffer, format.c_str(), y, M, d, h, m, s);
-			return std::string(buffer);
+			int index = -1;
+
+			while ((index = format.find("%H")) != std::string::npos)
+				format.replace(index, 2, std::to_string(h));
+
+			while ((index = format.find("%M")) != std::string::npos)
+				format.replace(index, 2, std::to_string(m));
+
+			while ((index = format.find("%d")) != std::string::npos)
+				format.replace(index, 2, std::to_string(d));
+
+			while ((index = format.find("%m")) != std::string::npos)
+				format.replace(index, 2, std::to_string(M));
+
+			while ((index = format.find("%Y")) != std::string::npos)
+				format.replace(index, 2, std::to_string(y));
+
+			return format;
 		});
 	})
 
