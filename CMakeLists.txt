@@ -55,6 +55,12 @@ if (NOT ("$ENV{PKGROOT}" STREQUAL ""))
 	set(_PKGROOT "$ENV{PKGROOT}")
 endif()
 
+# _DEBUG adds compiler options therefore is specified before target declaration
+if (${_DEBUG})
+	add_compile_options( -g3 )
+	set(CMAKE_VERBOSE_MAKEFILE 1)
+endif()
+
 # Find source files
 file(GLOB_RECURSE _SOURCES src/*.cpp)
 
@@ -80,11 +86,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ${CURSES_LIBRARIES})
 # Explicitly set NCURSES_WIDECHAR
 add_definitions( -DNCURSES_WIDECHAR ) 
 
-# Set project version
-add_definitions( -DLIST_V=${PROJECT_VERSION_MAJOR} )
-add_definitions( -DCONF_V=${PROJECT_VERSION_MINOR} )
-add_definitions( -DPATCH_V=${PROJECT_VERSION_PATCH} )
-
 if (${_NO_MQUEUE})
 	add_definitions( -DNO_MQUEUE )
 else()
@@ -95,9 +96,10 @@ if (${_NO_ROOT_CHECK})
 	add_definitions( -DNO_ROOT_CHECK )
 endif()
 
-if (${_DEBUG})
-	add_compile_options( -g3 )
-endif()
+# Set project version
+add_definitions( -DLIST_V=${PROJECT_VERSION_MAJOR} )
+add_definitions( -DCONF_V=${PROJECT_VERSION_MINOR} )
+add_definitions( -DPATCH_V=${PROJECT_VERSION_PATCH} )
 
 if (NOT ("$ENV{V_SUFFIX}" STREQUAL ""))
 	add_definitions( -DV_SUFFIX="$ENV{V_SUFFIX}" )
