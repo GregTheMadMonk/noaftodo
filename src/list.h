@@ -10,8 +10,8 @@
 #include <sys/types.h>
 #include <vector>
 
-#include <noaftodo_macro.h>
-#include <noaftodo_time.h>
+#include <macro.h>
+#include <time.h>
 
 namespace li {
 

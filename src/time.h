@@ -5,7 +5,7 @@
 #include <functional>
 #include <string>
 
-#include <noaftodo_macro.h>
+#include <macro.h>
 
 struct time_s {
 	time_t time;

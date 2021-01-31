@@ -9,8 +9,8 @@
 #include <vector>
 
 #include <noaftodo.h>
-#include <noaftodo_cmd.h>
-#include <noaftodo_cvar.h>
+#include <cmd.h>
+#include <cvar.h>
 
 using namespace std;
 

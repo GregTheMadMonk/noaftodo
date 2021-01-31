@@ -15,11 +15,11 @@
 #include <stdexcept>
 
 #include <noaftodo.h>
-#include <noaftodo_config.h>
-#include <noaftodo_cui.h>
-#include <noaftodo_cvar.h>
-#include <noaftodo_daemon.h>
-#include <noaftodo_time.h>
+#include <config.h>
+#include <cui.h>
+#include <cvar.h>
+#include <daemon.h>
+#include <time.h>
 
 using namespace std;
 
