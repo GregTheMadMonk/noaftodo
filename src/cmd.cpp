@@ -1,4 +1,4 @@
-#include "noaftodo_cmd.h"
+#include "cmd.h"
 
 /*
  * [Almost] everything responsible for NOAFtodo
@@ -19,7 +19,7 @@
 #include <cui.h>
 #include <cvar.h>
 #include <daemon.h>
-#include <time.h>
+#include <core/time.h>
 
 using namespace std;
 

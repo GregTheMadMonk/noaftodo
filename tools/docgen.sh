@@ -13,9 +13,9 @@ mkdir -p gen/src
 
 printf "Command mode commands:\n%s" "$(grep -i 'command \"' $(find $DIR/src/*) | sort | sed 's/.*\/\/ command \"/\t:/g;s/\".*- /\n\t\t/g')" > gen/doc/cmd.doc.gen
 printf "Command-line arguments:\n%s" "$(grep -i 'argument \"' $DIR/src/noaftodo.cpp | sort | sed 's/.*\/\/ argument \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/arg.doc.gen
-printf "%s" "$(grep -i 'LISTVIEW column \"' $DIR/src/noaftodo_def.cpp | sort | sed 's/.*\/\/ LISTVIEW column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.lview.doc.gen
-printf "%s" "$(grep -i 'NORMAL column \"' $DIR/src/noaftodo_def.cpp | sort | sed 's/.*\/\/ NORMAL column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.norm.doc.gen
-printf "%s" "$(grep -i 'status field \"' $DIR/src/noaftodo_def.cpp | sort | sed 's/.*\/\/ status field \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/fields.status.doc.gen
+printf "%s" "$(grep -i 'LISTVIEW column \"' $DIR/src/def.cpp | sort | sed 's/.*\/\/ LISTVIEW column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.lview.doc.gen
+printf "%s" "$(grep -i 'NORMAL column \"' $DIR/src/def.cpp | sort | sed 's/.*\/\/ NORMAL column \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/cols.norm.doc.gen
+printf "%s" "$(grep -i 'status field \"' $DIR/src/def.cpp | sort | sed 's/.*\/\/ status field \"/\t/g;s/\".*- /\n\t\t/g')" > gen/doc/fields.status.doc.gen
 
 printf "#include <string>
 std::string HELP = \"%s\";
@@ -24,7 +24,7 @@ std::string TCONF = \"%s\";" \
 "$(sed 's/\\/\\\\/g' gen/doc/arg.doc.gen | sed 's/\t/\\t/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')" \
 "$(sed 's/\*/\\\*/g' gen/doc/cmd.doc.gen | sed 's/\\/\\\\/g' | sed 's/\t/\\t/g' | sed '0~2s/^/**/g;0~2s/$/**/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')" \
 "$(sed 's/\\/\\\\/g' $DIR/noaftodo.conf.template | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\"/\\"/g')" \
-> gen/src/noaftodo_embed.cpp
+> gen/src/embed.cpp
 
 VERSION=$(grep "noaftodo VERSION" $DIR/CMakeLists.txt | sed 's/^.*VERSION //g;s/)$//g')
 

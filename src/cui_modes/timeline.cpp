@@ -2,7 +2,7 @@
 #include <cui.h>
 #include <cvar.h>
 #include <entry_flags.h>
-#include <time.h>
+#include <core/time.h>
 
 using namespace std;
 using namespace li::entry_flags;

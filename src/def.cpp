@@ -7,7 +7,7 @@
 #include <cvar.h>
 #include <daemon.h>
 #include <entry_flags.h>
-#include <time.h>
+#include <core/time.h>
 
 using namespace std;
 

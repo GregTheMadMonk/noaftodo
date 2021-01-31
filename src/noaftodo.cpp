@@ -15,7 +15,7 @@
 #include <cvar.h>
 #include <daemon.h>
 #include <list.h>
-#include <time.h>
+#include <core/time.h>
 
 using namespace std;
 

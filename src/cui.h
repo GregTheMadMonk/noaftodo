@@ -16,7 +16,7 @@
 
 #include <noaftodo.h>
 #include <list.h>
-#include <time.h>
+#include <core/time.h>
 
 // mode declaration macro
 #define NOAFTODO_START_MODE(name, init_name, painter_name, input_handler_name) namespace cui::modes::mode_##name {\

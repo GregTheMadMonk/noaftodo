@@ -1,4 +1,4 @@
-#include "noaftodo_list.h"
+#include "list.h"
 
 #include <algorithm>
 #include <fstream>
@@ -11,7 +11,7 @@
 #include <cui.h>
 #include <daemon.h>
 #include <entry_flags.h>
-#include <time.h>
+#include <core/time.h>
 
 using namespace std;
 

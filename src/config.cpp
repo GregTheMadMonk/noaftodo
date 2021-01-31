@@ -1,4 +1,4 @@
-#include "noaftodo_config.h"
+#include "config.h"
 
 #ifdef __sun
 #include <ncurses/curses.h>

@@ -61,7 +61,7 @@ file(GLOB_RECURSE _SOURCES src/*.cpp)
 # Generate embedded code
 add_custom_command(
 	OUTPUT
-	${CMAKE_CURRENT_BINARY_DIR}/gen/src/noaftodo_embed.cpp
+	${CMAKE_CURRENT_BINARY_DIR}/gen/src/embed.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/gen/doc/noaftodo.man.gz
 	COMMAND ${PROJECT_SOURCE_DIR}/tools/docgen.sh "${PROJECT_SOURCE_DIR}"
 	COMMENT "Executing documentation and embedded code generation..."
@@ -72,7 +72,7 @@ add_custom_command(
 # Declare an executable
 add_executable(${CMAKE_PROJECT_NAME}
 	${_SOURCES}
-	${CMAKE_CURRENT_BINARY_DIR}/gen/src/noaftodo_embed.cpp)
+	${CMAKE_CURRENT_BINARY_DIR}/gen/src/embed.cpp)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CURSES_LIBRARIES})
 
