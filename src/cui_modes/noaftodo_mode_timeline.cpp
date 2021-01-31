@@ -1,8 +1,8 @@
-#include "../noaftodo_cmd.h"
-#include "../noaftodo_cui.h"
-#include "../noaftodo_cvar.h"
-#include "../noaftodo_entry_flags.h"
-#include "../noaftodo_time.h"
+#include <noaftodo_cmd.h>
+#include <noaftodo_cui.h>
+#include <noaftodo_cvar.h>
+#include <noaftodo_entry_flags.h>
+#include <noaftodo_time.h>
 
 using namespace std;
 using namespace li::entry_flags;

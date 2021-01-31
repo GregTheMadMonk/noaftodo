@@ -7,7 +7,7 @@
 #include <optional>
 #include <string>
 
-#include "noaftodo.h"
+#include <noaftodo.h>
 
 constexpr int CVAR_FLAG_RO = 0b1;
 constexpr int CVAR_FLAG_WS_IGNORE = 0b10;

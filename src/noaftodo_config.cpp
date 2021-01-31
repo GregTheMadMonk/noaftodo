@@ -8,9 +8,9 @@
 #include <fstream>
 #include <vector>
 
-#include "noaftodo.h"
-#include "noaftodo_cmd.h"
-#include "noaftodo_cvar.h"
+#include <noaftodo.h>
+#include <noaftodo_cmd.h>
+#include <noaftodo_cvar.h>
 
 using namespace std;
 

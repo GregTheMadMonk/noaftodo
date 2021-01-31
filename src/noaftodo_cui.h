@@ -14,9 +14,9 @@
 #include <curses.h>
 #endif
 
-#include "noaftodo.h"
-#include "noaftodo_list.h"
-#include "noaftodo_time.h"
+#include <noaftodo.h>
+#include <noaftodo_list.h>
+#include <noaftodo_time.h>
 
 // mode declaration macro
 #define NOAFTODO_START_MODE(name, init_name, painter_name, input_handler_name) namespace cui::modes::mode_##name {\

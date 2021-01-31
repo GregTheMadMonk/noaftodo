@@ -1,4 +1,4 @@
-#include "../noaftodo_cui.h"
+#include <noaftodo_cui.h>
 
 using namespace std;
 

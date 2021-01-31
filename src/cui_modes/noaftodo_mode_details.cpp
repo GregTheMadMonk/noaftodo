@@ -1,4 +1,4 @@
-#include "../noaftodo_cui.h"
+#include <noaftodo_cui.h>
 
 NOAFTODO_START_MODE(details, init, paint, input)
 

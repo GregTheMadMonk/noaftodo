@@ -1,6 +1,5 @@
-#include "../noaftodo_cui.h"
-
-#include "../noaftodo_entry_flags.h"
+#include <noaftodo_cui.h>
+#include <noaftodo_entry_flags.h>
 
 NOAFTODO_START_MODE(normal, init, paint, input)
 

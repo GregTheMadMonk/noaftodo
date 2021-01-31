@@ -11,7 +11,7 @@ add_compile_options( -fpermissive -std=c++17 )
 # Link ncurses
 set(CURSES_NEED_WIDE True)
 find_package(Curses REQUIRED)
-include_directories(${CURSES_INCLUDE_DIR})
+include_directories(${CURSES_INCLUDE_DIR} "src/")
 
 # Platform-specific stuff
 message("Building for ${CMAKE_HOST_SYSTEM_NAME}")

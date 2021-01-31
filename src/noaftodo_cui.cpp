@@ -2,11 +2,11 @@
 
 #include <regex>
 
-#include "noaftodo_cmd.h"
-#include "noaftodo_config.h"
-#include "noaftodo_cvar.h"
-#include "noaftodo_daemon.h"
-#include "noaftodo_entry_flags.h"
+#include <noaftodo_cmd.h>
+#include <noaftodo_config.h>
+#include <noaftodo_cvar.h>
+#include <noaftodo_daemon.h>
+#include <noaftodo_entry_flags.h>
 
 using namespace std;
 

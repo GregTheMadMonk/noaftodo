@@ -1,8 +1,7 @@
-#include "../noaftodo_cui.h"
-
 #include <regex>
 
-#include "../noaftodo_cmd.h"
+#include <noaftodo_cui.h>
+#include <noaftodo_cmd.h>
 
 NOAFTODO_START_MODE(command, init, paint, input)
 

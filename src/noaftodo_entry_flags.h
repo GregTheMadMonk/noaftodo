@@ -1,7 +1,7 @@
 #ifndef NOAFTODO_ENTRY_FLAGS
 #define NOAFTODO_ENTRY_FLAGS
 
-#include "noaftodo_list.h"
+#include <noaftodo_list.h>
 
 namespace li::entry_flags {
 
