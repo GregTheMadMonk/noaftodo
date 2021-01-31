@@ -2,6 +2,8 @@
 
 A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolutely no clue why.
 
+[Take me to the screenshots!](#screenshots)
+
 ![GPL-3.0](https://img.shields.io/github/license/gregthemadmonk/noaftodo?style=flat-square)
 ![Contributors](https://img.shields.io/github/contributors/gregthemadmonk/noaftodo?style=flat-square)
 ![Commits since last release](https://img.shields.io/github/commits-since/gregthemadmonk/noaftodo/latest?style=flat-square)![Commit activity](https://img.shields.io/github/commit-activity/w/gregthemadmonk/noaftodo?style=flat-square)
@@ -9,12 +11,12 @@ A TODO-manager No One Asked For. Written in C++, with ncurses, love and absolute
 
 [![AUR version](https://img.shields.io/aur/version/noaftodo-git?style=for-the-badge)](https://aur.archlinux.org/packages/noaftodo-git/)[![AUR version](https://img.shields.io/aur/last-modified/noaftodo-git?style=for-the-badge)](https://aur.archlinux.org/packages/noaftodo-git/)
 
-<img src="workflow.gif" width="576" height="auto" alt="NOAFtodo workflow"></img>
-
 ### Hey you! Yes, <ins>YOU</ins>! There is an unfinished [guide](https://github.com/GregTheMadMonk/noaftodo/wiki/Guide) on the NOAFtodo Wiki!
 Come take a look, or help finish it by becoming a wiki contributor or telling what information you and others will find most useful!
 
 ### Features
+
+### See [NOAFtodo roadmap](https://github.com/GregTheMadMonk/noaftodo/projects/1) to take a look on planned features and how much is ready from the next release.
 
 - [x] minimalisic interface written with ncurses with different display modes
 - [x] multiple lists between which tasks can be moved
@@ -23,8 +25,6 @@ Come take a look, or help finish it by becoming a wiki contributor or telling wh
 - [x] a daemon that can work in background, track tasks dues and completion and is able to execute custom commands on certain events (like sending notifications)
 - [x] per-task events on top of global events, which allow you to do some tricky things (creaing recurring tasks or setting up something like an alarm clock)
 - [x] bugs *WHO WROTE THAT?!!*
-
-To take a look on planned features and how much is ready from the next release see [NOAFtodo roadmap](https://github.com/GregTheMadMonk/noaftodo/projects/1).
 
 ### Issues
 
@@ -58,3 +58,9 @@ $ cmake .. && make   # replace "make" with "gmake" on Solaris 11 and maybe some 
 
 ### Configuring
 See [noaftodo.conf.template](https://github.com/GregTheMadMonk/noaftodo/blob/master/noaftodo.conf.template) if you want an example configuration.
+
+### Screenshots
+
+<img src="workflow.gif" width="576" height="auto" alt="NOAFtodo workflow"></img>
+<img src="scr1.png" width="576" height="auto" alt="NOAFtodo workflow"></img>
+<img src="scr2.png" width="576" height="auto" alt="NOAFtodo workflow"></img>
