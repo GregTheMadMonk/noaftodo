@@ -33,7 +33,7 @@ void paint() {
 	move(h - 1, 0);
 	int offset = command_cursor - w + 3;
 	if (offset < 0) offset = 0;
-	addstr(w_converter.to_bytes(L":" + command.substr(offset)).c_str());
+	addstr(w_converter().to_bytes(L":" + command.substr(offset)).c_str());
 	move(h - 1, 1 + command_cursor - offset);
 }
 
@@ -49,8 +49,8 @@ void input(const keystroke_s& key, const bool& bind_fired) {
 	if (contexec_regex_filter != "") {
 		regex ce_regex(contexec_regex_filter);
 
-		if (regex_search(w_converter.to_bytes(command), ce_regex))
-			cmd::exec(w_converter.to_bytes(command));
+		if (regex_search(w_converter().to_bytes(command), ce_regex))
+			cmd::exec(w_converter().to_bytes(command));
 	}
 }
 

@@ -143,7 +143,7 @@ void paint() {
 	// draw the line
 	move(h - 4, 0);
 	for (int x = 0; x < w - 1; x++) addstr(line.c_str());
-	move(h - 4, w - w_converter.from_bytes(rarrow).length());
+	move(h - 4, w - w_converter().from_bytes(rarrow).length());
 	addstr(rarrow.c_str());
 
 	const int rounder = time_s().to_tm().tm_min % unit;

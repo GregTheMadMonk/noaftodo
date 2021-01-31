@@ -509,7 +509,7 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 
 	{ "cmd.send", [] (const vector<string>& args) {
 			if (cui::command != L"") {
-				exec(w_converter.to_bytes(cui::command));
+				exec(w_converter().to_bytes(cui::command));
 				cui::command_history.push_back(cui::command);
 				cui::command_index = cui::command_history.size();
 				terminate();

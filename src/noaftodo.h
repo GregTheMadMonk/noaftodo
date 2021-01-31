@@ -89,7 +89,10 @@ const std::vector<std::string> SPECIAL =
 };
 
 // string <-> wstring converter
-extern std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> w_converter;
+static std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>& w_converter() {
+	static std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> wc;
+	return wc;
+}
 
 // program mode
 extern int run_mode;

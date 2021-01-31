@@ -143,7 +143,7 @@ unique_ptr<cvar_base_s> cvar_base_s::wrap_multistr(multistr_c& var, const int& l
 							const optional<cvar_setter>& setter_override,
 							const string& predefine_value) {
 	auto ret = make_unique<cvar_base_s>(
-			[&var] () { return w_converter.to_bytes(var.str()); },
+			[&var] () { return w_converter().to_bytes(var.str()); },
 
 			(flags & CVAR_FLAG_RO) ? (
 				(cvar_setter) [] (const string& val) { }
@@ -181,7 +181,7 @@ unique_ptr<cvar_base_s> cvar_base_s::wrap_multistr_element(multistr_c& var, cons
 							const optional<cvar_setter>& setter_override,
 							const string& predefine_value) {
 	auto ret = make_unique<cvar_base_s>(
-			[&var, index] () { return w_converter.to_bytes(var.at(index)); },
+			[&var, index] () { return w_converter().to_bytes(var.at(index)); },
 
 			(flags & CVAR_FLAG_RO) ? (
 				(cvar_setter) [] (const string& val) { }
@@ -204,7 +204,7 @@ unique_ptr<cvar_base_s> cvar_base_s::wrap_multistr_element(multistr_c& var, cons
 					vector<wstring> newval;
 
 					wstring buffer = L"";
-					wstring wval = w_converter.from_bytes(val.substr(start_from));
+					wstring wval = w_converter().from_bytes(val.substr(start_from));
 					for (int i = 0; i < wval.length(); i++) {
 						buffer += wval.at(i);
 

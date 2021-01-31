@@ -32,8 +32,6 @@ int log_offset = 0;
 
 int exit_value = 0;
 
-wstring_convert<codecvt_utf8<wchar_t>, wchar_t> w_converter;
-
 extern string HELP;
 
 int main(int argc, char* argv[]) {
@@ -295,7 +293,7 @@ string replace_special(string str) {
 
 // multistr_c functions
 multistr_c::multistr_c(const string& str, const int& elen, const int& len) {
-	wstring wstr = w_converter.from_bytes(str);
+	wstring wstr = w_converter().from_bytes(str);
 	this->init(wstr, elen, len);
 }
 
@@ -348,7 +346,7 @@ wstring multistr_c::get(const int& i) {
 }
 
 string multistr_c::s_get(const int& i) {
-	return w_converter.to_bytes(this->get(i));
+	return w_converter().to_bytes(this->get(i));
 }
 
 vector<wstring>& multistr_c::v_at(const int& i) {

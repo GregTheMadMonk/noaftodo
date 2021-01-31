@@ -57,7 +57,7 @@ void init() {
 		it->second.init_f();
 
 	// construct UI
-	command_history.push_back(w_converter.from_bytes(""));
+	command_history.push_back(w_converter().from_bytes(""));
 }
 
 void construct() {
@@ -259,9 +259,9 @@ bool fire_bind(const keystroke_s& key) {
 			if (bind.autoexec) cmd::exec(bind.command);
 			else  {
 				if ((s_line >= 0) && (s_line < t_list.size()))
-					command = w_converter.from_bytes(format_str(bind.command, &t_list.at(s_line)));
+					command = w_converter().from_bytes(format_str(bind.command, &t_list.at(s_line)));
 				else
-					command = w_converter.from_bytes(bind.command);
+					command = w_converter().from_bytes(bind.command);
 				set_mode(MODE_COMMAND);
 			}
 
@@ -355,7 +355,7 @@ string prompt(const string& message) {
 
 		switch (c) {
 			case 10:
-				return w_converter.to_bytes(command);
+				return w_converter().to_bytes(command);
 				break;
 			case 27:
 				wint_t c2;
@@ -380,7 +380,7 @@ string prompt(const string& message) {
 		move(h - 1, 0);
 		int offset = command_cursor - w + 3;
 		if (offset < 0) offset = 0;
-		addstr((message + w_converter.to_bytes(command.substr(offset))).c_str());
+		addstr((message + w_converter().to_bytes(command.substr(offset))).c_str());
 		move(h - 1, 1 + command_cursor - offset);
 	}
 
@@ -604,7 +604,7 @@ void draw_status(const string& fields) {
 	attron_ext(0, color_status);
 	move(h - 1, 0);
 	for (int x = 0; x < w; x++) addch(' ');
-	const auto len = text_box(w - 1 - w_converter.from_bytes(status_l).length(), h - 1, w, 1, status_l, true, 0, true).w;
+	const auto len = text_box(w - 1 - w_converter().from_bytes(status_l).length(), h - 1, w, 1, status_l, true, 0, true).w;
 	text_box(w - 1 - len, h - 1, w, 1, status_l);
 	attrset_ext(A_NORMAL);
 }
@@ -691,7 +691,7 @@ box_dim text_box(const int& x, const int& y, const int& w, const int& h, const s
 				c033 = false;
 
 				try {
-					pair = pair_from_str(w_converter.to_bytes(buffer));
+					pair = pair_from_str(w_converter().to_bytes(buffer));
 					attrset_ext(attrs, pair);
 				} catch (const invalid_argument& e) { }
 
@@ -709,7 +709,7 @@ box_dim text_box(const int& x, const int& y, const int& w, const int& h, const s
 
 		if ((t_y >= y) && !nullout) {
 			move(t_y, t_x);
-			addstr(w_converter.to_bytes(wch).c_str());
+			addstr(w_converter().to_bytes(wch).c_str());
 		}
 
 		if (t_x - x > rw) rw = t_x - x;
@@ -718,7 +718,7 @@ box_dim text_box(const int& x, const int& y, const int& w, const int& h, const s
 		t_x++;
 	};
 
-	wstring wstr = w_converter.from_bytes(str);
+	wstring wstr = w_converter().from_bytes(str);
 	if (!show_md) {
 		for (const auto& wch : wstr) {
 			putwch(wch);
