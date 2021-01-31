@@ -31,6 +31,7 @@ using cui::s_line;
 
 namespace cmd {
 
+string retval_new = "";
 string retval = "";
 string buffer;
 
@@ -232,7 +233,9 @@ void run(string command) {
 		exec(alstr); // try to run
 	} catch (const out_of_range& e) { // no such alias
 		try {
+			retval_new = "";
 			const int ret = (cmds.at(name))(args); // try to run command
+			retval = retval_new;
 
 			if (ret != 0) switch (ret) { // handle error return values
 				case ERR_ARG_COUNT:
@@ -253,7 +256,7 @@ void run(string command) {
 		}
 	}
 
-	status = retval;
+	if (retval != "") status = retval;
 
 	log_offset--;
 }

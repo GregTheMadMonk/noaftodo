@@ -68,7 +68,7 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 			pclose(pipe);
 
 			result.erase(remove(result.begin(), result.end(), '\n'), result.end());
-			retval = result;
+			ret(result);
 
 			return 0;
 		}
@@ -279,20 +279,20 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 						else if (args.at(1) == "min") result = (a < b) ? a : b;
 						break;
 					case '=':
-						if (args.size() < 4) retval = (a == b) ? "true" : "false";
+						if (args.size() < 4) ret((a == b) ? "true" : "false");
 						else cvar(args.at(3)).setter((a == b) ? "true" : "false");
 						return 0;
 					case '<':
-						if (args.size() < 4) retval = (a < b) ? "true" : "false";
+						if (args.size() < 4) ret((a < b) ? "true" : "false");
 						else cvar(args.at(3)).setter((a < b) ? "true" : "false");
 						return 0;
 					case '>':
-						if (args.size() > 4) retval = (a > b) ? "true" : "false";
+						if (args.size() > 4) ret((a > b) ? "true" : "false");
 						else cvar(args.at(3)).setter((a > b) ? "true" : "false");
 						return 0;
 				}
 
-				if (args.size() < 4) retval = to_string(result);
+				if (args.size() < 4) ret(to_string(result));
 				else cvar(args.at(3)).setter(to_string(result));
 			} catch (const invalid_argument& e) { return ERR_ARG_TYPE; }
 
@@ -396,133 +396,8 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 			string message = "";
 			for (int i = 0; i < args.size(); i++) message += args.at(i) + " ";
 
-			retval = message;
+			ret(message);
 			if (!cui::active) log((pure ? "" : "echo :: ") + message, LP_IMPORTANT);
-			return 0;
-		}
-	},
-
-	// COMMAND MODE CURSOR CONTROLS
-	{ "cmd.curs.left", [] (const vector<string>& args) {
-			if (cui::command_cursor > 0) cui::command_cursor--;
-			return 0;
-		}
-	},
-
-	{ "cmd.curs.right", [] (const vector<string>& args) {
-			if (cui::command_cursor < cui::command.length()) cui::command_cursor++;
-			return 0;
-		}
-	},
-
-	{ "cmd.curs.home", [] (const vector<string>& args) {
-			cui::command_cursor = 0;
-			return 0;
-		}
-	},
-
-	{ "cmd.curs.end", [] (const vector<string>& args) {
-			cui::command_cursor = cui::command.length();
-			return 0;
-		}
-	},
-
-	{ "cmd.curs.word.home", [] (const vector<string>& args) {
-			while (cui::command_cursor > 0) {
-				cui::command_cursor--;
-				const auto c = cui::command.at(cui::command_cursor);
-				if (cui::wordbreakers.find(c) != wstring::npos) break;
-			}
-
-			return 0;
-		}
-	},
-
-	{ "cmd.curs.word.end", [] (const vector<string>& args) {
-			while (cui::command_cursor < cui::command.length()) {
-				cui::command_cursor++;
-				if (cui::command_cursor >= cui::command.length()) break;
-				const auto c = cui::command.at(cui::command_cursor);
-				if (cui::wordbreakers.find(c) != wstring::npos) break;
-			}
-
-			return 0;
-		}
-	},
-
-	{ "cmd.history.up", [] (const vector<string>& args) {
-			if (cui::command_index > 0) {
-				if (cui::command_index == cui::command_history.size())
-					cui::command_t = cui::command;
-
-				cui::command_index--;
-				cui::command = cui::command_history[cui::command_index];
-			}
-
-			if (cui::command_cursor > cui::command.length())
-				cui::command_cursor = cui::command.length();
-
-			return 0;
-		}
-	},
-
-	{ "cmd.history.down", [] (const vector<string>& args) {
-			if (cui::command_index < cui::command_history.size() - 1) {
-				cui::command_index++;
-				cui::command = cui::command_history[cui::command_index];
-			} else if (cui::command_index == cui::command_history.size() - 1) {
-				cui::command_index++;
-				cui::command = cui::command_t;
-			}
-
-			if (cui::command_cursor > cui::command.length())
-				cui::command_cursor = cui::command.length();
-
-			return 0;
-		}
-	},
-
-	{ "cmd.backspace", [] (const vector<string>& args) {
-			cui::command_index = cui::command_history.size();
-
-			if (cui::command_cursor > 0) {
-				cui::command = cui::command.substr(0, cui::command_cursor - 1) +
-					cui::command.substr(cui::command_cursor);
-
-				cui::command_cursor--;
-			}
-
-			return 0;
-		}
-	},
-
-	{ "cmd.delete", [] (const vector<string>& args) {
-			cui::command_index = cui::command_history.size();
-
-			if (cui::command_cursor < cui::command.length())
-				cui::command = cui::command.substr(0, cui::command_cursor) +
-					cui::command.substr(cui::command_cursor + 1);
-
-			return 0;
-		}
-	},
-
-	{ "cmd.send", [] (const vector<string>& args) {
-			if (cui::command != L"") {
-				exec(w_converter().to_bytes(cui::command));
-				cui::command_history.push_back(cui::command);
-				cui::command_index = cui::command_history.size();
-				terminate();
-			}
-
-			return 0;
-		}
-	},
-
-	{ "cmd.clear", [] (const vector<string>& args) {
-			cui::command = L"";
-			cui::filter_history();
-
 			return 0;
 		}
 	},
@@ -541,8 +416,6 @@ void init_cvars() {
 	// CORE CVARS
 	cvar_base_s::cvars["allow_root"] = cvar_base_s::wrap_bool(allow_root);
 	cvar_base_s::cvars["autorun_daemon"] = cvar_base_s::wrap_bool(da::fork_autostart);
-
-	cvar_base_s::cvars["cmd.contexec"] = cvar_base_s::wrap_string(cui::contexec_regex_filter);
 
 	cvar_base_s::cvars["mode"] =
 		cvar_base_s::wrap_int(cui::mode, CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE,

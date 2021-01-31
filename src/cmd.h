@@ -17,7 +17,9 @@ constexpr int ERR_ARG_TYPE 	= 3;
 extern std::map<std::string, std::function<int(const std::vector<std::string>& args)>> cmds;
 extern std::map<std::string, std::string> aliases;
 
+extern std::string retval_new;
 extern std::string retval;
+inline void ret(const std::string val) { retval_new = val; }
 extern std::string buffer;
 
 extern li::entry* sel_entry;
