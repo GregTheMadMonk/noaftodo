@@ -6,7 +6,16 @@ NOAFTODO_START_MODE(normal, init, paint, input)
 using li::t_list;
 using namespace li::entry_flags;
 
-void init() {}
+void init() {
+	// @cvar "norm.regex_filter" - NORMAL mode entry regex filter
+	cvar_base_s::cvars["norm.regex_filter"] = cvar_base_s::wrap_string(cui::normal_regex_filter);
+	// @cvar "norm.cols.all" - NORMAL mode columns when viewving entries from all lists
+	cvar_base_s::cvars["norm.cols.all"] = cvar_base_s::wrap_string(cui::normal_all_cols);
+	// @cvar "norm.cols" - NORMAL mode columns when viewving a specific list
+	cvar_base_s::cvars["norm.cols"] = cvar_base_s::wrap_string(cui::normal_cols);
+	// @cvar "norm.status_fields" - status fields to display in NORMAL mode
+	cvar_base_s::cvars["norm.status_fields"] = cvar_base_s::wrap_string(cui::normal_status_fields);
+}
 
 void paint() {
 	const int last_string =

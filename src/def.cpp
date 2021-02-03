@@ -581,12 +581,6 @@ void init_cvars() {
 		CVAR_FLAG_NO_PREDEF | CVAR_FLAG_WS_IGNORE
 	);
 
-	// FILTERS
-	// @cvar "norm.regex_filter" - NORMAL mode entry regex filter
-	cvar_base_s::cvars["norm.regex_filter"] = cvar_base_s::wrap_string(cui::normal_regex_filter);
-	// @cvar "livi.regex_filter" - LISTVIEW mode list regex filter
-	cvar_base_s::cvars["livi.regex_filter"] = cvar_base_s::wrap_string(cui::listview_regex_filter);
-
 	// @cvar "tag_filter" - current list's index. -1 for all lists
 	cvar_base_s::cvars["tag_filter"] = cvar_base_s::wrap_int(cui::tag_filter, CVAR_FLAG_NO_PREDEF,
 			{},
@@ -679,19 +673,6 @@ void init_cvars() {
 	// @cvar "frameshift_multistr" - animate multistr cvars (even I don't really know how this works)
 	cvar_base_s::cvars["frameshift_multistr"] = cvar_base_s::wrap_bool(cui::shift_multivars);
 
-	// @cvar "norm.cols.all" - NORMAL mode columns when viewving entries from all lists
-	cvar_base_s::cvars["norm.cols.all"] = cvar_base_s::wrap_string(cui::normal_all_cols);
-	// @cvar "norm.cols" - NORMAL mode columns when viewving a specific list
-	cvar_base_s::cvars["norm.cols"] = cvar_base_s::wrap_string(cui::normal_cols);
-	// @cvar "livi.cols" - LISTVIEW mode columns
-	cvar_base_s::cvars["livi.cols"] = cvar_base_s::wrap_string(cui::listview_cols);
-	// @cvar "det.cols" - "columns" (or better fields) to display as entry information in DETAILS mode
-	cvar_base_s::cvars["det.cols"] = cvar_base_s::wrap_string(cui::details_cols);
-
-	// @cvar "norm.status_fields" - status fields to display in NORMAL mode
-	cvar_base_s::cvars["norm.status_fields"] = cvar_base_s::wrap_string(cui::normal_status_fields);
-	// @cvar "livi.status_fields" - status fields to display in LISTVIEW mode
-	cvar_base_s::cvars["livi.status_fields"] = cvar_base_s::wrap_string(cui::listview_status_fields);
 
 	// CHARACTER SET
 	// @cvar "charset.separators" - separators (3 characters - between rows, status fields, DETAILS mode fields)
@@ -706,8 +687,6 @@ void init_cvars() {
 	cvar_base_s::cvars["charset.separators.row"] = cvar_base_s::wrap_multistr_element(cui::separators, cui::CHAR_ROW_SEP);
 	// @cvar "charset.separators.status" - separator between status fields
 	cvar_base_s::cvars["charset.separators.status"] = cvar_base_s::wrap_multistr_element(cui::separators, cui::CHAR_STA_SEP);
-	// @cvar "charset.separators.details" - separator between DETAILS fields
-	cvar_base_s::cvars["charset.separators.details"] = cvar_base_s::wrap_multistr_element(cui::separators, cui::CHAR_DET_SEP);
 
 	// @cvar "charset.box_strong.v" - thick box vertical line character
 	cvar_base_s::cvars["charset.box_strong.v"] = cvar_base_s::wrap_multistr_element(cui::box_strong, cui::CHAR_VLINE);

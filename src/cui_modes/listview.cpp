@@ -5,7 +5,14 @@ NOAFTODO_START_MODE(liview, init, paint, input)
 using li::t_list;
 using li::t_tags;
 
-void init() {}
+void init() {
+	// @cvar "livi.regex_filter" - LISTVIEW mode list regex filter
+	cvar_base_s::cvars["livi.regex_filter"] = cvar_base_s::wrap_string(cui::listview_regex_filter);
+	// @cvar "livi.cols" - LISTVIEW mode columns
+	cvar_base_s::cvars["livi.cols"] = cvar_base_s::wrap_string(cui::listview_cols);
+	// @cvar "livi.status_fields" - status fields to display in LISTVIEW mode
+	cvar_base_s::cvars["livi.status_fields"] = cvar_base_s::wrap_string(cui::listview_status_fields);
+}
 
 void paint() {
 	const int last_string = draw_table(0, 0, w, h - 1,

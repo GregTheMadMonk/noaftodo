@@ -7,7 +7,12 @@ using namespace std;
 using li::t_list;
 using li::t_tags;
 
-void init() {}
+void init() {
+	// @cvar "det.cols" - "columns" (or better fields) to display as entry information in DETAILS mode
+	cvar_base_s::cvars["det.cols"] = cvar_base_s::wrap_string(cui::details_cols);
+	// @cvar "charset.separators.details" - separator between DETAILS fields
+	cvar_base_s::cvars["charset.separators.details"] = cvar_base_s::wrap_multistr_element(cui::separators, cui::CHAR_DET_SEP);
+}
 
 void paint() {
 	modes::mode("normal").paint();
