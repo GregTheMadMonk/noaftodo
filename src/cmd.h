@@ -14,6 +14,8 @@ constexpr int ERR_EXTERNAL	= 1;
 constexpr int ERR_ARG_COUNT 	= 2;
 constexpr int ERR_ARG_TYPE 	= 3;
 
+extern bool allow_system_commands; // allow system commands to be run via ! and !! ?
+
 extern std::map<std::string, std::function<int(const std::vector<std::string>& args)>> cmds;
 extern std::map<std::string, std::string> aliases;
 

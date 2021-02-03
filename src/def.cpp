@@ -20,6 +20,8 @@ namespace cmd {
 using li::t_list;
 using li::t_tags;
 
+bool allow_system_commands = true;
+
 // initialize commands
 map<string, function<int(const vector<string>& args)>> cmds = {
 /*	{ command, int cmd_func(const vector<string>& args) },	*/
@@ -38,6 +40,11 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 
 	// @command "!<command>" - execute shell command
 	{ "!", [] (const vector<string>& args) {
+			if (!allow_system_commands) {
+				log("%allow_system_commands% is false. Skipping...", LP_ERROR);
+				return ERR_EXTERNAL;
+			}
+
 			string cmdline = "";
 
 			for (const auto& arg : args) cmdline += arg + " ";
@@ -76,6 +83,11 @@ map<string, function<int(const vector<string>& args)>> cmds = {
 
 	// @command "!!<command>" - execute shell command, don't track output (for lauching programs that have a TUI or something
 	{ "!!", [] (const vector<string>& args) {
+			if (!allow_system_commands) {
+				log("%allow_system_commands% is false. Skipping...", LP_ERROR);
+				return ERR_EXTERNAL;
+			}
+
 			string cmdline = "";
 			
 			for (const auto& arg : args) cmdline += arg + " ";
@@ -416,6 +428,8 @@ void init_cvars() {
 	// CORE CVARS
 	// @cvar "allow_root" - allows program to be run as root user on UNIX systems. Will do nothing on single-user systems like Haiku (check is disabled there)
 	cvar_base_s::cvars["allow_root"] = cvar_base_s::wrap_bool(allow_root);
+	// @cvar "allow_system_commands" - allow host system commands to be executed via "!" and "!!" commands
+	cvar_base_s::cvars["allow_system_commands"] = cvar_base_s::wrap_bool(allow_system_commands);
 	// @cvar "autorun_daemon" - automatically start/stop a background daemon (if not already runnning) on program start/quit
 	cvar_base_s::cvars["autorun_daemon"] = cvar_base_s::wrap_bool(da::fork_autostart);
 

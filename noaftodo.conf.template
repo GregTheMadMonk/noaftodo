@@ -143,6 +143,7 @@ bind "esc" "cmd.clear; back" 2 true
 # SETTINGS
 # CORE
 set "allow_root" "false"
+set "allow_system_commands" "true"
 set "autorun_daemon" "true"
 
 set "cmd.contexec" "^set norm\\.regex_filter\ |^set livi\\.regex_filter "
