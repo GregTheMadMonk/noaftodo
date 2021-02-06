@@ -1,4 +1,5 @@
 #include <cui.h>
+#include <cvar.h>
 
 NOAFTODO_START_MODE(liview, init, paint, input)
 

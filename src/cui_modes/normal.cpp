@@ -1,4 +1,5 @@
 #include <cui.h>
+#include <cvar.h>
 #include <entry_flags.h>
 
 NOAFTODO_START_MODE(normal, init, paint, input)
