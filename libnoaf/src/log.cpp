@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include <hooks.hpp>
 #include <time_s.hpp>
 
 using namespace std;
@@ -14,7 +15,9 @@ namespace noaf {
 			offset(0),
 			level(0),
 			flusher([] (const string& message) {
+				ui::pause();
 				cout << message;
+				ui::resume();
 				})
 	{}
 

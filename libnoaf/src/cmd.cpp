@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <hooks.hpp>
 #include <log.hpp>
 
 using namespace std;
@@ -14,6 +15,17 @@ namespace noaf::cmd {
 	map<string, cmd>& cmds() {
 		// commands index is initialized with essential commands EVERY noaf app should have
 		static map<string, cmd> _cmds = {
+			{ "q",
+				{
+					[] (const vector<string>& args) {
+						int code = 0;
+						if (args.size() > 0) code = stoi(args.at(0));
+						noaf::exit(code);
+						return "";
+					},
+					"Exits program with code from its argument or, if unspecified, 0"
+				}
+			},
 			{ "!",
 				{
 					[] (const vector<string>& args) {
@@ -24,7 +36,7 @@ namespace noaf::cmd {
 
 						for (const auto& arg : args) cmdline += arg + " ";
 
-						// TODO: halt UI
+						ui::pause();
 
 						char buffer[128];
 						string result = "";
@@ -42,7 +54,7 @@ namespace noaf::cmd {
 							throw runtime_error("Error dduring process execution!");
 						}
 
-						// TODO: resume UI
+						ui::resume();
 
 						pclose(pipe);
 
@@ -51,6 +63,27 @@ namespace noaf::cmd {
 						return result;
 					},
 					"Executes shell command"
+				}
+			},
+			{ "!!",
+				{
+					[] (const vector<string>& args) {
+						if (!allow_system)
+							throw runtime_error("Execution of system commands is not allowed!");
+
+						string cmdline = "";
+
+						for (const auto& arg : args) cmdline += arg + " ";
+
+						ui::pause();
+
+						system(cmdline.c_str());
+
+						ui::resume();
+
+						return "";
+					},
+					"Execute shell command, but don't capture its output. Useful when calling an app that has UI."
 				}
 			},
 			{ "echo",
@@ -109,7 +142,7 @@ namespace noaf::cmd {
 			try {
 				ret = cmds().at(queue.at(0)).cmd_f(args);
 			} catch (const out_of_range& e) {
-				log << llev(VERR) << "Command not found: " << queue.at(0) << "" << lend;
+				log << llev(VERR) << "Command not found: \"" << queue.at(0) << "\"" << lend;
 			}
 
 			queue = { };
