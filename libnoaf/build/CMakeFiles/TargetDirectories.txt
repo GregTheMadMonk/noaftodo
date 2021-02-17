@@ -1,3 +1,0 @@
-/home/greg/projects/cpp/noaftodo/noaftodo/libnoaf/build/CMakeFiles/rebuild_cache.dir
-/home/greg/projects/cpp/noaftodo/noaftodo/libnoaf/build/CMakeFiles/edit_cache.dir
-/home/greg/projects/cpp/noaftodo/noaftodo/libnoaf/build/CMakeFiles/noaf.dir
