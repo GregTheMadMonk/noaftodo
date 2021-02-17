@@ -11,7 +11,13 @@ add_compile_options( -fpermissive -std=c++17 )
 # Link ncurses
 set(CURSES_NEED_WIDE True)
 find_package(Curses REQUIRED)
-include_directories(${CURSES_INCLUDE_DIR} "src/")
+
+# Compile libnoaf also
+add_subdirectory( libnoaf )
+link_directories( libnoaf/build )
+
+# Include index
+include_directories(${CURSES_INCLUDE_DIR} "src/" "libnoaf/src")
 
 # Platform-specific stuff
 message("Building for ${CMAKE_HOST_SYSTEM_NAME}")
@@ -80,7 +86,7 @@ add_executable(${CMAKE_PROJECT_NAME}
 	${_SOURCES}
 	${CMAKE_CURRENT_BINARY_DIR}/gen/src/embed.cpp)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CURSES_LIBRARIES})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${CURSES_LIBRARIES} noaf )
 
 # Add nessesary build flags
 # Explicitly set NCURSES_WIDECHAR
