@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include <cmd.hpp>
 #include <hooks.hpp>
 #include <time_s.hpp>
 
@@ -25,7 +26,8 @@ namespace noaf {
 		if (level >= verbosity) {
 			if (pure) flusher(buffer.str());
 			else {
-				string prefix = "[" + time_s().fmt("%H:%M:%S") + "][" + to_string(level) + "]\t";
+				// TODO: print only fixed amount of return value characters
+				string prefix = "[" + time_s().fmt("%H:%M:%S") + "][" + to_string(level) + "][" + cmd::ret + "\t]\t";
 				for (int i = 0; i < offset; i++) prefix += "\t";
 				flusher(prefix + buffer.str());
 			}

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <cvar.hpp>
 #include <hooks.hpp>
 #include <log.hpp>
 
@@ -103,6 +104,22 @@ namespace noaf::cmd {
 					"It's an echo command. IDK how to explain it if you don't know what it does"
 				}
 			},
+			{ "set",
+				{
+					[] (const vector<string>& args) -> string {
+						if (args.size() < 1)
+							throw runtime_error("Cvar name is not given!");
+						if (args.size() < 2) {
+							cvar::reset(args.at(0));
+							return "";
+						}
+
+						cvar::get(args.at(0)) = args.at(1);
+						return args.at(1);
+					},
+					"Sets a console variable value. If no value is given, a console variable is reset"
+				}
+			},
 		};
 		return _cmds;
 	}
@@ -119,11 +136,24 @@ namespace noaf::cmd {
 
 	void exec(const string& command) {
 		log << "Attempting execution: " << command << lend << lr;
+
+		// but before we get to funs stuff, it's needed to be sure that some needed cvars are
+		// properly initialized.
+		if (cvar::cvars().find("ret") == cvar::cvars().end())
+			cvar::cvars()["ret"] = cvar::wrap_string(ret, cvar::READONLY || cvar::NO_PREDEF);
 		
 		vector<string> queue = { "" };
 
+		bool skip_special = false;	// skip next special character
+		bool inquotes = false;		// take input inquotesly
+		bool readvar = false;
+		char mode = 0;			// input mode
+		int curly_owo = 0;		// how deep are we inside curly brackets
+		string temp = "";
+
 		// get last argument of current queue item
 		const auto& last = [&] () -> string& {
+			if (readvar || (mode == '`')) return temp;
 			return queue.at(queue.size() - 1);
 		};
 
@@ -149,12 +179,6 @@ namespace noaf::cmd {
 			buffer = "";
 		};
 
-		bool skip_special = false;	// skip next special character
-		bool inquotes = false;		// take input inquotesly
-		char mode = 0;			// input mode
-		int curly_owo = 0;		// how deep are we inside curly brackets
-		string temp = "";
-
 		for (const char& c : command) {
 			buffer += c;
 
@@ -168,18 +192,14 @@ namespace noaf::cmd {
 			}
 
 			if (skip_special) {
-				if (mode == '`') temp += c;
-				else last() += c;
+				last() += c;
 				skip_special = false;
 				continue;
 			}
 
-			if (inquotes && (mode != c)) {
+			if ((readvar || inquotes) && (mode != c)) {
 				if (c == '\\') skip_special = true;
-				else {
-					if (mode == '`') temp += c;
-					else last() += c;
-				}
+				else last() += c;
 
 				continue;
 			}
@@ -202,15 +222,36 @@ namespace noaf::cmd {
 						temp = "";
 					} else {
 						mode = 0;
+						inquotes = false;
 						exec(temp);
 						last() += ret;
 					}
 					break;
+				case '%':
+					if (!readvar) {
+						mode = c;
+						readvar = true;
+						temp = "";
+					} else if (mode == c) {
+						// var name = temp
+						mode = 0;
+						readvar = false;
+						const auto ret_copy = ret;
+						log << "Resolving variable name for " << temp << lend;
+						exec("echo " + temp);
+						temp = ret;
+						ret = ret_copy;
+						log << "Replacing variable " << temp << lend;
+						last() += (string)cvar::get(temp);
+					}
 				case '\'': case '\"':
 					if (!inquotes) {
 						mode = c;
 						inquotes = true;
-					} else if (mode == c) mode = 0;
+					} else if (mode == c) {
+						mode = 0;
+						inquotes = false;
+					}
 					break;
 				case ' ': case '\t':
 					if (!inquotes) {
