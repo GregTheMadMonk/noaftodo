@@ -163,8 +163,12 @@ namespace noaf::cmd {
 						} else if (args.at(1) == "*") {
 							return to_string(a * b);
 						} else if (args.at(1) == "/") {
+							if (b == 0)
+								throw runtime_error("No, you can't divide by zero");
 							return to_string(a / b);
 						} else if (args.at(1) == "%") {
+							if (stoi(args.at(2)) == 0)
+								throw runtime_error("No, you can't divide by zero");
 							return to_string(stoi(args.at(0)) % stoi(args.at(2)));
 						}
 
