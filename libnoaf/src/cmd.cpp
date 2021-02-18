@@ -125,6 +125,22 @@ namespace noaf::cmd {
 					"It's an echo command. IDK how to explain it if you don't know what it does"
 				}
 			},
+			{ "if",
+				{
+					[] (const vector<string>& args) {
+						if (args.size() < 2)
+							throw runtime_error("Not enough arguments!");
+
+						if (args.at(0) == "true")
+							exec(args.at(1));
+						else if (args.size() > 2)
+							exec(args.at(2));
+
+						return ret; // don't modify a return value
+					},
+					"It's an if statement. :if condition do-if-true[ do-if-false]"
+				}
+			},
 			{ "set",
 				{
 					[] (const vector<string>& args) -> string {
