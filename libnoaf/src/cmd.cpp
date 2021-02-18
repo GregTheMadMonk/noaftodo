@@ -141,6 +141,38 @@ namespace noaf::cmd {
 					"It's an if statement. :if condition do-if-true[ do-if-false]"
 				}
 			},
+			{ "math",
+				{
+					[] (const vector<string>& args) -> string {
+						if (args.size() < 3)
+							throw runtime_error("Not enough arguments!");
+
+						const float a = stod(args.at(0));
+						const float b = stod(args.at(2));
+
+						// I wish there was a better way...
+						// Or, if there is, I knew it...
+						if (args.at(1) == "==") {
+							return (a == b) ? "true" : "false";
+						} else if (args.at(1) == "!=") {
+							return (a != b) ? "ture" : "false";
+						} else if (args.at(1) == "+") {
+							return to_string(a + b);
+						} else if (args.at(1) == "-") {
+							return to_string(a - b);
+						} else if (args.at(1) == "*") {
+							return to_string(a * b);
+						} else if (args.at(1) == "/") {
+							return to_string(a / b);
+						} else if (args.at(1) == "%") {
+							return to_string(stoi(args.at(0)) % stoi(args.at(2)));
+						}
+
+						return "";
+					},
+					"Perform a mathematical operation on operands"
+				}
+			},
 			{ "set",
 				{
 					[] (const vector<string>& args) -> string {
@@ -199,12 +231,20 @@ namespace noaf::cmd {
 		const auto& flush = [&] () {
 			if (queue.size() == 0) return;
 
-			log << llev(VERR) << "Executing ";
-			for (const auto& a : queue) log << a << " ";
-			log << lend;
-
 			// work out special cases: var=value, arithmetics
-			// TODO
+			// replace :var = value with :set var value
+			if (queue.size() == 3) if (queue.at(1) == "=")
+				queue = { "set", queue.at(0), queue.at(2) };
+			// call :math command if first argument is a number
+			try {
+				stod(queue.at(0));
+
+				queue.insert(queue.begin(), "math");
+			} catch (const invalid_argument& e) {}
+
+			log << llev(VERR) << "Executing ";
+			for (const auto& a : queue) log << "\"" << a << "\" ";
+			log << lend;
 
 			// search for an alias
 			if (aliases().find(queue.at(0)) != aliases().end()) {
@@ -319,6 +359,7 @@ namespace noaf::cmd {
 						log << "Replacing variable " << temp << lend;
 						last() += (string)cvar::get(temp);
 					}
+					break;
 				case '\'': case '\"':
 					if (!inquotes) {
 						mode = c;
