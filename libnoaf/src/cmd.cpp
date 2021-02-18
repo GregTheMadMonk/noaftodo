@@ -22,7 +22,7 @@ namespace noaf::cmd {
 						int code = 0;
 						if (args.size() > 0) code = stoi(args.at(0));
 						noaf::exit(code);
-						return "";
+						return ret;
 					},
 					"Exits program with code from its argument or, if unspecified, 0"
 				}
@@ -82,7 +82,7 @@ namespace noaf::cmd {
 
 						ui::resume();
 
-						return "";
+						return ret;
 					},
 					"Execute shell command, but don't capture its output. Useful when calling an app that has UI."
 				}
@@ -148,7 +148,7 @@ namespace noaf::cmd {
 							throw runtime_error("Cvar name is not given!");
 						if (args.size() < 2) {
 							cvar::reset(args.at(0));
-							return "";
+							return ret;
 						}
 
 						cvar::get(args.at(0)) = args.at(1);
