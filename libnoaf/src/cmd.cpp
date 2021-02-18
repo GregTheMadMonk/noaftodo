@@ -227,7 +227,7 @@ namespace noaf::cmd {
 		// get last argument of current queue item
 		const auto& last = [&] () -> string& {
 			if (queue.size() == 0) queue.push_back("");
-			if (readvar || (mode == '`')) return temp;
+			if (readvar || (mode == '`') || (mode == '(')) return temp;
 			return queue.at(queue.size() - 1);
 		};
 
@@ -294,11 +294,20 @@ namespace noaf::cmd {
 			buffer += c;
 
 			if (curly_owo > 0) {
-				if (c == '{') curly_owo++;
-				if (c == '}') {
+				if (c == mode) curly_owo++;
+				if (((mode == '{') && (c == '}')) || ((mode == '(') && (c == ')'))) {
 					curly_owo--;
 				}
 				if (curly_owo > 0) last() += c;
+
+				if (curly_owo == 0) {
+					if (mode = '(') {
+						exec(temp);
+						mode = 0;
+						last() += ret;
+					}
+					mode = 0;
+				}
 				continue;
 			}
 
@@ -324,8 +333,11 @@ namespace noaf::cmd {
 			}
 
 			switch (c) {
+				case '(':
+					temp = "";
 				case '{':
 					curly_owo++;
+					mode = c;
 					break;
 				case '\\':
 					skip_special = true;
