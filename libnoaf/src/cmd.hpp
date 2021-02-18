@@ -15,8 +15,13 @@ namespace noaf::cmd {
 		std::string tooltip;
 	};
 
-	std::map<std::string, cmd>&		cmds();		// commands index
-	std::map<std::string, std::string>&	aliases();	// aliases index
+	struct alias {
+		std::vector<std::string>	args;	// alias argument list
+		std::string			body;	// alias body
+	};
+
+	std::map<std::string, cmd>&	cmds();		// commands index
+	std::map<std::string, alias>&	aliases();	// aliases index
 
 	extern std::string buffer; // buffer to store unterminated command e.g. when
 					// command is spread across multiple lines

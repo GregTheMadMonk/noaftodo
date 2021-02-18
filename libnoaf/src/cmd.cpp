@@ -87,6 +87,27 @@ namespace noaf::cmd {
 					"Execute shell command, but don't capture its output. Useful when calling an app that has UI."
 				}
 			},
+			{ "alias",
+				{
+					[] (const vector<string>& args) {
+						if (args.size() < 2)
+							throw runtime_error("Not enough arguments!");
+
+						vector<string> a_args;
+
+						for (int i = 1; i < args.size() - 1; i++)
+							a_args.push_back(args.at(i));
+
+						aliases()[args.at(0)] = {
+							a_args,
+							args.at(args.size() - 1)
+						};
+
+						return args.at(0);
+					},
+					"Create an alias (basically, NOAFScript functions)"
+				}
+			},
 			{ "echo",
 				{
 					[] (const vector<string>& args) {
@@ -124,8 +145,8 @@ namespace noaf::cmd {
 		return _cmds;
 	}
 
-	map<string, string>& aliases() {
-		static map<string, string> _aliases;
+	map<string, alias>& aliases() {
+		static map<string, alias> _aliases;
 		return _aliases;
 	}
 
@@ -153,6 +174,7 @@ namespace noaf::cmd {
 
 		// get last argument of current queue item
 		const auto& last = [&] () -> string& {
+			if (queue.size() == 0) queue.push_back("");
 			if (readvar || (mode == '`')) return temp;
 			return queue.at(queue.size() - 1);
 		};
@@ -165,6 +187,31 @@ namespace noaf::cmd {
 			for (const auto& a : queue) log << a << " ";
 			log << lend;
 
+			// work out special cases: var=value, arithmetics
+			// TODO
+
+			// search for an alias
+			if (aliases().find(queue.at(0)) != aliases().end()) {
+				const auto& alias = aliases().at(queue.at(0));
+
+				if (queue.size() - 1 < alias.args.size()) {
+					log << llev(VERR) << "Not enough arguments for an alias!" << lend;
+					ret = "";
+					return;
+				}
+
+				for (int i = 0; i < alias.args.size(); i++)
+					cvar::get("arg_" + alias.args.at(i)) = queue.at(1 + i);
+
+				exec(alias.body);
+
+				for (const auto& arg : alias.args)
+					cvar::erase("arg_" + arg);
+
+				return;
+			}
+
+			// execute a command
 			vector<string> args;
 			for (int i = 1; i < queue.size(); i++)
 				args.push_back(queue.at(i));
@@ -173,6 +220,10 @@ namespace noaf::cmd {
 				ret = cmds().at(queue.at(0)).cmd_f(args);
 			} catch (const out_of_range& e) {
 				log << llev(VERR) << "Command not found: \"" << queue.at(0) << "\"" << lend;
+				ret = "";
+			} catch (const exception& e) {
+				log << llev(VERR) << "Command execution error: " << e.what() << lend;
+				ret = "";
 			}
 
 			queue = { };
