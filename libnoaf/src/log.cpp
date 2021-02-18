@@ -26,8 +26,14 @@ namespace noaf {
 		if (level >= verbosity) {
 			if (pure) flusher(buffer.str());
 			else {
-				// TODO: print only fixed amount of return value characters
-				string prefix = "[" + time_s().fmt("%H:%M:%S") + "][" + to_string(level) + "][" + cmd::ret + "\t]\t";
+				string prefix = "[" + time_s().fmt("%H:%M:%S") + "][" + to_string(level) + "][";
+
+				for (int i = 0; i < 10; i++)
+					if (i < cmd::ret.length()) prefix += cmd::ret.at(i);
+					else prefix += " ";
+
+				prefix += "]\t";
+
 				for (int i = 0; i < offset; i++) prefix += "\t";
 				flusher(prefix + buffer.str());
 			}
