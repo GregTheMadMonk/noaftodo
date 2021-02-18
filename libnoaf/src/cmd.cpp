@@ -271,6 +271,14 @@ namespace noaf::cmd {
 				continue;
 			}
 
+			// ! and !! commands should not require a space after
+			if (c == '!') {
+				mode = '!';
+			} else if (mode == '!') {
+				queue.push_back("");
+				mode = 0;
+			}
+
 			switch (c) {
 				case '{':
 					curly_owo++;
