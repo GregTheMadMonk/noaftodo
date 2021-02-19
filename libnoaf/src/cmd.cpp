@@ -348,7 +348,7 @@ namespace noaf::cmd {
 			}
 
 			// ! and !! commands should not require a space after
-			if (c == '!') {
+			if ((c == '!') && (queue.size() == 1)) {
 				mode = '!';
 			} else if (mode == '!') {
 				queue.push_back("");
