@@ -132,9 +132,9 @@ namespace noaf::cmd {
 							throw runtime_error("Not enough arguments!");
 
 						if (args.at(0) == "true")
-							exec(args.at(1));
+							exec(args.at(1), true);
 						else if (args.size() > 2)
-							exec(args.at(2));
+							exec(args.at(2), true);
 
 						return ret; // don't modify a return value
 					},
@@ -207,9 +207,7 @@ namespace noaf::cmd {
 	string msg = "";
 	string ret = "";
 
-	void exec(const string& command) {
-		log << "Attempting execution: " << command << lend << lr;
-
+	void exec(const string& command, const bool& oneliner) {
 		// but before we get to funs stuff, it's needed to be sure that some needed cvars are
 		// properly initialized.
 		if (cvar::cvars().find("ret") == cvar::cvars().end())
@@ -227,7 +225,8 @@ namespace noaf::cmd {
 		// get last argument of current queue item
 		const auto& last = [&] () -> string& {
 			if (queue.size() == 0) queue.push_back("");
-			if (readvar || (mode == '`') || (mode == '(')) return temp;
+			if (readvar || (mode == '`') || (mode == '(') || (mode == '$'))
+				return temp;
 			return queue.at(queue.size() - 1);
 		};
 
@@ -263,7 +262,7 @@ namespace noaf::cmd {
 				for (int i = 0; i < alias.args.size(); i++)
 					cvar::get("arg_" + alias.args.at(i)) = queue.at(1 + i);
 
-				exec(alias.body);
+				exec(alias.body, true);
 
 				for (const auto& arg : alias.args)
 					cvar::erase("arg_" + arg);
@@ -287,11 +286,31 @@ namespace noaf::cmd {
 			}
 
 			queue = { };
-			buffer = "";
+			if (!oneliner) buffer = "";
 		};
 
-		for (const char& c : command) {
-			buffer += c;
+		const auto cmds = (oneliner ? "" : buffer) + command;
+		if (!oneliner) buffer = "";
+		log << "Attempting execution: " << cmds << lend << lr;
+
+		for (const char& c : cmds) {
+			if (!oneliner) buffer += c;
+
+			if (mode == '$') {
+				// reading a shell variable name
+				if (((c <= 'z') && (c >= 'a')) ||
+					((c <= 'Z') && (c >= 'A')) ||
+					((c <= '9') && (c >= '0')) ||
+					(c == '_'))
+					last() += c;
+				else {
+					mode = 0;
+					log << "Trying to replace $" << temp << lend;
+					if (getenv(temp.c_str()) != nullptr)
+						last() += getenv(temp.c_str());
+				}
+				continue;
+			}
 
 			if (curly_owo > 0) {
 				if (c == mode) curly_owo++;
@@ -302,7 +321,7 @@ namespace noaf::cmd {
 
 				if (curly_owo == 0) {
 					if (mode = '(') {
-						exec(temp);
+						exec(temp, true);
 						mode = 0;
 						last() += ret;
 					}
@@ -333,6 +352,15 @@ namespace noaf::cmd {
 			}
 
 			switch (c) {
+				case '~':
+					if (getenv("HOME") != nullptr)
+						last() += getenv("HOME");
+					else last() += c;
+					break;
+				case '$':
+					mode = c;
+					temp = "";
+					break;
 				case '(':
 					temp = "";
 				case '{':
@@ -354,7 +382,7 @@ namespace noaf::cmd {
 					} else {
 						mode = 0;
 						inquotes = false;
-						exec(temp);
+						exec(temp, true);
 						last() += ret;
 					}
 					break;
@@ -369,7 +397,7 @@ namespace noaf::cmd {
 						readvar = false;
 						const auto ret_copy = ret;
 						log << "Resolving variable name for " << temp << lend;
-						exec("echo " + temp);
+						exec("echo " + temp, true);
 						temp = ret;
 						ret = ret_copy;
 						log << "Replacing variable " << temp << lend;
@@ -395,9 +423,19 @@ namespace noaf::cmd {
 			}
 		}
 
-		if (!skip_special) flush();
-
-		log << ll << "Execution done with return value " << ret << lend;
+		if (!skip_special) switch (mode) {
+			case '$':
+				// end reading of an envvar name
+				mode = 0;
+				log << "Trying to replace $" << temp << lend;
+				if (getenv(temp.c_str()) != nullptr)
+					last() += getenv(temp.c_str());
+			case 0:
+				flush();
+				log << "Execution done with return value " << ret << lend;
+				break;
+		}
+		log << ll;
 	}
 
 	void terminate() {

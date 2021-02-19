@@ -29,7 +29,7 @@ namespace noaf::cmd {
 	extern std::string msg;	// message with current command interpreter status (usually just command output)
 	extern std::string ret;	// last command return value
 
-	void exec(const std::string& command); // initalize command execution (complex command string)
+	void exec(const std::string& command, const bool& oneliner = false); // initalize command execution (complex command string)
 	
 	void terminate(); // signals the end of command input. Resets buffer
 
