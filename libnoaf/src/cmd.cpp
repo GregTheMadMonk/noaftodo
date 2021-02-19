@@ -245,7 +245,7 @@ namespace noaf::cmd {
 				queue.insert(queue.begin(), "math");
 			} catch (const invalid_argument& e) {}
 
-			log << llev(VERR) << "Executing ";
+			log << "Executing ";
 			for (const auto& a : queue) log << "\"" << a << "\" ";
 			log << lend;
 
@@ -352,12 +352,12 @@ namespace noaf::cmd {
 			}
 
 			switch (c) {
-				case '~':
+				case '~': // replace ~ with $HOME value
 					if (getenv("HOME") != nullptr)
 						last() += getenv("HOME");
 					else last() += c;
 					break;
-				case '$':
+				case '$': // read system environment variables
 					mode = c;
 					temp = "";
 					break;
@@ -421,6 +421,8 @@ namespace noaf::cmd {
 			}
 		}
 
+		// line of input could've terminated here, or we
+		// might've reached a line wrap
 		if (skip_special) {
 			buffer.at(buffer.length() - 1) = ' ';
 		} else switch (mode) {
