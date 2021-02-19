@@ -6,6 +6,7 @@
 #include <cvar.hpp>
 #include <hooks.hpp>
 #include <log.hpp>
+#include <ui.hpp>
 
 using namespace std;
 
@@ -37,7 +38,7 @@ namespace noaf::cmd {
 
 						for (const auto& arg : args) cmdline += arg + " ";
 
-						ui::pause();
+						if (ui) ui->pause();
 
 						char buffer[128];
 						string result = "";
@@ -55,7 +56,7 @@ namespace noaf::cmd {
 							throw runtime_error("Error dduring process execution!");
 						}
 
-						ui::resume();
+						if (ui) ui->resume();
 
 						pclose(pipe);
 
@@ -76,11 +77,11 @@ namespace noaf::cmd {
 
 						for (const auto& arg : args) cmdline += arg + " ";
 
-						ui::pause();
+						if (ui) ui->pause();
 
 						system(cmdline.c_str());
 
-						ui::resume();
+						if (ui) ui->resume();
 
 						return ret;
 					},

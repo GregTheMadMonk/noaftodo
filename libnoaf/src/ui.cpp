@@ -2,7 +2,7 @@
 
 using namespace std;
 
-namespace noaf::ui {
+namespace noaf {
 
 	unique_ptr<backend> ui;
 

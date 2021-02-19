@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-namespace noaf::ui {
+namespace noaf {
 
 	class backend {
 		enum feature {
@@ -46,6 +46,9 @@ namespace noaf::ui {
 	};
 
 	extern std::unique_ptr<backend> ui;
+	template <class b> std::unique_ptr<b>& ui_as() {
+		return static_cast<std::unique_ptr<b>>(ui);
+	}
 
 	int ucvt(const int& val, const char& unit = 0);
 

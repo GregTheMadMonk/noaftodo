@@ -9,6 +9,10 @@ set(CXX_STANDART_REQUIRED True)
 
 add_compile_options( -fpermissive -std=c++17)
 
+# Link ncurses
+set(CURSES_NEED_WIDE True)
+find_package(Curses REQUIRED)
+
 # include directories
 include_directories(src/)
 

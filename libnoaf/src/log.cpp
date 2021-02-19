@@ -3,8 +3,8 @@
 #include <iostream>
 
 #include <cmd.hpp>
-#include <hooks.hpp>
 #include <time_s.hpp>
+#include <ui.hpp>
 
 using namespace std;
 
@@ -16,9 +16,9 @@ namespace noaf {
 			offset(0),
 			level(0),
 			flusher([] (const string& message) {
-				ui::pause();
+				if (ui) ui->pause();
 				cout << message;
-				ui::resume();
+				if (ui) ui->resume();
 				})
 	{}
 
