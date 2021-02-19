@@ -155,7 +155,15 @@ namespace noaf::cmd {
 						if (args.at(1) == "==") {
 							return (a == b) ? "true" : "false";
 						} else if (args.at(1) == "!=") {
-							return (a != b) ? "ture" : "false";
+							return (a != b) ? "true" : "false";
+						} else if (args.at(1) == "<") {
+							return (a < b) ? "true" : "false";
+						} else if (args.at(1) == "<=") {
+							return (a <= b) ? "true" : "false";
+						} else if (args.at(1) == ">") {
+							return (a > b) ? "true" : "false";
+						} else if (args.at(1) == ">=") {
+							return (a >= b) ? "true" : "false";
 						} else if (args.at(1) == "+") {
 							return to_string(a + b);
 						} else if (args.at(1) == "-") {
