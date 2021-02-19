@@ -15,11 +15,15 @@ int main(int argc, char* argv[]) {
 
 	ui = make_shared<backend_ncurses>();
 
+	ui_as<backend_ncurses>()->charset = L"|-/\\\\/";
+	ui_as<backend_ncurses>()->halfdelay_time = 1;
+
 	ui->init();
 
-	ui_as<backend_ncurses>()->charset = L"|-/\\\\/";
-
-	on_paint = [] () {
+	int frame = 0;
+	on_paint = [&] () {
+		frame++;
+		ui->draw_text(1, 1, to_string(frame));
 		ui->draw_box(ucvt(50, 'w'), ucvt(50, 'h'), ucvt(100, 'w') - 2, ucvt(100, 'h') - 2);
 		ui->draw_box(10, 10, 20, 20);
 	};

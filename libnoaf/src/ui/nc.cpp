@@ -13,12 +13,19 @@ using namespace std;
 namespace noaf {
 
 	backend_ncurses::backend_ncurses() :
-		active(false),
+		initialized(false),
+		running(false),
 		halfdelay_time(0),
 		charset(L"|-++++") {
 	}
 
 	void backend_ncurses::init() {
+		log << "Initializing the \"ncurses\" backend..." << lend;
+		resume();
+	}
+
+	void backend_ncurses::resume() {
+		if (initialized) return;
 		initscr();
 		start_color();
 		use_default_colors();
@@ -30,25 +37,26 @@ namespace noaf {
 		noecho();
 		keypad(stdscr, true);
 
-		active = true;
-	}
-
-	void backend_ncurses::resume() {
-		if (!active) init();
+		initialized = true;
 	}
 
 	void backend_ncurses::pause() {
-		if (active) kill();
+		if (!initialized) return;
+		endwin();
+		initialized = false;
 	}
 
 	void backend_ncurses::kill() {
-		endwin();
-		active = false;
+		running = false; // will cause run() to end
+		pause();
 	}
 
 	void backend_ncurses::run() {
-		for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0)) {
+		running = true;
+		for (wint_t c = -1; running; (get_wch(&c) != ERR) ? : (c = 0)) {
 			on_paint();
+
+			if (!running) break;
 		}
 	}
 
@@ -84,6 +92,11 @@ namespace noaf {
 			move(y2, i);
 			addstr(charset_get(1).c_str());
 		}
+	}
+
+	void backend_ncurses::draw_text(const int& x, const int& y, const std::string& text) {
+		move(y, x);
+		addstr(text.c_str());
 	}
 
 	string backend_ncurses::charset_get(const int& position) {
