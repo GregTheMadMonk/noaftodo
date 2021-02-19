@@ -256,6 +256,7 @@ namespace noaf::cmd {
 				if (queue.size() - 1 < alias.args.size()) {
 					log << llev(VERR) << "Not enough arguments for an alias!" << lend;
 					ret = "";
+					buffer = "";
 					return;
 				}
 
@@ -266,6 +267,8 @@ namespace noaf::cmd {
 
 				for (const auto& arg : alias.args)
 					cvar::erase("args." + arg);
+
+				buffer = "";
 
 				return;
 			}
@@ -317,10 +320,9 @@ namespace noaf::cmd {
 				if (((mode == '{') && (c == '}')) || ((mode == '(') && (c == ')'))) {
 					curly_owo--;
 				}
-				if (curly_owo > 0) last() += c;
 
 				if (curly_owo == 0) {
-					if (mode = '(') {
+					if (mode == '(') {
 						const auto ret_copy = ret;
 						exec(temp, true);
 						mode = 0;
@@ -328,7 +330,7 @@ namespace noaf::cmd {
 						ret = ret_copy;
 					}
 					mode = 0;
-				}
+				} else last() += c;
 				continue;
 			}
 
