@@ -46,6 +46,12 @@ namespace noaf {
 		active = false;
 	}
 
+	void backend_ncurses::run() {
+		for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0)) {
+			on_paint();
+		}
+	}
+
 	int backend_ncurses::width()	{ return getmaxx(stdscr); }
 	int backend_ncurses::height()	{ return getmaxy(stdscr); }
 

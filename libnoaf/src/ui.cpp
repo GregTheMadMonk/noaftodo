@@ -4,7 +4,7 @@ using namespace std;
 
 namespace noaf {
 
-	unique_ptr<backend> ui;
+	shared_ptr<backend> ui;
 
 	bool backend::can(const feature& req) {
 		for (const auto& f : features) if (f == req) return true;
@@ -16,12 +16,14 @@ namespace noaf {
 			case 0:
 				return val;
 			case 'w':
-				return ui->width() * val  / 100;
+				return (ui->width() - 1) * val  / 100;
 			case 'h':
-				return ui->height() * val / 100;
+				return (ui->height() - 1) * val / 100;
 			default:
 				return 0;
 		}
 	}
+
+	function<void()> on_paint = [] () {};
 
 }

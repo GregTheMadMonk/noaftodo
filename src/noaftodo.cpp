@@ -5,8 +5,6 @@
 #include <log.hpp>
 #include <ui/nc.hpp>
 
-#include <curses.h>
-
 using namespace std;
 using namespace noaf;
 
@@ -15,14 +13,18 @@ int main(int argc, char* argv[]) {
 
 	log << lver(0);
 
-	ui = make_unique<backend_ncurses>();
+	ui = make_shared<backend_ncurses>();
 
 	ui->init();
 
-	for (wint_t c = -1; ; (get_wch(&c) != ERR) ? : (c = 0)) {
+	ui_as<backend_ncurses>()->charset = L"|-/\\\\/";
+
+	on_paint = [] () {
 		ui->draw_box(ucvt(50, 'w'), ucvt(50, 'h'), ucvt(100, 'w') - 2, ucvt(100, 'h') - 2);
 		ui->draw_box(10, 10, 20, 20);
-	}
+	};
+
+	ui->run();
 
 	ui->kill();
 

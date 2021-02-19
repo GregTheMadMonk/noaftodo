@@ -19,6 +19,8 @@ namespace noaf {
 			void resume();
 			void kill();
 
+			void run();
+
 			int width();
 			int height();
 

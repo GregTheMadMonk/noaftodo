@@ -2,6 +2,7 @@
 #ifndef NOAF_UI_H
 #define NOAF_UI_H
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -22,6 +23,8 @@ namespace noaf {
 			virtual void pause() = 0;
 			virtual void resume() = 0;
 			virtual void kill() = 0;
+
+			virtual void run() = 0; // backend life cycle
 
 			virtual int width() = 0;
 			virtual int height() = 0;
@@ -45,12 +48,14 @@ namespace noaf {
 			bool can(const feature& req);
 	};
 
-	extern std::unique_ptr<backend> ui;
-	template <class b> std::unique_ptr<b>& ui_as() {
-		return static_cast<std::unique_ptr<b>>(ui);
+	extern std::shared_ptr<backend> ui;
+	template <class b> std::shared_ptr<b> ui_as() {
+		return std::dynamic_pointer_cast<b>(ui);
 	}
 
 	int ucvt(const int& val, const char& unit = 0);
+
+	extern std::function<void()> on_paint;
 
 }
 
