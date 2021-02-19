@@ -213,19 +213,19 @@ namespace noaf::cmd {
 		if (cvar::cvars().find("ret") == cvar::cvars().end())
 			cvar::cvars()["ret"] = cvar::wrap_string(ret, cvar::READONLY || cvar::NO_PREDEF);
 		
-		vector<string> queue = { "" };
+		// interpreter state variables
+		vector<string> queue = { "" };	// arguments list
 
 		bool skip_special = false;	// skip next special character
 		bool inquotes = false;		// take input inquotesly
-		bool readvar = false;
 		char mode = 0;			// input mode
 		int curly_owo = 0;		// how deep are we inside curly brackets
-		string temp = "";
+		string temp = "";		// we read some stuff here, e.g. variable names
 
 		// get last argument of current queue item
 		const auto& last = [&] () -> string& {
 			if (queue.size() == 0) queue.push_back("");
-			if (readvar || (mode == '`') || (mode == '(') || (mode == '$'))
+			if ((mode == '%') || (mode == '`') || (mode == '(') || (mode == '$'))
 				return temp;
 			return queue.at(queue.size() - 1);
 		};
@@ -336,7 +336,7 @@ namespace noaf::cmd {
 				continue;
 			}
 
-			if ((readvar || inquotes) && (mode != c)) {
+			if (((mode == '%') || inquotes) && (mode != c)) {
 				if (c == '\\') skip_special = true;
 				else last() += c;
 
@@ -387,14 +387,12 @@ namespace noaf::cmd {
 					}
 					break;
 				case '%':
-					if (!readvar) {
+					if (mode != c) {
 						mode = c;
-						readvar = true;
 						temp = "";
 					} else if (mode == c) {
 						// var name = temp
 						mode = 0;
-						readvar = false;
 						const auto ret_copy = ret;
 						log << "Resolving variable name for " << temp << lend;
 						exec("echo " + temp, true);
