@@ -423,7 +423,9 @@ namespace noaf::cmd {
 			}
 		}
 
-		if (!skip_special) switch (mode) {
+		if (skip_special) {
+			buffer.at(buffer.length() - 1) = ' ';
+		} else switch (mode) {
 			case '$':
 				// end reading of an envvar name
 				mode = 0;
