@@ -34,7 +34,7 @@ namespace noaf {
 
 				prefix += "]\t";
 
-				for (int i = 0; i < offset; i++) prefix += "\t";
+				for (int i = 0; i < offset; i++) prefix += "  ";
 				flusher(prefix + buffer.str());
 			}
 		}
