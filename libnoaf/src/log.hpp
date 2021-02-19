@@ -54,6 +54,7 @@ namespace noaf {
 	constexpr int VIMP = 1;	// an important message
 	constexpr int VWAR = 2;	// a warning message
 	constexpr int VERR = 3;	// an error message
+	constexpr int VCAT = 4;	// a command output that should be shown even if error messages are off
 }
 
 #endif

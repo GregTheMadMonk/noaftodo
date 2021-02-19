@@ -118,7 +118,7 @@ namespace noaf::cmd {
 							if (i < args.size() - 1) ret += " ";
 						}
 
-						log << ret << lend;
+						log << llev(VCAT) << ret << lend;
 
 						return ret;
 					},
@@ -321,9 +321,11 @@ namespace noaf::cmd {
 
 				if (curly_owo == 0) {
 					if (mode = '(') {
+						const auto ret_copy = ret;
 						exec(temp, true);
 						mode = 0;
 						last() += ret;
+						ret = ret_copy;
 					}
 					mode = 0;
 				}
@@ -382,8 +384,10 @@ namespace noaf::cmd {
 					} else {
 						mode = 0;
 						inquotes = false;
+						const auto ret_copy = ret; // back up return value
 						exec(temp, true);
 						last() += ret;
+						ret  = ret_copy;
 					}
 					break;
 				case '%':
