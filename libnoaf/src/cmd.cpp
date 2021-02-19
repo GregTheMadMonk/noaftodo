@@ -260,12 +260,12 @@ namespace noaf::cmd {
 				}
 
 				for (int i = 0; i < alias.args.size(); i++)
-					cvar::get("arg_" + alias.args.at(i)) = queue.at(1 + i);
+					cvar::get("args." + alias.args.at(i)) = queue.at(1 + i);
 
 				exec(alias.body, true);
 
 				for (const auto& arg : alias.args)
-					cvar::erase("arg_" + arg);
+					cvar::erase("args." + arg);
 
 				return;
 			}
