@@ -10,8 +10,8 @@ namespace noaf {
 
 	class backend {
 		enum feature {
-			color_table,
-			color,
+			color_base16,
+			color_256,
 			opacity,
 			images
 		};
@@ -33,15 +33,10 @@ namespace noaf {
 			virtual void draw_box(const int& x1, const int& y1, const int& x2, const int& y2) = 0;
 			virtual void draw_text(const int& x, const int& y, const std::string& text) = 0;
 
-			// color management (color table)
-			// TODO
-			virtual void set_color(const int& index) {}
-			// color management (256-color)
-			// TODO
-			virtual void set_color(const int& r, const int& g, const int& b) {}
-			// opacity management
-			// TODO
-			virtual void set_opacity(const float& a) {}
+			// color management
+			virtual void set_fg(const uint32_t& color) {}
+			virtual void set_bg(const uint32_t& color) {}
+
 			// image drawing
 			// TODO
 

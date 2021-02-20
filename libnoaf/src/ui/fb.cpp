@@ -18,20 +18,10 @@ namespace noaf {
 	}
 
 	void backend_framebuffer::init() {
-		log << "Initializing \"framebuffer\" backend..." << lend;
-		resume();
-	}
-
-	void backend_framebuffer::pause() {
-		if (dev == -1) return;
-		munmap(data, w * h);
-		data = nullptr;
-		close(dev);
-		dev = -1;
-	}
-
-	void backend_framebuffer::resume() {
 		if (dev >= 0) return;
+
+		log << "Initializing \"framebuffer\" backend..." << lend;
+
 		dev = open(dev_name.c_str(), O_RDWR);
 		if (dev < 0) return;
 
@@ -44,7 +34,17 @@ namespace noaf {
 		data = (uint32_t*)mmap(NULL, w * h * sizeof(uint32_t), PROT_READ | PROT_WRITE, MAP_SHARED, dev, (off_t)0);
 	}
 
+	void backend_framebuffer::pause() { }	// no need to pause or
+	void backend_framebuffer::resume() { }	// resume the framebuffer (for now)
+
 	void backend_framebuffer::kill() {
+		if (dev == -1) return;
+		munmap(data, w * h);
+		data = nullptr;
+		close(dev);
+		dev = -1;
+
+		blank(); // clear the screen
 	}
 
 	void backend_framebuffer::run() {
@@ -75,6 +75,18 @@ namespace noaf {
 	}
 
 	void backend_framebuffer::draw_text(const int& x, const int& y, const std::string& text) {
+	}
+
+	void backend_framebuffer::blank() {
+		int blank = -1;
+		if ((blank = open("/sys/classs/graphics/fb0/blank", O_WRONLY)) <= 0) {
+			log << llev(VERR) << "Can't open \"blank\" file!" << lend;
+			return;
+		}
+
+		write(blank, "1", sizeof(char));
+
+		close(blank);
 	}
 
 }

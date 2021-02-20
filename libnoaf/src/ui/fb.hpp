@@ -36,6 +36,8 @@ namespace noaf {
 
 			// stuff specific to this backend
 			std::string dev_name;
+
+			void blank();	// clear framebuffer
 	};
 
 }
