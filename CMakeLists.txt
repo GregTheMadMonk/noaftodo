@@ -1,124 +1,93 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(noaftodo VERSION 1.4.6)
+include( CheckIncludeFile )
 
-# use C++ 17
+project(noaftodo VERSION 2.0.0)
+
+# Use C++ 17
 set(CXX_STANDART 17)
 set(CXX_STANDART_REQUIRED True)
 
 add_compile_options( -fpermissive -std=c++17 )
 
-# Link ncurses
-set(CURSES_NEED_WIDE True)
-find_package(Curses REQUIRED)
-
-# Compile libnoaf also
+# Compile and link libnoaf
 add_subdirectory( libnoaf )
-link_directories( libnoaf/build )
+
+# Link ncurses
+set( NCURSES_NEED_WIDE True )
+find_package( Curses REQUIRED )
 
 # Include index
-include_directories(${CURSES_INCLUDE_DIR} "src/" "libnoaf/src")
+include_directories( ${CURSES_INCLUDE_DIR} "src/" "libnoaf/src" ) # TODO: export libnoaf includes and use them
+
+# Check for needed headers
+CHECK_INCLUDE_FILE( "mqueue.h" _HAS_MQUEUE )
+if ( NOT _HAS_MQUEUE )
+	message("Fail! Using a replacement...")
+	set( _NO_MQUEUE 1 )
+endif()
 
 # Platform-specific stuff
-message("Building for ${CMAKE_HOST_SYSTEM_NAME}")
-
-if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Haiku")
-	message("mqueue is off due to platform")
-	set(_NO_MQUEUE 1)
-	message("root check is off due to platform")
-	set(_NO_ROOT_CHECK 1)
+if ( "${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Haiku" )
+	message( "root check is useless on Haiku since it's a single-user system. Disabling...." )
+	set( _NO_ROOT_CHECK 1 )
 endif()
 
-# Environment arguments
-if ($ENV{NO_MQUEUE})
-	message("mqueue is off by build flag")
-	set(_NO_MQUEUE 1)
-elseif (NOT("$ENV{NO_MQUEUE}" STREQUAL ""))
-	message("mqueue is on by build flag")
-	set(_NO_MQUEUE 0)
+# Envvar controlled arguments
+if ( $ENV{NO_MQUEUE} )
+	message( "mqueue is off by build flag. Using a replacement..." )
+	set( _NO_MQUEUE 1 )
+elseif ( NOT ( "$ENV{NO_MQUEUE}" STREQUAL "" ) )
+	message( "mqueue is forced on by build flag." )
+	set( _NO_MQUEUE 0 )
 endif()
 
-if ($ENV{NO_ROOT_CHECK})
-	message("root check is off by build flag")
-	set(_NO_ROOT_CHECK 1)
-elseif (NOT("$ENV{NO_ROOT_CHECK}" STREQUAL ""))
-	message("root check is on by build flag")
-	set(_NO_ROOT_CHECK 0)
+if ( $ENV{NO_ROOT_CHECK} )
+	message( "root check is off by build flag." )
+	set( _NO_ROOT_CHECK 1 )
+elseif ( NOT ( "$ENV{NO_ROOT_CHECK}" STREQUAL "" ) )
+	message( "root check is on by build flag." )
+	set( _NO_ROOT_CHECK 0 )
 endif()
 
-if ($ENV{DEBUG})
-	message("debug flag on")
-	set(_DEBUG 1)
-endif()
-
-if ("$ENV{PKGNAME}" STREQUAL "")
-	set(_PKGNAME "${CMAKE_PROJECT_NAME}")
+if ( "$ENV{PKGNAME}" STREQUAL "" )
+	set( _PKGNAME "${CMAKE_PROJECT_NAME}" )
 else()
-	set(_PKGNAME "$ENV{PKGNAME}")
+	set( _PKGNAME "$ENV{PKGNAME}" )
 endif()
 
-if (NOT ("$ENV{PKGROOT}" STREQUAL ""))
-	set(_PKGROOT "$ENV{PKGROOT}")
-endif()
-
-# _DEBUG adds compiler options therefore is specified before target declaration
-if (${_DEBUG})
-	add_compile_options( -g3 )
-	set(CMAKE_VERBOSE_MAKEFILE 1)
+if ( NOT ( "$ENV{PKGROOT}" STREQUAL "" ) )
+	set( _PKGROOT "$ENV{PKGROOT}" )
 endif()
 
 # Find source files
-file(GLOB_RECURSE _SOURCES src/*.cpp)
-
-# Generate embedded code
-add_custom_command(
-	OUTPUT
-	${CMAKE_CURRENT_BINARY_DIR}/gen/src/embed.cpp
-	${CMAKE_CURRENT_BINARY_DIR}/gen/doc/noaftodo.man.gz
-	COMMAND ${PROJECT_SOURCE_DIR}/tools/docgen.sh "${PROJECT_SOURCE_DIR}"
-	COMMENT "Executing documentation and embedded code generation..."
-	DEPENDS
-	noaftodo.conf.template
-	${_SOURCES})
+file( GLOB_RECURSE _SOURCES src/*.cpp )
 
 # Declare an executable
-add_executable(${CMAKE_PROJECT_NAME}
-	${_SOURCES}
-	${CMAKE_CURRENT_BINARY_DIR}/gen/src/embed.cpp)
+add_executable( ${CMAKE_PROJECT_NAME} ${_SOURCES} )
+target_link_libraries( ${CMAKE_PROJECT_NAME} ${CURSES_LIBRARIES} noaf )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CURSES_LIBRARIES} noaf )
-
-# Add nessesary build flags
 # Explicitly set NCURSES_WIDECHAR
-add_definitions( -DNCURSES_WIDECHAR ) 
+add_definitions( -DNCURSES_WIDECHAR )
 
-if (${_NO_MQUEUE})
+if ( ${_NO_MQUEUE} )
 	add_definitions( -DNO_MQUEUE )
 else()
-	target_link_libraries(${CMAKE_PROJECT_NAME} rt)
+	target_link_libraries( ${CMAKE_PROJECT_NAME} rt )
 endif()
 
-if (${_NO_ROOT_CHECK})
+if ( ${_NO_ROOT_CHECK} )
 	add_definitions( -DNO_ROOT_CHECK )
 endif()
 
-# Set project version
-add_definitions( -DLIST_V=${PROJECT_VERSION_MAJOR} )
-add_definitions( -DCONF_V=${PROJECT_VERSION_MINOR} )
-add_definitions( -DPATCH_V=${PROJECT_VERSION_PATCH} )
+# Pass version to code
+# TODO
 
-if (NOT ("$ENV{V_SUFFIX}" STREQUAL ""))
-	add_definitions( -DV_SUFFIX="$ENV{V_SUFFIX}" )
-endif()
+# Add version suffix
+# TODO
 
-# Declare installation targets
-# Install binary
-install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION "${_PKGROOT}/usr/bin/")
-# Install LICENSE
-install(FILES LICENSE DESTINATION "${_PKGROOT}/usr/share/licenses/${_PKGNAME}/")
-# Install default config
-install(FILES noaftodo.conf.template DESTINATION "${_PKGROOT}/etc/${_PKGNAME}/")
-# Install scripts
-install(DIRECTORY scripts DESTINATION "${_PKGROOT}/etc/${_PKGNAME}/")
-# Install manual
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/gen/doc/noaftodo.man.gz DESTINATION "${_PKGROOT}/usr/share/man/man1/" RENAME "noaftodo.1.gz")
+# Generate docs
+# TODO
+
+# Install the program
+# TODO
