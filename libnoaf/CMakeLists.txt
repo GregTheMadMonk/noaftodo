@@ -25,3 +25,7 @@ file(GLOB_RECURSE _SOURCES src/*.cpp)
 
 add_library(${_NAME} SHARED
 	${_SOURCES})
+
+# Add nessesary build flags
+# Explicitly set NCURSES_WIDECHAR
+add_definitions( -DNCURSES_WIDECHAR ) 
