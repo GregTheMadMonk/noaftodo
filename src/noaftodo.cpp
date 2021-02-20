@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 	int frame = 0;
 	on_paint = [&] () {
 		frame++;
-		ui->draw_text(1, 1, to_string(frame));
+		ui->draw_text(1, 1, "**Frame:** " + to_string(frame));
 		ui->draw_box(ucvt(50, 'w'), ucvt(50, 'h'), ucvt(100, 'w') - 2, ucvt(100, 'h') - 2);
 		ui->draw_box(10, 10, 20, 20);
 		ui->draw_box(ucvt(25, 'w'), ucvt(25, 'h'), ucvt(75, 'w'), ucvt(75, 'h'));

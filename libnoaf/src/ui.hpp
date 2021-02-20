@@ -9,13 +9,13 @@
 namespace noaf {
 
 	class backend {
-		enum feature {
-			color_base16,
-			color_256,
-			opacity,
-			images
-		};
-		std::vector<feature> features = {}; // all backends can handle primitives/text, other is optional
+		protected:
+		static constexpr int MARKDOWN		= 0b1;
+		static constexpr int COLOR		= 0b10;
+		static constexpr int TRUECOLOR		= 0b100;
+		static constexpr int OPACITY		= 0b1000;
+		static constexpr int IMAGES		= 0b10000;
+		std::vector<int> features = {}; // all backends can handle primitives/text, other is optional
 		public:
 			// backend hooks
 			// basic functionality
@@ -41,7 +41,7 @@ namespace noaf {
 			// TODO
 
 			// feature request
-			bool can(const feature& req);
+			bool can(const int& req);
 	};
 
 	extern std::shared_ptr<backend> ui;
@@ -52,6 +52,12 @@ namespace noaf {
 	int ucvt(const int& val, const char& unit = 0);
 
 	extern std::function<void()> on_paint;
+
+	// cast colors from different palettes
+	namespace col {
+		uint32_t to_true(const int& col);
+		int to_16(const uint32_t& col);
+	}
 
 }
 

@@ -16,7 +16,9 @@ namespace noaf {
 		initialized(false),
 		running(false),
 		halfdelay_time(0),
-		charset(L"|-++++") {
+		charset(L"|-++++"),
+		w(0), h(0) {
+		features = { MARKDOWN, COLOR };
 	}
 
 	void backend_ncurses::init() {
@@ -36,6 +38,9 @@ namespace noaf {
 		curs_set(0);
 		noecho();
 		keypad(stdscr, true);
+
+		w = getmaxx(stdscr);
+		h = getmaxy(stdscr);
 
 		initialized = true;
 	}
@@ -60,8 +65,8 @@ namespace noaf {
 		}
 	}
 
-	int backend_ncurses::width()	{ return getmaxx(stdscr); }
-	int backend_ncurses::height()	{ return getmaxy(stdscr); }
+	int backend_ncurses::width()	{ return w; }
+	int backend_ncurses::height()	{ return h; }
 
 	void backend_ncurses::draw_line(const int& x1, const int& y1, const int& x2, const int& y2) {
 	}
@@ -97,6 +102,12 @@ namespace noaf {
 	void backend_ncurses::draw_text(const int& x, const int& y, const std::string& text) {
 		move(y, x);
 		addstr(text.c_str());
+	}
+
+	void backend_ncurses::set_fg(const uint32_t& color) {
+	}
+
+	void backend_ncurses::set_bg(const uint32_t& color) {
 	}
 
 	string backend_ncurses::charset_get(const int& position) {
