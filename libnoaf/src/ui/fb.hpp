@@ -1,5 +1,6 @@
 #pragma once
 #ifdef __linux__
+
 #ifndef NOAF_UI_FB_H
 #define NOAF_UI_FB_H
 

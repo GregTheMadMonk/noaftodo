@@ -12,8 +12,6 @@ namespace noaf {
 			bool initialized;
 			bool running;
 
-			int w, h; // screen dimensions
-
 			int fg;	// color code or -1 for default
 			int bg;	// -- // --
 

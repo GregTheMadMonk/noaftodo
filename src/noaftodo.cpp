@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 		ui = make_shared<backend_ncurses>();
 
 		ui_as<backend_ncurses>()->charset = L"|-/\\\\/";
-		ui_as<backend_ncurses>()->halfdelay_time = 1;
+		ui_as<backend_ncurses>()->halfdelay_time = 0;
 #ifdef __linux__
 	}
 #endif
