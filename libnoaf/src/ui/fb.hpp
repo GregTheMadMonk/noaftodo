@@ -43,4 +43,7 @@ namespace noaf {
 }
 
 #endif
+
+#else
+#warning "framebuffer backend is only provided for Linux platform and you don't seem to be running one :("
 #endif
