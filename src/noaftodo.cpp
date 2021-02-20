@@ -23,24 +23,30 @@ int main(int argc, char* argv[]) {
 		0,
 		""
 	};
+#ifdef __linux__
 	conarg::args()[{ "-f" }] = {
 		[&] (const vector<string>& params) { fb = true; },
 		0,
 		""
 	};
+#endif
 
 	conarg::parse(argc, argv);
 
+#ifdef __linux__
 	if (fb) {
 		ui = make_shared<backend_framebuffer>();
 
 		ui_as<backend_framebuffer>()->dev_name = "/dev/fb0";
 	} else {
+#endif
 		ui = make_shared<backend_ncurses>();
 
 		ui_as<backend_ncurses>()->charset = L"|-/\\\\/";
 		ui_as<backend_ncurses>()->halfdelay_time = 1;
+#ifdef __linux__
 	}
+#endif
 
 	ui->init();
 
