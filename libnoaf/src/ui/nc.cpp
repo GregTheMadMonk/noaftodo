@@ -14,6 +14,37 @@ namespace noaf {
 
 	backend_ncurses::backend_ncurses() {
 		features = MARKDOWN | COLOR;
+
+		keyname_lookup = {
+			{ "KEY_LEFT",		"left" },
+			{ "KEY_RIGHT",		"right" },
+			{ "KEY_UP",		"up" },
+			{ "KEY_DOWN",		"down" },
+			{ "kLFT3",		"a^left" },
+			{ "kRIT3",		"a^right" },
+			{ "kUP3",		"a^up" },
+			{ "kDN3",		"a^down" },
+			{ "kLFT5",		"c^left" },
+			{ "kRIT5",		"c^right" },
+			{ "kUP5",		"c^up" },
+			{ "kDN5",		"c^down" },
+			{ "kLFT7",		"a^c^left" },
+			{ "kRIT7",		"a^c^right" },
+			{ "kUP7",		"a^c^up" },
+			{ "kDN7",		"a^c^down" },
+			{ "KEY_SLEFT",		"sleft" },
+			{ "KEY_SRIGHT",		"sright" },
+			{ "KEY_SR",		"sup" }, // not much how about you ahahaahaahhhhaahaahahahahaha
+			{ "KEY_SF",		"sdown" },
+			{ "KEY_BACKSPACE",	"backspace" },
+			{ "KEY_DC",		"delete" },
+			{ "^J",			"enter" },
+			{ "^I",			"tab" },
+			{ "KEY_HOME",		"home" },
+			{ "KEY_END",		"end" },
+			{ "KEY_PPAGE",		"pgup" },
+			{ "KEY_NPAGE",		"pgdown" },
+		};
 	}
 
 	void backend_ncurses::init() {
@@ -54,63 +85,92 @@ namespace noaf {
 			// process input
 			if (c > 0) {
 				input_event event;
-				event.name = keyname(c);
-				event.mod_alt = mod_alt;
-				mod_alt = false;
+				bool mod_alt = false;
+				bool mod_ctrl = false;
 				if (c == 27) { // alt+ combination
 					mod_alt = true;
-				} else if ((c & 0x1f) == c) { // ctrl key performs an AND on keycode and 0x1f
-					event.mod_ctrl = true;
-					event.key = wc.from_bytes(event.name).at(1);
-				} else event.key = c;
+					nodelay(stdscr, true);
+					if (get_wch(&c) == ERR) {
+						event.key = 27;
+						event.name = "esc";
+						mod_alt = false;
+						mod_ctrl = false;
+					} else mod_alt = true;
+					nodelay(stdscr, false);
+				}
+
+				if (event.key == 0) {
+					if (keyname(c) != nullptr) event.name = keyname(c);
+					else event.name = wc.to_bytes(c);
+
+					if ((c & 0x1f) == c) { // ctrl key performs an AND on keycode and 0x1f
+						mod_ctrl = true;
+						event.key = wc.from_bytes(event.name).at(1);
+					} else event.key = c;
+				}
 
 				if (event.key != 0) {
-					log << event.mod_alt << " - " <<
-						event.mod_ctrl << " - " <<
-						wc.to_bytes(event.key) << " - " <<
-						event.name << lend;
+					if (keyname_lookup.find(event.name) != keyname_lookup.end())
+						event.name = keyname_lookup.at(event.name);
+					else {
+						if (mod_ctrl)	event.name = tolower(event.name.at(1));
+						if (mod_ctrl)	event.name = "c^" + event.name;
+						if (mod_alt)	event.name = "a^" + event.name;
+					}
+
 					on_input(event);
 				}
 			}
 
+			if (!running) break;
+
 			// paint UI
 			on_paint();
-
-			if (!running) break;
 		}
 	}
 
 	int backend_ncurses::width()	{ return getmaxx(stdscr); }
 	int backend_ncurses::height()	{ return getmaxy(stdscr); }
 
+	void backend_ncurses::clear() {
+			::clear();
+	}
+
 	void backend_ncurses::draw_line(const int& x1, const int& y1, const int& x2, const int& y2) {
 	}
 
 	void backend_ncurses::draw_box(const int& x1, const int& y1, const int& x2, const int& y2) {
-		// draw corners
-		move(y1, x1);
-		addstr(charset_get(2).c_str());
-		move(y1, x2);
-		addstr(charset_get(3).c_str());
-		move(y2, x1);
-		addstr(charset_get(4).c_str());
-		move(y2, x2);
-		addstr(charset_get(5).c_str());
+		if (draw_stroke) {
+			// draw corners
+			move(y1, x1);
+			addstr(charset_get(2).c_str());
+			move(y1, x2);
+			addstr(charset_get(3).c_str());
+			move(y2, x1);
+			addstr(charset_get(4).c_str());
+			move(y2, x2);
+			addstr(charset_get(5).c_str());
 
-		// draw vertical lines
-		for (int i = y1 + 1; i < y2; i++) {
-			move(i, x1);
-			addstr(charset_get(0).c_str());
-			move(i, x2);
-			addstr(charset_get(0).c_str());
+			// draw vertical lines
+			for (int i = y1 + 1; i < y2; i++) {
+				move(i, x1);
+				addstr(charset_get(0).c_str());
+				move(i, x2);
+				addstr(charset_get(0).c_str());
+			}
+
+			// draw horizontal lines
+			for (int i = x1 + 1; i < x2; i++) {
+				move(y1, i);
+				addstr(charset_get(1).c_str());
+				move(y2, i);
+				addstr(charset_get(1).c_str());
+			}
 		}
 
-		// draw horizontal lines
-		for (int i = x1 + 1; i < x2; i++) {
-			move(y1, i);
-			addstr(charset_get(1).c_str());
-			move(y2, i);
-			addstr(charset_get(1).c_str());
+		if (draw_fill) for (int x = x1 + 1; x < x2; x++) for (int y = y1 + 1; y < y2; y++) {
+			move(y, x);
+			addstr(" ");
 		}
 	}
 

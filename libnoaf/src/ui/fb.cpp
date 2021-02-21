@@ -2,6 +2,7 @@
 
 #include "fb.hpp"
 
+#include <algorithm>
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <sys/ioctl.h>
@@ -22,7 +23,7 @@ namespace noaf {
 
 		log << "Initializing \"framebuffer\" backend..." << lend;
 
-		dev = open(dev_name.c_str(), O_RDWR);
+		dev = open(("/dev/" + dev_name).c_str(), O_RDWR);
 		if (dev < 0) return;
 
 		struct fb_var_screeninfo vinfo;
@@ -38,6 +39,7 @@ namespace noaf {
 	void backend_framebuffer::resume() { }	// resume the framebuffer (for now)
 
 	void backend_framebuffer::kill() {
+		running = false;
 		if (dev == -1) return;
 		munmap(data, w * h);
 		data = nullptr;
@@ -48,14 +50,23 @@ namespace noaf {
 	}
 
 	void backend_framebuffer::run() {
-		while (true) {
+		char c;
+		running = true;
+		while (c = getchar()) {
+			input_event e;
+			e.key = c;
+			on_input(e);
+			if (!running) break;
 			on_paint();
-			system("sleep 1");
 		}
 	}
 
 	int backend_framebuffer::width()	{ return w; }
 	int backend_framebuffer::height()	{ return h; }
+
+	void backend_framebuffer::clear() {
+		std::fill(data, data + w * h, 0);
+	}
 
 	void backend_framebuffer::draw_line(const int& x1, const int& y1, const int& x2, const int& y2) {
 		if (x1 == x2)
@@ -68,10 +79,15 @@ namespace noaf {
 	}
 
 	void backend_framebuffer::draw_box(const int& x1, const int& y1, const int& x2, const int& y2) {
-		draw_line(x1, y1, x2, y1);
-		draw_line(x2, y1, x2, y2);
-		draw_line(x2, y2, x1, y2);
-		draw_line(x1, y2, x1, y1);
+		if (draw_stroke) {
+			draw_line(x1, y1, x2, y1);
+			draw_line(x2, y1, x2, y2);
+			draw_line(x2, y2, x1, y2);
+			draw_line(x1, y2, x1, y1);
+		}
+
+		if (draw_fill) for (int y = y1 + 1; y < y2; y++)
+				std::fill(data + y * w + x1 + 1, data + y * w + x2, 0);
 	}
 
 	void backend_framebuffer::draw_text(const int& x, const int& y, const std::string& text) {
@@ -79,7 +95,7 @@ namespace noaf {
 
 	void backend_framebuffer::blank() {
 		int blank = -1;
-		if ((blank = open("/sys/classs/graphics/fb0/blank", O_WRONLY)) <= 0) {
+		if ((blank = open(("/sys/class/graphics/" + dev_name + "/blank").c_str(), O_WRONLY)) <= 0) {
 			log << llev(VERR) << "Can't open \"blank\" file!" << lend;
 			return;
 		}

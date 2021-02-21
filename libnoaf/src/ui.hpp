@@ -20,7 +20,7 @@ namespace noaf {
 
 		// what to draw
 		bool draw_fill	= false;
-		bool draw_stroke= false;
+		bool draw_stroke= true;
 		public:
 			// backend hooks
 			// basic functionality
@@ -33,6 +33,8 @@ namespace noaf {
 
 			virtual int width() = 0;
 			virtual int height() = 0;
+
+			virtual void clear() = 0;
 
 			virtual void draw_line(const int& x1, const int& y1, const int& x2, const int& y2) = 0;
 			virtual void draw_box(const int& x1, const int& y1, const int& x2, const int& y2) = 0;
@@ -74,8 +76,6 @@ namespace noaf {
 		int type = KEY;
 		wchar_t key = 0;	// keycode
 		std::string name = "";	// key name on a physical keyboard
-		bool mod_alt = false;	// was an alt+ ?
-		bool mod_ctrl = false;	// was an ctrl+ ?
 	};
 
 	// callbacks

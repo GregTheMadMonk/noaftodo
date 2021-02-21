@@ -6,7 +6,8 @@
 
 namespace noaf {
 	// program exit callback
-	extern std::function<void(const int& code)> exit;
+	extern std::function<void(const int& code)> on_exit;
+	void exit(int code = 0);
 }
 
 #endif

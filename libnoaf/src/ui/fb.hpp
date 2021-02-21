@@ -17,6 +17,8 @@ namespace noaf {
 
 			int bytes;
 
+			bool running = false;
+
 			uint32_t* data;
 		public:
 			backend_framebuffer();
@@ -30,6 +32,8 @@ namespace noaf {
 
 			int width();
 			int height();
+
+			void clear();
 
 			void draw_line(const int& x1, const int& y1, const int& x2, const int& y2);
 			void draw_box(const int& x1, const int& y1, const int& x2, const int& y2);
