@@ -21,11 +21,12 @@ namespace noaf {
 
 	void backend_framebuffer::init() {
 		if (dev >= 0) return;
+
+		log << "Initializing \"framebuffer\" backend..." << lend;
+
 		initscr();
 		if (halfdelay_time == 0) cbreak();
 		else halfdelay(halfdelay_time);
-
-		log << "Initializing \"framebuffer\" backend..." << lend;
 
 		dev = open(("/dev/" + dev_name).c_str(), O_RDWR);
 		if (dev < 0) return;

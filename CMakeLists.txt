@@ -5,8 +5,8 @@ include( CheckIncludeFile )
 project(noaftodo VERSION 2.0.0)
 
 # Use C++ 17
-set(CXX_STANDART 17)
-set(CXX_STANDART_REQUIRED True)
+set( CXX_STANDART 17 )
+set( CXX_STANDART_REQUIRED True )
 
 add_compile_options( -fpermissive -std=c++17 )
 
@@ -23,30 +23,30 @@ include_directories( ${CURSES_INCLUDE_DIR} "src/" "libnoaf/src" ) # TODO: export
 # Check for needed headers
 CHECK_INCLUDE_FILE( "mqueue.h" _HAS_MQUEUE )
 if ( NOT _HAS_MQUEUE )
-	message("Fail! Using a replacement...")
+	message( STATUS "Fail! Using a replacement..." )
 	set( _NO_MQUEUE 1 )
 endif()
 
 # Platform-specific stuff
 if ( "${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Haiku" )
-	message( "root check is useless on Haiku since it's a single-user system. Disabling...." )
+	message( STATUS "root check is useless on Haiku since it's a single-user system. Disabling...." )
 	set( _NO_ROOT_CHECK 1 )
 endif()
 
 # Envvar controlled arguments
 if ( $ENV{NO_MQUEUE} )
-	message( "mqueue is off by build flag. Using a replacement..." )
+	message( STATUS "mqueue is off by build flag. Using a replacement..." )
 	set( _NO_MQUEUE 1 )
 elseif ( NOT ( "$ENV{NO_MQUEUE}" STREQUAL "" ) )
-	message( "mqueue is forced on by build flag." )
+	message( STATUS "mqueue is forced on by build flag." )
 	set( _NO_MQUEUE 0 )
 endif()
 
 if ( $ENV{NO_ROOT_CHECK} )
-	message( "root check is off by build flag." )
+	message( STATUS "root check is off by build flag." )
 	set( _NO_ROOT_CHECK 1 )
 elseif ( NOT ( "$ENV{NO_ROOT_CHECK}" STREQUAL "" ) )
-	message( "root check is on by build flag." )
+	message( STATUS "root check is on by build flag." )
 	set( _NO_ROOT_CHECK 0 )
 endif()
 
