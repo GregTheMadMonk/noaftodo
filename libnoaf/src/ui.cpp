@@ -6,6 +6,22 @@ namespace noaf {
 
 	shared_ptr<backend> ui;
 
+	void backend::fill() {
+		draw_fill = !draw_fill;
+	}
+
+	void backend::fill(const bool& val) {
+		draw_fill = val;
+	}
+
+	void backend::stroke() {
+		draw_stroke = !draw_stroke;
+	}
+
+	void backend::stroke(const bool& val) {
+		draw_stroke = val;
+	}
+
 	bool backend::can(const int& req) {
 		return features & req;
 	}

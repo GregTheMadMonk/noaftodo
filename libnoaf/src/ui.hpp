@@ -16,6 +16,10 @@ namespace noaf {
 		static constexpr int OPACITY		= 0b1000;
 		static constexpr int IMAGES		= 0b10000;
 		int features = 0; // all backends can handle primitives/text, other is optional
+
+		// what to draw
+		bool draw_fill	= false;
+		bool draw_stroke= false;
 		public:
 			// backend hooks
 			// basic functionality
@@ -32,6 +36,12 @@ namespace noaf {
 			virtual void draw_line(const int& x1, const int& y1, const int& x2, const int& y2) = 0;
 			virtual void draw_box(const int& x1, const int& y1, const int& x2, const int& y2) = 0;
 			virtual void draw_text(const int& x, const int& y, const std::string& text) = 0;
+
+			// switch drawing fill and stroke
+			virtual void fill();			// toggle
+			virtual void fill(const bool& val);	// set
+			virtual void stroke();			// toggle
+			virtual void stroke(const bool& val);	// set
 
 			// color management
 			virtual void set_fg(const uint32_t& color) {}
