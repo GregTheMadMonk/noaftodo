@@ -58,6 +58,11 @@ namespace noaf {
 		start_color();
 		use_default_colors();
 
+		// initialize color pairs
+		for (int f = -1; f < 16; f++)
+			for (int b = -1; b < 16; b++)
+				init_pair(f + 1 + (b + 1) * 17, f, b);
+
 		if (halfdelay_time == 0) cbreak();
 		else halfdelay(halfdelay_time);
 		set_escdelay(0);
@@ -137,9 +142,11 @@ namespace noaf {
 	}
 
 	void backend_ncurses::draw_line(const int& x1, const int& y1, const int& x2, const int& y2) {
+		set_attrs();
 	}
 
 	void backend_ncurses::draw_box(const int& x1, const int& y1, const int& x2, const int& y2) {
+		set_attrs();
 		if (draw_stroke) {
 			// draw corners
 			move(y1, x1);
@@ -175,14 +182,21 @@ namespace noaf {
 	}
 
 	void backend_ncurses::draw_text(const int& x, const int& y, const std::string& text) {
+		set_attrs();
 		move(y, x);
 		addstr(text.c_str());
 	}
 
 	void backend_ncurses::set_fg(const uint32_t& color) {
+		fg = col::to_16(color);
 	}
 
 	void backend_ncurses::set_bg(const uint32_t& color) {
+		bg = col::to_16(color);
+	}
+
+	void backend_ncurses::set_attrs() {
+		attr_set(A_NORMAL, fg + 1 + (bg + 1) * 17, NULL);
 	}
 
 	string backend_ncurses::charset_get(const int& position) {

@@ -22,7 +22,7 @@ namespace noaf {
 
 			std::map<std::string, std::string> keyname_lookup;
 
-			void set_attrs();
+			void set_attrs(); // set ncurses attributes according to backend state
 		public:
 			backend_ncurses();
 

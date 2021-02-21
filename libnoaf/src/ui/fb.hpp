@@ -11,7 +11,7 @@
 namespace noaf {
 
 	class backend_framebuffer : public backend {
-			int dev;
+			int dev = -1;
 
 			int w, h;
 
@@ -19,7 +19,10 @@ namespace noaf {
 
 			bool running = false;
 
-			uint32_t* data;
+			uint32_t fg = 0xffffffff;
+			uint32_t bg = 0xff000000;
+
+			uint32_t* data = nullptr;
 		public:
 			backend_framebuffer();
 
@@ -38,6 +41,9 @@ namespace noaf {
 			void draw_line(const int& x1, const int& y1, const int& x2, const int& y2);
 			void draw_box(const int& x1, const int& y1, const int& x2, const int& y2);
 			void draw_text(const int& x, const int& y, const std::string& text);
+
+			void set_fg(const uint32_t& color);
+			void set_bg(const uint32_t& color);
 
 			// stuff specific to this backend
 			std::string dev_name;

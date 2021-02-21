@@ -13,9 +13,8 @@
 
 namespace noaf {
 
-	backend_framebuffer::backend_framebuffer() :
-		dev(-1),
-		data(nullptr) {
+	backend_framebuffer::backend_framebuffer() {
+		features = COLOR;
 	}
 
 	void backend_framebuffer::init() {
@@ -71,10 +70,10 @@ namespace noaf {
 	void backend_framebuffer::draw_line(const int& x1, const int& y1, const int& x2, const int& y2) {
 		if (x1 == x2)
 			for (int y = ((y1 < y2) ? y1 : y2); y <= ((y2 > y1) ? y2 : y1); y++)
-				data[y * w + x1] = 0xffffff;
+				data[y * w + x1] = fg;
 		else for (int x = ((x1 < x2) ? x1 : x2); x <= ((x2 > x1) ? x2 : x1); x++) {
 			int y = y1 + (x - x1) * (y2 - y1) / (x2 - x1);
-			data[y * w + x] = 0xffffff;
+			data[y * w + x] = fg;
 		}
 	}
 
@@ -87,11 +86,14 @@ namespace noaf {
 		}
 
 		if (draw_fill) for (int y = y1 + 1; y < y2; y++)
-				std::fill(data + y * w + x1 + 1, data + y * w + x2, 0);
+				std::fill(data + y * w + x1 + 1, data + y * w + x2, bg);
 	}
 
 	void backend_framebuffer::draw_text(const int& x, const int& y, const std::string& text) {
 	}
+
+	void backend_framebuffer::set_fg(const uint32_t& color) { fg = color; }
+	void backend_framebuffer::set_bg(const uint32_t& color) { bg = color; }
 
 	void backend_framebuffer::blank() {
 		int blank = -1;

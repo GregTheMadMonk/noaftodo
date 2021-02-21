@@ -13,9 +13,8 @@ namespace noaf {
 		protected:
 		static constexpr int MARKDOWN		= 0b1;
 		static constexpr int COLOR		= 0b10;
-		static constexpr int TRUECOLOR		= 0b100;
-		static constexpr int OPACITY		= 0b1000;
-		static constexpr int IMAGES		= 0b10000;
+		static constexpr int OPACITY		= 0b100;
+		static constexpr int IMAGES		= 0b1000;
 		int features = 0; // all backends can handle primitives/text, other is optional
 
 		// what to draw
@@ -47,8 +46,8 @@ namespace noaf {
 			virtual void stroke(const bool& val);	// set
 
 			// color management
-			virtual void set_fg(const uint32_t& color) {}
-			virtual void set_bg(const uint32_t& color) {}
+			virtual void set_fg(const uint32_t& color = 0xffffffff) {}
+			virtual void set_bg(const uint32_t& color = 0) {}
 
 			// image drawing
 			// TODO
