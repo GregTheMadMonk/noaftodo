@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace noaf {
@@ -61,13 +62,25 @@ namespace noaf {
 
 	int ucvt(const int& val, const char& unit = 0);
 
-	extern std::function<void()> on_paint;
-
 	// cast colors from different palettes
 	namespace col {
 		uint32_t to_true(const int& col);
 		int to_16(const uint32_t& col);
 	}
+
+	// UI input event structure
+	struct input_event {
+		static constexpr int KEY= 0;	// keyboard event
+		int type = KEY;
+		wchar_t key;		// keycode
+		std::string name;	// key name on a physical keyboard
+		bool mod_alt;		// was an alt+ ?
+		bool mot_ctrl;		// was an ctrl+ ?
+	};
+
+	// callbacks
+	extern std::function<void()> on_paint;
+	extern std::function<void(const input_event& event)> on_input;
 
 }
 

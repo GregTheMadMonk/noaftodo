@@ -39,54 +39,44 @@ namespace noaf {
 		}
 	}
 
-	function<void()> on_paint = [] () {};
-
 	namespace col {
 
+		// TODO: this two functions don't appear to handle white/bright white
+		// really well. Fix it!
 		uint32_t to_true(const int& col) {
 			if (col == -1) return 0;
 
-			uint32_t ret = 0xff << 24; // opaque
+			const auto extract = [&] (const unsigned& offset) -> uint32_t {
+				const int ec = (col % 8) & (1 << offset);
 
-			int r = (col % 8) & 0b1;
-			int g = (col % 8) & 0b10;
-			int b = (col % 8) & 0b100;
+				return ((ec > 0) ? 0xff : ((col >= 8) ? 0x80 : 0)) << ((2 - offset) * 8);
+			};
 
-			ret |= (r > 0) ? 0xff0000 : ((col >= 8) ? 0x800000 : 0);
-			ret |= (g > 0) ? 0xff00 : ((col >= 8) ? 0x8000 : 0);
-			ret |= (b > 0) ? 0xff : ((col >= 8) ? 0x80 : 0);
-			
-			return ret;
+			return (0xff << 24) | extract(0) | extract(1) | extract (2);
 		}
 
 		int to_16(const uint32_t& col) {
 			if (col & 0xff000000 == 0) return -1;
-			int r = ((col & 0xff0000) >> 16);
-			int g = ((col & 0xff00) >> 8);
-			int b = col & 0xff;
 
-			bool bright = false;;
-			int ret = 0;
+			bool bright = false;
 
-			if (r >= 64) {
-				if (r >= 192) ret += 0b1; // 192 = 128 + 64
-				else bright = true;
-			}
+			const auto extract = [&] (const unsigned& offset) -> int {
+				int ec = ((col & (0xff << offset * 8)) >> (offset * 8));
 
-			if (g >= 64) {
-				if (g >= 192) ret += 0b10; // 192 = 128 + 64
-				else bright = true;
-			}
+				if (ec >= 64) {
+					if (ec >= 192) return (1 << (2 - offset)); // 192 = 128 + 64
+					else bright = true;
+				}
 
-			if (b >= 64) {
-				if (b >= 192) ret += 0b100; // 192 = 128 + 64
-				else bright = true;
-			}
+				return 0;
+			};
 
-			if (bright) ret += 8;
-			return ret;
+			return (extract(0) | extract(1) | extract(2)) + (bright ? 8 : 0);
 		}
 
 	}
+
+	function<void()> on_paint = [] () {};
+	function<void(const input_event&)> on_input = [] (const input_event& e) {};
 
 }
