@@ -6,6 +6,9 @@
 #include <curses.h>
 #endif
 
+#include <cstdlib>
+#include <cstring>
+
 #include <log.hpp>
 
 using namespace std;
@@ -196,6 +199,8 @@ namespace noaf {
 	}
 
 	void backend_ncurses::set_attrs() {
+		// Native linux terminal (tty) supports only 8 colors
+		// TODO: detect and fix it (detect with getenv("TERM") == "linux")
 		attr_set(A_NORMAL, fg + 1 + (bg + 1) * 17, NULL);
 	}
 
