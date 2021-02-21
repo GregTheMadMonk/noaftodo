@@ -62,9 +62,10 @@ namespace noaf {
 		use_default_colors();
 
 		// initialize color pairs
-		for (int f = -1; f < 16; f++)
-			for (int b = -1; b < 16; b++)
-				init_pair(f + 1 + (b + 1) * 17, f, b);
+		if (COLOR_PAIRS < 17 * 17) for (int f = 0; f < 8; f++) for (int b = 0; b < 8; b++)
+			init_pair(f + b * 8 + 1, f, b);
+		else for (int f = -1; f < 16; f++) for (int b = -1; b < 16; b++)
+			init_pair(f + 1 + (b + 1) * 17 + 1, f % 8, b % 8);
 
 		if (halfdelay_time == 0) cbreak();
 		else halfdelay(halfdelay_time);
@@ -199,9 +200,11 @@ namespace noaf {
 	}
 
 	void backend_ncurses::set_attrs() {
-		// Native linux terminal (tty) supports only 8 colors
-		// TODO: detect and fix it (detect with getenv("TERM") == "linux")
-		attr_set(A_NORMAL, fg + 1 + (bg + 1) * 17, NULL);
+		if (COLOR_PAIRS < 17 * 17) {
+			attr_set(A_NORMAL,
+					((fg == -1) ? 7 : (fg % 8)) +
+					((bg == -1) ? 7 : (bg % 8)) * 8 + 1, NULL);
+		} else attr_set(A_NORMAL, fg + 1 + (bg + 1) * 17 + 1, NULL);
 	}
 
 	string backend_ncurses::charset_get(const int& position) {
