@@ -18,10 +18,6 @@ namespace noaf {
 			int fg = -1;		// color code or -1 for default
 			int bg = -1;		// -- // --
 
-			std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> wc;
-
-			std::map<std::string, std::string> keyname_lookup;
-
 			void set_attrs(); // set ncurses attributes according to backend state
 		public:
 			backend_ncurses();
@@ -49,6 +45,9 @@ namespace noaf {
 			std::wstring charset = L"|-++++";
 			std::string charset_get(const int& position);
 	};
+
+	extern std::map<std::string, std::string> nc_keyname_lookup;
+	input_event nc_process_input(wint_t c);
 
 }
 

@@ -18,36 +18,6 @@ namespace noaf {
 	backend_ncurses::backend_ncurses() {
 		features = MARKDOWN | COLOR;
 
-		keyname_lookup = {
-			{ "KEY_LEFT",		"left" },
-			{ "KEY_RIGHT",		"right" },
-			{ "KEY_UP",		"up" },
-			{ "KEY_DOWN",		"down" },
-			{ "kLFT3",		"a^left" },
-			{ "kRIT3",		"a^right" },
-			{ "kUP3",		"a^up" },
-			{ "kDN3",		"a^down" },
-			{ "kLFT5",		"c^left" },
-			{ "kRIT5",		"c^right" },
-			{ "kUP5",		"c^up" },
-			{ "kDN5",		"c^down" },
-			{ "kLFT7",		"a^c^left" },
-			{ "kRIT7",		"a^c^right" },
-			{ "kUP7",		"a^c^up" },
-			{ "kDN7",		"a^c^down" },
-			{ "KEY_SLEFT",		"sleft" },
-			{ "KEY_SRIGHT",		"sright" },
-			{ "KEY_SR",		"sup" }, // not much how about you ahahaahaahhhhaahaahahahahaha
-			{ "KEY_SF",		"sdown" },
-			{ "KEY_BACKSPACE",	"backspace" },
-			{ "KEY_DC",		"delete" },
-			{ "^J",			"enter" },
-			{ "^I",			"tab" },
-			{ "KEY_HOME",		"home" },
-			{ "KEY_END",		"end" },
-			{ "KEY_PPAGE",		"pgup" },
-			{ "KEY_NPAGE",		"pgdown" },
-		};
 	}
 
 	void backend_ncurses::init() {
@@ -92,44 +62,7 @@ namespace noaf {
 		running = true;
 		for (wint_t c = 0; running; (get_wch(&c) != ERR) ? : (c = 0)) {
 			// process input
-			if (c > 0) {
-				input_event event;
-				bool mod_alt = false;
-				bool mod_ctrl = false;
-				if (c == 27) { // alt+ combination
-					mod_alt = true;
-					nodelay(stdscr, true);
-					if (get_wch(&c) == ERR) {
-						event.key = 27;
-						event.name = "esc";
-						mod_alt = false;
-						mod_ctrl = false;
-					} else mod_alt = true;
-					nodelay(stdscr, false);
-				}
-
-				if (event.key == 0) {
-					if (keyname(c) != nullptr) event.name = keyname(c);
-					else event.name = wc.to_bytes(c);
-
-					if ((c & 0x1f) == c) { // ctrl key performs an AND on keycode and 0x1f
-						mod_ctrl = true;
-						event.key = wc.from_bytes(event.name).at(1);
-					} else event.key = c;
-				}
-
-				if (event.key != 0) {
-					if (keyname_lookup.find(event.name) != keyname_lookup.end())
-						event.name = keyname_lookup.at(event.name);
-					else {
-						if (mod_ctrl)	event.name = tolower(event.name.at(1));
-						if (mod_ctrl)	event.name = "c^" + event.name;
-						if (mod_alt)	event.name = "a^" + event.name;
-					}
-
-					on_input(event);
-				}
-			}
+			if (c != 0) on_input(nc_process_input(c));
 
 			if (!running) break;
 
@@ -209,6 +142,79 @@ namespace noaf {
 
 	string backend_ncurses::charset_get(const int& position) {
 		return string(charset.begin() + position, charset.begin() + position + 1);
+	}
+
+	map<string, string> nc_keyname_lookup = {
+		{ "KEY_LEFT",		"left" },
+		{ "KEY_RIGHT",		"right" },
+		{ "KEY_UP",		"up" },
+		{ "KEY_DOWN",		"down" },
+		{ "kLFT3",		"a^left" },
+		{ "kRIT3",		"a^right" },
+		{ "kUP3",		"a^up" },
+		{ "kDN3",		"a^down" },
+		{ "kLFT5",		"c^left" },
+		{ "kRIT5",		"c^right" },
+		{ "kUP5",		"c^up" },
+		{ "kDN5",		"c^down" },
+		{ "kLFT7",		"a^c^left" },
+		{ "kRIT7",		"a^c^right" },
+		{ "kUP7",		"a^c^up" },
+		{ "kDN7",		"a^c^down" },
+		{ "KEY_SLEFT",		"sleft" },
+		{ "KEY_SRIGHT",		"sright" },
+		{ "KEY_SR",		"sup" }, // not much how about you ahahaahaahhhhaahaahahahahaha
+		{ "KEY_SF",		"sdown" },
+		{ "KEY_BACKSPACE",	"backspace" },
+		{ "KEY_DC",		"delete" },
+		{ "^J",			"enter" },
+		{ "^I",			"tab" },
+		{ "KEY_HOME",		"home" },
+		{ "KEY_END",		"end" },
+		{ "KEY_PPAGE",		"pgup" },
+		{ "KEY_NPAGE",		"pgdown" },
+	};
+
+	input_event nc_process_input(wint_t c) {
+		wstring_convert<codecvt_utf8<wchar_t>, wchar_t> wc;
+		input_event event;
+		bool mod_alt = false;
+		bool mod_ctrl = false;
+		if (c == 27) { // alt+ combination
+			mod_alt = true;
+			nodelay(stdscr, true);
+			if (get_wch(&c) == ERR) {
+				event.key = 27;
+				event.name = "esc";
+				mod_alt = false;
+				mod_ctrl = false;
+			} else mod_alt = true;
+			nodelay(stdscr, false);
+		}
+
+		if (event.key == 0) {
+			if (keyname(c) != nullptr) event.name = keyname(c);
+			else event.name = wc.to_bytes(c);
+
+			if ((c & 0x1f) == c) { // ctrl key performs an AND on keycode and 0x1f
+				mod_ctrl = true;
+				event.key = wc.from_bytes(event.name).at(1);
+			} else event.key = c;
+		}
+
+		if (event.key != 0) {
+			if (nc_keyname_lookup.find(event.name) != nc_keyname_lookup.end())
+				event.name = nc_keyname_lookup.at(event.name);
+			else {
+				if (mod_ctrl)	event.name = tolower(event.name.at(1));
+				if (mod_ctrl)	event.name = "c^" + event.name;
+				if (mod_alt)	event.name = "a^" + event.name;
+			}
+
+			return event;
+		}
+
+		return input_event();
 	}
 
 }

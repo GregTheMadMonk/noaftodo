@@ -4,12 +4,14 @@
 
 #include <algorithm>
 #include <fcntl.h>
+#include <curses.h>	// we will use ncurses for input
 #include <linux/fb.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
 #include <log.hpp>
+#include <ui/nc.hpp>
 
 namespace noaf {
 
@@ -19,6 +21,9 @@ namespace noaf {
 
 	void backend_framebuffer::init() {
 		if (dev >= 0) return;
+		initscr();
+		if (halfdelay_time == 0) cbreak();
+		else halfdelay(halfdelay_time);
 
 		log << "Initializing \"framebuffer\" backend..." << lend;
 
@@ -46,15 +51,15 @@ namespace noaf {
 		dev = -1;
 
 		blank(); // clear the screen
+
+		endwin();
 	}
 
 	void backend_framebuffer::run() {
 		char c;
 		running = true;
-		while (c = getchar()) {
-			input_event e;
-			e.key = c;
-			on_input(e);
+		for (wint_t c = 0; running; (get_wch(&c) != ERR) ? : (c = 0)) {
+			if (c != 0) on_input(nc_process_input(c));
 			if (!running) break;
 			on_paint();
 		}

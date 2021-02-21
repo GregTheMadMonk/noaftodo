@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
 		ui = make_shared<backend_framebuffer>();
 
 		ui_as<backend_framebuffer>()->dev_name = "fb0";
+		ui_as<backend_framebuffer>()->halfdelay_time = 3;
 	} else {
 #endif
 		ui = make_shared<backend_ncurses>();

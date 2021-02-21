@@ -48,6 +48,8 @@ namespace noaf {
 			// stuff specific to this backend
 			std::string dev_name;
 
+			int halfdelay_time = 0;
+
 			void blank();	// clear framebuffer
 	};
 
