@@ -17,7 +17,7 @@ namespace noaf {
 		running(false),
 		halfdelay_time(0),
 		charset(L"|-++++") {
-		features = { MARKDOWN, COLOR };
+		features = MARKDOWN | COLOR;
 	}
 
 	void backend_ncurses::init() {

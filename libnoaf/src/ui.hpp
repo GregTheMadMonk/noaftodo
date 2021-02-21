@@ -15,7 +15,7 @@ namespace noaf {
 		static constexpr int TRUECOLOR		= 0b100;
 		static constexpr int OPACITY		= 0b1000;
 		static constexpr int IMAGES		= 0b10000;
-		std::vector<int> features = {}; // all backends can handle primitives/text, other is optional
+		int features = 0; // all backends can handle primitives/text, other is optional
 		public:
 			// backend hooks
 			// basic functionality

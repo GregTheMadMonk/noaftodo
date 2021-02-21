@@ -7,8 +7,7 @@ namespace noaf {
 	shared_ptr<backend> ui;
 
 	bool backend::can(const int& req) {
-		for (const auto& f : features) if (f == req) return true;
-		return false;
+		return features & req;
 	}
 
 	int ucvt(const int& val, const char& unit) {
