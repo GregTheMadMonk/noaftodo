@@ -72,10 +72,10 @@ namespace noaf {
 	struct input_event {
 		static constexpr int KEY= 0;	// keyboard event
 		int type = KEY;
-		wchar_t key;		// keycode
-		std::string name;	// key name on a physical keyboard
-		bool mod_alt;		// was an alt+ ?
-		bool mot_ctrl;		// was an ctrl+ ?
+		wchar_t key = 0;	// keycode
+		std::string name = "";	// key name on a physical keyboard
+		bool mod_alt = false;	// was an alt+ ?
+		bool mod_ctrl = false;	// was an ctrl+ ?
 	};
 
 	// callbacks

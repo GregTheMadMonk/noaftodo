@@ -12,11 +12,7 @@ using namespace std;
 
 namespace noaf {
 
-	backend_ncurses::backend_ncurses() :
-		initialized(false),
-		running(false),
-		halfdelay_time(0),
-		charset(L"|-++++") {
+	backend_ncurses::backend_ncurses() {
 		features = MARKDOWN | COLOR;
 	}
 
@@ -54,7 +50,30 @@ namespace noaf {
 
 	void backend_ncurses::run() {
 		running = true;
-		for (wint_t c = -1; running; (get_wch(&c) != ERR) ? : (c = 0)) {
+		for (wint_t c = 0; running; (get_wch(&c) != ERR) ? : (c = 0)) {
+			// process input
+			if (c > 0) {
+				input_event event;
+				event.name = keyname(c);
+				event.mod_alt = mod_alt;
+				mod_alt = false;
+				if (c == 27) { // alt+ combination
+					mod_alt = true;
+				} else if ((c & 0x1f) == c) { // ctrl key performs an AND on keycode and 0x1f
+					event.mod_ctrl = true;
+					event.key = wc.from_bytes(event.name).at(1);
+				} else event.key = c;
+
+				if (event.key != 0) {
+					log << event.mod_alt << " - " <<
+						event.mod_ctrl << " - " <<
+						wc.to_bytes(event.key) << " - " <<
+						event.name << lend;
+					on_input(event);
+				}
+			}
+
+			// paint UI
 			on_paint();
 
 			if (!running) break;

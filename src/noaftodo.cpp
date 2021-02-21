@@ -59,6 +59,10 @@ int main(int argc, char* argv[]) {
 		ui->draw_box(ucvt(25, 'w'), ucvt(25, 'h'), ucvt(75, 'w'), ucvt(75, 'h'));
 	};
 
+	on_input = [&] (const input_event& e) {
+		if (e.key == 'q') ui->kill();
+	};
+
 	ui->run();
 
 	ui->kill();
