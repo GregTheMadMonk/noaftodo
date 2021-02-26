@@ -2,8 +2,12 @@
 #ifndef NOAF_CMD_H
 #define NOAF_CMD_H
 
+#include <functional>
 #include <map>
+#include <stack>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace noaf::cmd {
 
@@ -30,10 +34,137 @@ namespace noaf::cmd {
 	 * a couple of weeks slowly turning this iddea into an abomination
 	 * because I've never studied CS and not going to in my next
 	 * several lifetimes
+	 * There's also a list mode, but it's not as cool it just makes
+	 * the same command execute for each item in the list basically a
+	 * for loop but without writing for and shit since we're making
+	 * this language primarily for typing commands in the program and
+	 * you want them to be as short and straight-forward as possible
 	 * Peace
 	 */
-	extern std::map<char, std::string> tokens_base;
-	extern std::map<char, std::string> tokens_expr;
+
+	// all the different types of tokens
+	enum token_type : char {
+		TNONE = 0,
+
+		NEXTCMD = ';',
+		INLINE_START = '(',
+		INLINE_END = ')',
+		BLOCK_START = '{',
+		BLOCK_END = '}',
+
+		BASE_START = 'b',
+		BASE_DELIMITER = ' ',
+
+		EXPR_START = 'E',
+		OP_ADD = '+',
+		OP_SUB = '-',
+		OP_MUL = '*',
+		OP_DIV = '/',
+		OP_EQ = '=',
+		OP_ADDEQ = 'a',
+		OP_SUBEQ = 's',
+		OP_MULEQ = 'm',
+		OP_DIVEQ = 'd',
+
+		LIST_START = 'l',
+		LIST_END = 'e',
+		LIST_DELIMITER = ',',
+		LIST_THROUGH = '.',
+
+		VALUE = 'V',
+		VALUE_SPECIAL = '\\',
+
+		REFERENCE = 'R',	// references the top of previously executed commands return values
+		LIST_REFERENCE = 'L',	// references the list
+
+		CALL = 'C',	// call the command
+		EVAL = 'v',	// evaluate the expression
+
+		CLRRET = 'c',	// clear the return values queue
+	};
+
+	// contain regex patterns for corresponding tokens
+	extern std::map<token_type, std::string> tokens_base;
+	extern std::map<token_type, std::string> tokens_expr;
+	extern std::map<token_type, std::string> tokens_list;
+
+	struct token {
+		token_type type;
+		std::string value;
+	};
+
+	// interpreter modes
+	enum mode_type {
+		MNONE,
+		BASE,
+		EXPRESSION,
+		LIST
+	};
+
+	// interpreter runtime exceptions
+	const std::runtime_error wrong_mode("Invalid mode!");
+	const std::runtime_error wrong_token("Unexpected token!");
+	const std::runtime_error token_not_found("Can't find next token in the string!");
+	const std::runtime_error lose_reference("Lose REFERENCE token!");
+	const std::runtime_error few_arguments("Not enoguh arguments!");
+	const std::runtime_error wrong_arg_type("Wrong argument type!");
+
+	// command struct
+	struct command {
+		typedef std::function<std::string(const std::vector<std::string>& args)> cmd_cb;
+		cmd_cb callback;	// command callback
+		std::string usage;	// usage tempalte
+		std::string tooltip;	// command tooltip
+		bool spacebrk;		// does a command need a space after its name
+
+		command() = default;
+		command(const cmd_cb& cb, const std::string& u = "", const std::string& t = "", const bool& sb = true);
+	};
+	// commands list
+	std::map<std::string, command>& cmds();
+
+	// list expansion from the dump
+	std::vector<std::string> read_list(std::stack<token>& dump);
+
+	// reads the last command
+	typedef std::vector<std::vector<std::string>> listdb;
+	typedef std::vector<token> track;
+
+	// track expander. All lists in the track shoul be scanned to determine all
+	// possible substitutions
+	typedef std::vector<std::vector<std::pair<size_t, std::string>>> substitutor;
+	typedef std::map<size_t, size_t> list_indexer;
+	substitutor get_subst(const list_indexer& li, const list_indexer::iterator& where, const listdb& what);
+
+	// reads the command from the end to the first command starting token + implaces lists
+	std::vector<track> read_command(std::stack<token>& dump, const listdb& lists, const std::stack<mode_type>& mode);
+
+	// append a set of "tracks" to an existing one
+	std::vector<track> tracks_append(const std::vector<track>& base, const std::vector<track>& more);
+	
+	/*
+	 * A little remark: yes, I know that read_list, read_command and get_subst
+	 * could've been a lambda expression inide precomp, but they're just
+		 ___  ___    _ __ ___   __ _ ___ ___(_)_   _____
+		/ __|/ _ \  | '_ ` _ \ / _` / __/ __| \ \ / / _ \
+		\__ \ (_) | | | | | | | (_| \__ \__ \ |\ V /  __/
+		|___/\___/  |_| |_| |_|\__,_|___/___/_| \_/ \___|
+	* that I really don't think that putting them iside another method is a good
+	* idea even at cost of passing some arguments that would've been captured
+	* in a lambda
+	*/
+
+	std::string call(const track& cmdline);
+	std::string eval(const track& cmdline);
+
+	// lexer (forgive me my terminology, I don't know shit about CS)
+	track lex(const std::string& s);
+	// "compiler"
+	track precomp(std::vector<token> ts);
+	// actually run the mostrocity from precomp
+	std::string run(const track& data);
+
+	void exec(const std::string& s);
 
 }
 
