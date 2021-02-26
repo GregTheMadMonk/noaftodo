@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <cmd/token.hpp>
+
 namespace noaf::cmd {
 
 	/*
@@ -42,56 +44,10 @@ namespace noaf::cmd {
 	 * Peace
 	 */
 
-	// all the different types of tokens
-	enum token_type : char {
-		TNONE = 0,
-
-		NEXTCMD = ';',
-		INLINE_START = '(',
-		INLINE_END = ')',
-		BLOCK_START = '{',
-		BLOCK_END = '}',
-
-		BASE_START = 'b',
-		BASE_DELIMITER = ' ',
-
-		EXPR_START = 'E',
-		OP_ADD = '+',
-		OP_SUB = '-',
-		OP_MUL = '*',
-		OP_DIV = '/',
-		OP_EQ = '=',
-		OP_ADDEQ = 'a',
-		OP_SUBEQ = 's',
-		OP_MULEQ = 'm',
-		OP_DIVEQ = 'd',
-
-		LIST_START = 'l',
-		LIST_END = 'e',
-		LIST_DELIMITER = ',',
-		LIST_THROUGH = '.',
-
-		VALUE = 'V',
-		VALUE_SPECIAL = '\\',
-
-		REFERENCE = 'R',	// references the top of previously executed commands return values
-		LIST_REFERENCE = 'L',	// references the list
-
-		CALL = 'C',	// call the command
-		EVAL = 'v',	// evaluate the expression
-
-		CLRRET = 'c',	// clear the return values queue
-	};
-
 	// contain regex patterns for corresponding tokens
 	extern std::map<token_type, std::string> tokens_base;
 	extern std::map<token_type, std::string> tokens_expr;
 	extern std::map<token_type, std::string> tokens_list;
-
-	struct token {
-		token_type type;
-		std::string value;
-	};
 
 	// interpreter modes
 	enum mode_type {

@@ -424,6 +424,9 @@ namespace noaf::cmd {
 		stack<token>	pending; // next command pending execution
 
 		const auto form = [&] () {
+			// implace references
+			// we need to do it in a specific function so that it doesn't mess
+			// up the implacement order
 			track result;
 
 			while (!pending.empty()) {
