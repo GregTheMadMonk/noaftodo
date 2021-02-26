@@ -447,9 +447,6 @@ namespace noaf::cmd {
 			switch (t.type) {
 				case CALL:
 					retvals.push(call(form()));
-					for (auto temp = retvals; !temp.empty(); temp.pop())
-						log << temp.top() << " -> ";
-					log << lend;
 					pending = {};
 					break;
 				case EVAL:
