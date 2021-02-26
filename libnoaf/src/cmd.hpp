@@ -115,10 +115,9 @@ namespace noaf::cmd {
 		cmd_cb callback;	// command callback
 		std::string usage;	// usage tempalte
 		std::string tooltip;	// command tooltip
-		bool spacebrk;		// does a command need a space after its name
 
 		command() = default;
-		command(const cmd_cb& cb, const std::string& u = "", const std::string& t = "", const bool& sb = true);
+		command(const cmd_cb& cb, const std::string& u = "", const std::string& t = "");
 	};
 	// commands list
 	std::map<std::string, command>& cmds();

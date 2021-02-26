@@ -44,8 +44,8 @@ namespace noaf::cmd {
 		{ INLINE_END,		"\\s*\\)\\s*" },
 	};
 
-	command::command(const cmd_cb& cb, const string& u, const string& t, const bool& sb) :
-		callback(cb), usage(u), tooltip(t), spacebrk(sb) {}
+	command::command(const cmd_cb& cb, const string& u, const string& t) :
+		callback(cb), usage(u), tooltip(t) {}
 
 	map<string, command>& cmds() {
 		static map<string, command> _cmds = {
@@ -142,7 +142,7 @@ namespace noaf::cmd {
 			dump.pop();
 
 			switch (bt.type) {
-				case VALUE:
+				case VALUE: case VALUE_SPECIAL:
 					if (items.empty()) items.push_back({ VALUE, "" });
 					if ((items.at(0).type != VALUE) || delim)
 						items.insert(items.begin(), bt);
@@ -174,6 +174,9 @@ namespace noaf::cmd {
 		switch (mode.top()) {
 			case BASE:
 				items.push_back({ CALL, "" });
+				break;
+			case EXPRESSION:
+				items.push_back({ EVAL, "" });
 				break;
 		}
 
@@ -212,7 +215,7 @@ namespace noaf::cmd {
 
 		for (const auto& t : cmdline) {
 			switch (t.type) {
-				case VALUE:
+				case VALUE: // VALUE_SPECIAL is not presentby this point
 					if (last == VALUE) {
 						args.back() += t.value;
 					} else if (name.empty()) {
@@ -229,6 +232,8 @@ namespace noaf::cmd {
 
 	string eval(const track& cmdline) {
 		if (cmdline.empty()) return "";
+
+		if (cmdline.size() == 1) return cmdline.at(0).value;
 	}
 
 	track lex(const std::string& s) {
@@ -249,7 +254,7 @@ namespace noaf::cmd {
 				mode_type new_mode = EXPRESSION;
 				// search if there is a command at the beginning of a string
 				for (auto it = cmds().begin(); it != cmds().end(); it++) {
-					regex cmdsearch(it->first + (it->second.spacebrk ? " " : ""));
+					regex cmdsearch(it->first + " ");
 					if (regex_search(command.begin(), command.end(), match, cmdsearch)) {
 						// command found, use BASE mode
 						if (match.position() == 0) new_mode = BASE;
@@ -418,6 +423,9 @@ namespace noaf::cmd {
 			switch (t.type) {
 				case CALL:
 					retvals.push(call(pending));
+					for (auto temp = retvals; !temp.empty(); temp.pop())
+						log << temp.front() << " -> ";
+					log << lend;
 					pending = {};
 					break;
 				case EVAL:
