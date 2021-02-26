@@ -1,7 +1,6 @@
 #include "cmd.hpp"
 
 #include <regex>
-#include <queue>
 
 #include <log.hpp>
 
@@ -234,6 +233,8 @@ namespace noaf::cmd {
 		if (cmdline.empty()) return "";
 
 		if (cmdline.size() == 1) return cmdline.at(0).value;
+
+		return "";
 	}
 
 	track lex(const std::string& s) {
@@ -387,7 +388,10 @@ namespace noaf::cmd {
 					break;
 				case INLINE_END:
 					if (mode.top() == LIST) throw wrong_token;
+					tracks = tracks_append(tracks, read_command(dump, lists, mode));
+					dump.push({ REFERENCE, "" });
 					mode.pop();
+					break;
 				case NEXTCMD:
 					tracks = tracks_append(tracks, read_command(dump, lists, mode));
 					dump.push({ REFERENCE, "" });
@@ -416,36 +420,50 @@ namespace noaf::cmd {
 	}
 
 	string run(const track& data) {
-		queue<string>	retvals; // return values
-		track		pending; // next command pending execution
+		stack<string>	retvals; // return values
+		stack<token>	pending; // next command pending execution
+
+		const auto form = [&] () {
+			track result;
+
+			while (!pending.empty()) {
+				switch (pending.top().type) {
+					case REFERENCE:
+						if (retvals.empty()) throw lose_reference;
+
+						result.insert(result.begin(), { VALUE, retvals.top() });
+						retvals.pop();
+						break;
+					default:
+						result.insert(result.begin(), pending.top());
+				}
+				pending.pop();
+			}
+
+			return result;
+		};
 
 		for (const auto& t : data) {
 			switch (t.type) {
 				case CALL:
-					retvals.push(call(pending));
+					retvals.push(call(form()));
 					for (auto temp = retvals; !temp.empty(); temp.pop())
-						log << temp.front() << " -> ";
+						log << temp.top() << " -> ";
 					log << lend;
 					pending = {};
 					break;
 				case EVAL:
-					retvals.push(eval(pending));
+					retvals.push(eval(form()));
 					pending = {};
-					break;
-				case REFERENCE:
-					if (retvals.empty()) throw lose_reference;
-
-					pending.push_back({ VALUE, retvals.front() });
-					retvals.pop();
 					break;
 				case CLRRET:
 					{
-						queue<string> emp;
+						stack<string> emp;
 						swap(retvals, emp);
 					}
 					break;
 				default:
-					pending.push_back(t);
+					pending.push(t);
 			}
 		}
 
