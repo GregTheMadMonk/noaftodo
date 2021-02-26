@@ -20,9 +20,10 @@ namespace noaf::cmd {
 	map<token_type, string> tokens_expr = {
 		{ NEXTCMD,		"\\s*;\\s*" },
 		{ INLINE_START,		"\\s*\\(\\s*" },
-		{ INLINE_END,		"\\s*\\)\\s*" },
+		{ INLINE_END,		"\\s*\\)" },
 		{ LIST_START,		"\\s*\\[\\s*" },
 		{ VALUE_SPECIAL,	"\\\\." },
+
 		{ OP_ADD,		"\\s*\\+\\s*" },
 		{ OP_SUB,		"\\s*-\\s*" },
 		{ OP_MUL,		"\\s*\\*\\s*" },
@@ -32,6 +33,9 @@ namespace noaf::cmd {
 		{ OP_MULEQ,		"\\s*\\*=\\s*" },
 		{ OP_DIVEQ,		"\\s*\\/=\\s*" },
 		{ OP_EQ,		"\\s*=\\s*" },
+
+		{ TNONE,		"\\s+" },	// if for some reason there are lose whitspaces in an
+							// expression
 	};
 
 	map<token_type, string> tokens_list = {
@@ -405,6 +409,8 @@ namespace noaf::cmd {
 						string(1, (char)(lists.size() - 1))
 					});
 					mode.pop();
+					break;
+				case TNONE: // empty token
 					break;
 				default:
 					dump.push(t);

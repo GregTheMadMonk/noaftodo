@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 
 	log << lver(0);
 
-	cmd::cmds()["q"] = cmd::command([] (const vector<string>& args) { return "q"; });
+	cmd::cmds()["q"] = cmd::command([] (const vector<string>& args) { noaf::exit(); return ""; });
 
 	string s;
 	while (getline(cin, s)) {
