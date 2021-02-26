@@ -141,7 +141,7 @@ namespace noaf::cmd {
 
 	// append a set of "tracks" to an existing one
 	std::vector<track> tracks_append(const std::vector<track>& base, const std::vector<track>& more);
-	
+
 	/*
 	 * A little remark: yes, I know that read_list, read_command and get_subst
 	 * could've been a lambda expression inide precomp, but they're just
