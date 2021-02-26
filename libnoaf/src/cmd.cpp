@@ -47,6 +47,19 @@ namespace noaf::cmd {
 		{ INLINE_END,		"\\s*\\)\\s*" },
 	};
 
+	vector<token_type> op_order = {
+		// priority from most prioritized to least
+		OP_DIV,
+		OP_MUL,
+		OP_SUB,
+		OP_ADD,
+		OP_DIVEQ,
+		OP_MULEQ,
+		OP_SUBEQ,
+		OP_ADDEQ,
+		OP_EQ,
+	};
+
 	command::command(const cmd_cb& cb, const string& u, const string& t) :
 		callback(cb), usage(u), tooltip(t) {}
 
@@ -233,12 +246,76 @@ namespace noaf::cmd {
 		return cmds().at(name).callback(args);
 	}
 
-	string eval(const track& cmdline) {
+	string eval(track cmdline) {
 		if (cmdline.empty()) return "";
 
 		if (cmdline.size() == 1) return cmdline.at(0).value;
 
-		return "";
+		// finds the first token of specified type in a track
+		const auto fd_t = [] (const track& trck, const token_type& tt) {
+			for (auto it = trck.begin(); it != trck.end(); it++)
+				if ((*it).type == tt) return it;
+
+			return trck.end();
+		};
+
+		for (const auto& op_t : op_order)
+			for (auto it = fd_t(cmdline, op_t); it != cmdline.end(); it = fd_t(cmdline, op_t)) {
+				token res;
+				res.type = VALUE;
+
+				switch ((*it).type) {
+					case OP_SUB: // - before a number without a left operand negates it
+						{
+
+						bool negate = false;
+						if (it == cmdline.begin()) {
+							negate = true;
+						} else {
+							const auto ta = *prev(it);
+							negate = (ta.type != VALUE);
+						}
+
+						if (negate) {
+							const auto tb = *next(it);
+							if (tb.type != VALUE) throw wrong_token;
+
+							cmdline.erase(it, next(next(it)));
+							cmdline.insert(it, { VALUE, to_string(-stof(tb.value)) });
+							break;
+						}
+
+						}
+					case OP_DIV: case OP_MUL: case OP_ADD:
+						const auto ta = *prev(it);
+						const auto tb = *next(it);
+						if ((ta.type != VALUE) || (tb.type != VALUE)) throw wrong_token;
+
+						const float a = stof(ta.value);
+						const float b = stof(tb.value);
+
+						switch ((*it).type) {
+							case OP_DIV:
+								res.value = to_string(a / b);
+								break;
+							case OP_MUL:
+								res.value = to_string(a * b);
+								break;
+							case OP_ADD:
+								res.value = to_string(a + b);
+								break;
+							case OP_SUB:
+								res.value = to_string(a - b);
+								break;
+						}
+
+						cmdline.erase(prev(it), next(next(it)));
+						cmdline.insert(prev(it), res);
+						break;
+				}
+			}
+
+		return cmdline.at(0).value;
 	}
 
 	track lex(const std::string& s) {

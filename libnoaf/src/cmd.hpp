@@ -49,6 +49,9 @@ namespace noaf::cmd {
 	extern std::map<token_type, std::string> tokens_expr;
 	extern std::map<token_type, std::string> tokens_list;
 
+	// operators priority order
+	extern std::vector<token_type> op_order;
+
 	// interpreter modes
 	enum mode_type {
 		MNONE,
@@ -110,7 +113,7 @@ namespace noaf::cmd {
 	*/
 
 	std::string call(const track& cmdline);
-	std::string eval(const track& cmdline);
+	std::string eval(track cmdline);
 
 	// lexer (forgive me my terminology, I don't know shit about CS)
 	track lex(const std::string& s);
