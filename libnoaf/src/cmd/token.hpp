@@ -2,7 +2,9 @@
 #ifndef NOAF_CMD_TOKEN_H
 #define NOAF_CMD_TOKEN_H
 
+#include <map>
 #include <string>
+#include <vector>
 
 namespace noaf::cmd {
 
@@ -63,6 +65,14 @@ namespace noaf::cmd {
 		token_type type;
 		std::string value;
 	};
+
+	// contain regex patterns for corresponding tokens
+	extern std::map<token_type, std::string> tokens_base;
+	extern std::map<token_type, std::string> tokens_expr;
+	extern std::map<token_type, std::string> tokens_list;
+
+	// operators priority order
+	extern std::vector<token_type> op_order;
 
 }
 #endif

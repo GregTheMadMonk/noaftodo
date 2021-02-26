@@ -44,14 +44,6 @@ namespace noaf::cmd {
 	 * Peace
 	 */
 
-	// contain regex patterns for corresponding tokens
-	extern std::map<token_type, std::string> tokens_base;
-	extern std::map<token_type, std::string> tokens_expr;
-	extern std::map<token_type, std::string> tokens_list;
-
-	// operators priority order
-	extern std::vector<token_type> op_order;
-
 	// interpreter modes
 	enum mode_type {
 		MNONE,

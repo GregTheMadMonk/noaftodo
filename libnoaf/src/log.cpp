@@ -28,13 +28,6 @@ namespace noaf {
 			else {
 				string prefix = "[" + time_s().fmt("%H:%M:%S") + "][" + to_string(level) + "][";
 
-				/*
-				 * TODO: print last return value again
-				for (int i = 0; i < 10; i++)
-					if (i < cmd::ret.length()) prefix += cmd::ret.at(i);
-					else prefix += " ";
-				*/
-
 				prefix += "]\t";
 
 				for (int i = 0; i < offset; i++) prefix += "  ";
