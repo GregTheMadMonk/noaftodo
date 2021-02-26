@@ -38,10 +38,6 @@ namespace noaf::cmd {
 		OP_MUL = '*',
 		OP_DIV = '/',
 		OP_EQ = '=',
-		OP_ADDEQ = 'a',
-		OP_SUBEQ = 's',
-		OP_MULEQ = 'm',
-		OP_DIVEQ = 'd',
 
 		// list mode tokens
 		LIST_END = 'e',

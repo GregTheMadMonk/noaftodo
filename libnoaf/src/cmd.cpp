@@ -2,6 +2,7 @@
 
 #include <regex>
 
+#include <cvar.hpp>
 #include <log.hpp>
 
 using namespace std;
@@ -28,10 +29,6 @@ namespace noaf::cmd {
 		{ OP_SUB,		"\\s*-\\s*" },
 		{ OP_MUL,		"\\s*\\*\\s*" },
 		{ OP_DIV,		"\\s*\\/\\s*" },
-		{ OP_ADDEQ,		"\\s*\\+=\\s*" },
-		{ OP_SUBEQ,		"\\s*-=\\s*" },
-		{ OP_MULEQ,		"\\s*\\*=\\s*" },
-		{ OP_DIVEQ,		"\\s*\\/=\\s*" },
 		{ OP_EQ,		"\\s*=\\s*" },
 
 		{ TNONE,		"\\s+" },	// if for some reason there are lose whitspaces in an
@@ -53,10 +50,6 @@ namespace noaf::cmd {
 		OP_MUL,
 		OP_SUB,
 		OP_ADD,
-		OP_DIVEQ,
-		OP_MULEQ,
-		OP_SUBEQ,
-		OP_ADDEQ,
 		OP_EQ,
 	};
 
@@ -287,6 +280,7 @@ namespace noaf::cmd {
 
 						}
 					case OP_DIV: case OP_MUL: case OP_ADD:
+						{
 						const auto ta = *prev(it);
 						const auto tb = *next(it);
 						if ((ta.type != VALUE) || (tb.type != VALUE)) throw wrong_token;
@@ -311,6 +305,19 @@ namespace noaf::cmd {
 
 						cmdline.erase(prev(it), next(next(it)));
 						cmdline.insert(prev(it), res);
+						}
+						break;
+					case OP_EQ:
+						{
+						const auto ta = *prev(it);
+						const auto tb = *next(it);
+
+						if ((ta.type != VALUE) || (tb.type != VALUE)) throw wrong_token;
+
+						cvar::get(ta.value) = tb.value;
+
+						cmdline.erase(prev(it), next(it));
+						}
 						break;
 				}
 			}
