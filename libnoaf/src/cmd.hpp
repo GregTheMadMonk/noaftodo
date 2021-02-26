@@ -58,6 +58,7 @@ namespace noaf::cmd {
 	const std::runtime_error token_not_found("Can't find next token in the string!");
 	const std::runtime_error lose_reference("Lose REFERENCE token!");
 	const std::runtime_error few_arguments("Not enoguh arguments!");
+	const std::runtime_error unterminated_mode("Unterminated mode!");
 	const std::runtime_error wrong_arg_type("Wrong argument type!");
 
 	// command struct

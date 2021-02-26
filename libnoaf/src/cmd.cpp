@@ -403,6 +403,8 @@ namespace noaf::cmd {
 			tokens.push_back(t);
 		}
 
+		if (mode.size() > 1) throw unterminated_mode;
+
 		return tokens;
 	}
 
