@@ -117,14 +117,21 @@ namespace noaf::cmd {
 		bool delim = false;
 
 		while (is_reading()) {
-			const auto bt = dump.top();
+			auto bt = dump.top();
 			dump.pop();
 
 			switch (bt.type) {
-				case VALUE: case VALUE_SPECIAL:
+				case QUOT1: case QUOT2: case QUOT3:
+					bt.value = bt.value.substr(0, bt.value.length() - 1);
+					bt.value = regex_replace(bt.value,
+							regex("\\\\(.)"),
+							"$1");
+				case VALUE_SPECIAL:
+					bt.value = bt.value.substr(1);
+				case VALUE:
 					if (items.empty()) items.push_back({ VALUE, "" });
 					if ((items.at(0).type != VALUE) || delim)
-						items.insert(items.begin(), bt);
+						items.insert(items.begin(), { VALUE, bt.value });
 					else items.at(0).value = bt.value + items.at(0).value;
 					delim = false;
 					break;
@@ -406,9 +413,6 @@ namespace noaf::cmd {
 					break;
 				case INLINE_END:
 					mode.pop();
-					break;
-				case VALUE_SPECIAL:
-					t.value = string(1, t.value.at(1));
 					break;
 				default:
 					break;

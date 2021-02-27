@@ -11,6 +11,10 @@ namespace noaf::cmd {
 		{ LIST_START,		"\\[\\s*" },
 		{ BASE_DELIMITER,	"\\s+" },
 		{ VALUE_SPECIAL,	"\\\\." },
+
+		{ QUOT1,		"\"((\\\\\")*[^\"\\\\]*)*\"" },
+		{ QUOT2,		"'((\\\\')*[^'\\\\]*)*'" },
+		{ QUOT3,		"`((\\\\`)*[^`\\\\]*)*`" },
 	};
 
 	map<token_type, string> tokens_expr = {

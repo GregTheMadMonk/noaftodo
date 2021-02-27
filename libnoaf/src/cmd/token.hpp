@@ -24,6 +24,11 @@ namespace noaf::cmd {
 		BLOCK_START = '{',
 		BLOCK_END = '}',
 
+		// start and end of various quotes
+		QUOT1 = '"',
+		QUOT2 = '\'',
+		QUOT3 = '`',
+
 		// mode start tokens
 		BASE_START = 'b',
 		EXPR_START = 'E',
