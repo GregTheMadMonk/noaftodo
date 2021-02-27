@@ -456,7 +456,6 @@ namespace noaf::cmd {
 					break;
 				case NEXTCMD:
 					tracks = tracks_append(tracks, read_command(dump, lists, mode));
-					dump.push({ REFERENCE, "" });
 					break;
 				case LIST_END:
 					if (mode.top() != LIST) throw wrong_token;
