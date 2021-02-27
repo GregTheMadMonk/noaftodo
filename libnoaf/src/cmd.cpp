@@ -431,6 +431,7 @@ namespace noaf::cmd {
 		stack<token> dump;
 		vector<track> tracks;
 		listdb lists;
+		track ret = {};
 
 		// "compilation"?
 		for (size_t p = 0; p < tokens.size(); p++) {
@@ -456,6 +457,15 @@ namespace noaf::cmd {
 					break;
 				case NEXTCMD:
 					tracks = tracks_append(tracks, read_command(dump, lists, mode));
+					if (mode.size() == 1) { // top level commands are not chain-expanded
+						// squash the tracks into a token sequence
+						for (const auto& trck : tracks) {
+							ret.insert(ret.end(), { CLRRET, "" });
+							ret.insert(ret.end(), trck.begin(), trck.end());
+						}
+
+						tracks = {};
+					}
 					break;
 				case LIST_END:
 					if (mode.top() != LIST) throw wrong_token;
@@ -474,12 +484,7 @@ namespace noaf::cmd {
 			}
 		}
 
-		tokens = {};
-		for (auto& trck : tracks) {
-			trck.insert(trck.begin(), { CLRRET, "" });
-			tokens.insert(tokens.end(), trck.begin(), trck.end());
-		}
-		return tokens;
+		return ret;
 	}
 
 	string run(const track& data) {
