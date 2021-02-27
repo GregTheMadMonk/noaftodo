@@ -3,6 +3,7 @@
 #include <regex>
 
 #include <cvar.hpp>
+#include <hooks.hpp>
 #include <log.hpp>
 
 using namespace std;
@@ -31,7 +32,20 @@ namespace noaf::cmd {
 					"echo [arguments...]",
 					"Outputs its arguments"
 				)
-			}
+			},
+			{
+				"q",
+				command(
+					[] (const vector<string>& args) {
+						if (args.empty()) noaf::exit();
+						else noaf::exit(stoi(args.at(0)));
+
+						return "";
+					},
+					"q [code = 0]",
+					"Exits the program with specified code"
+				)
+			},
 		};
 
 		return _cmds;
@@ -299,7 +313,9 @@ namespace noaf::cmd {
 				mode_type new_mode = EXPRESSION;
 				// search if there is a command at the beginning of a string
 				for (auto it = cmds().begin(); it != cmds().end(); it++) {
-					regex cmdsearch(it->first + " ");
+					regex cmdsearch(it->first +
+						       ((command.length() == it->first.length()) ? "" : " ")
+						       );
 					if (regex_search(command.begin(), command.end(), match, cmdsearch)) {
 						// command found, use BASE mode
 						if (match.position() == 0) new_mode = BASE;
