@@ -414,7 +414,9 @@ namespace noaf::cmd {
 				case INLINE_END:
 					mode.pop();
 					break;
-				default:
+				case NEXTCMD:
+					mode.pop();
+					mode.push(MNONE);
 					break;
 			}
 
@@ -470,6 +472,7 @@ namespace noaf::cmd {
 
 						tracks = {};
 					}
+					mode.pop();
 					break;
 				case LIST_END:
 					if (mode.top() != LIST) throw wrong_token;
@@ -550,8 +553,15 @@ namespace noaf::cmd {
 	}
 
 	void exec(const std::string& s) {
+		const auto prn = [] (const track& tr) {
+			for (const auto& t : tr) log << t.type << " -> " << t.value << lend;
+		};
+
 		auto tokens = lex(s);
+		// prn(tokens);
 		tokens = precomp(tokens);
+		// log << "-----------------" << lend;
+		// prn(tokens);
 		const auto ret = run(tokens);
 
 		log << ">>> " << ret << lend;
