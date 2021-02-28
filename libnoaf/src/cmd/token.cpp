@@ -15,6 +15,8 @@ namespace noaf::cmd {
 		{ QUOT1,		"\"((\\\\\")*[^\"\\\\]*)*\"" },
 		{ QUOT2,		"'((\\\\')*[^'\\\\]*)*'" },
 		{ QUOT3,		"`((\\\\`)*[^`\\\\]*)*`" },
+
+		{ VAR_REFERENCE,	"%((\\\\%)*[^%\\\\]*)*%" }
 	};
 
 	map<token_type, string> tokens_expr = {
@@ -32,6 +34,8 @@ namespace noaf::cmd {
 
 		{ TNONE,		"\\s+" },	// if for some reason there are lose whitspaces in an
 							// expression
+
+		{ VAR_REFERENCE,	"%((\\\\%)*[^%\\\\]*)*%" }
 	};
 
 	map<token_type, string> tokens_list = {
@@ -41,6 +45,8 @@ namespace noaf::cmd {
 		{ VALUE_SPECIAL,	"\\\\." },
 		{ INLINE_START,		"\\s*\\(\\s*" },
 		{ INLINE_END,		"\\s*\\)\\s*" },
+
+		{ VAR_REFERENCE,	"%((\\\\%)*[^%\\\\]*)*%" }
 	};
 
 	vector<token_type> op_order = {

@@ -58,6 +58,7 @@ namespace noaf::cmd {
 		// references
 		REFERENCE = 'R',	// references the top of previously executed commands return values
 		LIST_REFERENCE = 'L',	// references the list
+		VAR_REFERENCE = 'r',	// references a cvar
 
 		// execution flow control
 		CALL = 'C',	// call the command

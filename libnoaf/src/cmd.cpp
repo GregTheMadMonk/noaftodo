@@ -509,6 +509,13 @@ namespace noaf::cmd {
 						result.insert(result.begin(), { VALUE, retvals.top() });
 						retvals.pop();
 						break;
+					case VAR_REFERENCE:
+						{
+						string var = pending.top().value;
+						var = var.substr(1, var.length() - 2);
+						result.insert(result.begin(), { VALUE, (string)cvar::get(var) });
+						}
+						break;
 					default:
 						result.insert(result.begin(), pending.top());
 				}
