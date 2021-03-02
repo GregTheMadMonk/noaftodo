@@ -5,7 +5,6 @@
 #include <codecvt>
 #include <locale>
 #include <map>
-#include <string>
 
 #include <ui.hpp>
 
@@ -41,7 +40,6 @@ namespace noaf {
 			void set_fg(const uint32_t& color);
 			void set_bg(const uint32_t& color);
 
-			int halfdelay_time;
 			std::wstring charset = L"|-++++";
 			std::string charset_get(const int& position);
 	};

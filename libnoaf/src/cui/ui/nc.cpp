@@ -37,8 +37,8 @@ namespace noaf {
 		else for (int f = -1; f < 16; f++) for (int b = -1; b < 16; b++)
 			init_pair(f + 1 + (b + 1) * 17 + 1, f % 8, b % 8);
 
-		if (halfdelay_time == 0) cbreak();
-		else halfdelay(halfdelay_time);
+		if (frame_time == 0) cbreak();
+		else halfdelay(frame_time / 100);
 		set_escdelay(0);
 		curs_set(0);
 		noecho();

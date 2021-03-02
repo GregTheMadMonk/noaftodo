@@ -21,6 +21,8 @@ namespace noaf {
 		bool draw_fill	= false;
 		bool draw_stroke= true;
 		public:
+			int frame_time = 300; // time one frame takes
+
 			// backend hooks
 			// basic functionality
 			virtual void init() = 0;

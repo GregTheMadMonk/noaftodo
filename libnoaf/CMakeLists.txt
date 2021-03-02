@@ -9,9 +9,12 @@ set( CXX_STANDART_REQUIRED True )
 
 add_compile_options( -fpermissive -std=c++17 )
 
-# Link ncurses
+# Require ncurses
 set( CURSES_NEED_WIDE True )
 find_package( Curses REQUIRED )
+
+# Require Qt5
+find_package( Qt5 COMPONENTS Core Gui Widgets REQUIRED )
 
 # Include index
 include_directories( src/core )
@@ -35,8 +38,11 @@ add_library( ${_NAME}cui SHARED
 target_link_libraries( ${_NAME}cui ${CURSES_LIBRARIES} )
 
 # NOAF GUI
+SET( CMAKE_AUTOMOC TRUE )
 add_library( ${_NAME}gui SHARED
 	${_SOURCES_GUI} )
+target_link_libraries( ${_NAME}gui Qt5::Core Qt5::Gui Qt5::Widgets )
+SET( CMAKE_AUTOMOC FALSE )
 
 # Add nessesary build flags
 # Explicitly set NCURSES_WIDECHAR
@@ -47,6 +53,7 @@ add_definitions( -DNCURSES_WIDECHAR )
 
 # Build demos
 file( GLOB_RECURSE _DEMOS demos/*.cpp )
+include_directories( src/cui src/gui )
 foreach( _DEMO ${_DEMOS} )
 	get_filename_component( _DEMO_NAME ${_DEMO} NAME_WE )
 	message( STATUS "${_DEMO_NAME}" )
