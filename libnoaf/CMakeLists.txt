@@ -14,17 +14,29 @@ set( CURSES_NEED_WIDE True )
 find_package( Curses REQUIRED )
 
 # Include index
-include_directories( src/ )
+include_directories( src/core )
 
 # Envvar controlled arguments
 # TODO
 
 # Find source files
-file( GLOB_RECURSE _SOURCES src/*.cpp )
+file( GLOB_RECURSE _SOURCES src/core/*.cpp )
+file( GLOB_RECURSE _SOURCES_CUI src/cui/*.cpp )
+file( GLOB_RECURSE _SOURCES_GUI src/gui/*.cpp )
 
 # Declare the library
+# NOAF core
 add_library( ${_NAME} SHARED
 	${_SOURCES} )
+
+# NOAF CUI
+add_library( ${_NAME}cui SHARED
+	${_SOURCES_CUI} )
+target_link_libraries( ${_NAME}cui ${CURSES_LIBRARIES} )
+
+# NOAF GUI
+add_library( ${_NAME}gui SHARED
+	${_SOURCES_GUI} )
 
 # Add nessesary build flags
 # Explicitly set NCURSES_WIDECHAR
@@ -39,7 +51,7 @@ foreach( _DEMO ${_DEMOS} )
 	get_filename_component( _DEMO_NAME ${_DEMO} NAME_WE )
 	message( STATUS "${_DEMO_NAME}" )
 	add_executable( ${_DEMO_NAME} ${_DEMO} )
-	target_link_libraries( ${_DEMO_NAME} ${CURSES_LIBRARIES} noaf )
+	target_link_libraries( ${_DEMO_NAME} noaf noafcui noafgui )
 endforeach()
 
 # Install the library

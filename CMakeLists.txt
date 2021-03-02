@@ -13,12 +13,8 @@ add_compile_options( -fpermissive -std=c++17 )
 # Compile and link libnoaf
 add_subdirectory( libnoaf )
 
-# Link ncurses
-set( NCURSES_NEED_WIDE True )
-find_package( Curses REQUIRED )
-
 # Include index
-include_directories( ${CURSES_INCLUDE_DIR} "src/" "libnoaf/src" ) # TODO: export libnoaf includes and use them
+include_directories( "src/" "libnoaf/src" ) # TODO: export libnoaf includes and use them
 
 # Check for needed headers
 CHECK_INCLUDE_FILE( "mqueue.h" _HAS_MQUEUE )
@@ -65,10 +61,7 @@ file( GLOB_RECURSE _SOURCES src/*.cpp )
 
 # Declare an executable
 add_executable( ${CMAKE_PROJECT_NAME} ${_SOURCES} )
-target_link_libraries( ${CMAKE_PROJECT_NAME} ${CURSES_LIBRARIES} noaf )
-
-# Explicitly set NCURSES_WIDECHAR
-add_definitions( -DNCURSES_WIDECHAR )
+target_link_libraries( ${CMAKE_PROJECT_NAME} noaf noafcui )
 
 if ( ${_NO_MQUEUE} )
 	add_definitions( -DNO_MQUEUE )
