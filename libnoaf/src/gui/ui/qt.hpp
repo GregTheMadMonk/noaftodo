@@ -2,16 +2,16 @@
 #ifndef NOAF_UI_QT_H
 #define NOAF_UI_QT_H
 
-#include <ui.hpp>
-
-#include <memory>
-
 #include <QApplication>
 #include <QEvent>
 #include <QMainWindow>
 #include <QPen>
 #include <QPixmap>
 #include <QWidget>
+
+#include <memory>
+
+#include <ui.hpp>
 
 namespace noaf {
 
