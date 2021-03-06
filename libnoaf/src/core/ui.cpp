@@ -4,7 +4,7 @@ using namespace std;
 
 namespace noaf {
 
-	shared_ptr<backend> ui;
+	backend* ui;
 
 	void backend::fill() {
 		draw_fill = !draw_fill;

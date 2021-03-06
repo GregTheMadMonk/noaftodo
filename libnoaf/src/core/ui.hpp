@@ -3,7 +3,6 @@
 #define NOAF_UI_H
 
 #include <functional>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -58,10 +57,7 @@ namespace noaf {
 			bool can(const int& req);
 	};
 
-	extern std::shared_ptr<backend> ui;
-	template <class b> std::shared_ptr<b> ui_as() {
-		return std::dynamic_pointer_cast<b>(ui);
-	}
+	extern backend* ui;
 
 	int ucvt(const int& val, const char& unit = 0);
 
@@ -82,6 +78,8 @@ namespace noaf {
 	// callbacks
 	extern std::function<void()> on_paint;
 	extern std::function<void(const input_event& event)> on_input;
+
+	typedef backend* (*backend_creator)(const int& argc, char**& argv);
 
 }
 

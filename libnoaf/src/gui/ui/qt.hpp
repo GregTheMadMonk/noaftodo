@@ -2,47 +2,19 @@
 #ifndef NOAF_UI_QT_H
 #define NOAF_UI_QT_H
 
-#include <QApplication>
-#include <QEvent>
-#include <QMainWindow>
-#include <QPen>
-#include <QPixmap>
-#include <QWidget>
-
 #include <memory>
 
 #include <ui.hpp>
 
+class QApplication;
+
 namespace noaf {
 
-	class QNOAFMainWidget : public QWidget {
-			Q_OBJECT
-
-			QPixmap target;
-		public:
-			QNOAFMainWidget(QWidget* parent);
-			~QNOAFMainWidget();
-			friend class QNOAFWindow;
-			friend class backend_qt;
-		protected:
-			void paintEvent(QPaintEvent* e);
-	};
-
-	class QNOAFWindow : public QMainWindow {
-			Q_OBJECT
-			std::unique_ptr<QNOAFMainWidget> main_widget;
-		public:
-			QNOAFWindow();
-
-			friend class backend_qt;
-	};
+	class QNOAFWindow;
 
 	class backend_qt : public backend {
-			std::unique_ptr<QApplication> app = nullptr;
-			std::unique_ptr<QNOAFWindow> win = nullptr;
-
-			QPen fg;
-			QColor bg;
+			QApplication* app = nullptr;
+			QNOAFWindow* win = nullptr;
 
 			int argc;
 			char** argv;

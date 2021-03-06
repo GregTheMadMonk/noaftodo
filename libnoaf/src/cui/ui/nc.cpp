@@ -217,4 +217,8 @@ namespace noaf {
 		return input_event();
 	}
 
+	extern "C" backend* backend_create(const int& ac, char**& av) {
+		return new backend_ncurses();
+	}
+
 }

@@ -1,3 +1,4 @@
+#include <dlfcn.h>
 #include <csignal>
 
 #include <conarg.hpp>
@@ -15,22 +16,30 @@ int main(int argc, char* argv[]) {
 	signal(SIGINT, noaf::exit);
 	signal(SIGTERM, noaf::exit);
 
-	bool fb = false;
+	bool qt = false;
 
 	conarg::args()[{ "--qt" }] = {
-		[&] (const vector<string>& params) { fb = true; },
+		[&] (const vector<string>& params) { qt = true; },
 		0,
 		""
 	};
 
 	conarg::parse(argc, argv);
 
-	if (fb) {
-		ui = make_shared<backend_qt>(argc, argv);
-	} else {
-		ui = make_shared<backend_ncurses>();
+	void* handle = nullptr;
 
-		ui_as<backend_ncurses>()->charset = L"|-/\\\\/";
+	if (qt) {
+		handle = dlopen("libnoafgui.so", RTLD_LAZY);
+	} else {
+		handle = dlopen("libnoafcui.so", RTLD_LAZY);
+	}
+
+	backend_creator creator = (backend_creator) dlsym(handle, "backend_create");
+	ui = creator(argc, argv);
+
+	if (qt) {
+	} else {
+		((backend_ncurses*)ui)->charset = L"|-/\\\\/";
 	}
 
 	ui->init();
@@ -69,6 +78,9 @@ int main(int argc, char* argv[]) {
 	ui->run();
 
 	ui->kill();
+
+	delete ui;
+	dlclose(handle);
 
 	return 0;
 }

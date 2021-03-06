@@ -58,7 +58,12 @@ foreach( _DEMO ${_DEMOS} )
 	get_filename_component( _DEMO_NAME ${_DEMO} NAME_WE )
 	message( STATUS "${_DEMO_NAME}" )
 	add_executable( ${_DEMO_NAME} ${_DEMO} )
-	target_link_libraries( ${_DEMO_NAME} noaf noafcui noafgui )
+	if ( "${_DEMO_NAME}" STREQUAL "noafui" )
+		message( "Building noafui" )
+		target_link_libraries( ${_DEMO_NAME} noaf dl )
+	else()
+		target_link_libraries( ${_DEMO_NAME} noaf noafcui noafgui )
+	endif()
 endforeach()
 
 # Install the library
