@@ -15,7 +15,6 @@ namespace noaf {
 			QPixmap target;
 		public:
 			QNOAFMainWidget(QWidget* parent);
-			~QNOAFMainWidget();
 			friend class QNOAFWindow;
 			friend class backend_qt;
 		protected:
@@ -24,7 +23,7 @@ namespace noaf {
 
 	class QNOAFWindow : public QMainWindow {
 			Q_OBJECT
-			std::unique_ptr<QNOAFMainWidget> main_widget;
+			QNOAFMainWidget* main_widget;
 
 			QPen fg;
 			QColor bg;
@@ -32,6 +31,9 @@ namespace noaf {
 			QNOAFWindow();
 
 			friend class backend_qt;
+
+		protected:
+			void keyPressEvent(QKeyEvent *event);
 	};
 
 }

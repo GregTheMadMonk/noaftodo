@@ -54,15 +54,15 @@ int main(int argc, char* argv[]) {
 		ui->clear();
 		ui->set_fg(0xffff0000);
 		ui->set_bg(0xffffffff);
-		ui->draw_text(1, 1, "**Frame:** " + to_string(frame) + " : " + to_string(frame % 16));
+		ui->draw_text(1, ucvt(50, 'h'), "**Frame:** " + to_string(frame) + " : " + to_string(frame % 16));
 		ui->set_fg(0xff00ff00);
-		ui->draw_text(1, 2, "**Last input: **" + input_name);
+		ui->draw_text(1, ucvt(50, 'h') + 1, "**Last input: **" + input_name);
 		ui->set_fg(0xffffffff);
 		ui->set_bg(0xffffcc00);
 		ui->draw_box(ucvt(50, 'w'), ucvt(50, 'h'), ucvt(100, 'w') - 2, ucvt(100, 'h') - 2);
 		ui->set_bg(col::to_true(frame % 16));
 		ui->draw_box(10, 10, 20, 20);
-		ui->set_bg(0xffff00cc);
+		ui->set_bg(0xaaff00cc);
 		ui->draw_box(ucvt(25, 'w'), ucvt(25, 'h'), ucvt(75, 'w'), ucvt(75, 'h'));
 	};
 
@@ -71,13 +71,11 @@ int main(int argc, char* argv[]) {
 		if (e.key == 'q') noaf::exit();
 	};
 
-	noaf::on_exit = [] (const int& code) {
+	noaf::on_exit = [&] (const int& code) {
 		ui->kill();
 	};
 
 	ui->run();
-
-	ui->kill();
 
 	delete ui;
 	dlclose(handle);

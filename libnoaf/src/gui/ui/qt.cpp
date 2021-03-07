@@ -1,6 +1,7 @@
 #include "qt.hpp"
 
 #include <QApplication>
+#include <QFontMetrics>
 #include <QPainter>
 #include <QPainterPath>
 #include <QTimer>
@@ -17,10 +18,10 @@ namespace noaf {
 	}
 
 	backend_qt::~backend_qt() {
-		delete argv;
+		kill();
 		delete app;
 		delete win;
-		kill();
+		delete argv;
 	}
 
 	void backend_qt::init() {
@@ -33,8 +34,7 @@ namespace noaf {
 	void backend_qt::resume() {}
 
 	void backend_qt::kill() {
-		delete app;
-		delete win;
+		app->quit();
 	}
 
 	void backend_qt::run() {
@@ -73,19 +73,19 @@ namespace noaf {
 	void backend_qt::draw_box(const int& x1, const int& y1, const int& x2, const int& y2) {
 		QPainter p(&win->main_widget->target);
 		QPainterPath path;
-		path.addRect(x1, y1, x2 - x1, y2 - y1);
+		path.addRect(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
+		if (draw_fill) p.fillPath(path, win->bg);
 		if (draw_stroke) {
 			p.setPen(win->fg);
 			p.drawPath(path);
 		}
-		if (draw_fill) p.fillPath(path, win->bg);
 		p.end();
 	}
 
 	void backend_qt::draw_text(const int& x, const int& y, const string& text) {
 		QPainter p(&win->main_widget->target);
 		p.setPen(win->fg);
-		p.drawText(x, y, text.c_str());
+		p.drawText(x, y + QFontMetrics(p.font()).height(), text.c_str());
 		p.end();
 	}
 
