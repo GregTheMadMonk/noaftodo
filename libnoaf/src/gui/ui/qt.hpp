@@ -18,7 +18,14 @@ namespace noaf {
 
 			int argc;
 			char** argv;
+			#ifdef __linux__
+			int k_mode = -1;
+			#endif
 		public:
+			#ifdef __linux__
+			bool linuxfb;
+			#endif
+
 			backend_qt(const int& ac, char**& av);
 			~backend_qt();
 

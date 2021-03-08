@@ -141,7 +141,7 @@ namespace noaf {
 	}
 
 	string backend_ncurses::charset_get(const int& position) {
-		return string(charset.begin() + position, charset.begin() + position + 1);
+		return wc.to_bytes(charset.at(position));
 	}
 
 	map<string, string> nc_keyname_lookup = {
@@ -175,8 +175,7 @@ namespace noaf {
 		{ "KEY_NPAGE",		"pgdown" },
 	};
 
-	input_event nc_process_input(wint_t c) {
-		wstring_convert<codecvt_utf8<wchar_t>, wchar_t> wc;
+	input_event backend_ncurses::nc_process_input(wint_t c) {
 		input_event event;
 		bool mod_alt = false;
 		bool mod_ctrl = false;

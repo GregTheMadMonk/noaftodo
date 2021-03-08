@@ -24,6 +24,15 @@ int main(int argc, char* argv[]) {
 		""
 	};
 
+	#ifdef __linux__
+	bool fb = false;
+	conarg::args()[{ "--fb" }] = {
+		[&] (const vector<string>& params) { fb = true; },
+		0,
+		""
+	};
+	#endif
+
 	conarg::parse(argc, argv);
 
 	void* handle = nullptr;
@@ -38,8 +47,11 @@ int main(int argc, char* argv[]) {
 	ui = creator(argc, argv);
 
 	if (qt) {
+		#ifdef __linux__
+		((backend_qt*)ui)->linuxfb = fb;
+		#endif
 	} else {
-		((backend_ncurses*)ui)->charset = L"|-/\\\\/";
+		((backend_ncurses*)ui)->charset = L"│─╭╮╰╯";
 	}
 
 	ui->init();
@@ -76,6 +88,7 @@ int main(int argc, char* argv[]) {
 	};
 
 	ui->run();
+	ui->kill();
 
 	delete ui;
 	dlclose(handle);

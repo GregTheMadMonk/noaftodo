@@ -8,6 +8,18 @@
 
 #include <ui/qt_window.hpp>
 
+#ifdef __linux__
+// Qt fails to reset terminal back to normal
+// after running a framebuffer application
+// for some reason.
+// Fine, we'll do it ourselves
+#include <cstdlib>
+#include <fcntl.h>
+#include <linux/kd.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+
 using namespace std;
 
 namespace noaf {
@@ -25,6 +37,16 @@ namespace noaf {
 	}
 
 	void backend_qt::init() {
+		#ifdef __linux__
+		if (linuxfb) {
+			setenv("QT_QPA_PLATFORM", "linuxfb:tty=/dev/tty", 1);
+			int tfd = open("/dev/tty", O_RDWR);
+			if (tfd == -1) throw runtime_error("Cannot open TTY");
+			ioctl(tfd, KDGKBMODE, &k_mode);
+			if (k_mode == -1) throw runtime_error("Cannot recieve KDBMODE");
+			close(tfd);
+		}
+		#endif
 		app = new QApplication(argc, argv);
 		win = new QNOAFWindow();
 	}
@@ -35,6 +57,17 @@ namespace noaf {
 
 	void backend_qt::kill() {
 		app->quit();
+		#ifdef __linux__
+		int tfd = open("/dev/tty", O_RDWR);
+		if (tfd == -1) throw runtime_error("Cannot open TTY");
+		ioctl(tfd, KDSETMODE, KD_TEXT); // return to text mode from graphics mode
+		ioctl(tfd, 0x4b51, 0); // 0x4b51=KDKBMUTE
+		ioctl(tfd, KDSKBMODE, k_mode);
+		k_mode = -1;
+		const auto blink_on = "\033[9;15]\033[?33h\033[?25h\033[?0c";
+		write(tfd, blink_on, strlen(blink_on) + 1);
+		close(tfd);
+		#endif
 	}
 
 	void backend_qt::run() {
