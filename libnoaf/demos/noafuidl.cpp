@@ -1,3 +1,4 @@
+#include <dlfcn.h>
 #include <csignal>
 
 #include <conarg.hpp>
@@ -34,11 +35,16 @@ int main(int argc, char* argv[]) {
 
 	conarg::parse(argc, argv);
 
+	void* handle = nullptr;
+
 	if (qt) {
-		ui = new backend_qt(argc, argv);
+		handle = dlopen("libnoafgui.so", RTLD_LAZY);
 	} else {
-		ui = new backend_ncurses();
+		handle = dlopen("libnoafcui.so", RTLD_LAZY);
 	}
+
+	backend_creator creator = (backend_creator) dlsym(handle, "backend_create");
+	ui = creator(argc, argv);
 
 	if (qt) {
 		#ifdef __linux__
@@ -85,6 +91,7 @@ int main(int argc, char* argv[]) {
 	ui->kill();
 
 	delete ui;
+	dlclose(handle);
 
 	return 0;
 }
