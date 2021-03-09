@@ -38,6 +38,7 @@ namespace noaf {
 
 			virtual void draw_line(const int& x1, const int& y1, const int& x2, const int& y2) = 0;
 			virtual void draw_box(const int& x1, const int& y1, const int& x2, const int& y2) = 0;
+			virtual void draw_rnd_box(const int& x1, const int& y1, const int& x2, const int& y2, const int& radius);
 			virtual void draw_text(const int& x, const int& y, const std::string& text) = 0;
 
 			// switch drawing fill and stroke

@@ -22,6 +22,10 @@ namespace noaf {
 		draw_stroke = val;
 	}
 
+	void backend::draw_rnd_box(const int& x1, const int& y1, const int& x2, const int& y2, const int& radius) {
+		draw_box(x1, y1, x2, y2); // dfault to a regular box
+	}
+
 	bool backend::can(const int& req) {
 		return features & req;
 	}
