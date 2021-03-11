@@ -14,10 +14,6 @@ namespace noaf {
 		time_s(const long& t_long); 		// constructor from a long. OBSOLETE in 2.x.x
 		time_s(const std::string& t_str);	// constructor from a cmd string
 
-		// cast to long. OBSOLETE in 2.x.x
-		long to_long() const;
-		long to_long();
-
 		// return localtime tm struct
 		tm to_tm() const;
 		tm to_tm();

@@ -103,18 +103,6 @@ namespace noaf {
 		time = mktime(&ti);
 	}
 
-	long time_s::to_long() const {
-		const tm l_ti = *localtime(&(time));
-		return l_ti.tm_min +
-			l_ti.tm_hour * 1e2 +
-			l_ti.tm_mday * 1e4 +
-			(l_ti.tm_mon + 1) * 1e6 +
-			(l_ti.tm_year + 1900) * 1e8;
-	}
-	long time_s::to_long() {
-		return static_cast<const time_s&>(*this).to_long();
-	}
-
 	tm time_s::to_tm() {
 		return *localtime(&time);
 	}
